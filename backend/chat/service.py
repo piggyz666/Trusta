@@ -64,8 +64,12 @@ class ChatService:
                      for m in s.service_agent.resources(owner, "merchant")]
         funds = [{"id": f["id"], "display": f"心愿金“{f['name']}”（余 {f['balance'] / 100:.2f} 元）"}
                  for f in s.service_agent.resources(owner, "wish_fund") if f["status"] == "ACTIVE"]
+        # Contacts: names and nicknames only (no phone numbers) so the model can map "房东" / "我妈" itself.
+        payees = [{"id": r["id"], "display": r["name"] + (f"（{r['alias']}）" if r["alias"] else "")}
+                  for r in s.db.rows("SELECT p.id, p.name, c.alias FROM payees p LEFT JOIN payee_contacts c ON c.payee_id=p.id "
+                                     "WHERE p.customer_id=? AND (c.status IS NULL OR c.status='ACTIVE') ORDER BY p.id", (owner,))]
         return {"accounts": accounts, "cards": cards, "subscriptions": subs, "direct_debits": debits, "products": products,
-                "life_events": events, "merchants": merchants, "wish_funds": funds}
+                "life_events": events, "merchants": merchants, "wish_funds": funds, "payees": payees}
 
     # ---- sessions ----------------------------------------------------------------------------
     def create_session(self, owner, channel="app", default_account_id="acct-demo"):

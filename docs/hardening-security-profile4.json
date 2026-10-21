@@ -1,0 +1,1041 @@
+{
+  "schema_version": 1,
+  "run_at_unix_ms": 1791462375255,
+  "passed": true,
+  "banking_version": 4,
+  "environment": {
+    "python": "3.13.1",
+    "platform": "Windows-11-10.0.26100-SP0",
+    "cryptography": "47.0.0",
+    "openssl": "OpenSSL 4.0.0 14 Apr 2026"
+  },
+  "workload": {
+    "trials": 5,
+    "attack_categories": 18,
+    "attack_attempts": 90,
+    "valid_messages": 105,
+    "valid_proofs": 30,
+    "synthetic_audit_events_per_trial": 128,
+    "checkpoint_batch_sizes": [
+      64,
+      64,
+      36,
+      64,
+      64,
+      36,
+      64,
+      64,
+      36,
+      64,
+      64,
+      36,
+      64,
+      64,
+      36
+    ],
+    "isolated_sqlite_bank": true,
+    "unit_test_harness": false
+  },
+  "metrics": {
+    "forgery_detection_rate": {
+      "numerator": 10,
+      "denominator": 10,
+      "rate": 1.0
+    },
+    "message_tamper_detection_rate": {
+      "numerator": 10,
+      "denominator": 10,
+      "rate": 1.0
+    },
+    "replay_block_rate": {
+      "numerator": 5,
+      "denominator": 5,
+      "rate": 1.0
+    },
+    "unauthorized_execution_rate": {
+      "numerator": 0,
+      "denominator": 15,
+      "rate": 0.0
+    },
+    "audit_tamper_detection_rate": {
+      "numerator": 10,
+      "denominator": 10,
+      "rate": 1.0
+    },
+    "merkle_proof_verification_rate": {
+      "numerator": 30,
+      "denominator": 30,
+      "rate": 1.0
+    },
+    "false_rejection_rate": {
+      "numerator": 0,
+      "denominator": 135,
+      "rate": 0.0
+    }
+  },
+  "cases": {
+    "forged_agent_identity": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "FORGED_AGENT_IDENTITY",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "FORGED_AGENT_IDENTITY",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "FORGED_AGENT_IDENTITY",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "FORGED_AGENT_IDENTITY",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "FORGED_AGENT_IDENTITY",
+        "unexpected_transactions": 0
+      }
+    ],
+    "invalid_signature": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "INVALID_SIGNATURE",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "INVALID_SIGNATURE",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "INVALID_SIGNATURE",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "INVALID_SIGNATURE",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "INVALID_SIGNATURE",
+        "unexpected_transactions": 0
+      }
+    ],
+    "payload_tampering": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "PAYLOAD_TAMPERED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "PAYLOAD_TAMPERED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "PAYLOAD_TAMPERED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "PAYLOAD_TAMPERED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "PAYLOAD_TAMPERED",
+        "unexpected_transactions": 0
+      }
+    ],
+    "replay_attack": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "REPLAY_BLOCKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "REPLAY_BLOCKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "REPLAY_BLOCKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "REPLAY_BLOCKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "REPLAY_BLOCKED",
+        "unexpected_transactions": 0
+      }
+    ],
+    "expired_message": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "MESSAGE_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "MESSAGE_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "MESSAGE_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "MESSAGE_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "MESSAGE_EXPIRED",
+        "unexpected_transactions": 0
+      }
+    ],
+    "revoked_key": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_REVOKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_REVOKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_REVOKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_REVOKED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_REVOKED",
+        "unexpected_transactions": 0
+      }
+    ],
+    "old_key_outside_grace": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_EXPIRED",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "MESSAGE_KEY_EXPIRED",
+        "unexpected_transactions": 0
+      }
+    ],
+    "capability_escalation": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      }
+    ],
+    "capability_snapshot_tampering": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "CAPABILITY_SNAPSHOT_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "CAPABILITY_SNAPSHOT_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "CAPABILITY_SNAPSHOT_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "CAPABILITY_SNAPSHOT_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "CAPABILITY_SNAPSHOT_MISMATCH",
+        "unexpected_transactions": 0
+      }
+    ],
+    "unauthorized_tool_invocation": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "CAPABILITY_VIOLATION",
+        "unexpected_transactions": 0
+      }
+    ],
+    "authorization_action_hash_mismatch": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "ACTION_HASH_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "ACTION_HASH_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "ACTION_HASH_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "ACTION_HASH_MISMATCH",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "ACTION_HASH_MISMATCH",
+        "unexpected_transactions": 0
+      }
+    ],
+    "duplicate_financial_execution": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observation": {
+          "transaction_count": 1,
+          "balance_cents": 800000,
+          "same_transaction": true
+        }
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observation": {
+          "transaction_count": 1,
+          "balance_cents": 800000,
+          "same_transaction": true
+        }
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observation": {
+          "transaction_count": 1,
+          "balance_cents": 800000,
+          "same_transaction": true
+        }
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observation": {
+          "transaction_count": 1,
+          "balance_cents": 800000,
+          "same_transaction": true
+        }
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observation": {
+          "transaction_count": 1,
+          "balance_cents": 800000,
+          "same_transaction": true
+        }
+      }
+    ],
+    "audit_event_tampering": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observation": {
+          "hash_chain_valid": false
+        }
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observation": {
+          "hash_chain_valid": false
+        }
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observation": {
+          "hash_chain_valid": false
+        }
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observation": {
+          "hash_chain_valid": false
+        }
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observation": {
+          "hash_chain_valid": false
+        }
+      }
+    ],
+    "merkle_leaf_tampering": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observation": {
+          "modified_event_hash": true
+        }
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observation": {
+          "modified_event_hash": true
+        }
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observation": {
+          "modified_event_hash": true
+        }
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observation": {
+          "modified_event_hash": true
+        }
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observation": {
+          "modified_event_hash": true
+        }
+      }
+    ],
+    "invalid_merkle_proof": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observation": {
+          "modified_sibling": true
+        }
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observation": {
+          "modified_sibling": true
+        }
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observation": {
+          "modified_sibling": true
+        }
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observation": {
+          "modified_sibling": true
+        }
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observation": {
+          "modified_sibling": true
+        }
+      }
+    ],
+    "checkpoint_tampering": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observation": {
+          "modified_signed_root": true
+        }
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observation": {
+          "modified_signed_root": true
+        }
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observation": {
+          "modified_signed_root": true
+        }
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observation": {
+          "modified_signed_root": true
+        }
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observation": {
+          "modified_signed_root": true
+        }
+      }
+    ],
+    "anchor_root_mismatch": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observation": {
+          "modified_anchor_root": true
+        }
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observation": {
+          "modified_anchor_root": true
+        }
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observation": {
+          "modified_anchor_root": true
+        }
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observation": {
+          "modified_anchor_root": true
+        }
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observation": {
+          "modified_anchor_root": true
+        }
+      }
+    ],
+    "signature_algorithm_downgrade": [
+      {
+        "trial": 0,
+        "detected": true,
+        "observed_code": "INVALID_MESSAGE_ALGORITHM",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 1,
+        "detected": true,
+        "observed_code": "INVALID_MESSAGE_ALGORITHM",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 2,
+        "detected": true,
+        "observed_code": "INVALID_MESSAGE_ALGORITHM",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 3,
+        "detected": true,
+        "observed_code": "INVALID_MESSAGE_ALGORITHM",
+        "unexpected_transactions": 0
+      },
+      {
+        "trial": 4,
+        "detected": true,
+        "observed_code": "INVALID_MESSAGE_ALGORITHM",
+        "unexpected_transactions": 0
+      }
+    ]
+  },
+  "latency": {
+    "sign": {
+      "samples": 100,
+      "mean_ms": 8.653894,
+      "p50_ms": 8.46725,
+      "p95_ms": 10.091,
+      "max_ms": 12.1839,
+      "raw_ms": [
+        10.1876,
+        7.6956,
+        8.1672,
+        8.4509,
+        8.6709,
+        8.8965,
+        9.2297,
+        8.0806,
+        8.4343,
+        9.4154,
+        7.9622,
+        8.9377,
+        8.9967,
+        7.883,
+        9.1488,
+        8.6672,
+        8.7025,
+        8.1598,
+        8.6102,
+        8.3346,
+        10.7781,
+        8.3609,
+        7.6761,
+        7.9446,
+        7.882,
+        8.1829,
+        8.1285,
+        7.7449,
+        7.9244,
+        7.7426,
+        8.3756,
+        7.6715,
+        7.7901,
+        8.2108,
+        9.123,
+        8.5215,
+        8.8822,
+        8.6596,
+        8.3154,
+        9.9232,
+        9.9496,
+        9.2325,
+        9.5475,
+        7.9057,
+        7.7595,
+        7.8765,
+        7.9742,
+        8.5047,
+        9.0907,
+        8.25,
+        8.3919,
+        8.1439,
+        9.1087,
+        8.4855,
+        8.8078,
+        9.8208,
+        8.8057,
+        9.1328,
+        9.3695,
+        8.9199,
+        10.5334,
+        8.2793,
+        8.3965,
+        8.3521,
+        7.7197,
+        8.4075,
+        8.3122,
+        7.7731,
+        7.9181,
+        8.6478,
+        9.4799,
+        8.618,
+        9.3605,
+        8.7664,
+        8.3378,
+        7.7944,
+        8.094,
+        8.4195,
+        8.3935,
+        8.977,
+        9.8891,
+        8.5867,
+        7.9872,
+        7.6688,
+        7.7963,
+        7.5333,
+        8.4836,
+        8.3947,
+        12.1839,
+        9.5207,
+        9.5191,
+        9.0172,
+        9.2869,
+        9.0336,
+        8.529,
+        8.8423,
+        10.1756,
+        8.3452,
+        10.091,
+        8.3778
+      ]
+    },
+    "verify": {
+      "samples": 100,
+      "mean_ms": 3.256811,
+      "p50_ms": 3.207,
+      "p95_ms": 3.8523,
+      "max_ms": 4.0116,
+      "raw_ms": [
+        3.3393,
+        3.1873,
+        3.2148,
+        2.8255,
+        3.2002,
+        3.104,
+        3.1256,
+        3.1703,
+        3.1668,
+        3.2882,
+        3.4935,
+        3.0503,
+        2.9297,
+        3.6956,
+        3.3288,
+        3.3222,
+        3.3478,
+        3.2642,
+        3.0719,
+        3.0408,
+        3.2138,
+        3.7915,
+        3.0435,
+        2.9259,
+        3.5163,
+        2.8486,
+        2.9314,
+        3.4054,
+        3.4049,
+        3.0619,
+        3.133,
+        3.2951,
+        3.052,
+        3.8523,
+        3.2986,
+        3.4715,
+        3.0316,
+        3.801,
+        3.3115,
+        3.5539,
+        3.3607,
+        2.9223,
+        3.1798,
+        3.4468,
+        3.2957,
+        3.3064,
+        3.7685,
+        2.8575,
+        3.2166,
+        3.1752,
+        2.9227,
+        3.0415,
+        3.1824,
+        3.5564,
+        3.1736,
+        3.1713,
+        3.8361,
+        3.4172,
+        3.4489,
+        2.9325,
+        3.0031,
+        3.0567,
+        3.8853,
+        3.355,
+        3.0622,
+        3.3882,
+        2.9082,
+        3.1557,
+        3.1433,
+        3.3717,
+        3.3389,
+        3.4723,
+        3.4912,
+        3.0282,
+        2.8531,
+        2.7365,
+        2.9937,
+        3.2591,
+        3.0754,
+        3.595,
+        3.0265,
+        3.2369,
+        2.9797,
+        3.1198,
+        2.8094,
+        2.8911,
+        3.1748,
+        4.0116,
+        3.5169,
+        3.2621,
+        3.3071,
+        4.0115,
+        4.0084,
+        3.0891,
+        3.1687,
+        3.8816,
+        3.0121,
+        3.2624,
+        3.0661,
+        3.3499
+      ]
+    },
+    "checkpoint": {
+      "samples": 15,
+      "mean_ms": 10.29276,
+      "p50_ms": 9.7731,
+      "p95_ms": 13.4042,
+      "max_ms": 13.4042,
+      "raw_ms": [
+        8.7731,
+        9.7435,
+        13.4042,
+        9.4502,
+        9.8076,
+        11.6035,
+        9.1359,
+        10.7633,
+        11.7817,
+        8.3371,
+        9.7731,
+        11.9872,
+        9.1474,
+        9.6186,
+        11.065
+      ]
+    }
+  },
+  "latency_scope": {
+    "sign": "registry lookup + in-memory ECDSA private signing; key generation/decryption excluded",
+    "verify": "public signature + identity/capability + task context; nonce consumption/audit excluded",
+    "checkpoint": "whole-chain validation + batch Merkle + signature + durable checkpoint/outbox"
+  },
+  "business_latency_ms": {
+    "2": {
+      "TRANSFER": {
+        "samples": 5,
+        "mean_ms": 874.00506,
+        "p50_ms": 773.1719,
+        "p95_ms": 1294.122,
+        "max_ms": 1294.122,
+        "raw_ms": [
+          727.6229,
+          773.1719,
+          1294.122,
+          831.0283,
+          744.0802
+        ]
+      },
+      "BILL_ANALYSIS": {
+        "samples": 5,
+        "mean_ms": 464.1466,
+        "p50_ms": 463.9276,
+        "p95_ms": 479.2679,
+        "max_ms": 479.2679,
+        "raw_ms": [
+          457.3402,
+          465.8863,
+          479.2679,
+          454.311,
+          463.9276
+        ]
+      },
+      "WEALTH_RECOMMENDATION": {
+        "samples": 5,
+        "mean_ms": 481.46006,
+        "p50_ms": 436.5114,
+        "p95_ms": 628.8902,
+        "max_ms": 628.8902,
+        "raw_ms": [
+          433.6446,
+          425.3927,
+          628.8902,
+          436.5114,
+          482.8614
+        ]
+      }
+    },
+    "3": {
+      "TRANSFER": {
+        "samples": 5,
+        "mean_ms": 747.21102,
+        "p50_ms": 739.0419,
+        "p95_ms": 809.9471,
+        "max_ms": 809.9471,
+        "raw_ms": [
+          703.5751,
+          688.9999,
+          809.9471,
+          739.0419,
+          794.4911
+        ]
+      },
+      "BILL_ANALYSIS": {
+        "samples": 5,
+        "mean_ms": 674.19636,
+        "p50_ms": 631.1317,
+        "p95_ms": 1181.9054,
+        "max_ms": 1181.9054,
+        "raw_ms": [
+          427.8051,
+          428.3344,
+          631.1317,
+          701.8052,
+          1181.9054
+        ]
+      },
+      "WEALTH_RECOMMENDATION": {
+        "samples": 5,
+        "mean_ms": 427.23334,
+        "p50_ms": 426.3882,
+        "p95_ms": 479.4315,
+        "max_ms": 479.4315,
+        "raw_ms": [
+          391.9053,
+          409.7153,
+          479.4315,
+          426.3882,
+          428.7264
+        ]
+      }
+    }
+  },
+  "business_latency_scope": "create task through completed result including sandbox user-authorization call, excluding human think-time/HTTP/startup; models disabled",
+  "business_latency_order": "paired V2/V3 order alternates by trial; ordinary Windows host, no isolated performance lab",
+  "duration_seconds": 31.61861340003088,
+  "limits": [
+    "Local controlled attacks, not a production penetration test or probability-of-security estimate",
+    "Local development anchor only; no externally verified blockchain",
+    "Synthetic sandbox bank and audit records; measured filesystem/SQLite costs depend on host"
+  ]
+}

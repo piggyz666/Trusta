@@ -1,0 +1,13 @@
+test_background_event_is_once_only_and_pending_authorization (tests.test_backend_maintenance.MaintenanceTests.test_background_event_is_once_only_and_pending_authorization) ... ok
+test_shared_anchor_factory_no_silent_local_fallback (tests.test_backend_maintenance.MaintenanceTests.test_shared_anchor_factory_no_silent_local_fallback) ... ok
+test_artifact_pinning_and_unsupported_action (tests.test_privacy_proof.PrivacyProofTests.test_artifact_pinning_and_unsupported_action) ... ok
+test_expiry_and_fresh_authoritative_fact_check (tests.test_privacy_proof.PrivacyProofTests.test_expiry_and_fresh_authoritative_fact_check) ... ok
+test_http_proof_identity_and_authorization_boundary (tests.test_privacy_proof.PrivacyProofTests.test_http_proof_identity_and_authorization_boundary) ... ok
+test_invalid_public_inputs_owner_signature_and_groth16_proof (tests.test_privacy_proof.PrivacyProofTests.test_invalid_public_inputs_owner_signature_and_groth16_proof) ... ok
+test_real_circuit_rejects_insufficient_balance_and_risk (tests.test_privacy_proof.PrivacyProofTests.test_real_circuit_rejects_insufficient_balance_and_risk) ... ok
+test_real_proof_independent_issuer_restart_replay_and_no_execution (tests.test_privacy_proof.PrivacyProofTests.test_real_proof_independent_issuer_restart_replay_and_no_execution) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 22.937s
+
+OK

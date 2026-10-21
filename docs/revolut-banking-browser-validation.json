@@ -1,0 +1,38 @@
+[
+  {
+    "mode": "synthetic_readonly",
+    "passed": true,
+    "accounts": 1,
+    "records": 2,
+    "bank_pay_calls": 0,
+    "financial_api": "synthetic",
+    "browser_errors": []
+  },
+  {
+    "mode": "synthetic_transfer",
+    "passed": true,
+    "accounts": 1,
+    "records": 0,
+    "bank_pay_calls": 1,
+    "financial_api": "synthetic",
+    "browser_errors": []
+  },
+  {
+    "mode": "synthetic_pending",
+    "passed": true,
+    "accounts": 1,
+    "records": 0,
+    "bank_pay_calls": 1,
+    "financial_api": "synthetic",
+    "browser_errors": []
+  },
+  {
+    "mode": "live_readonly",
+    "passed": true,
+    "accounts": 5,
+    "records": 5,
+    "bank_pay_calls": 0,
+    "financial_api": "official sandbox GET only",
+    "browser_errors": []
+  }
+]

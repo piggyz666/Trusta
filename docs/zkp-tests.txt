@@ -1,0 +1,10 @@
+test_artifact_pinning_and_unsupported_action (tests.test_privacy_proof.PrivacyProofTests.test_artifact_pinning_and_unsupported_action) ... ok
+test_expiry_and_fresh_authoritative_fact_check (tests.test_privacy_proof.PrivacyProofTests.test_expiry_and_fresh_authoritative_fact_check) ... ok
+test_invalid_public_inputs_owner_signature_and_groth16_proof (tests.test_privacy_proof.PrivacyProofTests.test_invalid_public_inputs_owner_signature_and_groth16_proof) ... ok
+test_real_circuit_rejects_insufficient_balance_and_risk (tests.test_privacy_proof.PrivacyProofTests.test_real_circuit_rejects_insufficient_balance_and_risk) ... ok
+test_real_proof_independent_issuer_restart_replay_and_no_execution (tests.test_privacy_proof.PrivacyProofTests.test_real_proof_independent_issuer_restart_replay_and_no_execution) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 16.492s
+
+OK

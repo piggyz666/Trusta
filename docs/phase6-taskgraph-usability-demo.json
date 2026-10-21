@@ -1,0 +1,187 @@
+{
+  "scope": "OFFLINE_PROVIDER_FIXTURE; actual Gateway/Router/Core; temporary Virtual Bank",
+  "real_model_called": false,
+  "clarification": {
+    "needs_clarification": true,
+    "reason": "MISSING_INPUT",
+    "missing_parameters": [
+      "month"
+    ],
+    "question": "请补充分析月份，再提交任务。",
+    "authority": "NONE"
+  },
+  "readonly_status": "COMPLETED",
+  "readonly_result": {
+    "Read:result": [
+      {
+        "id": "sep-coffee",
+        "account_id": "acct-demo",
+        "merchant": "演示咖啡店",
+        "category": "FOOD",
+        "amount": 3000,
+        "currency": "CNY",
+        "occurred_at": 1788222600.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-lunch",
+        "account_id": "acct-demo",
+        "merchant": "演示餐厅",
+        "category": "FOOD",
+        "amount": 4500,
+        "currency": "CNY",
+        "occurred_at": 1788408000.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-trip",
+        "account_id": "acct-demo",
+        "merchant": "演示地铁",
+        "category": "TRANSPORT",
+        "amount": 600,
+        "currency": "CNY",
+        "occurred_at": 1788566400.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-market",
+        "account_id": "acct-demo",
+        "merchant": "演示超市",
+        "category": "GROCERIES",
+        "amount": 12000,
+        "currency": "CNY",
+        "occurred_at": 1789005600.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-ride",
+        "account_id": "acct-demo",
+        "merchant": "演示打车",
+        "category": "TRANSPORT",
+        "amount": 2400,
+        "currency": "CNY",
+        "occurred_at": 1789214400.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-shop",
+        "account_id": "acct-demo",
+        "merchant": "演示网店",
+        "category": "SHOPPING",
+        "amount": 18000,
+        "currency": "CNY",
+        "occurred_at": 1789542000.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-large",
+        "account_id": "acct-demo",
+        "merchant": "演示电子商店",
+        "category": "SHOPPING",
+        "amount": 500000,
+        "currency": "CNY",
+        "occurred_at": 1789884000.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-repeat-1",
+        "account_id": "acct-demo",
+        "merchant": "演示咖啡店",
+        "category": "FOOD",
+        "amount": 3000,
+        "currency": "CNY",
+        "occurred_at": 1790037000.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-repeat-2",
+        "account_id": "acct-demo",
+        "merchant": "演示咖啡店",
+        "category": "FOOD",
+        "amount": 3000,
+        "currency": "CNY",
+        "occurred_at": 1790037060.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-refund",
+        "account_id": "acct-demo",
+        "merchant": "演示网店",
+        "category": "SHOPPING",
+        "amount": 5000,
+        "currency": "CNY",
+        "occurred_at": 1790233200.0,
+        "kind": "REFUND",
+        "status": "SETTLED"
+      },
+      {
+        "id": "sep-pending",
+        "account_id": "acct-demo",
+        "merchant": "演示商店",
+        "category": "SHOPPING",
+        "amount": 900000,
+        "currency": "CNY",
+        "occurred_at": 1790319600.0,
+        "kind": "PURCHASE",
+        "status": "PENDING"
+      },
+      {
+        "id": "sep-end",
+        "account_id": "acct-demo",
+        "merchant": "演示餐厅",
+        "category": "FOOD",
+        "amount": 1000,
+        "currency": "CNY",
+        "occurred_at": 1790783999.0,
+        "kind": "PURCHASE",
+        "status": "SETTLED"
+      }
+    ],
+    "Analyze:result": {
+      "currency": "CNY",
+      "purchase_count": 10,
+      "refund_count": 1,
+      "settled_count": 11,
+      "excluded_count": 1,
+      "gross_spend": 547500,
+      "refunds": 5000,
+      "net_spend": 542500
+    },
+    "Report:result": {
+      "Analyze": {
+        "currency": "CNY",
+        "purchase_count": 10,
+        "refund_count": 1,
+        "settled_count": 11,
+        "excluded_count": 1,
+        "gross_spend": 547500,
+        "refunds": 5000,
+        "net_spend": 542500
+      }
+    }
+  },
+  "financial_proposal_status": "WAITING_USER",
+  "financial_stages": [
+    "PROPOSE_ACTION",
+    "SCHEMA",
+    "CAPABILITY",
+    "POLICY",
+    "AUTHORIZATION",
+    "CONTRACT",
+    "EXECUTE",
+    "VERIFY",
+    "RECEIPT",
+    "REPORT"
+  ],
+  "bank_writes": 0,
+  "passed": true
+}

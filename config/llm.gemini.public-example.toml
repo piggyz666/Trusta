@@ -1,0 +1,19 @@
+# Synthetic PUBLIC evaluation only. Customer goals are restricted and this route
+# is deliberately ineligible for /api/graphs/propose without a reviewed policy.
+[gateway]
+mode = "shadow"
+version = "phase6-example"
+timeout_seconds = 20
+max_output_tokens = 2048
+max_fallbacks = 0
+[[providers]]
+name = "gemini-public"
+kind = "gemini"
+model = "REPLACE_WITH_DEPLOYMENT_MODEL"
+endpoint = "https://generativelanguage.googleapis.com/v1beta/models/REPLACE_WITH_DEPLOYMENT_MODEL:generateContent"
+api_key_env = "GEMINI_API_KEY"
+locality = "external"
+max_sensitivity = "public"
+data_policy_reviewed = false
+# Optional native schema shaping; Core still validates the complete graph.
+structured_outputs = true

@@ -1,0 +1,18 @@
+provider: kimi
+model: kimi-k2.6
+endpoint: https://api.moonshot.cn/v1/chat/completions
+api_key: ${KIMI_API_KEY}
+token_parameter: max_tokens
+authentication: bearer
+thinking_mode: disabled
+json_output: false
+timeout: 45
+locality: external
+max_sensitivity: restricted
+data_policy_reviewed: true
+max_input_chars: 40000
+gateway:
+  mode: assisted
+  max_output_tokens: 2048
+  max_fallbacks: 0
+  graph_format: semantic_v3

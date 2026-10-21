@@ -1,0 +1,14 @@
+{
+  "status": "ROUTE_PREPARED_WRITES_DISABLED",
+  "source_currency": "EUR",
+  "destination_currency": "EUR",
+  "destination_country": "DE",
+  "account_count": 5,
+  "source_has_minimum_balance": true,
+  "maximum_minor_units": 100,
+  "proposed_demo_minor_units": 1,
+  "payment_token_exists": false,
+  "bank_financial_write_calls": 0,
+  "needs_bank_pay_consent": true,
+  "needs_per_action_authorization": true
+}

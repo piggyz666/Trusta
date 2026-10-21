@@ -1,0 +1,10 @@
+{
+  "status": "BLOCKED_EXTERNAL",
+  "method": "read-only chain + common-block comparison",
+  "provider": "BlockPI",
+  "endpoint_public": "https://ethereum-sepolia.public.blockpi.network/v1/rpc/public",
+  "broadcasts": 0,
+  "error_code": "ANCHOR_RPC_UNAVAILABLE",
+  "failure_type": "Rejected",
+  "duration_ms": 2245.29
+}

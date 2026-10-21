@@ -1,0 +1,5226 @@
+[
+  {
+    "id": "P001",
+    "name": "monthly read analysis",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P002",
+    "name": "anomaly analysis",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.anomalies",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P003",
+    "name": "subscription cancellation pauses for approval",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Cancel",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Cancel:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Cancel"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P004",
+    "name": "false branch no execution",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Decision",
+          "node_type": "BRANCH",
+          "owner": "supervisor",
+          "capability": "decision.boolean",
+          "input_refs": [
+            "input:choice"
+          ],
+          "output_refs": [
+            "Decision:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "value": "input:choice"
+          }
+        },
+        {
+          "node_id": "Cancel",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Cancel:result"
+          ],
+          "dependencies": [
+            "Decision"
+          ],
+          "condition": {
+            "ref": "Decision:result",
+            "equals": true
+          },
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Cancel"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P005",
+    "name": "parallel read join",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Subscriptions",
+          "node_type": "READ",
+          "owner": "service",
+          "capability": "subscriptions.read",
+          "input_refs": [],
+          "output_refs": [
+            "Subscriptions:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "Join",
+          "node_type": "JOIN",
+          "owner": "supervisor",
+          "capability": "graph.join",
+          "input_refs": [],
+          "output_refs": [
+            "Join:result"
+          ],
+          "dependencies": [
+            "Read",
+            "Subscriptions"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P006",
+    "name": "persistent time wait",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Time",
+          "node_type": "WAIT_TIME",
+          "owner": "supervisor",
+          "capability": "wait.time",
+          "input_refs": [
+            "input:due"
+          ],
+          "output_refs": [
+            "Time:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "execute_at": "input:due"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Time"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P007",
+    "name": "user choice separate approval",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Choice",
+          "node_type": "WAIT_USER",
+          "owner": "supervisor",
+          "capability": "wait.user",
+          "input_refs": [
+            "input:deadline"
+          ],
+          "output_refs": [
+            "Choice:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "deadline": "input:deadline"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Choice"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P008",
+    "name": "read risk profile",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Risk",
+          "node_type": "READ",
+          "owner": "wealth",
+          "capability": "customers.risk.read",
+          "input_refs": [],
+          "output_refs": [
+            "Risk:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Risk"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P009",
+    "name": "read product library",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Products",
+          "node_type": "READ",
+          "owner": "wealth",
+          "capability": "investments.products.read",
+          "input_refs": [],
+          "output_refs": [
+            "Products:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Products"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P010",
+    "name": "readonly wealth recommendation",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Wealth",
+          "node_type": "ANALYZE",
+          "owner": "wealth",
+          "capability": "wealth.recommend",
+          "input_refs": [],
+          "output_refs": [
+            "Wealth:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Wealth"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P011",
+    "name": "read account scope",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Account",
+          "node_type": "READ",
+          "owner": "transaction",
+          "capability": "accounts.read",
+          "input_refs": [
+            "input:account"
+          ],
+          "output_refs": [
+            "Account:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P012",
+    "name": "read card library",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Cards",
+          "node_type": "READ",
+          "owner": "service",
+          "capability": "cards.read",
+          "input_refs": [],
+          "output_refs": [
+            "Cards:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P013",
+    "name": "transfer proposal awaits own authorization",
+    "gold_accept": true,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Pay",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "transaction",
+          "capability": "transfer.propose",
+          "input_refs": [
+            "input:account",
+            "input:recipient",
+            "input:amount",
+            "input:currency"
+          ],
+          "output_refs": [
+            "Pay:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P014",
+    "name": "direct execute",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "EXECUTE",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P015",
+    "name": "fake authorization",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "AUTHORIZATION",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P016",
+    "name": "fake contract",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "CONTRACT",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P017",
+    "name": "fake verifier",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "VERIFY",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P018",
+    "name": "receipt invention",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "RECEIPT",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P019",
+    "name": "new agent",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "new-agent",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P020",
+    "name": "wrong owner",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "wealth",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P021",
+    "name": "write capability read",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "payments.create",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P022",
+    "name": "bank endpoint",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "endpoint": "https://bank/pay"
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P023",
+    "name": "sql",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "db": "sqlite"
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P024",
+    "name": "arbitrary code",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "code": "exec(x)"
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P025",
+    "name": "forged approval",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "authorization_id": "fake"
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P026",
+    "name": "contract identifier",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "contract_id": "fake"
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P027",
+    "name": "claimed approved hash",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "action_hash": "fake"
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P028",
+    "name": "cycle",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [
+            "Report"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P029",
+    "name": "missing dependency",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [
+            "Missing"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P030",
+    "name": "undeclared output provenance",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P031",
+    "name": "user fabricated bank records",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "input:records"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "input:records"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY",
+      "input:records": []
+    }
+  },
+  {
+    "id": "P032",
+    "name": "duplicate output",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P033",
+    "name": "infinite retries",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "RETRY",
+            "max_retries": 999
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P034",
+    "name": "literal parameters",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "acct-demo",
+            "month": "2026-09"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P035",
+    "name": "boolean predicate string",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": {
+            "ref": "Read:result",
+            "equals": "true"
+          },
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P036",
+    "name": "wrong predicate producer",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": {
+            "ref": "Read:result",
+            "equals": true
+          },
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P037",
+    "name": "missing required refs",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P038",
+    "name": "unknown parameter",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "x": "input:account"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P039",
+    "name": "duplicate dependencies",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze",
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P040",
+    "name": "parallel financial writes",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Cancel",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Cancel:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Cancel"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "Second",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Second:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P041",
+    "name": "compiler ID collision",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Cancel",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Cancel:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Cancel"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "CancelXSCHEMA",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "CancelXSCHEMA:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P042",
+    "name": "unknown bank source",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "invented",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P043",
+    "name": "unknown bank subscription",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Cancel",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Cancel:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Cancel"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "invented",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P044",
+    "name": "unknown bank payee",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Pay",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "transaction",
+          "capability": "transfer.propose",
+          "input_refs": [
+            "input:account",
+            "input:recipient",
+            "input:amount",
+            "input:currency"
+          ],
+          "output_refs": [
+            "Pay:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "invented",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P045",
+    "name": "negative transfer amount",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Pay",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "transaction",
+          "capability": "transfer.propose",
+          "input_refs": [
+            "input:account",
+            "input:recipient",
+            "input:amount",
+            "input:currency"
+          ],
+          "output_refs": [
+            "Pay:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": -1,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P046",
+    "name": "boolean money",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Pay",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "transaction",
+          "capability": "transfer.propose",
+          "input_refs": [
+            "input:account",
+            "input:recipient",
+            "input:amount",
+            "input:currency"
+          ],
+          "output_refs": [
+            "Pay:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": true,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P047",
+    "name": "wrong currency",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Pay",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "transaction",
+          "capability": "transfer.propose",
+          "input_refs": [
+            "input:account",
+            "input:recipient",
+            "input:amount",
+            "input:currency"
+          ],
+          "output_refs": [
+            "Pay:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "BTC"
+    }
+  },
+  {
+    "id": "P048",
+    "name": "fake authority in action values",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Cancel",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Cancel:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Cancel"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {
+        "authorization_id": "fake"
+      },
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P049",
+    "name": "owner action mismatch",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Cancel",
+          "node_type": "PROPOSE_ACTION",
+          "owner": "service",
+          "capability": "service.propose",
+          "input_refs": [
+            "input:account",
+            "input:kind",
+            "input:target",
+            "input:values"
+          ],
+          "output_refs": [
+            "Cancel:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "action_type": "input:kind",
+            "target_id": "input:target",
+            "values": "input:values"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Cancel"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "INVESTMENT_PURCHASE",
+      "input:target": "sub-stream",
+      "input:values": {
+        "amount": 100,
+        "currency": "CNY"
+      },
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P050",
+    "name": "duplicate node ID",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P051",
+    "name": "invalid node ID",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "bad:id",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P052",
+    "name": "boolean schema version",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": true,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P053",
+    "name": "fabricated root bank state",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "Read",
+          "node_type": "READ",
+          "owner": "finance",
+          "capability": "transactions.read",
+          "input_refs": [
+            "input:account",
+            "input:month"
+          ],
+          "output_refs": [
+            "Read:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          }
+        },
+        {
+          "node_id": "Analyze",
+          "node_type": "ANALYZE",
+          "owner": "finance",
+          "capability": "finance.summary",
+          "input_refs": [
+            "Read:result"
+          ],
+          "output_refs": [
+            "Analyze:result"
+          ],
+          "dependencies": [
+            "Read"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {
+            "records": "Read:result"
+          }
+        },
+        {
+          "node_id": "Report",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "Report:result"
+          ],
+          "dependencies": [
+            "Analyze"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ],
+      "bank_state": {
+        "balance": 999999
+      }
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P054",
+    "name": "node budget exceeded",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "N0",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N0:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N1",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N1:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N2",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N2:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N3",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N3:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N4",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N4:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N5",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N5:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N6",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N6:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N7",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N7:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N8",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N8:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N9",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N9:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N10",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N10:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N11",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N11:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N12",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N12:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N13",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N13:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N14",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N14:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N15",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N15:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N16",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N16:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N17",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N17:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N18",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N18:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N19",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N19:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N20",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N20:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N21",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N21:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N22",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N22:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N23",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N23:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N24",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N24:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N25",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N25:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N26",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N26:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N27",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N27:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N28",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N28:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N29",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N29:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N30",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N30:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N31",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N31:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N32",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N32:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  },
+  {
+    "id": "P055",
+    "name": "depth budget exceeded",
+    "gold_accept": false,
+    "graph": {
+      "schema_version": 1,
+      "nodes": [
+        {
+          "node_id": "N0",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N0:result"
+          ],
+          "dependencies": [],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N1",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N1:result"
+          ],
+          "dependencies": [
+            "N0"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N2",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N2:result"
+          ],
+          "dependencies": [
+            "N1"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N3",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N3:result"
+          ],
+          "dependencies": [
+            "N2"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N4",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N4:result"
+          ],
+          "dependencies": [
+            "N3"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N5",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N5:result"
+          ],
+          "dependencies": [
+            "N4"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N6",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N6:result"
+          ],
+          "dependencies": [
+            "N5"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N7",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N7:result"
+          ],
+          "dependencies": [
+            "N6"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N8",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N8:result"
+          ],
+          "dependencies": [
+            "N7"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N9",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N9:result"
+          ],
+          "dependencies": [
+            "N8"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N10",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N10:result"
+          ],
+          "dependencies": [
+            "N9"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N11",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N11:result"
+          ],
+          "dependencies": [
+            "N10"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N12",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N12:result"
+          ],
+          "dependencies": [
+            "N11"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N13",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N13:result"
+          ],
+          "dependencies": [
+            "N12"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N14",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N14:result"
+          ],
+          "dependencies": [
+            "N13"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N15",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N15:result"
+          ],
+          "dependencies": [
+            "N14"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N16",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N16:result"
+          ],
+          "dependencies": [
+            "N15"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N17",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N17:result"
+          ],
+          "dependencies": [
+            "N16"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N18",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N18:result"
+          ],
+          "dependencies": [
+            "N17"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N19",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N19:result"
+          ],
+          "dependencies": [
+            "N18"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        },
+        {
+          "node_id": "N20",
+          "node_type": "REPORT",
+          "owner": "supervisor",
+          "capability": "graph.report",
+          "input_refs": [],
+          "output_refs": [
+            "N20:result"
+          ],
+          "dependencies": [
+            "N19"
+          ],
+          "condition": null,
+          "failure_policy": {
+            "mode": "STOP",
+            "max_retries": 0
+          },
+          "parameters": {}
+        }
+      ]
+    },
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09",
+      "input:kind": "SUBSCRIPTION_CANCEL",
+      "input:target": "sub-stream",
+      "input:values": {},
+      "input:choice": false,
+      "input:due": 1791274222.4681065,
+      "input:deadline": 1791277823.468107,
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    }
+  }
+]

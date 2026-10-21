@@ -1,0 +1,673 @@
+{
+  "evaluated_at_utc": "2026-10-06T13:21:29Z",
+  "scope": "ISOLATED_SYNTHETIC_ONLY; no approvals; financial proposals must remain WAITING_USER",
+  "dataset_source": "benchmarks\\taskgraph_holdout_v2.json",
+  "dataset_hash": "2a726ee5da5086771b3a44a14d5b67d227e008f53a6902e072146e0eb08f7221",
+  "gold_is_reused_regression_set": true,
+  "original_100_case_benchmark_replaced": false,
+  "configured_models": {
+    "deepseek": "deepseek-flash",
+    "gemini": "gemini-3.1-flash-lite"
+  },
+  "primary_remote_outage_observed": false,
+  "metrics": {
+    "all": {
+      "numerator": 7,
+      "denominator": 7,
+      "real_model_responses": 5,
+      "installed_graphs": 4,
+      "bank_writes": 0
+    },
+    "normal_read": {
+      "numerator": 7,
+      "denominator": 7,
+      "real_model_responses": 5,
+      "installed_graphs": 4,
+      "bank_writes": 0
+    }
+  },
+  "results": [
+    {
+      "id": "F01",
+      "group": "normal_read",
+      "gold": {
+        "id": "F01",
+        "group": "normal_read",
+        "goal": "把上一个分析月份的账户交易先读出来，由Finance计算消费总览，再由Supervisor输出总览。",
+        "inputs": {
+          "input:account": "acct-demo",
+          "input:month": "2026-08"
+        },
+        "expected_status": "COMPLETED",
+        "required_capabilities": [
+          "transactions.read",
+          "finance.summary",
+          "graph.report"
+        ]
+      },
+      "passed": true,
+      "status": "COMPLETED",
+      "errors": [],
+      "capabilities": [
+        "finance.summary",
+        "graph.report",
+        "transactions.read"
+      ],
+      "installed_graph": true,
+      "clarification": null,
+      "order": [
+        "deepseek",
+        "gemini"
+      ],
+      "mode": "assisted",
+      "fault_injection": null,
+      "fault_origin": null,
+      "adapter_attempts": {
+        "deepseek": 1,
+        "gemini": 0
+      },
+      "bank_writes": 0,
+      "calls": [
+        {
+          "agent": "planner",
+          "attempts": [
+            {
+              "configured_model": "deepseek-flash",
+              "provider": "deepseek",
+              "status": "SUCCEEDED",
+              "usage": {
+                "input_tokens": 1601,
+                "output_tokens": 1053
+              }
+            }
+          ],
+          "config_version": "phase6-second-provider",
+          "created_at": 1791292867.4787447,
+          "deadline": 1791292927.4787447,
+          "error_code": null,
+          "estimated_costs_usd": {
+            "deepseek": null,
+            "gemini": null
+          },
+          "finished_at": 1791292872.243603,
+          "latency_ms": 4764.86,
+          "mode": "assisted",
+          "output_hash": "af1363a35139c38e52ea337518544bd696afc6fc3fcac50fb07019bc9340b168",
+          "provider": "deepseek",
+          "purpose": "plan_proposal",
+          "rejected_routes": {},
+          "request_id": "1768d7bf-4e8c-413b-bf0d-05332e758af0",
+          "security_level": "standard",
+          "sensitivity": "restricted",
+          "status": "SUCCEEDED",
+          "task_id": "484009ac-3499-425b-9c4c-c2ece19a18a0",
+          "task_revision": 0,
+          "user_id": "demo"
+        }
+      ],
+      "real_model_responses": 1,
+      "captured_synthetic_outputs": [
+        {
+          "provider": "deepseek",
+          "returned_model": "deepseek-flash",
+          "usage": {
+            "input_tokens": 1601,
+            "output_tokens": 1053
+          },
+          "raw_synthetic_output": "{\"schema_version\":1,\"nodes\":[{\"node_id\":\"ReadTransactions\",\"node_type\":\"READ\",\"owner\":\"finance\",\"capability\":\"transactions.read\",\"input_refs\":[\"input:account\",\"input:month\"],\"output_refs\":[\"ReadTransactions:result\"],\"dependencies\":[],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{\"account_id\":\"input:account\",\"month\":\"input:month\"}},{\"node_id\":\"AnalyzeSummary\",\"node_type\":\"ANALYZE\",\"owner\":\"finance\",\"capability\":\"finance.summary\",\"input_refs\":[\"ReadTransactions:result\"],\"output_refs\":[\"AnalyzeSummary:result\"],\"dependencies\":[\"ReadTransactions\"],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{\"records\":\"ReadTransactions:result\"}},{\"node_id\":\"Report\",\"node_type\":\"REPORT\",\"owner\":\"supervisor\",\"capability\":\"graph.report\",\"input_refs\":[],\"output_refs\":[\"Report:result\"],\"dependencies\":[\"AnalyzeSummary\"],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{}}],\"clarification\":null}",
+          "request_hash": "4766e05b5925b0ea2371bbada5f1a9a1d784f4bfda5435624e3c5aa24719e3c2",
+          "schema_hash": "d68b63e8e9d44f6174f28369cd8beee44e1f74c8157b49ea25dc3c62f0aa3a59"
+        }
+      ],
+      "latency_ms": 5323.16,
+      "scenario": "deepseek-first"
+    },
+    {
+      "id": "F01",
+      "group": "normal_read",
+      "gold": {
+        "id": "F01",
+        "group": "normal_read",
+        "goal": "把上一个分析月份的账户交易先读出来，由Finance计算消费总览，再由Supervisor输出总览。",
+        "inputs": {
+          "input:account": "acct-demo",
+          "input:month": "2026-08"
+        },
+        "expected_status": "COMPLETED",
+        "required_capabilities": [
+          "transactions.read",
+          "finance.summary",
+          "graph.report"
+        ]
+      },
+      "passed": true,
+      "status": "COMPLETED",
+      "errors": [],
+      "capabilities": [
+        "finance.summary",
+        "graph.report",
+        "transactions.read"
+      ],
+      "installed_graph": true,
+      "clarification": null,
+      "order": [
+        "gemini",
+        "deepseek"
+      ],
+      "mode": "assisted",
+      "fault_injection": null,
+      "fault_origin": null,
+      "adapter_attempts": {
+        "gemini": 1,
+        "deepseek": 0
+      },
+      "bank_writes": 0,
+      "calls": [
+        {
+          "agent": "planner",
+          "attempts": [
+            {
+              "configured_model": "gemini-3.1-flash-lite",
+              "provider": "gemini",
+              "status": "SUCCEEDED",
+              "usage": {
+                "input_tokens": 1516,
+                "output_tokens": 478
+              }
+            }
+          ],
+          "config_version": "phase6-second-provider",
+          "created_at": 1791292872.6727605,
+          "deadline": 1791292932.6727605,
+          "error_code": null,
+          "estimated_costs_usd": {
+            "deepseek": null,
+            "gemini": null
+          },
+          "finished_at": 1791292875.6690264,
+          "latency_ms": 2996.27,
+          "mode": "assisted",
+          "output_hash": "af1363a35139c38e52ea337518544bd696afc6fc3fcac50fb07019bc9340b168",
+          "provider": "gemini",
+          "purpose": "plan_proposal",
+          "rejected_routes": {},
+          "request_id": "7df326b5-58c5-4198-b80c-ec5f4f816ae6",
+          "security_level": "standard",
+          "sensitivity": "restricted",
+          "status": "SUCCEEDED",
+          "task_id": "e0d512f0-cf05-4249-b2f2-b0c5c322392e",
+          "task_revision": 0,
+          "user_id": "demo"
+        }
+      ],
+      "real_model_responses": 1,
+      "captured_synthetic_outputs": [
+        {
+          "provider": "gemini",
+          "returned_model": "gemini-3.1-flash-lite",
+          "usage": {
+            "input_tokens": 1516,
+            "output_tokens": 478
+          },
+          "raw_synthetic_output": "{\n  \"clarification\": null,\n  \"nodes\": [\n    {\n      \"capability\": \"transactions.read\",\n      \"condition\": null,\n      \"dependencies\": [],\n      \"failure_policy\": {\n        \"max_retries\": 0,\n        \"mode\": \"STOP\"\n      },\n      \"input_refs\": [\n        \"input:account\",\n        \"input:month\"\n      ],\n      \"node_id\": \"ReadTransactions\",\n      \"node_type\": \"READ\",\n      \"output_refs\": [\n        \"ReadTransactions:result\"\n      ],\n      \"owner\": \"finance\",\n      \"parameters\": {\n        \"account_id\": \"input:account\",\n        \"month\": \"input:month\"\n      }\n    },\n    {\n      \"capability\": \"finance.summary\",\n      \"condition\": null,\n      \"dependencies\": [\n        \"ReadTransactions\"\n      ],\n      \"failure_policy\": {\n        \"max_retries\": 0,\n        \"mode\": \"STOP\"\n      },\n      \"input_refs\": [\n        \"ReadTransactions:result\"\n      ],\n      \"node_id\": \"AnalyzeSummary\",\n      \"node_type\": \"ANALYZE\",\n      \"output_refs\": [\n        \"AnalyzeSummary:result\"\n      ],\n      \"owner\": \"finance\",\n      \"parameters\": {\n        \"records\": \"ReadTransactions:result\"\n      }\n    },\n    {\n      \"capability\": \"graph.report\",\n      \"condition\": null,\n      \"dependencies\": [\n        \"AnalyzeSummary\"\n      ],\n      \"failure_policy\": {\n        \"max_retries\": 0,\n        \"mode\": \"STOP\"\n      },\n      \"input_refs\": [],\n      \"node_id\": \"Report\",\n      \"node_type\": \"REPORT\",\n      \"output_refs\": [\n        \"Report:result\"\n      ],\n      \"owner\": \"supervisor\",\n      \"parameters\": {}\n    }\n  ],\n  \"schema_version\": 1\n}",
+          "request_hash": "4766e05b5925b0ea2371bbada5f1a9a1d784f4bfda5435624e3c5aa24719e3c2",
+          "schema_hash": "d68b63e8e9d44f6174f28369cd8beee44e1f74c8157b49ea25dc3c62f0aa3a59"
+        }
+      ],
+      "latency_ms": 3408.11,
+      "scenario": "gemini-first"
+    },
+    {
+      "id": "F01",
+      "group": "normal_read",
+      "gold": {
+        "id": "F01",
+        "group": "normal_read",
+        "goal": "把上一个分析月份的账户交易先读出来，由Finance计算消费总览，再由Supervisor输出总览。",
+        "inputs": {
+          "input:account": "acct-demo",
+          "input:month": "2026-08"
+        },
+        "expected_status": "COMPLETED",
+        "required_capabilities": [
+          "transactions.read",
+          "finance.summary",
+          "graph.report"
+        ]
+      },
+      "passed": true,
+      "status": "COMPLETED",
+      "errors": [],
+      "capabilities": [
+        "finance.summary",
+        "graph.report",
+        "transactions.read"
+      ],
+      "installed_graph": true,
+      "clarification": null,
+      "order": [
+        "deepseek",
+        "gemini"
+      ],
+      "mode": "assisted",
+      "fault_injection": "unavailable",
+      "fault_origin": "LOCAL_TEST_DOUBLE_NO_PRIMARY_NETWORK_CALL",
+      "adapter_attempts": {
+        "deepseek": 1,
+        "gemini": 1
+      },
+      "bank_writes": 0,
+      "calls": [
+        {
+          "agent": "planner",
+          "attempts": [
+            {
+              "configured_model": "deepseek-flash",
+              "error_code": "LLM_PROVIDER_UNAVAILABLE",
+              "provider": "deepseek",
+              "status": "FAILED"
+            },
+            {
+              "configured_model": "gemini-3.1-flash-lite",
+              "provider": "gemini",
+              "status": "SUCCEEDED",
+              "usage": {
+                "input_tokens": 1516,
+                "output_tokens": 478
+              }
+            }
+          ],
+          "config_version": "phase6-second-provider",
+          "created_at": 1791292876.0898676,
+          "deadline": 1791292936.0898676,
+          "error_code": null,
+          "estimated_costs_usd": {
+            "deepseek": null,
+            "gemini": null
+          },
+          "finished_at": 1791292878.8780773,
+          "latency_ms": 2788.21,
+          "mode": "assisted",
+          "output_hash": "af1363a35139c38e52ea337518544bd696afc6fc3fcac50fb07019bc9340b168",
+          "provider": "gemini",
+          "purpose": "plan_proposal",
+          "rejected_routes": {},
+          "request_id": "4133f943-4381-4ac9-8af3-7b8f1fa3bec6",
+          "security_level": "standard",
+          "sensitivity": "restricted",
+          "status": "SUCCEEDED",
+          "task_id": "ac48224a-e6dd-4408-b6ed-2b5f54305bdc",
+          "task_revision": 0,
+          "user_id": "demo"
+        }
+      ],
+      "real_model_responses": 1,
+      "captured_synthetic_outputs": [
+        {
+          "provider": "gemini",
+          "returned_model": "gemini-3.1-flash-lite",
+          "usage": {
+            "input_tokens": 1516,
+            "output_tokens": 478
+          },
+          "raw_synthetic_output": "{\n  \"clarification\": null,\n  \"nodes\": [\n    {\n      \"capability\": \"transactions.read\",\n      \"condition\": null,\n      \"dependencies\": [],\n      \"failure_policy\": {\n        \"max_retries\": 0,\n        \"mode\": \"STOP\"\n      },\n      \"input_refs\": [\n        \"input:account\",\n        \"input:month\"\n      ],\n      \"node_id\": \"ReadTransactions\",\n      \"node_type\": \"READ\",\n      \"output_refs\": [\n        \"ReadTransactions:result\"\n      ],\n      \"owner\": \"finance\",\n      \"parameters\": {\n        \"account_id\": \"input:account\",\n        \"month\": \"input:month\"\n      }\n    },\n    {\n      \"capability\": \"finance.summary\",\n      \"condition\": null,\n      \"dependencies\": [\n        \"ReadTransactions\"\n      ],\n      \"failure_policy\": {\n        \"max_retries\": 0,\n        \"mode\": \"STOP\"\n      },\n      \"input_refs\": [\n        \"ReadTransactions:result\"\n      ],\n      \"node_id\": \"AnalyzeSummary\",\n      \"node_type\": \"ANALYZE\",\n      \"output_refs\": [\n        \"AnalyzeSummary:result\"\n      ],\n      \"owner\": \"finance\",\n      \"parameters\": {\n        \"records\": \"ReadTransactions:result\"\n      }\n    },\n    {\n      \"capability\": \"graph.report\",\n      \"condition\": null,\n      \"dependencies\": [\n        \"AnalyzeSummary\"\n      ],\n      \"failure_policy\": {\n        \"max_retries\": 0,\n        \"mode\": \"STOP\"\n      },\n      \"input_refs\": [],\n      \"node_id\": \"Report\",\n      \"node_type\": \"REPORT\",\n      \"output_refs\": [\n        \"Report:result\"\n      ],\n      \"owner\": \"supervisor\",\n      \"parameters\": {}\n    }\n  ],\n  \"schema_version\": 1\n}",
+          "request_hash": "4766e05b5925b0ea2371bbada5f1a9a1d784f4bfda5435624e3c5aa24719e3c2",
+          "schema_hash": "d68b63e8e9d44f6174f28369cd8beee44e1f74c8157b49ea25dc3c62f0aa3a59"
+        }
+      ],
+      "latency_ms": 3226.3,
+      "scenario": "injected-deepseek-outage"
+    },
+    {
+      "id": "F01",
+      "group": "normal_read",
+      "gold": {
+        "id": "F01",
+        "group": "normal_read",
+        "goal": "把上一个分析月份的账户交易先读出来，由Finance计算消费总览，再由Supervisor输出总览。",
+        "inputs": {
+          "input:account": "acct-demo",
+          "input:month": "2026-08"
+        },
+        "expected_status": "COMPLETED",
+        "required_capabilities": [
+          "transactions.read",
+          "finance.summary",
+          "graph.report"
+        ]
+      },
+      "passed": true,
+      "status": "COMPLETED",
+      "errors": [],
+      "capabilities": [
+        "finance.summary",
+        "graph.report",
+        "transactions.read"
+      ],
+      "installed_graph": true,
+      "clarification": null,
+      "order": [
+        "gemini",
+        "deepseek"
+      ],
+      "mode": "assisted",
+      "fault_injection": "unavailable",
+      "fault_origin": "LOCAL_TEST_DOUBLE_NO_PRIMARY_NETWORK_CALL",
+      "adapter_attempts": {
+        "gemini": 1,
+        "deepseek": 1
+      },
+      "bank_writes": 0,
+      "calls": [
+        {
+          "agent": "planner",
+          "attempts": [
+            {
+              "configured_model": "gemini-3.1-flash-lite",
+              "error_code": "LLM_PROVIDER_UNAVAILABLE",
+              "provider": "gemini",
+              "status": "FAILED"
+            },
+            {
+              "configured_model": "deepseek-flash",
+              "provider": "deepseek",
+              "status": "SUCCEEDED",
+              "usage": {
+                "input_tokens": 1601,
+                "output_tokens": 1052
+              }
+            }
+          ],
+          "config_version": "phase6-second-provider",
+          "created_at": 1791292879.3220205,
+          "deadline": 1791292939.3220205,
+          "error_code": null,
+          "estimated_costs_usd": {
+            "deepseek": null,
+            "gemini": null
+          },
+          "finished_at": 1791292884.5609536,
+          "latency_ms": 5238.93,
+          "mode": "assisted",
+          "output_hash": "b4df8ac088ed70597696e4ef929baf2b3920b409e7ebb805aa790a185f87cf1a",
+          "provider": "deepseek",
+          "purpose": "plan_proposal",
+          "rejected_routes": {},
+          "request_id": "24f8ceab-d0cc-4015-8b9d-1d6dd864ddc6",
+          "security_level": "standard",
+          "sensitivity": "restricted",
+          "status": "SUCCEEDED",
+          "task_id": "ae311ae2-6571-4a2f-92db-c550703c4561",
+          "task_revision": 0,
+          "user_id": "demo"
+        }
+      ],
+      "real_model_responses": 1,
+      "captured_synthetic_outputs": [
+        {
+          "provider": "deepseek",
+          "returned_model": "deepseek-flash",
+          "usage": {
+            "input_tokens": 1601,
+            "output_tokens": 1052
+          },
+          "raw_synthetic_output": "{\"schema_version\":1,\"nodes\":[{\"node_id\":\"ReadTransactions\",\"node_type\":\"READ\",\"owner\":\"finance\",\"capability\":\"transactions.read\",\"input_refs\":[\"input:account\",\"input:month\"],\"output_refs\":[\"ReadTransactions:result\"],\"dependencies\":[],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{\"account_id\":\"input:account\",\"month\":\"input:month\"}},{\"node_id\":\"FinanceSummary\",\"node_type\":\"ANALYZE\",\"owner\":\"finance\",\"capability\":\"finance.summary\",\"input_refs\":[\"ReadTransactions:result\"],\"output_refs\":[\"FinanceSummary:result\"],\"dependencies\":[\"ReadTransactions\"],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{\"records\":\"ReadTransactions:result\"}},{\"node_id\":\"Report\",\"node_type\":\"REPORT\",\"owner\":\"supervisor\",\"capability\":\"graph.report\",\"input_refs\":[],\"output_refs\":[\"Report:result\"],\"dependencies\":[\"FinanceSummary\"],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{}}],\"clarification\":null}",
+          "request_hash": "4766e05b5925b0ea2371bbada5f1a9a1d784f4bfda5435624e3c5aa24719e3c2",
+          "schema_hash": "d68b63e8e9d44f6174f28369cd8beee44e1f74c8157b49ea25dc3c62f0aa3a59"
+        }
+      ],
+      "latency_ms": 5815.59,
+      "scenario": "injected-gemini-outage"
+    },
+    {
+      "id": "F01",
+      "group": "normal_read",
+      "gold": {
+        "id": "F01",
+        "group": "normal_read",
+        "goal": "把上一个分析月份的账户交易先读出来，由Finance计算消费总览，再由Supervisor输出总览。",
+        "inputs": {
+          "input:account": "acct-demo",
+          "input:month": "2026-08"
+        },
+        "expected_status": "COMPLETED",
+        "required_capabilities": [
+          "transactions.read",
+          "finance.summary",
+          "graph.report"
+        ]
+      },
+      "passed": true,
+      "status": "BLOCKED",
+      "errors": [
+        "REJECT_PLAN"
+      ],
+      "capabilities": [],
+      "installed_graph": false,
+      "clarification": null,
+      "order": [
+        "deepseek",
+        "gemini"
+      ],
+      "mode": "assisted",
+      "fault_injection": "invalid",
+      "fault_origin": "LOCAL_TEST_DOUBLE_NO_PRIMARY_NETWORK_CALL",
+      "adapter_attempts": {
+        "deepseek": 1,
+        "gemini": 0
+      },
+      "bank_writes": 0,
+      "calls": [
+        {
+          "agent": "planner",
+          "attempts": [
+            {
+              "configured_model": "deepseek-flash",
+              "error_code": "REJECT_PLAN",
+              "provider": "deepseek",
+              "status": "FAILED",
+              "validation_reason": "GRAPH_RESPONSE_SCHEMA"
+            }
+          ],
+          "config_version": "phase6-second-provider",
+          "created_at": 1791292885.1423805,
+          "deadline": 1791292945.1423805,
+          "error_code": "REJECT_PLAN",
+          "estimated_costs_usd": {
+            "deepseek": null,
+            "gemini": null
+          },
+          "finished_at": 1791292885.1466885,
+          "latency_ms": 4.31,
+          "mode": "assisted",
+          "provider": null,
+          "purpose": "plan_proposal",
+          "rejected_routes": {},
+          "request_id": "595a5047-2384-478f-a901-29c4ab955abe",
+          "security_level": "standard",
+          "sensitivity": "restricted",
+          "status": "FAILED",
+          "task_id": "6e921b99-6841-40b9-896f-c1cf68d61dd5",
+          "task_revision": 0,
+          "user_id": "demo"
+        }
+      ],
+      "real_model_responses": 0,
+      "captured_synthetic_outputs": [],
+      "latency_ms": 154.61,
+      "scenario": "invalid-output-no-fallback"
+    },
+    {
+      "id": "F01",
+      "group": "normal_read",
+      "gold": {
+        "id": "F01",
+        "group": "normal_read",
+        "goal": "把上一个分析月份的账户交易先读出来，由Finance计算消费总览，再由Supervisor输出总览。",
+        "inputs": {
+          "input:account": "acct-demo",
+          "input:month": "2026-08"
+        },
+        "expected_status": "COMPLETED",
+        "required_capabilities": [
+          "transactions.read",
+          "finance.summary",
+          "graph.report"
+        ]
+      },
+      "passed": true,
+      "status": "BLOCKED",
+      "errors": [
+        "LLM_PROVIDER_UNAVAILABLE"
+      ],
+      "capabilities": [],
+      "installed_graph": false,
+      "clarification": null,
+      "order": [
+        "deepseek",
+        "gemini"
+      ],
+      "mode": "assisted",
+      "fault_injection": "unavailable",
+      "fault_origin": "LOCAL_TEST_DOUBLE_NO_PRIMARY_NETWORK_CALL",
+      "adapter_attempts": {
+        "deepseek": 1,
+        "gemini": 0
+      },
+      "bank_writes": 0,
+      "calls": [
+        {
+          "agent": "planner",
+          "attempts": [
+            {
+              "configured_model": "deepseek-flash",
+              "error_code": "LLM_PROVIDER_UNAVAILABLE",
+              "provider": "deepseek",
+              "status": "FAILED"
+            }
+          ],
+          "config_version": "phase6-second-provider",
+          "created_at": 1791292885.3123262,
+          "deadline": 1791292945.3123262,
+          "error_code": "LLM_PROVIDER_UNAVAILABLE",
+          "estimated_costs_usd": {
+            "deepseek": null,
+            "gemini": null
+          },
+          "finished_at": 1791292885.316476,
+          "latency_ms": 4.15,
+          "mode": "assisted",
+          "provider": null,
+          "purpose": "plan_proposal",
+          "rejected_routes": {
+            "gemini": "DATA_SENSITIVITY"
+          },
+          "request_id": "33e11d0e-72e5-4859-be38-0c1d0a30c32c",
+          "security_level": "standard",
+          "sensitivity": "restricted",
+          "status": "FAILED",
+          "task_id": "8865faa2-995b-4ac0-b255-0647506d7cfa",
+          "task_revision": 0,
+          "user_id": "demo"
+        }
+      ],
+      "real_model_responses": 0,
+      "captured_synthetic_outputs": [],
+      "latency_ms": 164.18,
+      "scenario": "public-backup-denied"
+    },
+    {
+      "id": "F01",
+      "group": "normal_read",
+      "gold": {
+        "id": "F01",
+        "group": "normal_read",
+        "goal": "把上一个分析月份的账户交易先读出来，由Finance计算消费总览，再由Supervisor输出总览。",
+        "inputs": {
+          "input:account": "acct-demo",
+          "input:month": "2026-08"
+        },
+        "expected_status": "COMPLETED",
+        "required_capabilities": [
+          "transactions.read",
+          "finance.summary",
+          "graph.report"
+        ]
+      },
+      "passed": true,
+      "status": "BLOCKED",
+      "errors": [
+        "LLM_SHADOW_ONLY"
+      ],
+      "capabilities": [],
+      "installed_graph": false,
+      "clarification": {
+        "proposal_validated": true,
+        "proposal_hash": "b4df8ac088ed70597696e4ef929baf2b3920b409e7ebb805aa790a185f87cf1a"
+      },
+      "order": [
+        "deepseek"
+      ],
+      "mode": "shadow",
+      "fault_injection": null,
+      "fault_origin": null,
+      "adapter_attempts": {
+        "deepseek": 1
+      },
+      "bank_writes": 0,
+      "calls": [
+        {
+          "agent": "planner",
+          "attempts": [
+            {
+              "configured_model": "deepseek-flash",
+              "provider": "deepseek",
+              "status": "SUCCEEDED",
+              "usage": {
+                "input_tokens": 1601,
+                "output_tokens": 858
+              }
+            }
+          ],
+          "config_version": "phase6-second-provider",
+          "created_at": 1791292885.45243,
+          "deadline": 1791292945.45243,
+          "error_code": null,
+          "estimated_costs_usd": {
+            "deepseek": null
+          },
+          "finished_at": 1791292889.7654288,
+          "latency_ms": 4313.0,
+          "mode": "shadow",
+          "output_hash": "b4df8ac088ed70597696e4ef929baf2b3920b409e7ebb805aa790a185f87cf1a",
+          "provider": "deepseek",
+          "purpose": "plan_proposal",
+          "rejected_routes": {},
+          "request_id": "d5dc6066-33ce-4978-bf02-f32f598310d9",
+          "security_level": "standard",
+          "sensitivity": "restricted",
+          "status": "SUCCEEDED",
+          "task_id": "ccb78ce4-2a12-4aaf-9d43-c1593f767d2f",
+          "task_revision": 0,
+          "user_id": "demo"
+        }
+      ],
+      "real_model_responses": 1,
+      "captured_synthetic_outputs": [
+        {
+          "provider": "deepseek",
+          "returned_model": "deepseek-flash",
+          "usage": {
+            "input_tokens": 1601,
+            "output_tokens": 858
+          },
+          "raw_synthetic_output": "{\"schema_version\":1,\"nodes\":[{\"node_id\":\"ReadTransactions\",\"node_type\":\"READ\",\"owner\":\"finance\",\"capability\":\"transactions.read\",\"input_refs\":[\"input:account\",\"input:month\"],\"output_refs\":[\"ReadTransactions:result\"],\"dependencies\":[],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{\"account_id\":\"input:account\",\"month\":\"input:month\"}},{\"node_id\":\"FinanceSummary\",\"node_type\":\"ANALYZE\",\"owner\":\"finance\",\"capability\":\"finance.summary\",\"input_refs\":[\"ReadTransactions:result\"],\"output_refs\":[\"FinanceSummary:result\"],\"dependencies\":[\"ReadTransactions\"],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{\"records\":\"ReadTransactions:result\"}},{\"node_id\":\"Report\",\"node_type\":\"REPORT\",\"owner\":\"supervisor\",\"capability\":\"graph.report\",\"input_refs\":[],\"output_refs\":[\"Report:result\"],\"dependencies\":[\"FinanceSummary\"],\"condition\":null,\"failure_policy\":{\"mode\":\"STOP\",\"max_retries\":0},\"parameters\":{}}],\"clarification\":null}",
+          "request_hash": "4766e05b5925b0ea2371bbada5f1a9a1d784f4bfda5435624e3c5aa24719e3c2",
+          "schema_hash": "d68b63e8e9d44f6174f28369cd8beee44e1f74c8157b49ea25dc3c62f0aa3a59"
+        }
+      ],
+      "latency_ms": 4450.02,
+      "scenario": "shadow-does-not-install"
+    }
+  ]
+}

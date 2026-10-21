@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "validation_date": "2026-10-06",
+  "timezone": "Asia/Shanghai",
+  "baseline": {
+    "tests": 151,
+    "duration_seconds": 187.285,
+    "result": "OK"
+  },
+  "final_suite": {
+    "tests": 285,
+    "duration_seconds": 207.554,
+    "result": "OK",
+    "original_tests": 151,
+    "added_tests": 134,
+    "original_assertions_modified": false,
+    "output": "phase4-tests.txt"
+  },
+  "benchmark": {
+    "report": "phase4-security-benchmark.json",
+    "passed": true,
+    "workload": {
+      "trials": 5,
+      "attack_categories": 18,
+      "attack_attempts": 90,
+      "valid_messages": 105,
+      "valid_proofs": 30,
+      "synthetic_audit_events_per_trial": 128,
+      "checkpoint_batch_sizes": [
+        64,
+        64,
+        33,
+        64,
+        64,
+        33,
+        64,
+        64,
+        33,
+        64,
+        64,
+        33,
+        64,
+        64,
+        33
+      ],
+      "isolated_sqlite_bank": true,
+      "unit_test_harness": false
+    },
+    "metrics": {
+      "forgery_detection_rate": {
+        "numerator": 10,
+        "denominator": 10,
+        "rate": 1.0
+      },
+      "message_tamper_detection_rate": {
+        "numerator": 10,
+        "denominator": 10,
+        "rate": 1.0
+      },
+      "replay_block_rate": {
+        "numerator": 5,
+        "denominator": 5,
+        "rate": 1.0
+      },
+      "unauthorized_execution_rate": {
+        "numerator": 0,
+        "denominator": 15,
+        "rate": 0.0
+      },
+      "audit_tamper_detection_rate": {
+        "numerator": 10,
+        "denominator": 10,
+        "rate": 1.0
+      },
+      "merkle_proof_verification_rate": {
+        "numerator": 30,
+        "denominator": 30,
+        "rate": 1.0
+      },
+      "false_rejection_rate": {
+        "numerator": 0,
+        "denominator": 135,
+        "rate": 0.0
+      }
+    },
+    "latency": {
+      "sign": {
+        "samples": 100,
+        "mean_ms": 7.966152,
+        "p50_ms": 7.6526,
+        "p95_ms": 10.0868,
+        "max_ms": 13.6184
+      },
+      "verify": {
+        "samples": 100,
+        "mean_ms": 3.047028,
+        "p50_ms": 2.9341999999999997,
+        "p95_ms": 3.5744,
+        "max_ms": 5.5873
+      },
+      "checkpoint": {
+        "samples": 15,
+        "mean_ms": 10.380613333333333,
+        "p50_ms": 10.0122,
+        "p95_ms": 15.4272,
+        "max_ms": 15.4272
+      }
+    }
+  },
+  "demos": {
+    "report": "phase4-demo.json",
+    "TRANSFER": {
+      "request": "给张三转2000元",
+      "status": "COMPLETED",
+      "settlement": "SETTLED",
+      "verification": "VERIFIED",
+      "amount_cents": 200000,
+      "balance_cents": 800000,
+      "transaction_count": 1,
+      "action_hash_unchanged": true,
+      "receipt_id": "93f15899-ac0e-4e30-ad09-ce711f12605f",
+      "bank_transaction_id": "e851478a-20f9-4ee1-accc-2c86d5f81f1b"
+    },
+    "BILL_ANALYSIS": {
+      "request": "分析2026-09消费",
+      "status": "COMPLETED",
+      "net_spend_cents": 542500,
+      "anomaly_count": 3
+    },
+    "WEALTH_RECOMMENDATION": {
+      "request": "推荐适合我的理财产品",
+      "status": "COMPLETED",
+      "bank_risk_level": 2,
+      "product_ids": [
+        "sandbox-r1",
+        "sandbox-r2"
+      ],
+      "financial_write": false
+    },
+    "restart": {
+      "registry_preserved": true,
+      "key_rotation_preserved": true,
+      "revocation_preserved": true,
+      "nonce_replay_blocked": true,
+      "checkpoint_proof_verified": true,
+      "receipt_preserved": true
+    },
+    "audit_chain_valid": true,
+    "receipt_tampering_detected": true
+  },
+  "checks": {
+    "python_compileall": "PASS",
+    "frontend_node_syntax": "PASS",
+    "start_powershell_parse": "PASS",
+    "audit_worker_actual_cli_isolated_database": "PASS",
+    "public_only_record_cli": "PASS",
+    "browser_proof_display": "PASS",
+    "browser_warn_error_logs": 0,
+    "browser_download_event": "NOT_OBSERVED; click triggered, in-app download event timed out"
+  },
+  "trust_limits": {
+    "public_key_fixture": "local test key; no real external identity authentication",
+    "blockchain_externally_verified": false,
+    "did_implemented": false,
+    "zkp_implemented": false,
+    "production_penetration_test": false
+  }
+}

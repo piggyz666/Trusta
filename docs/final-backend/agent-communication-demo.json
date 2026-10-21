@@ -1,0 +1,895 @@
+{
+  "schema_version": 1,
+  "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+  "entries": [
+    {
+      "audit_event_id": "4af29703-f8de-4bef-b2f9-9e070f126dfa",
+      "evidence": {
+        "dependencies": [],
+        "dependency_state_hash": "10c97274c2b262d2bbcd73814b68b2365869d25c83de7e2bf7ad851b646502cb",
+        "evidence_id": "6013dfd4-3508-4597-8623-ac9094448974",
+        "financial_evidence_hashes": [],
+        "input_hash": "7ee9ac036591a45e0d5ad6e67fe61afa87c2c485818977d00d654a4d089cab3e",
+        "message": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "capability_snapshot_hash": "56a29b507ffcb6c3afc5bca2b253048678943d542eabb1c31a635d17d91cd222",
+          "expires_at": 1791574109686,
+          "issued_at": 1791573809686,
+          "message_id": "6013dfd4-3508-4597-8623-ac9094448974",
+          "message_type": "READ_ONLY_REPORT",
+          "nonce": "2dfe34cc-e9a4-45db-960a-8a9b83ca2858",
+          "payload_hash": "eaa9e4a29cc62043e564ad8f786da4e0706f97395ab14f0e94a9421cfdd2e5da",
+          "payload_ref": "task:b3b19e61-add3-467d-ab71-8754f0e797f1:agent_results:finance:READ_ONLY_REPORT",
+          "payload_version": 5,
+          "receiver_agent": "supervisor",
+          "schema_version": 3,
+          "sender_agent": "finance",
+          "sender_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:finance",
+          "sender_key_id": "key-cd653a8f-f6f1-4217-8467-722dbbc3f200",
+          "signature": "MEUCIHOCQ6O/pBH8d6PZkkFFVx07cOWI552734el4OrN3rSCAiEAjoaxBAU63bQfnzeFu9ygGu1KUvqVcOF+3oSWJDx7hXE=",
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "step_id": "Read",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1"
+        },
+        "output_hash": "eaa9e4a29cc62043e564ad8f786da4e0706f97395ab14f0e94a9421cfdd2e5da",
+        "parents": [],
+        "process": {
+          "agent": "finance",
+          "appcontainer_sid": "S-1-15-2-1973485005-1050838905-2536607428-1620748215-1490594317-2819250050-2187289942",
+          "broker_trust": "LOCAL_HOST_TRUST",
+          "classification": "PROCESS_ISOLATION_VERIFIED",
+          "network_capabilities": [],
+          "os_token_appcontainer": true,
+          "parent_pid": 50864,
+          "pid": 33456,
+          "private_keys_in_child": false
+        },
+        "schema_version": 1,
+        "signature": "MEUCIASxc/q5VfuL6DGoA5iJJNtJfyBUo8++SGAt9EJEpDVmAiEA3tWXCpLDZqmYDxLQa6rEw8qef3psJbmOG2m1i2tCBtQ=",
+        "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+        "step_id": "Read",
+        "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+        "task_revision": 5,
+        "transport_request": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "capability_snapshot_hash": "dd457f84b15ecfaa1d4ff4a2299aa82fa26d72d7ffa2bff9bba37ee2d3e6c554",
+          "expires_at": 1791574108418,
+          "issued_at": 1791573808418,
+          "message_id": "ca4ded17-2326-4df1-8945-d7b2d6a8233b",
+          "message_type": "REQUEST",
+          "nonce": "0b988e1d-479a-4d63-9d61-a6ea8988a322",
+          "payload_hash": "67ff5dd195999e583fb03fcd4fddf336ce8f174c9037a658ce79ac89da69f483",
+          "payload_ref": "handoff:957e3286-50ad-4dbc-8417-35e3f3997d07",
+          "payload_version": 4,
+          "receiver_agent": "finance",
+          "schema_version": 3,
+          "sender_agent": "supervisor",
+          "sender_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:supervisor",
+          "sender_key_id": "key-35ee7807-032e-486b-a829-a3578e28fae7",
+          "signature": "MEYCIQDwo7QV7o+hHZ4MFT7r5WR7bYsakcsykzljWgRVfxytSgIhAObYB8+xTh7cWgLR+uiecrx4x/RIGaFQps+EiLQ9dBeS",
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "step_id": "Read",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1"
+        }
+      },
+      "audit_proof": {
+        "schema_version": 1,
+        "audit_event_id": "4af29703-f8de-4bef-b2f9-9e070f126dfa",
+        "event": {
+          "action_id": null,
+          "actor": "runtime",
+          "audit_event_id": "4af29703-f8de-4bef-b2f9-9e070f126dfa",
+          "event_hash": "92d572921e692f0d4ecebb9642aa3df006025d02b94a7b9e7f49a96f90bc11ad",
+          "event_type": "HANDOFF_EVIDENCE_RECORDED",
+          "payload_hash": "a46eb41f87e947290a03302a174794c10efa7ebd021667bdf8ebe992f5d50d11",
+          "previous_hash": "128eae08473081d63b5e459f824f54145f90d674731fccb6d85dbd8bc4fa8d23",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+          "timestamp": 1791573809.6924102
+        },
+        "event_hash": "92d572921e692f0d4ecebb9642aa3df006025d02b94a7b9e7f49a96f90bc11ad",
+        "event_sequence": 194,
+        "leaf_index": 193,
+        "inclusion_proof": [
+          {
+            "side": "LEFT",
+            "hash": "bc4f6cbc814956bfea38d6f2e93e0f89c79df4261eb892c0621787c59a2d99e3"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "04e71bee067eaade43cd3a35c9ee0bd63f17888b3e07931a5d20a71adf0ae312"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "a59f6048d0d1254400c7153e3187f176df8b40dcf413350add4088e89038ea22"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "d1617010e0ccfdf37a100616729ac6fac0a0d4b173309d94df179e7cc1548da8"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "59205a3254b0f592af076eff063820573264f8c198788501ff03674f8c34a974"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "c2d4964db81ad96563deb4bb41133abbb35fdca056096298e756c7749a95145e"
+          },
+          {
+            "side": "LEFT",
+            "hash": "90a6b8b5c452c7480a8393a898b55df5d4aa3f493c8d575b12bc444cbd80d91e"
+          },
+          {
+            "side": "LEFT",
+            "hash": "be0f61a9cd2365f34932882c3f7263ad1b317c824aa8abb8bd2ad051c5a46d78"
+          }
+        ],
+        "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+        "checkpoint": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "checkpoint_signature": "MEUCIQD+C9GnXWXELYeV0msBOcoQJZYsMSkmuQhkhHUYNhZUqAIgNUuDYwQ/cwWr0Lol1GMdyhgaJw9vS2RPHDk+Lfi6XqA=",
+          "created_at": 1791573812352,
+          "first_event_sequence": 1,
+          "last_event_sequence": 251,
+          "leaf_count": 251,
+          "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "previous_checkpoint_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+          "public_key_fingerprint": "9af197e1182c4322349a5a3b77f0a24cd1d61593df8043cd83e0206bd4c5b06c",
+          "schema_version": 1,
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "signer_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:audit-checkpoint",
+          "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+          "tree_algorithm": "RFC6962-SHA256-event-hash-v1"
+        },
+        "signature_status": "VALID",
+        "signer_key_status": "ACTIVE",
+        "signer_public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4HuMdQswnvwYmVDl0rRC6RfOwlS3\nFg7TvGLs7oxsvA/7u7v+/f4yb+eTZRAvndto1XHyb4cOA9KQ1OFU5P8ULA==\n-----END PUBLIC KEY-----\n",
+        "anchor": {
+          "adapter": null,
+          "anchor_ref": null,
+          "attempts": 0,
+          "checkpoint_hash": "08ddee95f5f768e97422ef0a7e7053ae6e70b120ac61b2fff501f37f5c4dcfbf",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "error": null,
+          "root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "schema_version": 1,
+          "status": "PENDING",
+          "updated_at": 1791573812353
+        },
+        "anchor_status": "PENDING",
+        "record_verified": true
+      }
+    },
+    {
+      "audit_event_id": "1a12590f-016b-4ca4-aed7-916ae242f109",
+      "evidence": {
+        "dependencies": [
+          "Read"
+        ],
+        "dependency_state_hash": "8a3a500c667c261d137d91e5a804fb53ec641c5d7a3c5c2dc6e4f7b77f2328a2",
+        "evidence_id": "46766a83-d927-485f-a51d-2520329e18d2",
+        "financial_evidence_hashes": [],
+        "input_hash": "fe41ad91ba18dea508d6042c31184d8396ca48fe958b119c78b6284f44e33122",
+        "message": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "capability_snapshot_hash": "56a29b507ffcb6c3afc5bca2b253048678943d542eabb1c31a635d17d91cd222",
+          "expires_at": 1791574110934,
+          "issued_at": 1791573810934,
+          "message_id": "46766a83-d927-485f-a51d-2520329e18d2",
+          "message_type": "READ_ONLY_REPORT",
+          "nonce": "e16c3089-246f-4951-b011-368273364508",
+          "payload_hash": "8ff512bc8c110081f3da6f641a031e9b47cf9274dd0c8263a3f8526f8ff99097",
+          "payload_ref": "task:b3b19e61-add3-467d-ab71-8754f0e797f1:agent_results:finance:READ_ONLY_REPORT",
+          "payload_version": 10,
+          "receiver_agent": "supervisor",
+          "schema_version": 3,
+          "sender_agent": "finance",
+          "sender_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:finance",
+          "sender_key_id": "key-cd653a8f-f6f1-4217-8467-722dbbc3f200",
+          "signature": "MEUCIQC/drE2SMR5F3wg+jcLZ1tq7iYVNe1hYi+a7A3i5EI4AAIgQkmsqP9MFb3MgUwMqOVZDTVoF4mA2f6UXb/UwFrIxZE=",
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "step_id": "Sum",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1"
+        },
+        "output_hash": "8ff512bc8c110081f3da6f641a031e9b47cf9274dd0c8263a3f8526f8ff99097",
+        "parents": [
+          "34e23dc79d10e7abe0fa5cf187af792f6324fc5056a731fa392ada9d828a3257"
+        ],
+        "process": {
+          "agent": "finance",
+          "appcontainer_sid": "S-1-15-2-1973485005-1050838905-2536607428-1620748215-1490594317-2819250050-2187289942",
+          "broker_trust": "LOCAL_HOST_TRUST",
+          "classification": "PROCESS_ISOLATION_VERIFIED",
+          "network_capabilities": [],
+          "os_token_appcontainer": true,
+          "parent_pid": 50864,
+          "pid": 56876,
+          "private_keys_in_child": false
+        },
+        "schema_version": 1,
+        "signature": "MEQCIAR6EgjRTz1KvVeQcYeuyHgifi+SRl/CGJkSOwWEq6xEAiAE8DGJjQb0YNBNb+6fv9n0obDCsu07Mvw+xWmHcqx5cw==",
+        "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+        "step_id": "Sum",
+        "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+        "task_revision": 10,
+        "transport_request": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "capability_snapshot_hash": "dd457f84b15ecfaa1d4ff4a2299aa82fa26d72d7ffa2bff9bba37ee2d3e6c554",
+          "expires_at": 1791574109759,
+          "issued_at": 1791573809759,
+          "message_id": "07ac9d31-9834-4384-9a56-982d9fe39c4c",
+          "message_type": "REQUEST",
+          "nonce": "50d2b8a3-fd38-481f-9606-01c5b365104f",
+          "payload_hash": "1a21b254a5ea56dc0f844d286f1b0a76c1917942b687f4ea81e667dd10063f13",
+          "payload_ref": "handoff:9e39d149-1015-4ba6-9c51-eaed1ed85f86",
+          "payload_version": 9,
+          "receiver_agent": "finance",
+          "schema_version": 3,
+          "sender_agent": "supervisor",
+          "sender_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:supervisor",
+          "sender_key_id": "key-35ee7807-032e-486b-a829-a3578e28fae7",
+          "signature": "MEUCIQDXSOCIYZKRO+2EhzxcGNDUmtlAZaLAlHsWwTa9jtxaIgIgQhsFMBf6aj5N39lw3s6IJXE+GVCn1mxKegrhYyCaaxc=",
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "step_id": "Sum",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1"
+        }
+      },
+      "audit_proof": {
+        "schema_version": 1,
+        "audit_event_id": "1a12590f-016b-4ca4-aed7-916ae242f109",
+        "event": {
+          "action_id": null,
+          "actor": "runtime",
+          "audit_event_id": "1a12590f-016b-4ca4-aed7-916ae242f109",
+          "event_hash": "00d1644ee3512d3631fa02fd0ea9ebc1da96f0bcb8dad2b274f2ac0adbcb6dbb",
+          "event_type": "HANDOFF_EVIDENCE_RECORDED",
+          "payload_hash": "a8b7b015d7704cc7378980f9198b1f2b9b4c3dacbf754429e4fb6557c33a34ee",
+          "previous_hash": "2ec0c0bb5b35830fbf27f073d828ecc917e3d2404f340c5909b044d4da666cba",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+          "timestamp": 1791573810.940447
+        },
+        "event_hash": "00d1644ee3512d3631fa02fd0ea9ebc1da96f0bcb8dad2b274f2ac0adbcb6dbb",
+        "event_sequence": 202,
+        "leaf_index": 201,
+        "inclusion_proof": [
+          {
+            "side": "LEFT",
+            "hash": "cb06de4c5adc4cb59e9873bb7fd708d138c41ed2ffa5830d6f97aaf548e7bfd2"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "fa2ea28e7be90efbde48f2d1c8712fd11545e7f3614b7b846e031655430f1cc4"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "779cbbd50f621f5d41d04aaff331122f761bddacfa5ff0f40363ad1de742728a"
+          },
+          {
+            "side": "LEFT",
+            "hash": "0f5d540d2a26d175a8003af66da4a8de529f34eb6f186f99c858ebc49d2ae23d"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "59205a3254b0f592af076eff063820573264f8c198788501ff03674f8c34a974"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "c2d4964db81ad96563deb4bb41133abbb35fdca056096298e756c7749a95145e"
+          },
+          {
+            "side": "LEFT",
+            "hash": "90a6b8b5c452c7480a8393a898b55df5d4aa3f493c8d575b12bc444cbd80d91e"
+          },
+          {
+            "side": "LEFT",
+            "hash": "be0f61a9cd2365f34932882c3f7263ad1b317c824aa8abb8bd2ad051c5a46d78"
+          }
+        ],
+        "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+        "checkpoint": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "checkpoint_signature": "MEUCIQD+C9GnXWXELYeV0msBOcoQJZYsMSkmuQhkhHUYNhZUqAIgNUuDYwQ/cwWr0Lol1GMdyhgaJw9vS2RPHDk+Lfi6XqA=",
+          "created_at": 1791573812352,
+          "first_event_sequence": 1,
+          "last_event_sequence": 251,
+          "leaf_count": 251,
+          "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "previous_checkpoint_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+          "public_key_fingerprint": "9af197e1182c4322349a5a3b77f0a24cd1d61593df8043cd83e0206bd4c5b06c",
+          "schema_version": 1,
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "signer_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:audit-checkpoint",
+          "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+          "tree_algorithm": "RFC6962-SHA256-event-hash-v1"
+        },
+        "signature_status": "VALID",
+        "signer_key_status": "ACTIVE",
+        "signer_public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4HuMdQswnvwYmVDl0rRC6RfOwlS3\nFg7TvGLs7oxsvA/7u7v+/f4yb+eTZRAvndto1XHyb4cOA9KQ1OFU5P8ULA==\n-----END PUBLIC KEY-----\n",
+        "anchor": {
+          "adapter": null,
+          "anchor_ref": null,
+          "attempts": 0,
+          "checkpoint_hash": "08ddee95f5f768e97422ef0a7e7053ae6e70b120ac61b2fff501f37f5c4dcfbf",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "error": null,
+          "root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "schema_version": 1,
+          "status": "PENDING",
+          "updated_at": 1791573812353
+        },
+        "anchor_status": "PENDING",
+        "record_verified": true
+      }
+    },
+    {
+      "audit_event_id": "a6b5cb2d-e534-481c-bd0a-9fe2ca4d6f79",
+      "evidence": {
+        "dependencies": [
+          "Sum"
+        ],
+        "dependency_state_hash": "16e9217961396b1a5a1085ad86adacd42461d556e54f833343dad281d9383e60",
+        "evidence_id": "21f0b9b5-3867-49f2-8d96-ce0a827968f0",
+        "financial_evidence_hashes": [],
+        "input_hash": null,
+        "message": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "capability_snapshot_hash": "d1c011b17ce242c7049f3d83b3930159ea76d560e33d4744648fbf3910e30d3f",
+          "expires_at": 1791574111072,
+          "issued_at": 1791573811072,
+          "message_id": "21f0b9b5-3867-49f2-8d96-ce0a827968f0",
+          "message_type": "ACTION_PROPOSED",
+          "nonce": "4ec79617-0afc-423c-8fb5-9f789e723b3e",
+          "payload_hash": "08ca6f65391093eeccf9cafb11b5bcba85fca28e7531794df9589df3cc7f0a01",
+          "payload_ref": "task:b3b19e61-add3-467d-ab71-8754f0e797f1:agent_results:transaction:ACTION_PROPOSED",
+          "payload_version": 15,
+          "receiver_agent": "supervisor",
+          "schema_version": 3,
+          "sender_agent": "transaction",
+          "sender_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:transaction",
+          "sender_key_id": "key-1c11f09e-40b1-4f88-8e96-afb8de878816",
+          "signature": "MEYCIQDWvI83Sjm8OREHqgeaHB//aZCUcE1VgeKovReSfzRThAIhANCD6u6IqRbYh2RyP21xemomzHbc86mYtsrusgZgYRcr",
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "step_id": "Pay",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1"
+        },
+        "output_hash": "08ca6f65391093eeccf9cafb11b5bcba85fca28e7531794df9589df3cc7f0a01",
+        "parents": [
+          "6f65db687b7eba304d95af6fb436ebd00a8593378e12f678a048c5865db2232b"
+        ],
+        "process": null,
+        "schema_version": 1,
+        "signature": "MEUCIQDXeJkn9QOe3ASn3M74UgGEqhBcqr652CmKNBRUSBRacwIgautr1bEfCv0SLhb2IybcOsuNSyMjf7WFpGywDat2BCo=",
+        "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+        "step_id": "Pay",
+        "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+        "task_revision": 15,
+        "transport_request": null
+      },
+      "audit_proof": {
+        "schema_version": 1,
+        "audit_event_id": "a6b5cb2d-e534-481c-bd0a-9fe2ca4d6f79",
+        "event": {
+          "action_id": null,
+          "actor": "runtime",
+          "audit_event_id": "a6b5cb2d-e534-481c-bd0a-9fe2ca4d6f79",
+          "event_hash": "c726b66d8d03537f56bbf03bbd831604440add56f7ca91b798fb4839bb7e94bb",
+          "event_type": "HANDOFF_EVIDENCE_RECORDED",
+          "payload_hash": "16f24e8270977999287b6d09da165825a17457af79fb7debcad4231887134784",
+          "previous_hash": "ce8b1d42fabf5d9b1116e137033e10aef11536513df54a1e34cff276fcf1c0b5",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+          "timestamp": 1791573811.078802
+        },
+        "event_hash": "c726b66d8d03537f56bbf03bbd831604440add56f7ca91b798fb4839bb7e94bb",
+        "event_sequence": 208,
+        "leaf_index": 207,
+        "inclusion_proof": [
+          {
+            "side": "LEFT",
+            "hash": "76fcbff7ae9967dae8383d0d80ddb01da7f137a77f9cad05c3f6c8f3be534581"
+          },
+          {
+            "side": "LEFT",
+            "hash": "8d0a6b9808ecb3f38fe5a6c2f8f32bd85368fb51a00e11a5fe3bc6e5f3625d52"
+          },
+          {
+            "side": "LEFT",
+            "hash": "565cc23f4a7cfbfb56cc4a773d606ca5b5a111a927ca5bafeafe0481d870a17b"
+          },
+          {
+            "side": "LEFT",
+            "hash": "0f5d540d2a26d175a8003af66da4a8de529f34eb6f186f99c858ebc49d2ae23d"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "59205a3254b0f592af076eff063820573264f8c198788501ff03674f8c34a974"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "c2d4964db81ad96563deb4bb41133abbb35fdca056096298e756c7749a95145e"
+          },
+          {
+            "side": "LEFT",
+            "hash": "90a6b8b5c452c7480a8393a898b55df5d4aa3f493c8d575b12bc444cbd80d91e"
+          },
+          {
+            "side": "LEFT",
+            "hash": "be0f61a9cd2365f34932882c3f7263ad1b317c824aa8abb8bd2ad051c5a46d78"
+          }
+        ],
+        "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+        "checkpoint": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "checkpoint_signature": "MEUCIQD+C9GnXWXELYeV0msBOcoQJZYsMSkmuQhkhHUYNhZUqAIgNUuDYwQ/cwWr0Lol1GMdyhgaJw9vS2RPHDk+Lfi6XqA=",
+          "created_at": 1791573812352,
+          "first_event_sequence": 1,
+          "last_event_sequence": 251,
+          "leaf_count": 251,
+          "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "previous_checkpoint_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+          "public_key_fingerprint": "9af197e1182c4322349a5a3b77f0a24cd1d61593df8043cd83e0206bd4c5b06c",
+          "schema_version": 1,
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "signer_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:audit-checkpoint",
+          "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+          "tree_algorithm": "RFC6962-SHA256-event-hash-v1"
+        },
+        "signature_status": "VALID",
+        "signer_key_status": "ACTIVE",
+        "signer_public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4HuMdQswnvwYmVDl0rRC6RfOwlS3\nFg7TvGLs7oxsvA/7u7v+/f4yb+eTZRAvndto1XHyb4cOA9KQ1OFU5P8ULA==\n-----END PUBLIC KEY-----\n",
+        "anchor": {
+          "adapter": null,
+          "anchor_ref": null,
+          "attempts": 0,
+          "checkpoint_hash": "08ddee95f5f768e97422ef0a7e7053ae6e70b120ac61b2fff501f37f5c4dcfbf",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "error": null,
+          "root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "schema_version": 1,
+          "status": "PENDING",
+          "updated_at": 1791573812353
+        },
+        "anchor_status": "PENDING",
+        "record_verified": true
+      }
+    },
+    {
+      "audit_event_id": "856fc8bf-e366-4d1f-9111-b8cf496325bb",
+      "evidence": {
+        "dependencies": [
+          "PayXRECEIPT"
+        ],
+        "dependency_state_hash": "8f8fec38a95b45bfd41278106139d8d8ba665a721d1b20f6843a9bd71c0e5476",
+        "evidence_id": "f9d3ef97-e6fb-4a41-b554-1727a0c3b85c",
+        "financial_evidence_hashes": [
+          {
+            "action": "04a7616e4684d990754f4beddb3be34ff5d9e5d0785360f89af23dfef5f24cd0",
+            "authorization": "b5ca3fbaadf2583f6f59f69b67fb97bfb12e33923647fd5b790b54ee99716963",
+            "contract": "ae24e486f58e76327815692f070159f69c22bd4104a5c571c31ed8eee95633f6",
+            "receipt": "935a2d8872c9fc4ee2340ab28c5db358304a510f0547911e28ac3ea0372c4998",
+            "verification": "f25e58232b9b302c0b5cb9887762373b326e1b50a2b6757aa0ae193064030076"
+          }
+        ],
+        "input_hash": null,
+        "message": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "capability_snapshot_hash": "dd457f84b15ecfaa1d4ff4a2299aa82fa26d72d7ffa2bff9bba37ee2d3e6c554",
+          "expires_at": 1791574112300,
+          "issued_at": 1791573812300,
+          "message_id": "f9d3ef97-e6fb-4a41-b554-1727a0c3b85c",
+          "message_type": "READ_ONLY_REPORT",
+          "nonce": "716e28a7-5558-4623-8ccb-5f7e4c08e2fa",
+          "payload_hash": "22a808e03e959426a1a159bbd3727792adb047551aa77bfe0701d148e835d4fd",
+          "payload_ref": "task:b3b19e61-add3-467d-ab71-8754f0e797f1:agent_results:supervisor:READ_ONLY_REPORT",
+          "payload_version": 58,
+          "receiver_agent": "supervisor",
+          "schema_version": 3,
+          "sender_agent": "supervisor",
+          "sender_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:supervisor",
+          "sender_key_id": "key-35ee7807-032e-486b-a829-a3578e28fae7",
+          "signature": "MEUCIFvKSbwsW91cbfC92/i/0jwDMnzSojn8RQQNWpZN/zKKAiEAoHrMHrGxXRz6C7CQU+iv7Svz02VQSryo+Ip8l/zO/I0=",
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "step_id": "Report",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1"
+        },
+        "output_hash": "22a808e03e959426a1a159bbd3727792adb047551aa77bfe0701d148e835d4fd",
+        "parents": [
+          "441f80dbdbd4347f12e5c483dd33fb9b594637736ce78d188877f79b802083aa"
+        ],
+        "process": null,
+        "schema_version": 1,
+        "signature": "MEUCIQDX7nW2Px1E/Xap3Y2vVB+01223CBAz3OVQOBEQduEiSgIgBHon8ueVGzyJuBWhTkTux6+jzPfuzhigjiRmmtt72Cs=",
+        "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+        "step_id": "Report",
+        "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+        "task_revision": 58,
+        "transport_request": null
+      },
+      "audit_proof": {
+        "schema_version": 1,
+        "audit_event_id": "856fc8bf-e366-4d1f-9111-b8cf496325bb",
+        "event": {
+          "action_id": null,
+          "actor": "runtime",
+          "audit_event_id": "856fc8bf-e366-4d1f-9111-b8cf496325bb",
+          "event_hash": "43abde14303ba8a2661b53c6f17cf6af3e008ff04831c066d6d350f9365a296b",
+          "event_type": "HANDOFF_EVIDENCE_RECORDED",
+          "payload_hash": "8ee8c62d4b191bbeadf1bd65b7f1bd310bb651dbae67ae72e296624c70203771",
+          "previous_hash": "ccf383571c24a805267a38e663a3efdec7e78a3e7be2e2549c31453807a04a22",
+          "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+          "timestamp": 1791573812.3065352
+        },
+        "event_hash": "43abde14303ba8a2661b53c6f17cf6af3e008ff04831c066d6d350f9365a296b",
+        "event_sequence": 250,
+        "leaf_index": 249,
+        "inclusion_proof": [
+          {
+            "side": "LEFT",
+            "hash": "767ec189dcc00c9fbb7411b28621d72ef94403ba5d7cfddf37c84dfd5e0f9287"
+          },
+          {
+            "side": "RIGHT",
+            "hash": "7532b7221952efab3eb2d0ed156448af79919c21dbb695bb9a9e91ab239652be"
+          },
+          {
+            "side": "LEFT",
+            "hash": "095ba8631dfb07912cb386d241083eb1ee927fc0c85e4120501707f565c4c300"
+          },
+          {
+            "side": "LEFT",
+            "hash": "2066e543b6d7df01c76aebe63f18a04b8b1f61c2c70bb46e048acde569e2be92"
+          },
+          {
+            "side": "LEFT",
+            "hash": "d4f706d3a16ef5393eee5be9cf00cbf8430535b87e1f3c1bb9fbd556685a8abc"
+          },
+          {
+            "side": "LEFT",
+            "hash": "90a6b8b5c452c7480a8393a898b55df5d4aa3f493c8d575b12bc444cbd80d91e"
+          },
+          {
+            "side": "LEFT",
+            "hash": "be0f61a9cd2365f34932882c3f7263ad1b317c824aa8abb8bd2ad051c5a46d78"
+          }
+        ],
+        "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+        "checkpoint": {
+          "canonicalization": "TRUSTA-JSON-v1",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "checkpoint_signature": "MEUCIQD+C9GnXWXELYeV0msBOcoQJZYsMSkmuQhkhHUYNhZUqAIgNUuDYwQ/cwWr0Lol1GMdyhgaJw9vS2RPHDk+Lfi6XqA=",
+          "created_at": 1791573812352,
+          "first_event_sequence": 1,
+          "last_event_sequence": 251,
+          "leaf_count": 251,
+          "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "previous_checkpoint_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+          "public_key_fingerprint": "9af197e1182c4322349a5a3b77f0a24cd1d61593df8043cd83e0206bd4c5b06c",
+          "schema_version": 1,
+          "signature_algorithm": "ECDSA-P256-SHA256",
+          "signer_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:audit-checkpoint",
+          "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+          "tree_algorithm": "RFC6962-SHA256-event-hash-v1"
+        },
+        "signature_status": "VALID",
+        "signer_key_status": "ACTIVE",
+        "signer_public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4HuMdQswnvwYmVDl0rRC6RfOwlS3\nFg7TvGLs7oxsvA/7u7v+/f4yb+eTZRAvndto1XHyb4cOA9KQ1OFU5P8ULA==\n-----END PUBLIC KEY-----\n",
+        "anchor": {
+          "adapter": null,
+          "anchor_ref": null,
+          "attempts": 0,
+          "checkpoint_hash": "08ddee95f5f768e97422ef0a7e7053ae6e70b120ac61b2fff501f37f5c4dcfbf",
+          "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+          "error": null,
+          "root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+          "schema_version": 1,
+          "status": "PENDING",
+          "updated_at": 1791573812353
+        },
+        "anchor_status": "PENDING",
+        "record_verified": true
+      }
+    }
+  ],
+  "plan": {
+    "compiled": {
+      "schema_version": 1,
+      "semantic": {
+        "nodes": [
+          {
+            "capability": "transactions.read",
+            "condition": null,
+            "dependencies": [],
+            "failure_policy": {
+              "max_retries": 0,
+              "mode": "STOP"
+            },
+            "input_refs": [
+              "input:account",
+              "input:month"
+            ],
+            "node_id": "Read",
+            "node_type": "READ",
+            "output_refs": [
+              "Read:result"
+            ],
+            "owner": "finance",
+            "parameters": {
+              "account_id": "input:account",
+              "month": "input:month"
+            }
+          },
+          {
+            "capability": "finance.summary",
+            "condition": null,
+            "dependencies": [
+              "Read"
+            ],
+            "failure_policy": {
+              "max_retries": 0,
+              "mode": "STOP"
+            },
+            "input_refs": [
+              "Read:result"
+            ],
+            "node_id": "Sum",
+            "node_type": "ANALYZE",
+            "output_refs": [
+              "Sum:result"
+            ],
+            "owner": "finance",
+            "parameters": {
+              "records": "Read:result"
+            }
+          },
+          {
+            "capability": "transfer.propose",
+            "condition": null,
+            "dependencies": [
+              "Sum"
+            ],
+            "failure_policy": {
+              "max_retries": 0,
+              "mode": "STOP"
+            },
+            "input_refs": [
+              "input:account",
+              "input:recipient",
+              "input:amount",
+              "input:currency"
+            ],
+            "node_id": "Pay",
+            "node_type": "PROPOSE_ACTION",
+            "output_refs": [
+              "Pay:result"
+            ],
+            "owner": "transaction",
+            "parameters": {
+              "account_id": "input:account",
+              "amount": "input:amount",
+              "currency": "input:currency",
+              "recipient_name": "input:recipient"
+            }
+          },
+          {
+            "capability": "graph.report",
+            "condition": null,
+            "dependencies": [
+              "Pay"
+            ],
+            "failure_policy": {
+              "max_retries": 0,
+              "mode": "STOP"
+            },
+            "input_refs": [],
+            "node_id": "Report",
+            "node_type": "REPORT",
+            "output_refs": [
+              "Report:result"
+            ],
+            "owner": "supervisor",
+            "parameters": {}
+          }
+        ],
+        "schema_version": 1
+      },
+      "steps": [
+        {
+          "dependencies": [],
+          "name": "READ",
+          "owner": "finance",
+          "status": "PENDING",
+          "step_id": "Read"
+        },
+        {
+          "dependencies": [
+            "Read"
+          ],
+          "name": "ANALYZE",
+          "owner": "finance",
+          "status": "PENDING",
+          "step_id": "Sum"
+        },
+        {
+          "dependencies": [
+            "Sum"
+          ],
+          "name": "PROPOSE_ACTION",
+          "owner": "transaction",
+          "status": "PENDING",
+          "step_id": "Pay"
+        },
+        {
+          "dependencies": [
+            "Pay"
+          ],
+          "name": "SCHEMA",
+          "owner": "schema",
+          "status": "PENDING",
+          "step_id": "PayXSCHEMA"
+        },
+        {
+          "dependencies": [
+            "PayXSCHEMA"
+          ],
+          "name": "CAPABILITY",
+          "owner": "schema",
+          "status": "PENDING",
+          "step_id": "PayXCAPABILITY"
+        },
+        {
+          "dependencies": [
+            "PayXCAPABILITY"
+          ],
+          "name": "POLICY",
+          "owner": "policy",
+          "status": "PENDING",
+          "step_id": "PayXPOLICY"
+        },
+        {
+          "dependencies": [
+            "PayXPOLICY"
+          ],
+          "name": "AUTHORIZATION",
+          "owner": "authorization",
+          "status": "PENDING",
+          "step_id": "PayXAUTHORIZATION"
+        },
+        {
+          "dependencies": [
+            "PayXAUTHORIZATION"
+          ],
+          "name": "CONTRACT",
+          "owner": "executor",
+          "status": "PENDING",
+          "step_id": "PayXCONTRACT"
+        },
+        {
+          "dependencies": [
+            "PayXCONTRACT"
+          ],
+          "name": "EXECUTE",
+          "owner": "executor",
+          "status": "PENDING",
+          "step_id": "PayXEXECUTE"
+        },
+        {
+          "dependencies": [
+            "PayXEXECUTE"
+          ],
+          "name": "VERIFY",
+          "owner": "verifier",
+          "status": "PENDING",
+          "step_id": "PayXVERIFY"
+        },
+        {
+          "dependencies": [
+            "PayXVERIFY"
+          ],
+          "name": "RECEIPT",
+          "owner": "receipts",
+          "status": "PENDING",
+          "step_id": "PayXRECEIPT"
+        },
+        {
+          "dependencies": [
+            "PayXRECEIPT"
+          ],
+          "name": "REPORT",
+          "owner": "supervisor",
+          "status": "PENDING",
+          "step_id": "Report"
+        }
+      ],
+      "authority": "DETERMINISTIC_COMPILER"
+    },
+    "audit_proof": {
+      "schema_version": 1,
+      "audit_event_id": "51e5daf1-557c-4210-88ce-45214cb42f29",
+      "event": {
+        "action_id": null,
+        "actor": "planner",
+        "audit_event_id": "51e5daf1-557c-4210-88ce-45214cb42f29",
+        "event_hash": "f2c7824cdccfc5d905f958608fe60c3e5cc8f649b4054d149be92eff4be46d8a",
+        "event_type": "GRAPH_INSTALLED",
+        "payload_hash": "2c439384b45c7f8015c8929d98e25250839b8b8d0728b05e60504b3b0a81d2cc",
+        "previous_hash": "ee60676e30e157affd651495e862f324d5b2313eacba8d6512a8831b51156a11",
+        "task_id": "b3b19e61-add3-467d-ab71-8754f0e797f1",
+        "timestamp": 1791573808.3558571
+      },
+      "event_hash": "f2c7824cdccfc5d905f958608fe60c3e5cc8f649b4054d149be92eff4be46d8a",
+      "event_sequence": 187,
+      "leaf_index": 186,
+      "inclusion_proof": [
+        {
+          "side": "RIGHT",
+          "hash": "7c99905f97be56e5cd8d17bb9ed07e82aa6c9f4ddc2d589cbd7d447834edc7a3"
+        },
+        {
+          "side": "LEFT",
+          "hash": "199cb275eb471797a760304340568e28a24b2e661937a24f3403ba5b83fb9a13"
+        },
+        {
+          "side": "RIGHT",
+          "hash": "2f5e50c142cc199a4f52861ecfacfae2d0740132da29431f66a0668d9b6d03b4"
+        },
+        {
+          "side": "LEFT",
+          "hash": "59b4a275c0ec3bb4e16fa8eae9ebee1ee37253094145406b5f91c25376a48219"
+        },
+        {
+          "side": "LEFT",
+          "hash": "157c707447241cc696f52313fbfa58f5e438eb6b3d072c21e9ec216b9432c7e7"
+        },
+        {
+          "side": "LEFT",
+          "hash": "86f147f6cb92c7ab54fe3d72771f536a429d4ceef3c5c9af09f4f20dd0e8f89b"
+        },
+        {
+          "side": "RIGHT",
+          "hash": "580cee74b0bb8a8f8a34f9ed8f4ef80f79873bda1aa714900134b4267093c0d5"
+        },
+        {
+          "side": "LEFT",
+          "hash": "be0f61a9cd2365f34932882c3f7263ad1b317c824aa8abb8bd2ad051c5a46d78"
+        }
+      ],
+      "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+      "checkpoint": {
+        "canonicalization": "TRUSTA-JSON-v1",
+        "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+        "checkpoint_signature": "MEUCIQD+C9GnXWXELYeV0msBOcoQJZYsMSkmuQhkhHUYNhZUqAIgNUuDYwQ/cwWr0Lol1GMdyhgaJw9vS2RPHDk+Lfi6XqA=",
+        "created_at": 1791573812352,
+        "first_event_sequence": 1,
+        "last_event_sequence": 251,
+        "leaf_count": 251,
+        "merkle_root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+        "previous_checkpoint_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "public_key_fingerprint": "9af197e1182c4322349a5a3b77f0a24cd1d61593df8043cd83e0206bd4c5b06c",
+        "schema_version": 1,
+        "signature_algorithm": "ECDSA-P256-SHA256",
+        "signer_identity": "urn:trusta:87810323-708b-4af9-9adb-172a96f54469:audit-checkpoint",
+        "signer_key_id": "key-9929f2c9-cd98-4da2-94cb-3008457aa00e",
+        "tree_algorithm": "RFC6962-SHA256-event-hash-v1"
+      },
+      "signature_status": "VALID",
+      "signer_key_status": "ACTIVE",
+      "signer_public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4HuMdQswnvwYmVDl0rRC6RfOwlS3\nFg7TvGLs7oxsvA/7u7v+/f4yb+eTZRAvndto1XHyb4cOA9KQ1OFU5P8ULA==\n-----END PUBLIC KEY-----\n",
+      "anchor": {
+        "adapter": null,
+        "anchor_ref": null,
+        "attempts": 0,
+        "checkpoint_hash": "08ddee95f5f768e97422ef0a7e7053ae6e70b120ac61b2fff501f37f5c4dcfbf",
+        "checkpoint_id": "bd2d2adc-1c85-4f12-9a06-2c60167807a0",
+        "error": null,
+        "root": "ae101ef63d6a1dbc99da7939e2a79d4bac8a79aebbe443d4fcc98c26538a4e15",
+        "schema_version": 1,
+        "status": "PENDING",
+        "updated_at": 1791573812353
+      },
+      "anchor_status": "PENDING",
+      "record_verified": true
+    }
+  },
+  "authority": "RUNTIME_ATTESTATION_NOT_BANK_AUTHORIZATION"
+}

@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\TRUSTA金融科技\benchmarks\final_live_evaluation.py", line 177, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "D:\TRUSTA金融科技\benchmarks\final_live_evaluation.py", line 147, in main
+    OUT.mkdir(exist_ok=True);rows=dataset();path=OUT/'Final_LLM_Dataset.json'
+                                  ~~~~~~~^^
+  File "D:\TRUSTA金融科技\benchmarks\final_live_evaluation.py", line 44, in dataset
+    assert len(rows)==23
+           ^^^^^^^^^^^^^
+AssertionError

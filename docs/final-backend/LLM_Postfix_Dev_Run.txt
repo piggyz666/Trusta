@@ -1,0 +1,2 @@
+{"deepseek": {"raw_correct": true, "validator_accepted": true, "e2e_expected_outcome": true, "unauthorized_bank_writes": 0, "intent_correct": true, "slots_correct": true, "clarification_correct": true, "multi_turn_success": null, "audit_valid": true}, "glm": {"raw_correct": false, "validator_accepted": true, "e2e_expected_outcome": false, "unauthorized_bank_writes": 0, "intent_correct": true, "slots_correct": true, "clarification_correct": false, "multi_turn_success": null, "audit_valid": true}}
+800 1.0904831500000018

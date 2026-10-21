@@ -1,0 +1,9 @@
+{
+  "requested_model": "glm-4.7-flash",
+  "input": "Return JSON only: {\"ok\":true}. This is synthetic non-financial test data.",
+  "request_limit": 1,
+  "max_output_tokens": 128,
+  "status": "FAILED",
+  "error_code": "LLM_INCOMPLETE_OUTPUT",
+  "latency_ms": 2593.0
+}

@@ -1,0 +1,54 @@
+test_approval_cannot_follow_changed_calldata (tests.test_sepolia_readiness.ReadinessTests.test_approval_cannot_follow_changed_calldata) ... ok
+test_base_fee_cap (tests.test_sepolia_readiness.ReadinessTests.test_base_fee_cap) ... ok
+test_broadcast_disabled_after_local_synthetic_sign (tests.test_sepolia_readiness.ReadinessTests.test_broadcast_disabled_after_local_synthetic_sign) ... ok
+test_broadcast_wrong_chain (tests.test_sepolia_readiness.ReadinessTests.test_broadcast_wrong_chain) ... ok
+test_commit_dynamic_quote_and_publisher (tests.test_sepolia_readiness.ReadinessTests.test_commit_dynamic_quote_and_publisher) ... ok
+test_commit_gas_cap (tests.test_sepolia_readiness.ReadinessTests.test_commit_gas_cap) ... ok
+test_deploy_gas_cap (tests.test_sepolia_readiness.ReadinessTests.test_deploy_gas_cap) ... ok
+test_encrypted_local_synthetic_keystore (tests.test_sepolia_readiness.ReadinessTests.test_encrypted_local_synthetic_keystore) ... ok
+test_no_signature_without_exact_approval (tests.test_sepolia_readiness.ReadinessTests.test_no_signature_without_exact_approval) ... ok
+test_nonce_change (tests.test_sepolia_readiness.ReadinessTests.test_nonce_change) ... ok
+test_priority_price_cap (tests.test_sepolia_readiness.ReadinessTests.test_priority_price_cap) ... ok
+test_quote_expiry (tests.test_sepolia_readiness.ReadinessTests.test_quote_expiry) ... ok
+test_raw_rpc_broadcast_and_remote_signing_rejected (tests.test_sepolia_readiness.ReadinessTests.test_raw_rpc_broadcast_and_remote_signing_rejected) ... ok
+test_raw_signed_nonce_tampering (tests.test_sepolia_readiness.ReadinessTests.test_raw_signed_nonce_tampering) ... ok
+test_residual_balance_protected (tests.test_sepolia_readiness.ReadinessTests.test_residual_balance_protected) ... ok
+test_signer_mismatch (tests.test_sepolia_readiness.ReadinessTests.test_signer_mismatch) ... ok
+test_signing_wrong_chain (tests.test_sepolia_readiness.ReadinessTests.test_signing_wrong_chain) ... ok
+test_synthetic_eip1559_signature_and_broadcast_binding (tests.test_sepolia_readiness.ReadinessTests.test_synthetic_eip1559_signature_and_broadcast_binding) ... ok
+test_total_fee_cap (tests.test_sepolia_readiness.ReadinessTests.test_total_fee_cap) ... ok
+test_unknown_chain_fails_closed (tests.test_sepolia_readiness.ReadinessTests.test_unknown_chain_fails_closed) ... ok
+test_unsigned_dynamic_quote (tests.test_sepolia_readiness.ReadinessTests.test_unsigned_dynamic_quote) ... ok
+test_wrong_chain_stops_before_fee_or_wallet (tests.test_sepolia_readiness.ReadinessTests.test_wrong_chain_stops_before_fee_or_wallet) ... ok
+test_wrong_code_pin (tests.test_sepolia_readiness.ReadinessTests.test_wrong_code_pin) ... ok
+test_wrong_commit_schema (tests.test_sepolia_readiness.ReadinessTests.test_wrong_commit_schema) ... ok
+test_wrong_deployment_artifact (tests.test_sepolia_readiness.ReadinessTests.test_wrong_deployment_artifact) ... ok
+test_wrong_publisher (tests.test_sepolia_readiness.ReadinessTests.test_wrong_publisher) ... ok
+test_complete_proof_local_fixture (tests.test_phase6_anchor.AnchorProofTests.test_complete_proof_local_fixture) ... ok
+test_confirmation_depth_and_reorg (tests.test_phase6_anchor.AnchorProofTests.test_confirmation_depth_and_reorg) ... ok
+test_event_mismatch_and_readback_mismatch (tests.test_phase6_anchor.AnchorProofTests.test_event_mismatch_and_readback_mismatch) ... ok
+test_hash_alone_cannot_verify (tests.test_phase6_anchor.AnchorProofTests.test_hash_alone_cannot_verify) ... ok
+test_production_chain_configuration_rejected (tests.test_phase6_anchor.AnchorProofTests.test_production_chain_configuration_rejected) ... ok
+test_wrong_chain (tests.test_phase6_anchor.AnchorProofTests.test_wrong_chain) ... ok
+test_wrong_destination_and_failed_receipt (tests.test_phase6_anchor.AnchorProofTests.test_wrong_destination_and_failed_receipt) ... ok
+test_missing_credential_never_sends (tests.test_phase6_anchor.AnchorSubmissionTests.test_missing_credential_never_sends) ... ok
+test_signed_transaction_durable_binding_and_idempotency (tests.test_phase6_anchor.AnchorSubmissionTests.test_signed_transaction_durable_binding_and_idempotency) ... ok
+test_actual_evm_commit_read_and_event (tests.test_phase6_anchor.ContractTests.test_actual_evm_commit_read_and_event) ... ok
+test_duplicate_idempotent_and_conflict_reverted (tests.test_phase6_anchor.ContractTests.test_duplicate_idempotent_and_conflict_reverted) ... ok
+test_nonpublisher_cannot_commit (tests.test_phase6_anchor.ContractTests.test_nonpublisher_cannot_commit) ... ok
+test_canonical_membership_and_event_block_binding_required (tests.test_targeted_anchor.IndependentAnchorTests.test_canonical_membership_and_event_block_binding_required) ... ok
+test_code_hash_and_dual_rpc_consistency (tests.test_targeted_anchor.IndependentAnchorTests.test_code_hash_and_dual_rpc_consistency) ... ok
+test_event_root_identifier_version_and_duplicate_rejected (tests.test_targeted_anchor.IndependentAnchorTests.test_event_root_identifier_version_and_duplicate_rejected) ... ok
+test_mainnet_and_no_code_rejected (tests.test_targeted_anchor.IndependentAnchorTests.test_mainnet_and_no_code_rejected) ... ok
+test_malformed_config_rejected (tests.test_targeted_anchor.IndependentAnchorTests.test_malformed_config_rejected) ... ok
+test_missing_transaction_failed_receipt_and_changed_calldata (tests.test_targeted_anchor.IndependentAnchorTests.test_missing_transaction_failed_receipt_and_changed_calldata) ... ok
+test_pinned_checkpoint_signature_required (tests.test_targeted_anchor.IndependentAnchorTests.test_pinned_checkpoint_signature_required) ... ok
+test_readback_confirmations_and_reorg_rejected (tests.test_targeted_anchor.IndependentAnchorTests.test_readback_confirmations_and_reorg_rejected) ... ok
+test_valid_public_evidence_needs_no_original_database_or_wallet (tests.test_targeted_anchor.IndependentAnchorTests.test_valid_public_evidence_needs_no_original_database_or_wallet) ... ok
+test_wrong_contract_publisher_or_nonzero_value_rejected (tests.test_targeted_anchor.IndependentAnchorTests.test_wrong_contract_publisher_or_nonzero_value_rejected) ... ok
+test_wrong_pinned_public_key_rejected (tests.test_targeted_anchor.IndependentAnchorTests.test_wrong_pinned_public_key_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 3.626s
+
+OK

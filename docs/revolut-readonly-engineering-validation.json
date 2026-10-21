@@ -1,0 +1,66 @@
+{
+  "verified_at": "2026-10-08T04:27:59.554231+00:00",
+  "core_read_only_integration_verified": true,
+  "external_financial_execution_verified": false,
+  "frozen_architecture_files_unchanged": {
+    "backend/runtime/taskgraph.py": true,
+    "backend/runtime/graph_runtime.py": true,
+    "backend/execution/gateway.py": true,
+    "backend/execution/contract.py": true,
+    "backend/policy.py": true,
+    "backend/authorization.py": true,
+    "backend/schema_validator.py": true,
+    "backend/security/registry.py": true
+  },
+  "all_original_test_sources_unchanged": true,
+  "original_test_source_count": 35,
+  "intentional_source_changes": [
+    "backend/bank_sdk/configuration.py",
+    "backend/bank_sdk/transport.py",
+    "backend/agents/finance.py",
+    "backend/runtime/scenarios.py",
+    "backend/service.py",
+    "backend/llm/explanations.py"
+  ],
+  "new_source_files": [
+    "backend/bank_sdk/revolut.py",
+    "backend/bank_sdk/revolut_auth.py",
+    "scripts/revolut_readonly_demo.py",
+    "tests/test_revolut_sdk.py",
+    "config/bank.revolut.example.toml"
+  ],
+  "live_demo": "revolut-readonly-validation.json",
+  "live_refresh_probe": "../data/revolut-refresh-probe.json",
+  "checkpoint_offline_signature_verification": true,
+  "checkpoint_tamper_rejected": true,
+  "full_regression_status": "PASSED",
+  "business_bank_writes": 0,
+  "llm_calls": 0,
+  "virtual_three_scenarios": {
+    "TRANSFER": "COMPLETED",
+    "BILL_ANALYSIS": "COMPLETED",
+    "WEALTH_RECOMMENDATION": "COMPLETED"
+  },
+  "virtual_read_only_balance_unchanged": true,
+  "virtual_tasks_survive_restart": true,
+  "virtual_audit_chain_valid": true,
+  "full_regression_count": 522,
+  "full_regression_seconds": 400.27,
+  "new_sdk_test_count": 24,
+  "bootstrap_test_count": 12,
+  "previous_core_test_count": 486,
+  "source_sha256": {
+    "backend/bank_sdk/configuration.py": "d9ee855106dd305933a458813acd5e60a8f3ba0849f0d171a4031ad084406248",
+    "backend/bank_sdk/transport.py": "231ff041e6f508b414ee6fc8dd767053bd9c3e9b80010b9ed52312c06d9d0eac",
+    "backend/agents/finance.py": "adb6817b6282d74d3991ffdb67f5190e72af1d0e280b995caf8a0900386f4d97",
+    "backend/runtime/scenarios.py": "cafa4b982ea1454a93247703a0a2b1462528457ebf67af7caabafa5d958d0bbb",
+    "backend/service.py": "2485d2eb5bb582aeb2030ca25e14adb48974dfd52348513569070f81783a10e9",
+    "backend/llm/explanations.py": "793937ad42900d94d2cfa4e580c105c0464bd781c4769261b0a0c86a00b8f048",
+    "backend/bank_sdk/revolut.py": "36fd67db2f2e4a74336adc445819f73fcbf3892d85e013f38d7e17b7ce5632a8",
+    "backend/bank_sdk/revolut_auth.py": "ecff9253de901b920f24dd6f73f81f8bf32afa24bfcdf6c1c9a4678f4eeec6f6",
+    "scripts/revolut_readonly_demo.py": "ce9e099d0d04892f014c66c2c3bcf640379561e6793bb057c8a618c1e61166bf",
+    "tests/test_revolut_sdk.py": "653528002cead80f35dda17983daf4564b4c61f0e334e7920741a0f977b5aaea",
+    "config/bank.revolut.example.toml": "bb41a4ef17f4f922df282e8fec338415c83fcd3c61027589b2e5decde4a5090a"
+  },
+  "test_log_sha256": "32032fe68a5f5f0f3db81303a07399035af6736618ba2a81844ced124608a5da"
+}

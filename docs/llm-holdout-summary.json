@@ -1,0 +1,146 @@
+{
+  "protocol": "compact_v2 -> original TaskGraph validator -> deterministic compiler -> bank grounding -> runtime",
+  "final_independent_dataset": true,
+  "first_pass_failures_retained": true,
+  "fixed_gold_no_final_retuning": true,
+  "gold_manual_synthetic_not_real_customer_distribution": true,
+  "providers": {
+    "deepseek": {
+      "classification": "REAL_EXTERNAL_VERIFIED",
+      "configured_model": "deepseek-chat",
+      "metrics": {
+        "all": {
+          "numerator": 93,
+          "denominator": 120,
+          "rate": 0.775,
+          "model_responses": 120
+        },
+        "valid": {
+          "numerator": 47,
+          "denominator": 72,
+          "rate": 0.6527777777777778,
+          "model_responses": 72
+        },
+        "missing": {
+          "numerator": 22,
+          "denominator": 24,
+          "rate": 0.9166666666666666,
+          "model_responses": 24
+        },
+        "adversarial": {
+          "numerator": 24,
+          "denominator": 24,
+          "rate": 1.0,
+          "model_responses": 24
+        },
+        "valid_false_rejection": {
+          "numerator": 20,
+          "denominator": 72
+        },
+        "latency_ms": {
+          "mean": 1258.3792,
+          "p50": 1197.8565,
+          "p95": 1839.176
+        }
+      },
+      "system_statuses": {
+        "COMPLETED": 26,
+        "BLOCKED": 68,
+        "WAITING_USER": 26
+      },
+      "task_outcomes": {
+        "COMPLETED": 26,
+        "BLOCKED": 68,
+        "PROPOSAL_WAITING_APPROVAL": 26
+      },
+      "valid_statuses": {
+        "COMPLETED": 26,
+        "BLOCKED": 20,
+        "WAITING_USER": 26
+      },
+      "failure_reasons": {
+        "REJECT_PLAN": 21,
+        "INVALID_MONTH": 1
+      },
+      "unauthorized_bank_writes": 0,
+      "expected_state_hit_not_raw_intent_accuracy": true,
+      "dataset_sha256": "4589e4288a78555d3bbec53658ea2ae3444c66cd7c0cc74f177a3e11e75c53f9",
+      "source_hashes": {
+        "backend/llm/compact_graph.py": "74643e2672486798cb4e007d0ea0e5b2f323c57a262e141aed287a8dfc5c9714",
+        "backend/llm/graph_proposal.py": "23bc736f4e0af2311b474b7a26cb00c7a8fb906519aa0bd40b41c18de8981874",
+        "backend/runtime/taskgraph.py": "f77c831cb418b06d5a658ebfeb9911581949388f27b456b2481b625303688a78",
+        "benchmarks/hardening_holdout.py": "50c4adf5df4eec6cc0a6e5dff2ae51e35aaba720d8f02d63c7ae9c44617d5f6c"
+      },
+      "all_case_ids_retained": true,
+      "cost_usd": null
+    },
+    "gemini": {
+      "classification": "REAL_EXTERNAL_VERIFIED",
+      "configured_model": "gemini-3.1-flash-lite",
+      "metrics": {
+        "all": {
+          "numerator": 96,
+          "denominator": 120,
+          "rate": 0.8,
+          "model_responses": 120
+        },
+        "valid": {
+          "numerator": 58,
+          "denominator": 72,
+          "rate": 0.8055555555555556,
+          "model_responses": 72
+        },
+        "missing": {
+          "numerator": 14,
+          "denominator": 24,
+          "rate": 0.5833333333333334,
+          "model_responses": 24
+        },
+        "adversarial": {
+          "numerator": 24,
+          "denominator": 24,
+          "rate": 1.0,
+          "model_responses": 24
+        },
+        "valid_false_rejection": {
+          "numerator": 7,
+          "denominator": 72
+        },
+        "latency_ms": {
+          "mean": 2295.178525,
+          "p50": 2355.959,
+          "p95": 2916.984
+        }
+      },
+      "system_statuses": {
+        "COMPLETED": 36,
+        "BLOCKED": 54,
+        "WAITING_USER": 30
+      },
+      "task_outcomes": {
+        "COMPLETED": 36,
+        "BLOCKED": 54,
+        "PROPOSAL_WAITING_APPROVAL": 30
+      },
+      "valid_statuses": {
+        "COMPLETED": 35,
+        "WAITING_USER": 30,
+        "BLOCKED": 7
+      },
+      "failure_reasons": {
+        "REJECT_PLAN": 16
+      },
+      "unauthorized_bank_writes": 0,
+      "expected_state_hit_not_raw_intent_accuracy": true,
+      "dataset_sha256": "4589e4288a78555d3bbec53658ea2ae3444c66cd7c0cc74f177a3e11e75c53f9",
+      "source_hashes": {
+        "backend/llm/compact_graph.py": "74643e2672486798cb4e007d0ea0e5b2f323c57a262e141aed287a8dfc5c9714",
+        "backend/llm/graph_proposal.py": "23bc736f4e0af2311b474b7a26cb00c7a8fb906519aa0bd40b41c18de8981874",
+        "backend/runtime/taskgraph.py": "f77c831cb418b06d5a658ebfeb9911581949388f27b456b2481b625303688a78",
+        "benchmarks/hardening_holdout.py": "50c4adf5df4eec6cc0a6e5dff2ae51e35aaba720d8f02d63c7ae9c44617d5f6c"
+      },
+      "all_case_ids_retained": true,
+      "cost_usd": null
+    }
+  }
+}

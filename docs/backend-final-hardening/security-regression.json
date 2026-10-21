@@ -1,0 +1,34 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "measured_at": "2026-10-10T09:49:52.384579+00:00",
+  "baseline_tests": 714,
+  "full_tests": 737,
+  "full_passed": true,
+  "skipped": 0,
+  "banking_security": {
+    "unauthorized_execution_rate": {
+      "numerator": 0,
+      "denominator": 45,
+      "rate": 0.0
+    },
+    "attack_detection_rate": {
+      "numerator": 45,
+      "denominator": 45
+    }
+  },
+  "agent_attacks_and_recovery_tests": 31,
+  "agent_passed": true,
+  "new_targeted_tests": 23,
+  "changed_surface_tests": 60,
+  "new_attacks": "Selection replay/race across Core instances, interrupted proposal creation, identity, context/graph tamper, expiry, resource mutation, currency mismatch, conditional authority separation",
+  "old_test_sources_unchanged": true,
+  "frozen_security_sources_unchanged": true,
+  "bank_calls_remote_this_run": 0,
+  "llm_calls_remote_this_run": 0,
+  "real_wallet_signatures": 0,
+  "chain_broadcasts": 0,
+  "limits": [
+    "Controlled regression/attack harness, not an external penetration audit",
+    "Finance physical isolation only, not six-Agent/HSM isolation"
+  ]
+}

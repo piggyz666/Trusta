@@ -1,0 +1,2 @@
+# Test tooling only; production dependency sets remain unchanged.
+pytest==8.4.2

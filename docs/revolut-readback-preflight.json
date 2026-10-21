@@ -1,0 +1,9 @@
+{
+  "status": "OFFICIAL_READBACK_ENDPOINTS_VERIFIED",
+  "individual_transaction_identifier_matched": true,
+  "transaction_leg_count": 1,
+  "existing_selected_payee_count": 1,
+  "counterparty_endpoint": "GET /counterparty/{id}",
+  "transaction_endpoint": "GET /transaction/{id}",
+  "payment_post_calls": 0
+}

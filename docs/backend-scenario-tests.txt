@@ -1,0 +1,16 @@
+test_annual_conversation_fields (tests.test_backend_scenarios.BackendScenarioTests.test_annual_conversation_fields) ... ok
+test_annual_evidence_rejects_duplicates_wrong_month_and_currency (tests.test_backend_scenarios.BackendScenarioTests.test_annual_evidence_rejects_duplicates_wrong_month_and_currency) ... ok
+test_annual_report_grounded_and_readonly (tests.test_backend_scenarios.BackendScenarioTests.test_annual_report_grounded_and_readonly) ... ok
+test_application_has_no_bank_change_until_authorized (tests.test_backend_scenarios.BackendScenarioTests.test_application_has_no_bank_change_until_authorized) ... ok
+test_cross_event_and_interruption_do_not_retry (tests.test_backend_scenarios.BackendScenarioTests.test_cross_event_and_interruption_do_not_retry) ... ok
+test_event_state_tamper_fails_closed (tests.test_backend_scenarios.BackendScenarioTests.test_event_state_tamper_fails_closed) ... ok
+test_events_create_proposal_once_never_auto_pay (tests.test_backend_scenarios.BackendScenarioTests.test_events_create_proposal_once_never_auto_pay) ... ok
+test_events_ownership_cancel_idempotency_and_bad_parameters (tests.test_backend_scenarios.BackendScenarioTests.test_events_ownership_cancel_idempotency_and_bad_parameters) ... ok
+test_frozen_card_can_report_lost_and_owner_isolation (tests.test_backend_scenarios.BackendScenarioTests.test_frozen_card_can_report_lost_and_owner_isolation) ... ok
+test_loss_terminal_state_and_strong_auth (tests.test_backend_scenarios.BackendScenarioTests.test_loss_terminal_state_and_strong_auth) ... ok
+test_reminders_idempotent_restart_cancel_consistent (tests.test_backend_scenarios.BackendScenarioTests.test_reminders_idempotent_restart_cancel_consistent) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 14.219s
+
+OK

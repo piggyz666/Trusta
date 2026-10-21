@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "communication_version": 3,
+  "algorithm": "ECDSA-P256-SHA256",
+  "TRANSFER": {
+    "request": "给张三转2000元",
+    "status": "COMPLETED",
+    "settlement": "SETTLED",
+    "verification": "VERIFIED",
+    "amount_cents": 200000,
+    "balance_cents": 800000,
+    "transaction_count": 1,
+    "action_hash_unchanged": true,
+    "receipt_id": "28f1e109-151d-4d08-ac28-5b560a3e7438",
+    "bank_transaction_id": "07476435-034f-48fe-a8dd-fbdac9a7adec"
+  },
+  "BILL_ANALYSIS": {
+    "request": "分析2026-09消费",
+    "status": "COMPLETED",
+    "net_spend_cents": 542500,
+    "anomaly_count": 3
+  },
+  "WEALTH_RECOMMENDATION": {
+    "request": "推荐适合我的理财产品",
+    "status": "COMPLETED",
+    "bank_risk_level": 2,
+    "product_ids": [
+      "sandbox-r1",
+      "sandbox-r2"
+    ],
+    "financial_write": false
+  },
+  "restart": {
+    "registry_preserved": true,
+    "key_rotation_preserved": true,
+    "revocation_preserved": true,
+    "nonce_replay_blocked": true,
+    "checkpoint_proof_verified": true,
+    "receipt_preserved": true
+  },
+  "independent_proof_verification": true,
+  "receipt_tampering_detected": true,
+  "anchor_status": "CONFIRMED",
+  "anchor_verified_locally": true,
+  "blockchain_externally_verified": false,
+  "did_implemented": false,
+  "zkp_implemented": false,
+  "read_only_balance_unchanged": true,
+  "audit_chain_valid": true
+}

@@ -1,0 +1,17 @@
+provider = "revolut"
+environment = "sandbox"
+customer_id = "demo"
+client_id = "YOUR_REGISTERED_CLIENT_ID"
+issuer = "trusta.localhost"
+key_path = "C:/YOUR_PRIVATE_FOLDER/privatecert.pem"
+certificate_path = "revolut-sandbox/publiccert.cer"
+token_path = "C:/YOUR_PRIVATE_FOLDER/oauth-payment-tokens.local.json"
+transfer_profile = true
+writes_enabled = false
+# Enable only after bank READ,PAY consent and explicit test routing selection.
+source_accounts = []
+# A destination is the authoritative counterparty UUID + ':' + receiver account UUID.
+payees = []
+maximum_amount = 100 # At most 1.00 in the source currency; only GBP/GB or EUR/DE, no FX/scheduling.
+page_size = 1000
+max_pages = 20

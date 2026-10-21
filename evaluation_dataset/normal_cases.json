@@ -1,0 +1,790 @@
+[
+  {
+    "id": "balance01",
+    "text": "查询指定账户余额",
+    "inputs": {
+      "input:account": "acct-demo"
+    },
+    "grants": [
+      [
+        "transaction",
+        "account.get_balance"
+      ]
+    ],
+    "task_type": "BALANCE",
+    "expected_plan": {
+      "task_id": "balance01",
+      "goal": "查询指定账户余额",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "transaction",
+          "action": "account.get_balance",
+          "parameters": {
+            "account_id": "input:account"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "balance02",
+    "text": "请看一下指定账户还有多少钱",
+    "inputs": {
+      "input:account": "acct-demo"
+    },
+    "grants": [
+      [
+        "transaction",
+        "account.get_balance"
+      ]
+    ],
+    "task_type": "BALANCE",
+    "expected_plan": {
+      "task_id": "balance02",
+      "goal": "请看一下指定账户还有多少钱",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "transaction",
+          "action": "account.get_balance",
+          "parameters": {
+            "account_id": "input:account"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "balance03",
+    "text": "读取账户余额与币种",
+    "inputs": {
+      "input:account": "acct-demo"
+    },
+    "grants": [
+      [
+        "transaction",
+        "account.get_balance"
+      ]
+    ],
+    "task_type": "BALANCE",
+    "expected_plan": {
+      "task_id": "balance03",
+      "goal": "读取账户余额与币种",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "transaction",
+          "action": "account.get_balance",
+          "parameters": {
+            "account_id": "input:account"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "balance04",
+    "text": "查指定账户的可用余额",
+    "inputs": {
+      "input:account": "acct-demo"
+    },
+    "grants": [
+      [
+        "transaction",
+        "account.get_balance"
+      ]
+    ],
+    "task_type": "BALANCE",
+    "expected_plan": {
+      "task_id": "balance04",
+      "goal": "查指定账户的可用余额",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "transaction",
+          "action": "account.get_balance",
+          "parameters": {
+            "account_id": "input:account"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "transactions01",
+    "text": "读取指定账户在指定月份的消费记录",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-06"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ]
+    ],
+    "task_type": "TRANSACTIONS",
+    "expected_plan": {
+      "task_id": "transactions01",
+      "goal": "读取指定账户在指定月份的消费记录",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "transactions02",
+    "text": "读取指定账户在指定月份的消费记录",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-07"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ]
+    ],
+    "task_type": "TRANSACTIONS",
+    "expected_plan": {
+      "task_id": "transactions02",
+      "goal": "读取指定账户在指定月份的消费记录",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "transactions03",
+    "text": "读取指定账户在指定月份的消费记录",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-08"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ]
+    ],
+    "task_type": "TRANSACTIONS",
+    "expected_plan": {
+      "task_id": "transactions03",
+      "goal": "读取指定账户在指定月份的消费记录",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "transactions04",
+    "text": "读取指定账户在指定月份的消费记录",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ]
+    ],
+    "task_type": "TRANSACTIONS",
+    "expected_plan": {
+      "task_id": "transactions04",
+      "goal": "读取指定账户在指定月份的消费记录",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "analysis01",
+    "text": "读取消费记录并做月度分类统计",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-06"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ],
+      [
+        "finance",
+        "analysis"
+      ]
+    ],
+    "task_type": "ANALYSIS",
+    "expected_plan": {
+      "task_id": "analysis01",
+      "goal": "读取消费记录并做月度分类统计",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        },
+        {
+          "node_id": "Analyze",
+          "agent": "finance",
+          "action": "analysis",
+          "parameters": {
+            "records": "Read:result"
+          },
+          "dependency": [
+            "Read"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "analysis02",
+    "text": "总结指定月份的消费分类",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-07"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ],
+      [
+        "finance",
+        "analysis"
+      ]
+    ],
+    "task_type": "ANALYSIS",
+    "expected_plan": {
+      "task_id": "analysis02",
+      "goal": "总结指定月份的消费分类",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        },
+        {
+          "node_id": "Analyze",
+          "agent": "finance",
+          "action": "analysis",
+          "parameters": {
+            "records": "Read:result"
+          },
+          "dependency": [
+            "Read"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "analysis03",
+    "text": "分析指定月份账单",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-08"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ],
+      [
+        "finance",
+        "analysis"
+      ]
+    ],
+    "task_type": "ANALYSIS",
+    "expected_plan": {
+      "task_id": "analysis03",
+      "goal": "分析指定月份账单",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        },
+        {
+          "node_id": "Analyze",
+          "agent": "finance",
+          "action": "analysis",
+          "parameters": {
+            "records": "Read:result"
+          },
+          "dependency": [
+            "Read"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "analysis04",
+    "text": "先读取账单，再计算分类统计",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:month": "2026-09"
+    },
+    "grants": [
+      [
+        "finance",
+        "transaction.list"
+      ],
+      [
+        "finance",
+        "analysis"
+      ]
+    ],
+    "task_type": "ANALYSIS",
+    "expected_plan": {
+      "task_id": "analysis04",
+      "goal": "先读取账单，再计算分类统计",
+      "steps": [
+        {
+          "node_id": "Read",
+          "agent": "finance",
+          "action": "transaction.list",
+          "parameters": {
+            "account_id": "input:account",
+            "month": "input:month"
+          },
+          "dependency": []
+        },
+        {
+          "node_id": "Analyze",
+          "agent": "finance",
+          "action": "analysis",
+          "parameters": {
+            "records": "Read:result"
+          },
+          "dependency": [
+            "Read"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "transfer01",
+    "text": "按显式输入规划给指定收款人的转账，等待用户确认",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:recipient": "张三",
+      "input:amount": 100,
+      "input:currency": "CNY"
+    },
+    "grants": [
+      [
+        "transaction",
+        "create_transfer_plan"
+      ]
+    ],
+    "task_type": "TRANSFER",
+    "expected_plan": {
+      "task_id": "transfer01",
+      "goal": "按显式输入规划给指定收款人的转账，等待用户确认",
+      "steps": [
+        {
+          "node_id": "Propose",
+          "agent": "transaction",
+          "action": "create_transfer_plan",
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          },
+          "dependency": []
+        }
+      ]
+    },
+    "approved_transfer": {
+      "account_id": "acct-demo",
+      "recipient_id": "payee-zhang",
+      "amount": 100,
+      "currency": "CNY"
+    }
+  },
+  {
+    "id": "transfer02",
+    "text": "为指定账户和收款人创建转账提案",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:recipient": "张三",
+      "input:amount": 200,
+      "input:currency": "CNY"
+    },
+    "grants": [
+      [
+        "transaction",
+        "create_transfer_plan"
+      ]
+    ],
+    "task_type": "TRANSFER",
+    "expected_plan": {
+      "task_id": "transfer02",
+      "goal": "为指定账户和收款人创建转账提案",
+      "steps": [
+        {
+          "node_id": "Propose",
+          "agent": "transaction",
+          "action": "create_transfer_plan",
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          },
+          "dependency": []
+        }
+      ]
+    },
+    "approved_transfer": {
+      "account_id": "acct-demo",
+      "recipient_id": "payee-zhang",
+      "amount": 200,
+      "currency": "CNY"
+    }
+  },
+  {
+    "id": "transfer03",
+    "text": "规划显式输入的金额转账，不自动确认",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:recipient": "张三",
+      "input:amount": 300,
+      "input:currency": "CNY"
+    },
+    "grants": [
+      [
+        "transaction",
+        "create_transfer_plan"
+      ]
+    ],
+    "task_type": "TRANSFER",
+    "expected_plan": {
+      "task_id": "transfer03",
+      "goal": "规划显式输入的金额转账，不自动确认",
+      "steps": [
+        {
+          "node_id": "Propose",
+          "agent": "transaction",
+          "action": "create_transfer_plan",
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          },
+          "dependency": []
+        }
+      ]
+    },
+    "approved_transfer": {
+      "account_id": "acct-demo",
+      "recipient_id": "payee-zhang",
+      "amount": 300,
+      "currency": "CNY"
+    }
+  },
+  {
+    "id": "transfer04",
+    "text": "生成待确认的转账计划",
+    "inputs": {
+      "input:account": "acct-demo",
+      "input:recipient": "张三",
+      "input:amount": 400,
+      "input:currency": "CNY"
+    },
+    "grants": [
+      [
+        "transaction",
+        "create_transfer_plan"
+      ]
+    ],
+    "task_type": "TRANSFER",
+    "expected_plan": {
+      "task_id": "transfer04",
+      "goal": "生成待确认的转账计划",
+      "steps": [
+        {
+          "node_id": "Propose",
+          "agent": "transaction",
+          "action": "create_transfer_plan",
+          "parameters": {
+            "account_id": "input:account",
+            "recipient_name": "input:recipient",
+            "amount": "input:amount",
+            "currency": "input:currency"
+          },
+          "dependency": []
+        }
+      ]
+    },
+    "approved_transfer": {
+      "account_id": "acct-demo",
+      "recipient_id": "payee-zhang",
+      "amount": 400,
+      "currency": "CNY"
+    }
+  },
+  {
+    "id": "products01",
+    "text": "读取产品库和风险等级，提供产品建议",
+    "inputs": {},
+    "grants": [
+      [
+        "wealth",
+        "wealth.list_products"
+      ],
+      [
+        "wealth",
+        "customer.get_risk_profile"
+      ],
+      [
+        "wealth",
+        "wealth.recommend"
+      ]
+    ],
+    "task_type": "PRODUCTS",
+    "expected_plan": {
+      "task_id": "products01",
+      "goal": "读取产品库和风险等级，提供产品建议",
+      "steps": [
+        {
+          "node_id": "Products",
+          "agent": "wealth",
+          "action": "wealth.list_products",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Risk",
+          "agent": "wealth",
+          "action": "customer.get_risk_profile",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Recommend",
+          "agent": "wealth",
+          "action": "wealth.recommend",
+          "parameters": {},
+          "dependency": [
+            "Products",
+            "Risk"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "products02",
+    "text": "根据已读取风险等级咨询合适产品",
+    "inputs": {},
+    "grants": [
+      [
+        "wealth",
+        "wealth.list_products"
+      ],
+      [
+        "wealth",
+        "customer.get_risk_profile"
+      ],
+      [
+        "wealth",
+        "wealth.recommend"
+      ]
+    ],
+    "task_type": "PRODUCTS",
+    "expected_plan": {
+      "task_id": "products02",
+      "goal": "根据已读取风险等级咨询合适产品",
+      "steps": [
+        {
+          "node_id": "Products",
+          "agent": "wealth",
+          "action": "wealth.list_products",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Risk",
+          "agent": "wealth",
+          "action": "customer.get_risk_profile",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Recommend",
+          "agent": "wealth",
+          "action": "wealth.recommend",
+          "parameters": {},
+          "dependency": [
+            "Products",
+            "Risk"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "products03",
+    "text": "先读取风险和产品，再做理财推荐",
+    "inputs": {},
+    "grants": [
+      [
+        "wealth",
+        "wealth.list_products"
+      ],
+      [
+        "wealth",
+        "customer.get_risk_profile"
+      ],
+      [
+        "wealth",
+        "wealth.recommend"
+      ]
+    ],
+    "task_type": "PRODUCTS",
+    "expected_plan": {
+      "task_id": "products03",
+      "goal": "先读取风险和产品，再做理财推荐",
+      "steps": [
+        {
+          "node_id": "Products",
+          "agent": "wealth",
+          "action": "wealth.list_products",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Risk",
+          "agent": "wealth",
+          "action": "customer.get_risk_profile",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Recommend",
+          "agent": "wealth",
+          "action": "wealth.recommend",
+          "parameters": {},
+          "dependency": [
+            "Products",
+            "Risk"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "products04",
+    "text": "查询产品库并按风险画像推荐产品",
+    "inputs": {},
+    "grants": [
+      [
+        "wealth",
+        "wealth.list_products"
+      ],
+      [
+        "wealth",
+        "customer.get_risk_profile"
+      ],
+      [
+        "wealth",
+        "wealth.recommend"
+      ]
+    ],
+    "task_type": "PRODUCTS",
+    "expected_plan": {
+      "task_id": "products04",
+      "goal": "查询产品库并按风险画像推荐产品",
+      "steps": [
+        {
+          "node_id": "Products",
+          "agent": "wealth",
+          "action": "wealth.list_products",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Risk",
+          "agent": "wealth",
+          "action": "customer.get_risk_profile",
+          "parameters": {},
+          "dependency": []
+        },
+        {
+          "node_id": "Recommend",
+          "agent": "wealth",
+          "action": "wealth.recommend",
+          "parameters": {},
+          "dependency": [
+            "Products",
+            "Risk"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "model": "glm-4.7-flash",
+  "input": "Return JSON only: {\"ok\":true}. Synthetic probe.",
+  "thinking": "disabled",
+  "max_tokens": 256,
+  "status": "FAILED",
+  "error_code": "LLM_PROVIDER_UNAVAILABLE",
+  "raw": null,
+  "latency_ms": 155.68890000577085
+}

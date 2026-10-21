@@ -1,0 +1,56 @@
+{
+  "inference": "OFFLINE_FIXTURES_ONLY; no real LLM quality claim",
+  "TRANSFER": {
+    "status": "COMPLETED",
+    "verification": "VERIFIED",
+    "approved_action_unchanged_after_provider_switch": true,
+    "transaction_count": 1,
+    "balance_cents": 800000
+  },
+  "BILL_ANALYSIS": {
+    "status": "COMPLETED",
+    "net_spend_cents": 542500
+  },
+  "WEALTH_RECOMMENDATION": {
+    "status": "COMPLETED",
+    "bank_risk_level": 2,
+    "product_ids": [
+      "sandbox-r1",
+      "sandbox-r2"
+    ]
+  },
+  "shadow_calls": [
+    {
+      "purpose": "intent_normalization",
+      "provider": "offline-a",
+      "status": "SUCCEEDED",
+      "candidate_status": "ATTACHED",
+      "config_version": "demo-offline-a"
+    },
+    {
+      "purpose": "finance_explanation",
+      "provider": "offline-a",
+      "status": "SUCCEEDED",
+      "candidate_status": "ATTACHED",
+      "config_version": "demo-offline-a"
+    },
+    {
+      "purpose": "wealth_explanation",
+      "provider": "offline-a",
+      "status": "SUCCEEDED",
+      "candidate_status": "ATTACHED",
+      "config_version": "demo-offline-a"
+    },
+    {
+      "purpose": "intent_normalization",
+      "provider": "offline-b",
+      "status": "SUCCEEDED",
+      "candidate_status": "ATTACHED",
+      "config_version": "demo-offline-b"
+    }
+  ],
+  "read_only_balance_unchanged": true,
+  "audit_chain_valid": true,
+  "tasks_survive_restart": true,
+  "ledger_balanced": true
+}

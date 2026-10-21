@@ -1,0 +1,19 @@
+# Disabled example; contains no credentials. Review policy before enabling.
+# Chat Completions family only: select the EXACT operator-verified endpoint.
+provider: openai_compatible
+model: operator-selected-model
+endpoint: https://llm.example.invalid/v1/chat/completions
+api_key: ${TRUSTA_MODEL_API_KEY}
+token_parameter: max_completion_tokens
+# Use max_tokens for compatible endpoints that require the legacy parameter.
+timeout: 45
+locality: external
+max_sensitivity: public
+data_policy_reviewed: false
+json_output: true
+# Only set structured_outputs instead of json_output when the endpoint actually
+# supports the requested native JSON Schema dialect. Local validation always runs.
+gateway:
+  mode: disabled
+  max_output_tokens: 2048  # bounded range 1..4096, includes reasoning when billed
+  max_fallbacks: 0

@@ -1,0 +1,7 @@
+{"status": "LOCAL_CONFIRMATION_REJECTED", "reason": "ORIGIN_MISMATCH", "bank_requests_made": false}
+test_http_rejects_foreign_browser_host_and_post_origin (tests.test_revolut_sandbox_connect.RevolutBootstrapTests.test_http_rejects_foreign_browser_host_and_post_origin) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.561s
+
+OK

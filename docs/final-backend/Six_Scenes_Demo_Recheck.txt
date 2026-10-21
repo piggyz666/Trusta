@@ -1,0 +1,1 @@
+{"passed": true, "scenario_count": 6, "proof_count": 11, "time_scenario": {"status": "COMPLETED", "persistent_job_id": "81d98b8e-df84-4e21-a899-dac17c8581b2", "restart_before_due": true, "cash_cents": 990000, "transaction_count": 1, "duplicate_tick_writes": 0, "due_policy_authorization_state_rechecked": true}}

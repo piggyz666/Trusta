@@ -1,0 +1,15 @@
+test_separate_service_instances_cannot_double_consume_selection (tests.test_backend_final_hardening.BackendFinalHardeningTests.test_separate_service_instances_cannot_double_consume_selection) ... FAIL
+
+======================================================================
+FAIL: test_separate_service_instances_cannot_double_consume_selection (tests.test_backend_final_hardening.BackendFinalHardeningTests.test_separate_service_instances_cannot_double_consume_selection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\TRUSTA���ڿƼ�\tests\test_backend_final_hardening.py", line 183, in test_separate_service_instances_cannot_double_consume_selection
+    self.assertEqual(sum(r is not None for r in results),1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 1
+
+----------------------------------------------------------------------
+Ran 1 test in 3.242s
+
+FAILED (failures=1)

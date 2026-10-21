@@ -1,0 +1,1 @@
+{"aa": "COMPLETED", "graph": "COMPLETED", "budget": {"month": "2026-11", "base_budget": 300000, "monthly_saving": 1999, "planned_budget": 301999, "receipt_ref": "09881864-de4d-48cd-83b6-04b96404bf93", "financial_write": false, "guaranteed_return": false}}

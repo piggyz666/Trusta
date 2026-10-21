@@ -1,0 +1,28 @@
+{
+  "status": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+  "credential_presence": {
+    "ANCHOR_RPC_URL": false,
+    "ANCHOR_VERIFY_RPC_URL": false,
+    "ANCHOR_CONTRACT_ADDRESS": false,
+    "ANCHOR_WALLET_PRIVATE_KEY": false
+  },
+  "worker_external_enabled": false,
+  "network": "Sepolia",
+  "expected_chain_id": 11155111,
+  "chain_id_verified": false,
+  "wallet_balance_verified": false,
+  "contract_verified": false,
+  "external_blockchain_verified": false,
+  "read_only_probe_requested": false,
+  "blockers": [
+    "ANCHOR_RPC_URL is not configured locally",
+    "ANCHOR_VERIFY_RPC_URL is not configured locally",
+    "ANCHOR_CONTRACT_ADDRESS is not configured locally",
+    "ANCHOR_WALLET_PRIVATE_KEY is not configured locally",
+    "Async Anchor Worker external adapter is disabled"
+  ],
+  "broadcasts": 0,
+  "deployments": 0,
+  "test_eth_spent": 0,
+  "next_action": "Configure user-controlled credentials locally; approve a specific deployment/commit before any broadcast."
+}

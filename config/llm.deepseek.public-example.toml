@@ -1,0 +1,23 @@
+# Public synthetic data only. Restricted customer graph requests are ineligible.
+# Set DEEPSEEK_API_KEY outside this file; choose a model available to your account.
+[gateway]
+mode = "shadow"
+version = "phase6-deepseek-example"
+timeout_seconds = 30
+max_output_tokens = 4096
+max_fallbacks = 0
+
+[[providers]]
+name = "deepseek-public"
+kind = "openai_compatible"
+model = "REPLACE_WITH_DEPLOYMENT_MODEL"
+endpoint = "https://api.deepseek.com/chat/completions"
+api_key_env = "DEEPSEEK_API_KEY"
+locality = "external"
+max_sensitivity = "public"
+data_policy_reviewed = false
+structured_outputs = false
+json_output = true
+
+[routes]
+plan_proposal = ["deepseek-public"]

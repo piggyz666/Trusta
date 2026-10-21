@@ -1,0 +1,22 @@
+[gateway]
+mode = "shadow"
+version = "final-backend-glm-public"
+graph_format = "compact_v2"
+max_output_tokens = 4096
+timeout_seconds = 30
+max_fallbacks = 0
+
+[[providers]]
+name = "glm-public"
+kind = "openai_compatible"
+model = "glm-4-flash-250414"
+endpoint = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+api_key_env = "GLM_API_KEY"
+locality = "external"
+max_sensitivity = "public"
+data_policy_reviewed = false
+json_output = true
+
+[routes]
+plan_proposal = ["glm-public"]
+conversation_intent = ["glm-public"]

@@ -1,0 +1,9 @@
+# Optional external audit integrations and local contract verification.
+-r requirements.txt
+eth-account>=0.13,<0.14
+py-solc-x>=2,<3
+eth-tester[py-evm]>=0.13.0b1,<0.14
+# Pin vulnerable transitive HTTP dependencies used by py-solc-x.
+requests==2.33.0
+urllib3==2.8.0
+idna==3.15

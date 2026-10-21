@@ -1,0 +1,1112 @@
+{
+  "schema_version": 1,
+  "benchmark": "PROVIDER_EVALUATION",
+  "provider": "offline-eval",
+  "provider_kind": "mock",
+  "evaluation_mode": "OFFLINE_FIXTURES",
+  "real_model_experiment_verified": false,
+  "bank_tools_available": false,
+  "passed": true,
+  "metrics": {
+    "intent": {
+      "numerator": 15,
+      "denominator": 15,
+      "rate": 1.0
+    },
+    "parameters": {
+      "numerator": 13,
+      "denominator": 15,
+      "rate": 0.8666666666666667
+    },
+    "clarification": {
+      "numerator": 15,
+      "denominator": 15,
+      "rate": 1.0
+    },
+    "plan": {
+      "numerator": 15,
+      "denominator": 15,
+      "rate": 1.0
+    },
+    "guard": {
+      "numerator": 15,
+      "denominator": 15,
+      "rate": 1.0
+    }
+  },
+  "cases": [
+    {
+      "case_id": "intent-transfer",
+      "raw_case": {
+        "id": "intent-transfer",
+        "text": "给张三转100元",
+        "expected": {
+          "task_type": "TRANSFER",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "recipient_name",
+              "value": "张三"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "TRANSFER",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "amount",
+            "value": "10000"
+          },
+          {
+            "name": "recipient_name",
+            "value": "张三"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "transaction"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ],
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "recipient_name",
+              "value": "张三"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "TRANSFER"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 1.7671000096015632
+    },
+    {
+      "case_id": "extract-phone",
+      "raw_case": {
+        "id": "extract-phone",
+        "text": "给13800000001转100元",
+        "expected": {
+          "task_type": "TRANSFER",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "recipient_name",
+              "value": "13800000001"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "TRANSFER",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "amount",
+            "value": "10000"
+          },
+          {
+            "name": "recipient_name",
+            "value": "13800000001"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "transaction"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ],
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "recipient_name",
+              "value": "13800000001"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "TRANSFER"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.1734999823383987
+    },
+    {
+      "case_id": "clarification",
+      "raw_case": {
+        "id": "clarification",
+        "text": "给张三转账",
+        "expected": {
+          "task_type": "TRANSFER",
+          "needs_clarification": true,
+          "fields": [],
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "TRANSFER",
+        "needs_clarification": true,
+        "fields": [],
+        "agents": [
+          "supervisor",
+          "planner",
+          "transaction"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ],
+          "fields": [],
+          "needs_clarification": true,
+          "task_type": "TRANSFER"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.09819999104365706
+    },
+    {
+      "case_id": "ambiguous-transfer",
+      "raw_case": {
+        "id": "ambiguous-transfer",
+        "text": "给王五转100元",
+        "authority_ambiguous": true,
+        "expected": {
+          "task_type": "TRANSFER",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "recipient_name",
+              "value": "王五"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "TRANSFER",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "amount",
+            "value": "10000"
+          },
+          {
+            "name": "recipient_name",
+            "value": "王五"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "transaction"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ],
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "recipient_name",
+              "value": "王五"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "TRANSFER"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.09589997353032231
+    },
+    {
+      "case_id": "multi-intent-clarify",
+      "raw_case": {
+        "id": "multi-intent-clarify",
+        "text": "给张三转100元并购买理财",
+        "expected": {
+          "task_type": "INVESTMENT_PURCHASE",
+          "needs_clarification": true,
+          "fields": [],
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "INVESTMENT_PURCHASE",
+        "needs_clarification": true,
+        "fields": [],
+        "agents": [
+          "supervisor",
+          "planner",
+          "wealth"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ],
+          "fields": [],
+          "needs_clarification": true,
+          "task_type": "INVESTMENT_PURCHASE"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.12400001287460327
+    },
+    {
+      "case_id": "bill",
+      "raw_case": {
+        "id": "bill",
+        "text": "分析2026-09消费",
+        "expected": {
+          "task_type": "BILL_ANALYSIS",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "month",
+              "value": "2026-09"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "finance"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "BILL_ANALYSIS",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "month",
+            "value": "2026-09"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "finance"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "finance"
+          ],
+          "fields": [
+            {
+              "name": "month",
+              "value": "2026-09"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "BILL_ANALYSIS"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.15959999291226268
+    },
+    {
+      "case_id": "card",
+      "raw_case": {
+        "id": "card",
+        "text": "冻结card-demo",
+        "expected": {
+          "task_type": "CARD_MANAGEMENT",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "card-demo"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "CARD_MANAGEMENT",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "target_id",
+            "value": "card-demo"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "service"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ],
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "card-demo"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "CARD_MANAGEMENT"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.08560001151636243
+    },
+    {
+      "case_id": "subscription",
+      "raw_case": {
+        "id": "subscription",
+        "text": "取消订阅sub-stream",
+        "expected": {
+          "task_type": "SUBSCRIPTION_MANAGEMENT",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "sub-stream"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "SUBSCRIPTION_MANAGEMENT",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "target_id",
+            "value": "sub-stream"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "service"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ],
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "sub-stream"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "SUBSCRIPTION_MANAGEMENT"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.0811999780125916
+    },
+    {
+      "case_id": "direct-debit",
+      "raw_case": {
+        "id": "direct-debit",
+        "text": "关闭代扣dd-electric",
+        "expected": {
+          "task_type": "DIRECT_DEBIT_MANAGEMENT",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "dd-electric"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "DIRECT_DEBIT_MANAGEMENT",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "target_id",
+            "value": "dd-electric"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "service"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ],
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "dd-electric"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "DIRECT_DEBIT_MANAGEMENT"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.08110003545880318
+    },
+    {
+      "case_id": "wealth",
+      "raw_case": {
+        "id": "wealth",
+        "text": "购买sandbox-r1 100元",
+        "expected": {
+          "task_type": "INVESTMENT_PURCHASE",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "target_id",
+              "value": "sandbox-r1"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "INVESTMENT_PURCHASE",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "amount",
+            "value": "10000"
+          },
+          {
+            "name": "target_id",
+            "value": "sandbox-r1"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "wealth"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ],
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "target_id",
+              "value": "sandbox-r1"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "INVESTMENT_PURCHASE"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.08759996853768826
+    },
+    {
+      "case_id": "compare",
+      "raw_case": {
+        "id": "compare",
+        "text": "比较sandbox-r1和sandbox-r2",
+        "expected": {
+          "task_type": "PRODUCT_COMPARE",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "product_ids",
+              "value": "sandbox-r1,sandbox-r2"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "PRODUCT_COMPARE",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "product_ids",
+            "value": "sandbox-r1,sandbox-r2"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "wealth"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ],
+          "fields": [
+            {
+              "name": "product_ids",
+              "value": "sandbox-r1,sandbox-r2"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "PRODUCT_COMPARE"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.07830001413822174
+    },
+    {
+      "case_id": "cross-planning",
+      "raw_case": {
+        "id": "cross-planning",
+        "text": "分析2026-09消费，找出可能的订阅，我逐项确认后取消",
+        "expected": {
+          "task_type": "CROSS_SCENARIO",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "month",
+              "value": "2026-09"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "finance",
+            "service"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "CROSS_SCENARIO",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "month",
+            "value": "2026-09"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "finance",
+          "service"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "finance",
+            "service"
+          ],
+          "fields": [
+            {
+              "name": "month",
+              "value": "2026-09"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "CROSS_SCENARIO"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.08399999933317304
+    },
+    {
+      "case_id": "hallucinated-card",
+      "raw_case": {
+        "id": "hallucinated-card",
+        "text": "冻结card-demo",
+        "expected_guard": "REJECT",
+        "fixture": {
+          "task_type": "CARD_MANAGEMENT",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "card-1234"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ]
+        },
+        "expected": {
+          "task_type": "CARD_MANAGEMENT",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "card-demo"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "CARD_MANAGEMENT",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "target_id",
+            "value": "card-demo"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "service"
+        ],
+        "guard": "REJECT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "service"
+          ],
+          "fields": [
+            {
+              "name": "target_id",
+              "value": "card-1234"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "CARD_MANAGEMENT"
+        },
+        "guard": "REJECT",
+        "guard_reason": "UNGROUNDED_MODEL_FIELDS_OR_PLAN"
+      },
+      "checks": {
+        "intent": true,
+        "parameters": false,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.08379999781027436
+    },
+    {
+      "case_id": "hallucinated-risk",
+      "raw_case": {
+        "id": "hallucinated-risk",
+        "text": "购买sandbox-r1 100元",
+        "expected_guard": "REJECT",
+        "fixture": {
+          "task_type": "INVESTMENT_PURCHASE",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "risk_level",
+              "value": "5"
+            },
+            {
+              "name": "target_id",
+              "value": "sandbox-r1"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ]
+        },
+        "expected": {
+          "task_type": "INVESTMENT_PURCHASE",
+          "needs_clarification": false,
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "target_id",
+              "value": "sandbox-r1"
+            }
+          ],
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "INVESTMENT_PURCHASE",
+        "needs_clarification": false,
+        "fields": [
+          {
+            "name": "amount",
+            "value": "10000"
+          },
+          {
+            "name": "target_id",
+            "value": "sandbox-r1"
+          }
+        ],
+        "agents": [
+          "supervisor",
+          "planner",
+          "wealth"
+        ],
+        "guard": "REJECT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "wealth"
+          ],
+          "fields": [
+            {
+              "name": "amount",
+              "value": "10000"
+            },
+            {
+              "name": "risk_level",
+              "value": "5"
+            },
+            {
+              "name": "target_id",
+              "value": "sandbox-r1"
+            }
+          ],
+          "needs_clarification": false,
+          "task_type": "INVESTMENT_PURCHASE"
+        },
+        "guard": "REJECT",
+        "guard_reason": "LLM_INVALID_OUTPUT"
+      },
+      "checks": {
+        "intent": true,
+        "parameters": false,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.07349997758865356
+    },
+    {
+      "case_id": "missing-schedule-time",
+      "raw_case": {
+        "id": "missing-schedule-time",
+        "text": "下周五给张三转1000元",
+        "expected": {
+          "task_type": "SCHEDULED_TRANSFER",
+          "needs_clarification": true,
+          "fields": [],
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ]
+        }
+      },
+      "expected": {
+        "task_type": "SCHEDULED_TRANSFER",
+        "needs_clarification": true,
+        "fields": [],
+        "agents": [
+          "supervisor",
+          "planner",
+          "transaction"
+        ],
+        "guard": "ACCEPT"
+      },
+      "actual": {
+        "candidate": {
+          "agents": [
+            "supervisor",
+            "planner",
+            "transaction"
+          ],
+          "fields": [],
+          "needs_clarification": true,
+          "task_type": "SCHEDULED_TRANSFER"
+        },
+        "guard": "ACCEPT",
+        "guard_reason": null
+      },
+      "checks": {
+        "intent": true,
+        "parameters": true,
+        "clarification": true,
+        "plan": true,
+        "guard": true
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 0.06839999696239829
+    }
+  ],
+  "limits": [
+    "Fixture CI proves harness/guard behavior, not model understanding",
+    "Interpretation remains conservatively bounded by deterministic source grounding",
+    "Ambiguous bank identity is resolved only by authority at runtime, never by this provider"
+  ]
+}

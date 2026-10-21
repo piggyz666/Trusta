@@ -1,0 +1,1 @@
+{"method": "two-worker unittest modules in isolated processes", "workers": 2, "modules": 49, "tests": 714, "skipped": 0, "duration_seconds": 315.963, "passed": true}

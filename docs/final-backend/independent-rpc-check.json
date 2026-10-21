@@ -1,0 +1,11 @@
+{
+  "operators": [
+    "Infura/Consensys",
+    "PublicNode/Allnodes"
+  ],
+  "secondary_public_endpoint": "https://ethereum-sepolia-rpc.publicnode.com",
+  "read_only": true,
+  "checked_at_unix": 1791572726,
+  "status": "FAILED",
+  "error_code": "ANCHOR_CHAIN_UNVERIFIED"
+}

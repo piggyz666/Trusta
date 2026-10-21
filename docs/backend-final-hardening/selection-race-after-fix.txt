@@ -1,0 +1,7 @@
+test_separate_service_instances_cannot_double_consume_selection (tests.test_backend_final_hardening.BackendFinalHardeningTests.test_separate_service_instances_cannot_double_consume_selection) ... ok
+test_failed_proposal_creation_does_not_reopen_selection (tests.test_backend_final_hardening.BackendFinalHardeningTests.test_failed_proposal_creation_does_not_reopen_selection) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 3.916s
+
+OK

@@ -1,0 +1,23 @@
+[
+  {
+    "checkpoint": {
+      "schema_version": 1,
+      "canonicalization": "TRUSTA-JSON-v1",
+      "tree_algorithm": "RFC6962-SHA256-event-hash-v1",
+      "checkpoint_id": "d7331d12-f1ba-4337-8c72-c4c92591fe90",
+      "first_event_sequence": 320,
+      "last_event_sequence": 381,
+      "leaf_count": 62,
+      "merkle_root": "4010ad88472c1e2a372df12538f90db2b0c2694b16e00664818937607f660cb0",
+      "created_at": 1791572745657,
+      "previous_checkpoint_hash": "d96f297ed5deca762b80e13af78dadbf2d7a9d410eb736eda6912edb0c8979db",
+      "signer_identity": "urn:trusta:5c8761d9-61df-42f9-83e3-c25f5c98582b:audit-checkpoint",
+      "signer_key_id": "key-1f6e1f0e-4d68-4e50-9bd7-7b1be720e977",
+      "public_key_fingerprint": "9a764ae8361263918e89a9c9bedf997948671b9a4f84e81fed860e7bf529a7c8",
+      "signature_algorithm": "ECDSA-P256-SHA256",
+      "checkpoint_signature": "MEUCIQDOIALpnLuf4JkkAkVF5FQbnlnZ0V4rsgP5qxeknEUnEQIgE4J0PDtaPwZzRCmfNoLkPnyngMHOXLyYmZrX9G5RiDA="
+    },
+    "public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoy9s3bKgAN2+PgzSp1v+DXsA5NS9\nWnwSKSar0voYLPiP6dtawXAX4pgDrWDSIllIfkQf54H6a/8hbOquZ47n+g==\n-----END PUBLIC KEY-----\n",
+    "key_status": "ACTIVE"
+  }
+]

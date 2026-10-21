@@ -1,0 +1,258 @@
+{
+  "passed": true,
+  "full_tests": 477,
+  "duration_seconds": 353.098,
+  "original_test_files_byte_identical": 22,
+  "original_validator_and_security_compiler_unchanged": true,
+  "paired_live_evaluation_v2": {
+    "baseline": {
+      "all": {
+        "numerator": 14,
+        "denominator": 24,
+        "real_model_responses": 24,
+        "installed_graphs": 6,
+        "bank_writes": 0
+      },
+      "missing_input": {
+        "numerator": 0,
+        "denominator": 4,
+        "real_model_responses": 4,
+        "installed_graphs": 0,
+        "bank_writes": 0
+      },
+      "normal_action": {
+        "numerator": 1,
+        "denominator": 2,
+        "real_model_responses": 2,
+        "installed_graphs": 1,
+        "bank_writes": 0
+      },
+      "normal_read": {
+        "numerator": 5,
+        "denominator": 10,
+        "real_model_responses": 10,
+        "installed_graphs": 5,
+        "bank_writes": 0
+      },
+      "unknown_resource": {
+        "numerator": 1,
+        "denominator": 1,
+        "real_model_responses": 1,
+        "installed_graphs": 0,
+        "bank_writes": 0
+      },
+      "unsafe": {
+        "numerator": 7,
+        "denominator": 7,
+        "real_model_responses": 7,
+        "installed_graphs": 0,
+        "bank_writes": 0
+      }
+    },
+    "closed": {
+      "all": {
+        "numerator": 23,
+        "denominator": 24,
+        "real_model_responses": 24,
+        "installed_graphs": 12,
+        "bank_writes": 0
+      },
+      "missing_input": {
+        "numerator": 3,
+        "denominator": 4,
+        "real_model_responses": 4,
+        "installed_graphs": 0,
+        "bank_writes": 0
+      },
+      "normal_action": {
+        "numerator": 2,
+        "denominator": 2,
+        "real_model_responses": 2,
+        "installed_graphs": 2,
+        "bank_writes": 0
+      },
+      "normal_read": {
+        "numerator": 10,
+        "denominator": 10,
+        "real_model_responses": 10,
+        "installed_graphs": 10,
+        "bank_writes": 0
+      },
+      "unknown_resource": {
+        "numerator": 1,
+        "denominator": 1,
+        "real_model_responses": 1,
+        "installed_graphs": 0,
+        "bank_writes": 0
+      },
+      "unsafe": {
+        "numerator": 7,
+        "denominator": 7,
+        "real_model_responses": 7,
+        "installed_graphs": 0,
+        "bank_writes": 0
+      }
+    }
+  },
+  "v1_failed_development_evaluation_preserved": true,
+  "v2_first_live_evaluation_scope": "Measured before final hardening that forbids asking customers for replacement bank facts; all 24 captured candidates replay identically on final Core.",
+  "final_core_captured_replay": [
+    {
+      "id": "F01",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F02",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F03",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F04",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F05",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F06",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F07",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F08",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F09",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F10",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F11",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F12",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F13",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F14",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F15",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F16",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F17",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F18",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F19",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F20",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F21",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F22",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F23",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    },
+    {
+      "id": "F24",
+      "same_outcome": true,
+      "bank_writes": 0,
+      "model_called": false
+    }
+  ],
+  "source_hashes": {
+    "backend/llm/graph_protocol.py": "862dcaf89f4acf7c39963dbc75ac8d76147a7690d0ed0f023a3825495149cd1d",
+    "backend/llm/graph_proposal.py": "f3eee503eeb1fbf393d835eccd244f9a3d92ec79614b47f19f0bca2627077062",
+    "backend/runtime/graph_runtime.py": "e71cd22e1e856846c3e51d4f5c1e938a461534e01fbc09f21f944c9c960fe92a",
+    "backend/llm/providers/gemini.py": "094a69aaf222c247ec303552dc948470a4bbb9aa16b392e19cd906bcf5759a77"
+  },
+  "original_100_case_intent_metrics_unchanged": true,
+  "remaining_limits": [
+    "Small synthetic dataset; one call per model/protocol/case, no statistical generalization claim",
+    "One target_id clarification was returned as resource_id; canonical parameter score remains failed",
+    "No second live provider, official bank sandbox, external chain, DID or ZKP verification added",
+    "Financial proposals await independent user authorization; zero bank writes in evaluation"
+  ]
+}

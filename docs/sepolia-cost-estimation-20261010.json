@@ -1,0 +1,271 @@
+{
+  "timestamp_utc": "2026-10-09T18:12:15.449017+00:00",
+  "chain_id_expected": 11155111,
+  "broadcasts": 0,
+  "external_deployments": 0,
+  "test_eth_spent": 0,
+  "artifact_creation_sha256": "c7c2ab864bed3a2cb49a72e6ca702adc0d356899849444f2d6d39f573d63da17",
+  "independent_acceptance_gas": 0,
+  "acceptance_note": "Read-only receipts/events/code/publisher/readback/confirmations via independent RPC; no on-chain verification transaction.",
+  "endpoint_selection": "temporary_infura_sepolia_same_key_no_config_edit",
+  "configuration_presence": {
+    "rpc": true,
+    "wallet_public_address": true,
+    "independent_rpc": false
+  },
+  "local_simulation": {
+    "scope": "LOCAL_MEMORY_EVM_NOT_SEPOLIA",
+    "vm": "PragueVM",
+    "deploy_estimate_gas": 556147,
+    "deploy_local_gas_used": 550499,
+    "commit_estimate_gas": 96055,
+    "commit_local_gas_used": 94333,
+    "readback_equal": true
+  },
+  "chain_id_observed": 11155111,
+  "chain_id_verified": true,
+  "block_number": 11879064,
+  "block_hash": "0x8fce2fe09607022629361df6ca0e06c8cb3668c1b0289c3116271dfa2098a533",
+  "wallet_public_address": "0xF84C2E84F43460A94bb24fFEb6d4a61B75De86bE",
+  "wallet_balance_sepolia_eth": "0.0103",
+  "current_eip1559": {
+    "base_fee_wei": 13,
+    "selected_tip_wei": 999999987,
+    "legacy_gas_price_wei": 1000013,
+    "suggested_max_fee_wei": 1000000013,
+    "fee_history": {
+      "oldestBlock": "0xb54294",
+      "reward": [
+        [
+          "0x3b9ac9f3",
+          "0x3b9ac9f3",
+          "0x3b9ac9f3"
+        ],
+        [
+          "0x3b9ac9f3",
+          "0x3b9ac9f3",
+          "0x3b9ac9f3"
+        ],
+        [
+          "0x3b9ac9f3",
+          "0x3b9ac9f3",
+          "0x3b9ac9f3"
+        ],
+        [
+          "0x3b9ac9f3",
+          "0x3b9ac9f3",
+          "0x3b9ac9f3"
+        ],
+        [
+          "0x3b9ac9f3",
+          "0x3b9ac9f3",
+          "0x3b9ac9f3"
+        ]
+      ],
+      "baseFeePerGas": [
+        "0xd",
+        "0xd",
+        "0xd",
+        "0xd",
+        "0xd",
+        "0xd"
+      ],
+      "gasUsedRatio": [
+        0.32870074,
+        0.337134074966579,
+        0.34028532497248537,
+        0.264155495,
+        0.33498756878523506
+      ],
+      "baseFeePerBlobGas": [
+        "0x1",
+        "0x1",
+        "0x1",
+        "0x1",
+        "0x1",
+        "0x1"
+      ],
+      "blobGasUsedRatio": [
+        0.6190476190476191,
+        0.5238095238095238,
+        0.6190476190476191,
+        0.23809523809523808,
+        0.3333333333333333
+      ]
+    },
+    "provider_suggested_tip_wei_recheck": 1000000,
+    "provider_suggested_tip_wei": 1000000
+  },
+  "deploy_estimation_scope": "SEPOLIA_RPC_ACTUAL_STATE",
+  "deploy_rpc_estimate_gas": 3802284,
+  "commit_estimation_scope": "SEPOLIA_RPC_STATE_OVERRIDE_FRESH_CONTRACT",
+  "commit_rpc_estimate_gas": 356357,
+  "costs": {
+    "protocol_base_fee_floor_no_inclusion_guarantee": {
+      "gas": 4158641,
+      "price_wei": 13,
+      "cost_sepolia_eth": "5.4062333E-11"
+    },
+    "current_eip1559_estimate": {
+      "gas": 4158641,
+      "price_wei": 1000000000,
+      "cost_sepolia_eth": "0.004158641"
+    },
+    "suggested_reserve_20pct_gas_2x_base_plus_tip": {
+      "gas": 4990370,
+      "price_wei": 1000000013,
+      "cost_sepolia_eth": "0.00499037006487481"
+    },
+    "base_fee_rises_2x": {
+      "gas": 4158641,
+      "price_wei": 1000000013,
+      "cost_sepolia_eth": "0.004158641054062333"
+    },
+    "base_fee_rises_5x": {
+      "gas": 4158641,
+      "price_wei": 1000000052,
+      "cost_sepolia_eth": "0.004158641216249332"
+    },
+    "existing_legacy_scripts_estimated_spend": {
+      "gas": 4158641,
+      "price_wei": 1000013,
+      "cost_sepolia_eth": "0.000004158695062333"
+    },
+    "existing_scripts_upfront_balance_required": {
+      "sepolia_eth": "0.000004002336029692",
+      "basis": "max(deploy limit, deploy estimate + commit limit) * legacy gasPrice"
+    }
+  },
+  "hypothetical_balances": {
+    "0.0005": {
+      "protocol_base_fee_floor_no_inclusion_guarantee": true,
+      "current_eip1559_estimate": false,
+      "suggested_reserve_20pct_gas_2x_base_plus_tip": false,
+      "base_fee_rises_2x": false,
+      "base_fee_rises_5x": false,
+      "existing_legacy_scripts_estimated_spend": true,
+      "existing_scripts_upfront_balance_sufficient": true,
+      "existing_scripts_gas_price_break_even_gwei": "0.1249286657318671038836824173"
+    },
+    "0.001": {
+      "protocol_base_fee_floor_no_inclusion_guarantee": true,
+      "current_eip1559_estimate": false,
+      "suggested_reserve_20pct_gas_2x_base_plus_tip": false,
+      "base_fee_rises_2x": false,
+      "base_fee_rises_5x": false,
+      "existing_legacy_scripts_estimated_spend": true,
+      "existing_scripts_upfront_balance_sufficient": true,
+      "existing_scripts_gas_price_break_even_gwei": "0.2498573314637342077673648347"
+    },
+    "0.005": {
+      "protocol_base_fee_floor_no_inclusion_guarantee": true,
+      "current_eip1559_estimate": true,
+      "suggested_reserve_20pct_gas_2x_base_plus_tip": true,
+      "base_fee_rises_2x": true,
+      "base_fee_rises_5x": true,
+      "existing_legacy_scripts_estimated_spend": true,
+      "existing_scripts_upfront_balance_sufficient": true,
+      "existing_scripts_gas_price_break_even_gwei": "1.249286657318671038836824173"
+    },
+    "0.05": {
+      "protocol_base_fee_floor_no_inclusion_guarantee": true,
+      "current_eip1559_estimate": true,
+      "suggested_reserve_20pct_gas_2x_base_plus_tip": true,
+      "base_fee_rises_2x": true,
+      "base_fee_rises_5x": true,
+      "existing_legacy_scripts_estimated_spend": true,
+      "existing_scripts_upfront_balance_sufficient": true,
+      "existing_scripts_gas_price_break_even_gwei": "12.49286657318671038836824173"
+    }
+  },
+  "actual_wallet_can_fund_existing_scripts_at_snapshot": true,
+  "existing_scripts_price_guard_allows_snapshot": true,
+  "status": "RPC_ESTIMATED",
+  "rpc_methods_attempted": [
+    "eth_chainId",
+    "eth_getBlockByNumber",
+    "eth_getBalance",
+    "eth_gasPrice",
+    "eth_feeHistory",
+    "eth_maxPriorityFeePerGas",
+    "eth_estimateGas",
+    "eth_getCode",
+    "eth_call",
+    "eth_estimateGas",
+    "eth_maxPriorityFeePerGas",
+    "eth_getBlockByNumber",
+    "eth_call",
+    "eth_call"
+  ],
+  "gas_limit_cross_checks": [
+    {
+      "case": "deploy_estimate_gas_1m",
+      "error_code": -32000,
+      "category": "out of gas"
+    },
+    {
+      "case": "deploy_call_gas_1m",
+      "error_code": -32000,
+      "category": "out of gas"
+    },
+    {
+      "case": "deploy_estimate_gas_600k",
+      "error_code": -32000,
+      "category": "out of gas"
+    },
+    {
+      "case": "commit_estimate_gas_200k",
+      "failure_type": "HTTPError"
+    },
+    {
+      "case": "commit_call_gas_200k",
+      "error_code": -32000,
+      "category": "out of gas"
+    },
+    {
+      "case": "deploy_call_gas_5m",
+      "success": true,
+      "runtime_bytes": 2305,
+      "runtime_matches_publisher_patched_compilation": true
+    },
+    {
+      "case": "commit_call_gas_500k",
+      "success": true,
+      "return_data": "0x"
+    }
+  ],
+  "snapshot_block_timestamp_utc": "2026-10-09T18:12:12+00:00",
+  "snapshot_hash_rechecked_equal": true,
+  "existing_scripts_gas_limits_sufficient": {
+    "deploy": false,
+    "commit": false
+  },
+  "existing_scripts_ready_to_execute": false,
+  "provider_tip_budget_scenario": {
+    "effective_price_wei": 1000013,
+    "estimated_deploy_cost": "0.000003802333429692",
+    "estimated_commit_cost": "3.56361632641E-7",
+    "estimated_total_cost": "0.000004158695062333",
+    "reserve_20pct_gas_2x_base_plus_provider_tip": "0.00000499049974962"
+  },
+  "effective_price_rise_scenarios": {
+    "1": {
+      "estimated_cost_sepolia_eth": "0.004158641",
+      "reserve_20pct_gas_sepolia_eth": "0.00499037"
+    },
+    "2": {
+      "estimated_cost_sepolia_eth": "0.008317282",
+      "reserve_20pct_gas_sepolia_eth": "0.00998074"
+    },
+    "5": {
+      "estimated_cost_sepolia_eth": "0.020793205",
+      "reserve_20pct_gas_sepolia_eth": "0.02495185"
+    },
+    "10": {
+      "estimated_cost_sepolia_eth": "0.04158641",
+      "reserve_20pct_gas_sepolia_eth": "0.0499037"
+    }
+  },
+  "configured_endpoint_chain_id": 1,
+  "previously_delivered_backend_hash_changes": []
+}

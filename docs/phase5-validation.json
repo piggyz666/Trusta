@@ -1,0 +1,316 @@
+{
+  "schema_version": 1,
+  "validation_date": "2026-10-06",
+  "timezone": "Asia/Shanghai",
+  "passed": true,
+  "baseline": {
+    "tests": 285,
+    "duration_seconds": 204.365,
+    "result": "OK",
+    "output": "phase5-baseline-tests.txt"
+  },
+  "final_suite": {
+    "tests": 371,
+    "duration_seconds": 480.245,
+    "result": "OK",
+    "original_tests": 285,
+    "additional_checks": 86,
+    "new_test_methods": 53,
+    "inherited_phase5_transfer_acceptance": 33,
+    "output": "phase5-tests.txt"
+  },
+  "original_tests": {
+    "files": 19,
+    "byte_identical": true,
+    "changed_files": [],
+    "manifest": "phase5-original-test-hashes.json"
+  },
+  "source_freeze": {
+    "python_files": 118,
+    "changed_since_final_suite": [],
+    "manifest": "phase5-code-hashes.json"
+  },
+  "reports": {
+    "banking_tasks": {
+      "file": "phase5-banking-benchmark.json",
+      "sha256": "77aa81b4e57818b0791e014b2a75976524a0a58f4397007e3256f56f30003068",
+      "passed": true,
+      "metrics": {
+        "case_pass_rate": {
+          "numerator": 34,
+          "denominator": 34,
+          "rate": 1.0
+        },
+        "task_completion_rate": {
+          "numerator": 23,
+          "denominator": 23,
+          "rate": 1.0
+        },
+        "intent_accuracy": {
+          "numerator": 34,
+          "denominator": 34,
+          "rate": 1.0
+        },
+        "parameter_accuracy": {
+          "numerator": 11,
+          "denominator": 11,
+          "rate": 1.0
+        },
+        "clarification_accuracy": {
+          "numerator": 34,
+          "denominator": 34,
+          "rate": 1.0
+        },
+        "plan_validity": {
+          "numerator": 34,
+          "denominator": 34,
+          "rate": 1.0
+        },
+        "tool_selection_accuracy": {
+          "numerator": 34,
+          "denominator": 34,
+          "rate": 1.0
+        },
+        "authorization_compliance": {
+          "numerator": 34,
+          "denominator": 34,
+          "rate": 1.0
+        },
+        "final_state_correctness": {
+          "numerator": 34,
+          "denominator": 34,
+          "rate": 1.0
+        },
+        "cross_scenario_completion_rate": {
+          "numerator": 2,
+          "denominator": 2,
+          "rate": 1.0
+        }
+      },
+      "cases": 34
+    },
+    "providers": {
+      "file": "phase5-provider-evaluation.json",
+      "sha256": "59f05003d0c9537956e741ed5471840e063913df976bb25c76b8c54bb7278eaf",
+      "passed": true,
+      "metrics": {
+        "intent": {
+          "numerator": 15,
+          "denominator": 15,
+          "rate": 1.0
+        },
+        "parameters": {
+          "numerator": 13,
+          "denominator": 15,
+          "rate": 0.8666666666666667
+        },
+        "clarification": {
+          "numerator": 15,
+          "denominator": 15,
+          "rate": 1.0
+        },
+        "plan": {
+          "numerator": 15,
+          "denominator": 15,
+          "rate": 1.0
+        },
+        "guard": {
+          "numerator": 15,
+          "denominator": 15,
+          "rate": 1.0
+        }
+      },
+      "cases": 15
+    },
+    "phase4_security": {
+      "file": "phase5-phase4-security-regression.json",
+      "sha256": "d3d13c241b40e8672a6042f9e624102b5641c52e5b820315ef47aa3091c02009",
+      "passed": true,
+      "metrics": {
+        "forgery_detection_rate": {
+          "numerator": 10,
+          "denominator": 10,
+          "rate": 1.0
+        },
+        "message_tamper_detection_rate": {
+          "numerator": 10,
+          "denominator": 10,
+          "rate": 1.0
+        },
+        "replay_block_rate": {
+          "numerator": 5,
+          "denominator": 5,
+          "rate": 1.0
+        },
+        "unauthorized_execution_rate": {
+          "numerator": 0,
+          "denominator": 15,
+          "rate": 0.0
+        },
+        "audit_tamper_detection_rate": {
+          "numerator": 10,
+          "denominator": 10,
+          "rate": 1.0
+        },
+        "merkle_proof_verification_rate": {
+          "numerator": 30,
+          "denominator": 30,
+          "rate": 1.0
+        },
+        "false_rejection_rate": {
+          "numerator": 0,
+          "denominator": 135,
+          "rate": 0.0
+        }
+      },
+      "cases": 18
+    },
+    "phase5_security": {
+      "file": "phase5-security-benchmark.json",
+      "sha256": "61725b8df4a1e1a63f5041f5d606a1186dd90d56dbc315bc5522e337de1d0bfd",
+      "passed": true,
+      "metrics": {
+        "forgery_detection_rate": {
+          "numerator": 10,
+          "denominator": 10,
+          "rate": 1.0
+        },
+        "message_tamper_detection_rate": {
+          "numerator": 10,
+          "denominator": 10,
+          "rate": 1.0
+        },
+        "replay_block_rate": {
+          "numerator": 5,
+          "denominator": 5,
+          "rate": 1.0
+        },
+        "unauthorized_execution_rate": {
+          "numerator": 0,
+          "denominator": 15,
+          "rate": 0.0
+        },
+        "audit_tamper_detection_rate": {
+          "numerator": 10,
+          "denominator": 10,
+          "rate": 1.0
+        },
+        "merkle_proof_verification_rate": {
+          "numerator": 30,
+          "denominator": 30,
+          "rate": 1.0
+        },
+        "false_rejection_rate": {
+          "numerator": 0,
+          "denominator": 135,
+          "rate": 0.0
+        }
+      },
+      "cases": 18
+    },
+    "banking_security": {
+      "file": "phase5-banking-security.json",
+      "sha256": "09bce77fe52ae48113ba095878f0b3c04e68635cdcc98aafc48e94eb143e495e",
+      "passed": true,
+      "metrics": {
+        "unauthorized_execution_rate": {
+          "numerator": 0,
+          "denominator": 45,
+          "rate": 0.0
+        },
+        "attack_detection_rate": {
+          "numerator": 45,
+          "denominator": 45
+        }
+      },
+      "cases": 45
+    },
+    "six_scenarios": {
+      "file": "phase5-demo.json",
+      "sha256": "79c07ab84664ae77431d6c6dfb230634679168106f6a2de9e14f081556a09265",
+      "passed": true,
+      "metrics": null,
+      "cases": 0
+    }
+  },
+  "demo": {
+    "http_scenarios": 6,
+    "proofs": 11,
+    "time_scenario": {
+      "status": "COMPLETED",
+      "persistent_job_id": "210fa246-b611-4486-9fc5-743ec43b6a8f",
+      "restart_before_due": true,
+      "cash_cents": 990000,
+      "transaction_count": 1,
+      "duplicate_tick_writes": 0,
+      "due_policy_authorization_state_rechecked": true
+    }
+  },
+  "definition_of_done": {
+    "A": {
+      "passed": true,
+      "evidence": "phase5-demo.json: six actual HTTP banking scenarios"
+    },
+    "B": {
+      "passed": true,
+      "evidence": "phase5-demo.json: six active_agents; V3 registry tests"
+    },
+    "C": {
+      "passed": true,
+      "evidence": "phase5-demo.json: Card ACTIVE/FROZEN/ACTIVE and limit/control states"
+    },
+    "D": {
+      "passed": true,
+      "evidence": "phase5-demo.json: subscription CANCELLED"
+    },
+    "E": {
+      "passed": true,
+      "evidence": "phase5-demo.json: cash/portfolio/investment_transactions and double ledger"
+    },
+    "F": {
+      "passed": true,
+      "evidence": "phase5-demo.json: dependency DAG and actual parallel read branches"
+    },
+    "G": {
+      "passed": true,
+      "evidence": "phase5-demo.json time_scenario; expiry/state/risk/TIME tamper tests"
+    },
+    "H": {
+      "passed": true,
+      "evidence": "phase5-demo.json cross-scene: COMPLETED and DENIED separate branches"
+    },
+    "I": {
+      "passed": true,
+      "evidence": "phase5-banking-security.json: direct Agent writes/contract/hash/capability checks"
+    },
+    "J": {
+      "passed": true,
+      "evidence": "phase5-tests.txt; byte-identical original assertions and Phase5 inherited transfer/old reports"
+    },
+    "K": {
+      "passed": true,
+      "evidence": "phase5-phase4-security-regression.json and phase5-security-benchmark.json: original18 attacks; unauthorized0"
+    },
+    "L": {
+      "passed": true,
+      "evidence": "banking_task_benchmark.py and JSON/CSV actual34 cases"
+    },
+    "M": {
+      "passed": true,
+      "evidence": "phase5-tests.txt: 371 tests OK"
+    },
+    "N": {
+      "passed": true,
+      "evidence": "All reports declare sandbox/offline; real_bank_connected and real_model_experiment_verified false"
+    }
+  },
+  "limits": {
+    "real_bank_connected": false,
+    "real_model_experiment_verified": false,
+    "external_blockchain_verified": false,
+    "six_scene_web_ui_implemented": false,
+    "time_runtime": "single local server and one TIME worker",
+    "investment": "sandbox principal at fixed unit price; not market returns",
+    "aa": "request-only split; no external collection"
+  }
+}

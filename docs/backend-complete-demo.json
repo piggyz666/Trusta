@@ -1,0 +1,163 @@
+{
+  "mode": "ISOLATED_VIRTUAL_BANK",
+  "external_bank_calls": 0,
+  "external_llm_calls": 0,
+  "production_funds": false,
+  "scenarios": [
+    {
+      "name": "智能转账",
+      "cases": [
+        {
+          "task_id": "deffb74e-393f-4a6e-9490-918a58ff9657",
+          "task_type": "TRANSFER",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        },
+        {
+          "task_id": "78be2450-4596-424d-b4e8-e58df1b459da",
+          "task_type": "TRANSFER",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        }
+      ],
+      "daily_limit_upgrade": "TOTP"
+    },
+    {
+      "name": "账单分析",
+      "cases": [
+        {
+          "task_id": "98ba4a6c-539d-4fab-aff9-f23dced5fb1e",
+          "task_type": "BILL_ANALYSIS",
+          "status": "COMPLETED",
+          "receipt_count": 0
+        }
+      ],
+      "months": 12,
+      "coverage": "AVAILABLE_SETTLED_RECORDS"
+    },
+    {
+      "name": "理财操作",
+      "cases": [
+        {
+          "task_id": "b6aac5f0-e421-4b58-bd0c-e75591e1f171",
+          "task_type": "WEALTH_RECOMMENDATION",
+          "status": "COMPLETED",
+          "receipt_count": 0
+        },
+        {
+          "task_id": "cbf08fb0-5dc5-495f-845b-c417015f9857",
+          "task_type": "PRODUCT_COMPARE",
+          "status": "COMPLETED",
+          "receipt_count": 0
+        },
+        {
+          "task_id": "bdaf26bb-77d1-40a8-b865-171130479668",
+          "task_type": "INVESTMENT_PURCHASE",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        },
+        {
+          "task_id": "8afee5a1-2999-4a76-ab92-cef9901d0f10",
+          "task_type": "INVESTMENT_REDEEM",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        }
+      ],
+      "provider": "LOCAL_SANDBOX"
+    },
+    {
+      "name": "卡片管理",
+      "cases": [
+        {
+          "task_id": "297b6277-713a-427b-a7b7-4b2d8dab61f6",
+          "task_type": "CARD_MANAGEMENT",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        },
+        {
+          "task_id": "d7cbea5b-f39d-43b7-94ad-2b23966870e0",
+          "task_type": "CARD_MANAGEMENT",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        },
+        {
+          "task_id": "0ade20ac-fbb7-4b17-9b4e-deb6dc4a0e35",
+          "task_type": "CARD_MANAGEMENT",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        }
+      ],
+      "application_status": "SUBMITTED",
+      "lost_state": "TERMINAL"
+    },
+    {
+      "name": "订阅/代扣",
+      "cases": [
+        {
+          "task_id": "00ca42b3-c20e-4715-8d7c-1522d8715921",
+          "task_type": "SUBSCRIPTION_MANAGEMENT",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        },
+        {
+          "task_id": "8466c1b4-fd31-4479-a423-3f6f4abe6138",
+          "task_type": "DIRECT_DEBIT_MANAGEMENT",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        }
+      ],
+      "reminders_before": 3,
+      "reminders_after": 1,
+      "notification": "LOCAL_QUEUE_ONLY"
+    },
+    {
+      "name": "跨场景联动",
+      "cases": [
+        {
+          "task_id": "3eb109a3-eb1e-48af-b619-d3d69966f123",
+          "task_type": "TRANSFER",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        },
+        {
+          "task_id": "ef397f39-8601-4102-9fc0-d0e92273b93c",
+          "task_type": "CROSS_SCENARIO",
+          "status": "COMPLETED",
+          "receipt_count": 1
+        }
+      ],
+      "event_requires_new_confirmation": true
+    }
+  ],
+  "crypto": {
+    "did": {
+      "method": "did:key",
+      "binding_verified": true
+    },
+    "zkp": {
+      "verified": true,
+      "challenge_id": "c67a2569-356f-48d1-94ab-7fa65223cd41",
+      "statement": "BANKING_ELIGIBILITY_V1",
+      "financial_authority": false,
+      "bank_write_performed": false,
+      "production_ready": false
+    },
+    "proof_public_signal_count": 4,
+    "setup": {
+      "enabled": true,
+      "implemented": true,
+      "scheme": "Groth16",
+      "statement": "BANKING_ELIGIBILITY_V1",
+      "setup": "DEVELOPMENT_SINGLE_HOST_CONTRIBUTION",
+      "phase1": "LOCAL_SINGLE_HOST",
+      "production_ready": false,
+      "issuer": "LOCAL_SANDBOX",
+      "financial_authority": false
+    },
+    "merkle_record_independently_verified": true,
+    "local_anchor_verified": true,
+    "local_anchor_is_blockchain": false,
+    "external_sepolia_verified": false
+  },
+  "audit_chain_verified": true
+}

@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-08",
+  "scope": "FIRST_VERSION_LOCAL_BACKEND",
+  "full_tests": 609,
+  "passed": true,
+  "full_tests_skipped": 0,
+  "duration_seconds": 229.705,
+  "test_method": "unittest discovery per module in isolated processes",
+  "test_modules": 42,
+  "isolated_test_processes": 4,
+  "first_attempt": {
+    "tests": 609,
+    "errors": 1,
+    "reason": "Windows OAuth helper closed rejected POST without consuming bounded body",
+    "log": "first-version-backend-full-tests-attempt1.txt"
+  },
+  "repair_validation": {
+    "affected_tests": 17,
+    "passed": true,
+    "log": "backend-http-repair-tests.txt"
+  },
+  "six_scenario_demo_passed": true,
+  "demo_log": "backend-complete-demo.json",
+  "audit_chain_verified": true,
+  "did": {
+    "implemented": true,
+    "method": "did:key",
+    "supported_key": "P-256",
+    "registry_binding_verified": true,
+    "financial_authority": false
+  },
+  "zkp": {
+    "implemented": true,
+    "real_proof_verified": true,
+    "scheme": "Groth16",
+    "curve": "bn128",
+    "setup": "DEVELOPMENT_SINGLE_HOST_CONTRIBUTION",
+    "phase1": "LOCAL_SINGLE_HOST",
+    "issuer": "LOCAL_SANDBOX",
+    "production_ready": false,
+    "financial_authority": false,
+    "manifest_sha256": "14b4c2b89099a5680310e74b33bf1c0e749e05fa8ae7e6e55ee76d55ffec8104"
+  },
+  "merkle_record_independently_verified": true,
+  "local_anchor_verified": true,
+  "local_anchor_is_blockchain": false,
+  "external_sepolia": {
+    "verified": false,
+    "live_submitted_this_run": false,
+    "tx_hash": null,
+    "classification": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+    "required": [
+      "RPC",
+      "test-wallet",
+      "test ETH for gas",
+      "deployed-contract"
+    ]
+  },
+  "external_bank_calls_this_run": 0,
+  "external_llm_calls_this_run": 0,
+  "production_funds": false,
+  "new_agents": 0,
+  "frontend_changed": false,
+  "financial_execution_boundary_preserved": true,
+  "remaining_acceptance": [
+    "External Sepolia deployment/commit/independent read-back",
+    "Fresh six-scenario natural-language model holdout evaluation"
+  ],
+  "production_limitations": [
+    "Local sandbox issuer, not bank-signed eligibility credentials",
+    "Single-host development ZKP setup, not independent MPC",
+    "Card/investment/subscription writes are Virtual Bank capabilities",
+    "Local TOTP, not production bank SCA"
+  ]
+}

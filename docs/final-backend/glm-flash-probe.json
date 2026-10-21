@@ -1,0 +1,34 @@
+{
+  "requested_model": "glm-4-flash-250414",
+  "max_tokens": 512,
+  "status": "LIVE_TESTED",
+  "text": "{\"ok\":true}",
+  "usage": {
+    "input_tokens": 71,
+    "output_tokens": 11
+  },
+  "returned_model": "glm-4-flash-250414",
+  "raw": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "{\"ok\":true}",
+          "role": "assistant"
+        }
+      }
+    ],
+    "created": 1791572888,
+    "id": "202610100308075f91547558c94512",
+    "model": "glm-4-flash-250414",
+    "object": "chat.completion",
+    "request_id": "202610100308075f91547558c94512",
+    "usage": {
+      "completion_tokens": 11,
+      "prompt_tokens": 71,
+      "total_tokens": 82
+    }
+  },
+  "latency_ms": 513.7064000009559
+}

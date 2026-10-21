@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TRUSTA · 业务沙箱</title><link rel="stylesheet" href="/styles.css"><script src="/app.js" defer></script></head>
+<body>
+  <header><div class="brand">TRUSTA <span>V1</span></div><div class="environment" id="environment">正在连接银行</div></header>
+  <main>
+    <section class="intro"><p class="eyebrow">每一步，都有依据</p><h1>转账、消费分析与理财推荐。</h1><p>转账需要核对授权；消费分析和产品推荐只读取数据。</p></section>
+    <div class="layout">
+      <div>
+        <section class="panel"><div class="section-head"><h2>发起业务请求</h2><span id="balance">余额读取中</span></div>
+          <label for="source-account">当前账户<select id="source-account"></select></label><p class="muted" id="bank-notice"></p>
+          <div class="actions"><button id="example-transfer" class="secondary">转账示例</button><button id="example-finance" class="secondary">消费分析示例</button><button id="example-wealth" class="secondary">理财推荐示例</button></div>
+          <div id="dialogue" aria-live="polite"></div>
+          <form id="request-form"><label for="request">输入请求或补充信息</label><textarea id="request" rows="3" required maxlength="1000">给张三转 2000 元</textarea><div class="form-foot"><small>可逐轮补充；聊天确认不能代替转账授权</small><button id="submit" type="submit">发送 →</button></div></form>
+          <button id="new-conversation" class="secondary">新对话并取消未确认请求</button>
+          <p id="notice" role="status" aria-live="polite"></p>
+        </section>
+        <section class="panel"><div class="section-head"><h2>账户交易</h2><button id="load-transactions" class="secondary">读取记录</button></div><label for="transaction-month">月份<input id="transaction-month" type="month" required></label><p id="transaction-note" class="muted"></p><div id="transaction-records"></div></section>
+        <section class="panel" id="auth-panel" hidden><h2>核对并授权</h2><p>请核对以下信息。确认后将从演示账户扣款。</p><dl id="auth-details"></dl><label id="strong-label" hidden>沙箱认证口令<input id="strong-secret" type="password" autocomplete="off"></label><p id="expiry"></p><div class="actions"><button id="approve">确认转账</button><button id="deny" class="secondary">拒绝</button><button id="renew" class="secondary" hidden>重新请求授权</button></div></section>
+        <section class="panel" id="result-panel" hidden><h2 id="result-title">转账结果</h2><p id="result-description"></p><dl id="result-details"></dl><button id="reconcile" class="secondary" hidden>重新核对银行结果（不会再次付款）</button></section>
+        <section class="panel" id="business-panel" hidden><h2 id="business-title"></h2><p id="business-description"></p><div id="business-summary"></div><div id="business-results"></div></section>
+        <section class="panel"><div class="section-head"><h2>当前任务</h2><button id="refresh" class="secondary">刷新状态</button></div><p id="task-meta">尚未创建任务</p><ol id="steps" class="steps"></ol></section>
+      </div>
+      <aside>
+        <section class="panel"><details id="memory-settings"><summary>说明偏好</summary><p class="muted">只影响新报告的说明方式，不改变银行数据或转账授权。</p>
+          <form id="memory-form"><label for="memory-style">说明方式</label><select id="memory-style"><option value="brief">简短</option><option value="detailed">详细</option></select>
+            <label class="consent-label"><input id="memory-consent" type="checkbox" required>同意保存此偏好 7 天，可随时忘记</label><button type="submit">保存偏好</button></form>
+          <div id="memory-list"></div><p id="memory-notice" role="status"></p>
+        </details></section>
+        <section class="panel"><h2>可信记录</h2><p class="muted">展示结构化依据与执行证据。</p><div id="trace"></div><p id="audit"></p>
+          <div id="proof-panel" hidden><button id="verify-proof" class="secondary">验证本条审计记录</button><p id="proof-status" role="status"></p><dl id="proof-details"></dl><button id="export-proof" class="secondary" hidden>导出证明</button></div>
+        </section>
+        <section class="panel"><h2>历史任务</h2><div id="history"></div></section>
+      </aside>
+    </div>
+    <footer>TRUSTA V1 · 仅用于本地沙箱演示</footer>
+  </main>
+</body>
+</html>

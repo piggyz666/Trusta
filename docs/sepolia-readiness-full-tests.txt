@@ -1,0 +1,1032 @@
+
+MODULE test_api.py
+test_approval_type_and_hash_checked (test_api.ApiTests.test_approval_type_and_hash_checked) ... ok
+test_authentication_required (test_api.ApiTests.test_authentication_required) ... ok
+test_cross_origin_blocked (test_api.ApiTests.test_cross_origin_blocked) ... ok
+test_customer_identity_not_client_controlled (test_api.ApiTests.test_customer_identity_not_client_controlled) ... ok
+test_http_cannot_override_wealth_risk_or_execute_purchase (test_api.ApiTests.test_http_cannot_override_wealth_risk_or_execute_purchase) ... ok
+test_http_end_to_end (test_api.ApiTests.test_http_end_to_end) ... ok
+test_read_only_http_scenarios_and_no_authorization (test_api.ApiTests.test_read_only_http_scenarios_and_no_authorization) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 6.499s
+
+OK
+
+MODULE test_acceptance.py
+test_01_transfer_settled (test_acceptance.Acceptance.test_01_transfer_settled) ... ok
+test_02_final_balance (test_acceptance.Acceptance.test_02_final_balance) ... ok
+test_03_balanced_ledger (test_acceptance.Acceptance.test_03_balanced_ledger) ... ok
+test_04_transaction_matches_approval (test_acceptance.Acceptance.test_04_transaction_matches_approval) ... ok
+test_05_receipt_generated (test_acceptance.Acceptance.test_05_receipt_generated) ... ok
+test_06_audit_chain_and_tamper_detection (test_acceptance.Acceptance.test_06_audit_chain_and_tamper_detection) ... ok
+test_07_amount_tampering_blocked (test_acceptance.Acceptance.test_07_amount_tampering_blocked) ... ok
+test_08_recipient_tampering_blocked (test_acceptance.Acceptance.test_08_recipient_tampering_blocked) ... ok
+test_09_missing_authorization_blocked (test_acceptance.Acceptance.test_09_missing_authorization_blocked) ... ok
+test_10_capability_bypass_blocked (test_acceptance.Acceptance.test_10_capability_bypass_blocked) ... ok
+test_11_invalid_signature_blocked (test_acceptance.Acceptance.test_11_invalid_signature_blocked) ... ok
+test_12_payload_tampering_blocked (test_acceptance.Acceptance.test_12_payload_tampering_blocked) ... ok
+test_13_replay_nonce_blocked_after_restart (test_acceptance.Acceptance.test_13_replay_nonce_blocked_after_restart) ... ok
+test_14_idempotency_never_double_debits (test_acceptance.Acceptance.test_14_idempotency_never_double_debits) ... ok
+test_15_insufficient_balance_blocked (test_acceptance.Acceptance.test_15_insufficient_balance_blocked) ... ok
+test_16_frozen_account_blocked (test_acceptance.Acceptance.test_16_frozen_account_blocked) ... ok
+test_17_waiting_user_survives_restart (test_acceptance.Acceptance.test_17_waiting_user_survives_restart) ... ok
+test_18_authorization_expiry_enforced (test_acceptance.Acceptance.test_18_authorization_expiry_enforced) ... ok
+test_19_bank_failure_cannot_produce_false_success (test_acceptance.Acceptance.test_19_bank_failure_cannot_produce_false_success) ... ok
+test_20_uncertain_verification_manual_review (test_acceptance.Acceptance.test_20_uncertain_verification_manual_review) ... ok
+test_authorization_renewal (test_acceptance.Acceptance.test_authorization_renewal) ... ok
+test_bank_deadline_rechecked_after_gateway (test_acceptance.Acceptance.test_bank_deadline_rechecked_after_gateway) ... ok
+test_bank_rechecks_stale_preconditions (test_acceptance.Acceptance.test_bank_rechecks_stale_preconditions) ... ok
+test_bank_write_call_sites_are_restricted (test_acceptance.Acceptance.test_bank_write_call_sites_are_restricted) ... ok
+test_contract_forgery_blocked (test_acceptance.Acceptance.test_contract_forgery_blocked) ... ok
+test_denial_cancels (test_acceptance.Acceptance.test_denial_cancels) ... ok
+test_expired_contract_blocked (test_acceptance.Acceptance.test_expired_contract_blocked) ... ok
+test_lost_response_after_commit_no_retry (test_acceptance.Acceptance.test_lost_response_after_commit_no_retry) ... ok
+test_money_precision_and_invalid_input (test_acceptance.Acceptance.test_money_precision_and_invalid_input) ... ok
+test_restart_mid_execution_no_retry (test_acceptance.Acceptance.test_restart_mid_execution_no_retry) ... ok
+test_scheduler_dependency_and_transition (test_acceptance.Acceptance.test_scheduler_dependency_and_transition) ... ok
+test_strong_auth_required (test_acceptance.Acceptance.test_strong_auth_required) ... ok
+test_unknown_payee_waiting_user (test_acceptance.Acceptance.test_unknown_payee_waiting_user) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 21.567s
+
+OK
+
+MODULE test_backend_maintenance.py
+test_background_event_is_once_only_and_pending_authorization (test_backend_maintenance.MaintenanceTests.test_background_event_is_once_only_and_pending_authorization) ... ok
+test_shared_anchor_factory_no_silent_local_fallback (test_backend_maintenance.MaintenanceTests.test_shared_anchor_factory_no_silent_local_fallback) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.362s
+
+OK
+
+MODULE test_backend_hardening.py
+test_claim_cannot_be_taken_over_by_time_or_active_task_recovery (test_backend_hardening.HardeningTests.test_claim_cannot_be_taken_over_by_time_or_active_task_recovery) ... ok
+test_compact_clarification_cannot_request_bank_facts (test_backend_hardening.HardeningTests.test_compact_clarification_cannot_request_bank_facts) ... ok
+test_compact_does_not_extract_inline_amount_or_bank_records (test_backend_hardening.HardeningTests.test_compact_does_not_extract_inline_amount_or_bank_records) ... ok
+test_compact_extra_authority_and_unknown_function_rejected (test_backend_hardening.HardeningTests.test_compact_extra_authority_and_unknown_function_rejected) ... ok
+test_compact_metadata_expansion_keeps_original_validator (test_backend_hardening.HardeningTests.test_compact_metadata_expansion_keeps_original_validator) ... ok
+test_compact_missing_ancestor_and_cycle_rejected (test_backend_hardening.HardeningTests.test_compact_missing_ancestor_and_cycle_rejected) ... ok
+test_database_graph_claim_blocks_other_runtime_instance (test_backend_hardening.HardeningTests.test_database_graph_claim_blocks_other_runtime_instance) ... ok
+test_handoff_capability_snapshot_or_plan_tamper_rejected (test_backend_hardening.HardeningTests.test_handoff_capability_snapshot_or_plan_tamper_rejected) ... ok
+test_handoff_duplicate_and_reordered_entries_rejected (test_backend_hardening.HardeningTests.test_handoff_duplicate_and_reordered_entries_rejected) ... ok
+test_handoff_offline_verification_with_out_of_band_keys (test_backend_hardening.HardeningTests.test_handoff_offline_verification_with_out_of_band_keys) ... ok
+test_handoff_other_customer_export_denied (test_backend_hardening.HardeningTests.test_handoff_other_customer_export_denied) ... ok
+test_handoff_tampered_parents_and_missing_causal_entry (test_backend_hardening.HardeningTests.test_handoff_tampered_parents_and_missing_causal_entry) ... ok
+test_handoff_wrong_key_owner_and_untrusted_key_rejected (test_backend_hardening.HardeningTests.test_handoff_wrong_key_owner_and_untrusted_key_rejected) ... ok
+test_nonce_audit_evidence_and_result_rollback_atomically (test_backend_hardening.HardeningTests.test_nonce_audit_evidence_and_result_rollback_atomically) ... ok
+test_terminal_claim_recovery_is_audited_and_owned (test_backend_hardening.HardeningTests.test_terminal_claim_recovery_is_audited_and_owned) ... ok
+test_child_rejects_tampering_wrong_receiver_parent_refs_and_signature (test_backend_hardening.ProcessTests.test_child_rejects_tampering_wrong_receiver_parent_refs_and_signature) ... ok
+test_child_replay_nonce_is_rejected (test_backend_hardening.ProcessTests.test_child_replay_nonce_is_rejected) ... ok
+test_compromised_child_cannot_read_key_database_or_adapter (test_backend_hardening.ProcessTests.test_compromised_child_cannot_read_key_database_or_adapter) ... ok
+test_no_generic_signer_or_write_rpc_exists (test_backend_hardening.ProcessTests.test_no_generic_signer_or_write_rpc_exists) ... ok
+test_outbox_storage_tamper_is_not_repaired (test_backend_hardening.ProcessTests.test_outbox_storage_tamper_is_not_repaired) ... ok
+test_process_failure_never_falls_back_to_parent_agent (test_backend_hardening.ProcessTests.test_process_failure_never_falls_back_to_parent_agent) ... ok
+test_real_process_roundtrip_signed_request_result_and_evidence (test_backend_hardening.ProcessTests.test_real_process_roundtrip_signed_request_result_and_evidence) ... ok
+test_rotation_uses_new_public_snapshot_and_revocation_fails_closed (test_backend_hardening.ProcessTests.test_rotation_uses_new_public_snapshot_and_revocation_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 26.032s
+
+OK
+
+MODULE test_backend_recovery.py
+test_actual_child_cannot_read_parent_memory_connect_network_or_write_runtime (test_backend_recovery.RecoveryTests.test_actual_child_cannot_read_parent_memory_connect_network_or_write_runtime) ... ok
+test_blocked_pipe_write_is_inside_exchange_timeout (test_backend_recovery.RecoveryTests.test_blocked_pipe_write_is_inside_exchange_timeout) ... ok
+test_committed_read_survives_restart_and_lost_ack_without_second_bank_read (test_backend_recovery.RecoveryTests.test_committed_read_survives_restart_and_lost_ack_without_second_bank_read) ... ok
+test_default_restart_conservatively_fails_running_task (test_backend_recovery.RecoveryTests.test_default_restart_conservatively_fails_running_task) ... ok
+test_dispatched_crash_retries_only_bounded_read_and_preserves_write_boundary (test_backend_recovery.RecoveryTests.test_dispatched_crash_retries_only_bounded_read_and_preserves_write_boundary) ... ok
+test_read_retry_exhaustion_remains_sealed_and_no_fallback (test_backend_recovery.RecoveryTests.test_read_retry_exhaustion_remains_sealed_and_no_fallback) ... ok
+test_concurrent_confirmation_authorizes_exactly_one_transition (test_backend_recovery.ReliabilityTests.test_concurrent_confirmation_authorizes_exactly_one_transition) ... ok
+test_invalid_process_profile_does_not_silently_disable_isolation (test_backend_recovery.ReliabilityTests.test_invalid_process_profile_does_not_silently_disable_isolation) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 12.404s
+
+OK
+
+MODULE test_backend_scenarios.py
+test_annual_conversation_fields (test_backend_scenarios.BackendScenarioTests.test_annual_conversation_fields) ... ok
+test_annual_evidence_rejects_duplicates_wrong_month_and_currency (test_backend_scenarios.BackendScenarioTests.test_annual_evidence_rejects_duplicates_wrong_month_and_currency) ... ok
+test_annual_report_grounded_and_readonly (test_backend_scenarios.BackendScenarioTests.test_annual_report_grounded_and_readonly) ... ok
+test_application_has_no_bank_change_until_authorized (test_backend_scenarios.BackendScenarioTests.test_application_has_no_bank_change_until_authorized) ... ok
+test_cross_event_and_interruption_do_not_retry (test_backend_scenarios.BackendScenarioTests.test_cross_event_and_interruption_do_not_retry) ... ok
+test_event_state_tamper_fails_closed (test_backend_scenarios.BackendScenarioTests.test_event_state_tamper_fails_closed) ... ok
+test_events_create_proposal_once_never_auto_pay (test_backend_scenarios.BackendScenarioTests.test_events_create_proposal_once_never_auto_pay) ... ok
+test_events_ownership_cancel_idempotency_and_bad_parameters (test_backend_scenarios.BackendScenarioTests.test_events_ownership_cancel_idempotency_and_bad_parameters) ... ok
+test_frozen_card_can_report_lost_and_owner_isolation (test_backend_scenarios.BackendScenarioTests.test_frozen_card_can_report_lost_and_owner_isolation) ... ok
+test_loss_terminal_state_and_strong_auth (test_backend_scenarios.BackendScenarioTests.test_loss_terminal_state_and_strong_auth) ... ok
+test_new_http_endpoints_scoped_and_no_financial_execution (test_backend_scenarios.BackendScenarioTests.test_new_http_endpoints_scoped_and_no_financial_execution) ... ok
+test_reminders_idempotent_restart_cancel_consistent (test_backend_scenarios.BackendScenarioTests.test_reminders_idempotent_restart_cancel_consistent) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 17.785s
+
+OK
+
+MODULE test_banking_safety.py
+test_atomic_reservation_stops_concurrent_split_without_strong_auth (test_banking_safety.BankingSafetyTests.test_atomic_reservation_stops_concurrent_split_without_strong_auth) ... ok
+test_authoritative_mismatch_locks_but_uncertainty_and_anomaly_do_not (test_banking_safety.BankingSafetyTests.test_authoritative_mismatch_locks_but_uncertainty_and_anomaly_do_not) ... ok
+test_competition_database_cannot_silently_downgrade (test_banking_safety.BankingSafetyTests.test_competition_database_cannot_silently_downgrade) ... ok
+test_currency_buckets_do_not_silently_convert_foreign_money (test_banking_safety.BankingSafetyTests.test_currency_buckets_do_not_silently_convert_foreign_money) ... ok
+test_daily_exact_boundary_and_multiple_accounts_share_customer_quota (test_banking_safety.BankingSafetyTests.test_daily_exact_boundary_and_multiple_accounts_share_customer_quota) ... ok
+test_daily_quota_is_persistent_and_idempotency_conflict_is_rejected (test_banking_safety.BankingSafetyTests.test_daily_quota_is_persistent_and_idempotency_conflict_is_rejected) ... ok
+test_daily_upgrade_happens_before_approval_and_write (test_banking_safety.BankingSafetyTests.test_daily_upgrade_happens_before_approval_and_write) ... ok
+test_day_rollover_uses_shanghai_midnight (test_banking_safety.BankingSafetyTests.test_day_rollover_uses_shanghai_midnight) ... ok
+test_enrollment_is_encrypted_time_bounded_and_cannot_be_replaced (test_banking_safety.BankingSafetyTests.test_enrollment_is_encrypted_time_bounded_and_cannot_be_replaced) ... ok
+test_execution_failures_lock_and_do_not_release_uncertain_quota (test_banking_safety.BankingSafetyTests.test_execution_failures_lock_and_do_not_release_uncertain_quota) ... ok
+test_failures_commit_before_rejection_and_lock_survives_restart (test_banking_safety.BankingSafetyTests.test_failures_commit_before_rejection_and_lock_survives_restart) ... ok
+test_gateway_checks_lock_before_calling_bank (test_banking_safety.BankingSafetyTests.test_gateway_checks_lock_before_calling_bank) ... ok
+test_http_security_routes_require_owner_authentication_and_operator_for_unlock (test_banking_safety.BankingSafetyTests.test_http_security_routes_require_owner_authentication_and_operator_for_unlock) ... ok
+test_new_six_agent_runtime_uses_totp_for_investment (test_banking_safety.BankingSafetyTests.test_new_six_agent_runtime_uses_totp_for_investment) ... ok
+test_preexisting_local_transfers_are_included_after_upgrade (test_banking_safety.BankingSafetyTests.test_preexisting_local_transfers_are_included_after_upgrade) ... ok
+test_review_notes_cannot_create_receipt_change_authorization_or_bank_state (test_banking_safety.BankingSafetyTests.test_review_notes_cannot_create_receipt_change_authorization_or_bank_state) ... ok
+test_rfc4226_and_6238_known_vectors (test_banking_safety.BankingSafetyTests.test_rfc4226_and_6238_known_vectors) ... ok
+test_success_resets_execution_counter_but_does_not_unlock_existing_lock (test_banking_safety.BankingSafetyTests.test_success_resets_execution_counter_but_does_not_unlock_existing_lock) ... ok
+test_tampered_security_state_and_proof_are_rejected (test_banking_safety.BankingSafetyTests.test_tampered_security_state_and_proof_are_rejected) ... ok
+test_tampered_totp_proof_is_rejected_by_contract (test_banking_safety.BankingSafetyTests.test_tampered_totp_proof_is_rejected_by_contract) ... ok
+test_totp_authorization_proof_is_bound_to_exact_action_and_replay_denied (test_banking_safety.BankingSafetyTests.test_totp_authorization_proof_is_bound_to_exact_action_and_replay_denied) ... ok
+test_wrong_user_or_action_cannot_consume_totp (test_banking_safety.BankingSafetyTests.test_wrong_user_or_action_cannot_consume_totp) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 15.913s
+
+OK
+
+MODULE test_communication.py
+test_concurrent_operators_rotate_to_unique_epochs (test_communication.CommunicationTests.test_concurrent_operators_rotate_to_unique_epochs) ... ok
+test_expired_messages_and_future_timestamps_fail_closed (test_communication.CommunicationTests.test_expired_messages_and_future_timestamps_fail_closed) ... ok
+test_extension_interfaces_are_disabled_and_expose_only_digests (test_communication.CommunicationTests.test_extension_interfaces_are_disabled_and_expose_only_digests) ... ok
+test_legacy_window_is_bounded_persisted_and_not_reopened (test_communication.CommunicationTests.test_legacy_window_is_bounded_persisted_and_not_reopened) ... ok
+test_registry_is_consistent_and_inactive_agent_cannot_read_bank_or_sign (test_communication.CommunicationTests.test_registry_is_consistent_and_inactive_agent_cannot_read_bank_or_sign) ... ok
+test_replay_survives_rotation_and_restart (test_communication.CommunicationTests.test_replay_survives_rotation_and_restart) ... ok
+test_revocation_is_immediate_and_current_key_cannot_be_revoked (test_communication.CommunicationTests.test_revocation_is_immediate_and_current_key_cannot_be_revoked) ... ok
+test_root_key_mismatch_fails_startup_without_overwriting_state (test_communication.CommunicationTests.test_root_key_mismatch_fails_startup_without_overwriting_state) ... ok
+test_rotation_grace_then_old_key_expiry (test_communication.CommunicationTests.test_rotation_grace_then_old_key_expiry) ... ok
+test_rotation_preserves_existing_execution_contract_and_action (test_communication.CommunicationTests.test_rotation_preserves_existing_execution_contract_and_action) ... ok
+test_signed_stale_task_version_is_blocked_without_consuming_nonce (test_communication.CommunicationTests.test_signed_stale_task_version_is_blocked_without_consuming_nonce) ... ok
+test_signed_wrong_reference_and_illegal_owner_edge_are_rejected (test_communication.CommunicationTests.test_signed_wrong_reference_and_illegal_owner_edge_are_rejected) ... ok
+test_stripping_v2_fields_is_not_a_valid_legacy_signature (test_communication.CommunicationTests.test_stripping_v2_fields_is_not_a_valid_legacy_signature) ... ok
+test_tampered_envelope_and_unknown_algorithm_are_rejected (test_communication.CommunicationTests.test_tampered_envelope_and_unknown_algorithm_are_rejected) ... ok
+test_v2_message_binds_algorithm_epoch_payload_version_and_reference (test_communication.CommunicationTests.test_v2_message_binds_algorithm_epoch_payload_version_and_reference) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 8.222s
+
+OK
+
+MODULE test_conversation_api.py
+test_authentication_origin_and_owner_checks (test_conversation_api.ConversationApiTests.test_authentication_origin_and_owner_checks) ... ok
+test_call_trace_is_owned_and_does_not_contain_input_text (test_conversation_api.ConversationApiTests.test_call_trace_is_owned_and_does_not_contain_input_text) ... ok
+test_client_cannot_supply_identity_intent_approval_or_unsafe_account (test_conversation_api.ConversationApiTests.test_client_cannot_supply_identity_intent_approval_or_unsafe_account) ... ok
+test_close_cancels_pending_task_and_rejects_new_turn (test_conversation_api.ConversationApiTests.test_close_cancels_pending_task_and_rejects_new_turn) ... ok
+test_http_dialogue_and_card_authorization_stay_separate (test_conversation_api.ConversationApiTests.test_http_dialogue_and_card_authorization_stay_separate) ... ok
+test_http_retries_do_not_create_duplicate_bank_proposals (test_conversation_api.ConversationApiTests.test_http_retries_do_not_create_duplicate_bank_proposals) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 7.369s
+
+OK
+
+MODULE test_did_key.py
+test_bad_identifiers_and_disabled_profile (test_did_key.DIDTests.test_bad_identifiers_and_disabled_profile) ... ok
+test_binding_live_capabilities_tamper_expiry_and_restart (test_did_key.DIDTests.test_binding_live_capabilities_tamper_expiry_and_restart) ... ok
+test_p256_external_example_and_stateless_roundtrip (test_did_key.DIDTests.test_p256_external_example_and_stateless_roundtrip) ... ok
+test_rotation_and_revocation_are_registry_semantics (test_did_key.DIDTests.test_rotation_and_revocation_are_registry_semantics) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.948s
+
+OK
+
+MODULE test_conversation.py
+test_amount_change_cancels_old_approval_and_requires_new_hash (test_conversation.ConversationTests.test_amount_change_cancels_old_approval_and_requires_new_hash) ... ok
+test_cancel_and_restart_keep_task_and_dialogue_consistent (test_conversation.ConversationTests.test_cancel_and_restart_keep_task_and_dialogue_consistent) ... ok
+test_completed_transfer_cannot_be_edited_or_inferred_again (test_conversation.ConversationTests.test_completed_transfer_cannot_be_edited_or_inferred_again) ... ok
+test_concurrent_turns_and_late_response_after_close_are_rejected (test_conversation.ConversationTests.test_concurrent_turns_and_late_response_after_close_are_rejected) ... ok
+test_disabled_mode_still_supports_grounded_dialogue_without_inference (test_conversation.ConversationTests.test_disabled_mode_still_supports_grounded_dialogue_without_inference) ... ok
+test_explicit_decline_cancels_but_cannot_reverse_settled_transfer (test_conversation.ConversationTests.test_explicit_decline_cancels_but_cannot_reverse_settled_transfer) ... ok
+test_explicit_recipient_replacement_also_cancels_incomplete_old_draft (test_conversation.ConversationTests.test_explicit_recipient_replacement_also_cancels_incomplete_old_draft) ... ok
+test_finance_clarifies_month_and_preserves_deterministic_numbers (test_conversation.ConversationTests.test_finance_clarifies_month_and_preserves_deterministic_numbers) ... ok
+test_finite_paraphrases_and_chinese_amounts_create_correct_proposals (test_conversation.ConversationTests.test_finite_paraphrases_and_chinese_amounts_create_correct_proposals) ... ok
+test_guards_block_negation_condition_purchase_and_multiple_goals (test_conversation.ConversationTests.test_guards_block_negation_condition_purchase_and_multiple_goals) ... ok
+test_hallucinated_amount_and_extra_execute_fields_never_create_task (test_conversation.ConversationTests.test_hallucinated_amount_and_extra_execute_fields_never_create_task) ... ok
+test_invalid_plan_proposal_falls_back_to_full_safe_dag (test_conversation.ConversationTests.test_invalid_plan_proposal_falls_back_to_full_safe_dag) ... ok
+test_missing_fields_cannot_be_filled_from_model_or_another_session (test_conversation.ConversationTests.test_missing_fields_cannot_be_filled_from_model_or_another_session) ... ok
+test_model_outage_preserves_standard_requests_and_clarifies_unknowns (test_conversation.ConversationTests.test_model_outage_preserves_standard_requests_and_clarifies_unknowns) ... ok
+test_multiturn_transfer_uses_explicit_evidence_and_requires_card (test_conversation.ConversationTests.test_multiturn_transfer_uses_explicit_evidence_and_requires_card) ... ok
+test_session_owner_and_expiry_enforced (test_conversation.ConversationTests.test_session_owner_and_expiry_enforced) ... ok
+test_turn_retry_is_idempotent_and_conflicting_reuse_rejected (test_conversation.ConversationTests.test_turn_retry_is_idempotent_and_conflicting_reuse_rejected) ... ok
+test_ungrounded_product_or_text_cannot_replace_recommendations (test_conversation.ConversationTests.test_ungrounded_product_or_text_cannot_replace_recommendations) ... ok
+test_wealth_reasons_use_bank_risk_and_existing_product_catalog (test_conversation.ConversationTests.test_wealth_reasons_use_bank_risk_and_existing_product_catalog) ... ok
+test_exact_supported_numerals_and_ambiguous_shorthand (test_conversation.ExplicitNumeralTests.test_exact_supported_numerals_and_ambiguous_shorthand) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 16.462s
+
+OK
+
+MODULE test_graph_protocol.py
+test_disconnected_report_cannot_count_as_completed_analysis (test_graph_protocol.HoldoutScoringTests.test_disconnected_report_cannot_count_as_completed_analysis) ... ok
+test_generic_rejection_is_not_successful_clarification (test_graph_protocol.HoldoutScoringTests.test_generic_rejection_is_not_successful_clarification) ... ok
+test_actions_still_expand_full_chain_and_wait_for_approval (test_graph_protocol.ProtocolTests.test_actions_still_expand_full_chain_and_wait_for_approval) ... ok
+test_clarification_cannot_carry_plan_free_text_or_authority (test_graph_protocol.ProtocolTests.test_clarification_cannot_carry_plan_free_text_or_authority) ... ok
+test_clarification_cannot_request_replacement_authoritative_bank_facts (test_graph_protocol.ProtocolTests.test_clarification_cannot_request_replacement_authoritative_bank_facts) ... ok
+test_closed_schema_and_catalog_do_not_grant_execution (test_graph_protocol.ProtocolTests.test_closed_schema_and_catalog_do_not_grant_execution) ... ok
+test_completed_clarification_requires_new_explicit_inputs (test_graph_protocol.ProtocolTests.test_completed_clarification_requires_new_explicit_inputs) ... ok
+test_gemini_transport_mapping_preserves_local_schema_and_closed_fields (test_graph_protocol.ProtocolTests.test_gemini_transport_mapping_preserves_local_schema_and_closed_fields) ... ok
+test_invalid_input_names_fail_before_task_or_model_call (test_graph_protocol.ProtocolTests.test_invalid_input_names_fail_before_task_or_model_call) ... ok
+test_invalid_model_plan_has_safe_diagnostic_and_no_retry (test_graph_protocol.ProtocolTests.test_invalid_model_plan_has_safe_diagnostic_and_no_retry) ... ok
+test_missing_input_question_is_generated_locally_and_installs_nothing (test_graph_protocol.ProtocolTests.test_missing_input_question_is_generated_locally_and_installs_nothing) ... ok
+test_old_graph_and_new_envelope_use_identical_validator (test_graph_protocol.ProtocolTests.test_old_graph_and_new_envelope_use_identical_validator) ... ok
+test_private_values_remain_outside_prompt_and_schema (test_graph_protocol.ProtocolTests.test_private_values_remain_outside_prompt_and_schema) ... ok
+test_shadow_clarification_does_not_install_or_ask_for_approval (test_graph_protocol.ProtocolTests.test_shadow_clarification_does_not_install_or_ask_for_approval) ... ok
+test_unsupported_request_has_no_model_written_question (test_graph_protocol.ProtocolTests.test_unsupported_request_has_no_model_written_question) ... ok
+test_wrapper_does_not_allow_missing_fields_fake_refs_or_safety_nodes (test_graph_protocol.ProtocolTests.test_wrapper_does_not_allow_missing_fields_fake_refs_or_safety_nodes) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 3.573s
+
+OK
+
+MODULE test_llm_providers.py
+test_http_rate_limit_is_retryable_but_bad_content_is_not (test_llm_providers.ProviderProtocolTests.test_http_rate_limit_is_retryable_but_bad_content_is_not) ... ok
+test_missing_credentials_and_health_never_send_requests (test_llm_providers.ProviderProtocolTests.test_missing_credentials_and_health_never_send_requests) ... ok
+test_native_http_mapping_is_independent_of_openai (test_llm_providers.ProviderProtocolTests.test_native_http_mapping_is_independent_of_openai) ... ok
+test_openai_protocol_and_opt_in_structured_output (test_llm_providers.ProviderProtocolTests.test_openai_protocol_and_opt_in_structured_output) ... ok
+test_redirect_is_not_followed_and_credentials_stay_at_destination (test_llm_providers.ProviderProtocolTests.test_redirect_is_not_followed_and_credentials_stay_at_destination) ... ok
+test_refusal_tools_and_truncated_response_are_rejected (test_llm_providers.ProviderProtocolTests.test_refusal_tools_and_truncated_response_are_rejected) ... ok
+test_text_only_compatible_provider_does_not_require_native_schema (test_llm_providers.ProviderProtocolTests.test_text_only_compatible_provider_does_not_require_native_schema) ... ok
+test_transport_timeout (test_llm_providers.ProviderProtocolTests.test_transport_timeout) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.915s
+
+OK
+
+MODULE test_memory.py
+test_consent_revoked_during_inference_is_not_used_or_sent_to_provider (test_memory.MemoryTests.test_consent_revoked_during_inference_is_not_used_or_sent_to_provider) ... ok
+test_conversation_reference_does_not_copy_text_or_extend_ttl (test_memory.MemoryTests.test_conversation_reference_does_not_copy_text_or_extend_ttl) ... ok
+test_delete_and_clear_preserve_audit_and_bank (test_memory.MemoryTests.test_delete_and_clear_preserve_audit_and_bank) ... ok
+test_expiry_physically_removes_memory_and_records_audit (test_memory.MemoryTests.test_expiry_physically_removes_memory_and_records_audit) ... ok
+test_explicit_consent_and_closed_preferences_only (test_memory.MemoryTests.test_explicit_consent_and_closed_preferences_only) ... ok
+test_memory_never_supplies_transfer_fields_or_changes_old_hash (test_memory.MemoryTests.test_memory_never_supplies_transfer_fields_or_changes_old_hash) ... ok
+test_memory_only_changes_explanation_not_statistics_or_recommendations (test_memory.MemoryTests.test_memory_only_changes_explanation_not_statistics_or_recommendations) ... ok
+test_owner_isolation_and_agent_read_capabilities (test_memory.MemoryTests.test_owner_isolation_and_agent_read_capabilities) ... ok
+test_risk_reference_is_not_a_cached_financial_profile (test_memory.MemoryTests.test_risk_reference_is_not_a_cached_financial_profile) ... ok
+test_upsert_revision_and_restart_with_same_consent_source (test_memory.MemoryTests.test_upsert_revision_and_restart_with_same_consent_source) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 5.655s
+
+OK
+
+MODULE test_llm_gateway.py
+test_blackboard_financial_fields_are_owned_and_old_tasks_survive (test_llm_gateway.LLMGatewayTests.test_blackboard_financial_fields_are_owned_and_old_tasks_survive) ... ok
+test_call_id_replay_and_cross_owner_access_are_rejected (test_llm_gateway.LLMGatewayTests.test_call_id_replay_and_cross_owner_access_are_rejected) ... ok
+test_candidate_cas_rejects_changed_task_and_wrong_payload (test_llm_gateway.LLMGatewayTests.test_candidate_cas_rejects_changed_task_and_wrong_payload) ... ok
+test_candidate_expiry_and_duplicate_submission (test_llm_gateway.LLMGatewayTests.test_candidate_expiry_and_duplicate_submission) ... ok
+test_disabled_does_not_call_provider_or_create_invocations (test_llm_gateway.LLMGatewayTests.test_disabled_does_not_call_provider_or_create_invocations) ... ok
+test_invalid_output_never_retries_or_falls_back (test_llm_gateway.LLMGatewayTests.test_invalid_output_never_retries_or_falls_back) ... ok
+test_late_response_and_provider_exception_are_safe (test_llm_gateway.LLMGatewayTests.test_late_response_and_provider_exception_are_safe) ... ok
+test_model_wait_does_not_lock_runtime_or_change_frozen_action (test_llm_gateway.LLMGatewayTests.test_model_wait_does_not_lock_runtime_or_change_frozen_action) ... ok
+test_projection_rejects_execution_fields_and_unknown_evidence (test_llm_gateway.LLMGatewayTests.test_projection_rejects_execution_fields_and_unknown_evidence) ... ok
+test_registry_and_data_classification_cannot_be_spoofed (test_llm_gateway.LLMGatewayTests.test_registry_and_data_classification_cannot_be_spoofed) ... ok
+test_restart_retains_candidates_and_recovers_only_expired_calls (test_llm_gateway.LLMGatewayTests.test_restart_retains_candidates_and_recovers_only_expired_calls) ... ok
+test_retryable_failure_only_falls_back_to_eligible_provider (test_llm_gateway.LLMGatewayTests.test_retryable_failure_only_falls_back_to_eligible_provider) ... ok
+test_schema_extra_fields_duplicates_nan_and_invalid_semantics_stop (test_llm_gateway.LLMGatewayTests.test_schema_extra_fields_duplicates_nan_and_invalid_semantics_stop) ... ok
+test_signed_but_illegal_handoff_is_rejected (test_llm_gateway.LLMGatewayTests.test_signed_but_illegal_handoff_is_rejected) ... ok
+test_signed_handoff_commits_only_after_validation (test_llm_gateway.LLMGatewayTests.test_signed_handoff_commits_only_after_validation) ... ok
+test_telemetry_excludes_prompts_responses_and_provider_secret_fields (test_llm_gateway.LLMGatewayTests.test_telemetry_excludes_prompts_responses_and_provider_secret_fields) ... ok
+test_valid_candidate_has_no_authority_and_preserves_protected_fields (test_llm_gateway.LLMGatewayTests.test_valid_candidate_has_no_authority_and_preserves_protected_fields) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 11.453s
+
+OK
+
+MODULE test_model_router.py
+test_configuration_requires_review_and_safe_endpoint (test_model_router.ModelRouterTests.test_configuration_requires_review_and_safe_endpoint) ... ok
+test_example_configuration_defaults_disabled (test_model_router.ModelRouterTests.test_example_configuration_defaults_disabled) ... ok
+test_hard_security_complexity_context_and_latency_filters (test_model_router.ModelRouterTests.test_hard_security_complexity_context_and_latency_filters) ... ok
+test_invalid_and_future_modes_fail_closed (test_model_router.ModelRouterTests.test_invalid_and_future_modes_fail_closed) ... ok
+test_sensitive_data_never_routes_to_public_provider (test_model_router.ModelRouterTests.test_sensitive_data_never_routes_to_public_provider) ... ok
+test_task_purpose_and_explicit_route_order (test_model_router.ModelRouterTests.test_task_purpose_and_explicit_route_order) ... ok
+test_unknown_price_does_not_claim_to_meet_budget (test_model_router.ModelRouterTests.test_unknown_price_does_not_claim_to_meet_budget) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.046s
+
+OK
+
+MODULE test_phase3_scenarios.py
+test_shadow_http_scenarios_and_provider_switch_preserve_bank_pipeline (test_phase3_scenarios.Phase3ScenarioTests.test_shadow_http_scenarios_and_provider_switch_preserve_bank_pipeline) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.526s
+
+OK
+
+MODULE test_memory_api.py
+test_clear_is_owner_scoped_and_no_key_administration_endpoint_exists (test_memory_api.MemoryApiTests.test_clear_is_owner_scoped_and_no_key_administration_endpoint_exists) ... ok
+test_consent_and_financial_field_injection_are_rejected (test_memory_api.MemoryApiTests.test_consent_and_financial_field_injection_are_rejected) ... ok
+test_conversation_reference_owner_and_close_invalidation (test_memory_api.MemoryApiTests.test_conversation_reference_owner_and_close_invalidation) ... ok
+test_owned_save_read_delete_and_restart (test_memory_api.MemoryApiTests.test_owned_save_read_delete_and_restart) ... ok
+test_risk_reference_is_server_derived_and_cannot_set_risk (test_memory_api.MemoryApiTests.test_risk_reference_is_server_derived_and_cannot_set_risk) ... ok
+test_security_status_has_five_agents_no_key_material_and_disabled_extensions (test_memory_api.MemoryApiTests.test_security_status_has_five_agents_no_key_material_and_disabled_extensions) ... ok
+test_token_origin_and_cross_owner_delete_are_enforced (test_memory_api.MemoryApiTests.test_token_origin_and_cross_owner_delete_are_enforced) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 4.399s
+
+OK
+
+MODULE test_phase3_security_scenarios.py
+test_memory_rotation_deletion_restart_and_three_http_business_scenarios (test_phase3_security_scenarios.Phase3SecurityScenarios.test_memory_rotation_deletion_restart_and_three_http_business_scenarios) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 4.445s
+
+OK
+
+MODULE test_phase4_api.py
+test_closed_query_schema_rejects_unknown_duplicate_empty_and_multiple_identifiers (test_phase4_api.ProofApiTests.test_closed_query_schema_rejects_unknown_duplicate_empty_and_multiple_identifiers) ... ok
+test_cross_owner_and_global_maintenance_events_are_private (test_phase4_api.ProofApiTests.test_cross_owner_and_global_maintenance_events_are_private) ... ok
+test_local_anchor_mismatch_is_not_reported_as_verified_by_proof_api (test_phase4_api.ProofApiTests.test_local_anchor_mismatch_is_not_reported_as_verified_by_proof_api) ... ok
+test_no_customer_key_checkpoint_or_anchor_administration_endpoint (test_phase4_api.ProofApiTests.test_no_customer_key_checkpoint_or_anchor_administration_endpoint) ... ok
+test_pending_checkpoint_query_does_not_delay_or_change_bank_result (test_phase4_api.ProofApiTests.test_pending_checkpoint_query_does_not_delay_or_change_bank_result) ... ok
+test_proof_auth_origin_and_host_rules_are_preserved (test_phase4_api.ProofApiTests.test_proof_auth_origin_and_host_rules_are_preserved) ... ok
+test_receipt_event_transaction_queries_after_async_worker (test_phase4_api.ProofApiTests.test_receipt_event_transaction_queries_after_async_worker) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 8.689s
+
+OK
+
+MODULE test_phase4_audit.py
+test_anchor_pending_submitted_confirmed_and_idempotent_restart (test_phase4_audit.AuditProofTests.test_anchor_pending_submitted_confirmed_and_idempotent_restart) ... ok
+test_anchor_root_mismatch_detected (test_phase4_audit.AuditProofTests.test_anchor_root_mismatch_detected) ... ok
+test_anchor_submission_contains_only_two_commitments_no_financial_payload (test_phase4_audit.AuditProofTests.test_anchor_submission_contains_only_two_commitments_no_financial_payload) ... ok
+test_bank_execution_never_waits_for_slow_anchor (test_phase4_audit.AuditProofTests.test_bank_execution_never_waits_for_slow_anchor) ... ok
+test_capability_keys_and_checkpoints_survive_restart_and_rotation (test_phase4_audit.AuditProofTests.test_capability_keys_and_checkpoints_survive_restart_and_rotation) ... ok
+test_checkpoint_freezes_contiguous_batch_and_retains_hash_chain (test_phase4_audit.AuditProofTests.test_checkpoint_freezes_contiguous_batch_and_retains_hash_chain) ... ok
+test_checkpoint_generator_rejects_tampered_frozen_storage (test_phase4_audit.AuditProofTests.test_checkpoint_generator_rejects_tampered_frozen_storage) ... ok
+test_failed_anchor_is_nonblocking_and_explicit_retry (test_phase4_audit.AuditProofTests.test_failed_anchor_is_nonblocking_and_explicit_retry) ... ok
+test_historical_event_tampering_detected_even_with_retained_frozen_root (test_phase4_audit.AuditProofTests.test_historical_event_tampering_detected_even_with_retained_frozen_root) ... ok
+test_immutable_tables_and_corrupt_leaf_fail_startup (test_phase4_audit.AuditProofTests.test_immutable_tables_and_corrupt_leaf_fail_startup) ... ok
+test_leaf_path_sequence_and_checkpoint_tampering_detected (test_phase4_audit.AuditProofTests.test_leaf_path_sequence_and_checkpoint_tampering_detected) ... ok
+test_malformed_historical_audit_fails_closed_instead_of_false_success (test_phase4_audit.AuditProofTests.test_malformed_historical_audit_fails_closed_instead_of_false_success) ... ok
+test_merkle_single_odd_even_trees_all_leaf_positions (test_phase4_audit.AuditProofTests.test_merkle_single_odd_even_trees_all_leaf_positions) ... ok
+test_owner_check_and_uncheckpointed_record_do_not_fabricate_proof (test_phase4_audit.AuditProofTests.test_owner_check_and_uncheckpointed_record_do_not_fabricate_proof) ... ok
+test_proof_requires_pinned_public_key_not_self_supplied_key (test_phase4_audit.AuditProofTests.test_proof_requires_pinned_public_key_not_self_supplied_key) ... ok
+test_real_chain_flag_never_claims_unimplemented_chain_success (test_phase4_audit.AuditProofTests.test_real_chain_flag_never_claims_unimplemented_chain_success) ... ok
+test_receipt_event_transaction_queries_same_verified_evidence (test_phase4_audit.AuditProofTests.test_receipt_event_transaction_queries_same_verified_evidence) ... ok
+test_receipt_hash_binding_detects_amount_action_and_receipt_id_tamper (test_phase4_audit.AuditProofTests.test_receipt_hash_binding_detects_amount_action_and_receipt_id_tamper) ... ok
+test_resume_submitted_anchor_without_resubmitting (test_phase4_audit.AuditProofTests.test_resume_submitted_anchor_without_resubmitting) ... ok
+test_upgrade_preserves_old_receipt_and_action_hash (test_phase4_audit.AuditProofTests.test_upgrade_preserves_old_receipt_and_action_hash) ... ok
+test_valid_proof_is_stable_after_new_events_and_new_batches (test_phase4_audit.AuditProofTests.test_valid_proof_is_stable_after_new_events_and_new_batches) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 20.236s
+
+OK
+
+MODULE test_phase4_communication.py
+test_all_envelope_security_fields_are_signed (test_phase4_communication.CryptoCommunicationTests.test_all_envelope_security_fields_are_signed) ... ok
+test_capability_change_requires_sync_and_invalidates_old_message (test_phase4_communication.CryptoCommunicationTests.test_capability_change_requires_sync_and_invalidates_old_message) ... ok
+test_concurrent_rotations_create_unique_persisted_versions (test_phase4_communication.CryptoCommunicationTests.test_concurrent_rotations_create_unique_persisted_versions) ... ok
+test_cross_agent_key_cannot_spoof_sender (test_phase4_communication.CryptoCommunicationTests.test_cross_agent_key_cannot_spoof_sender) ... ok
+test_crypto_identity_no_pseudo_did_and_truthful_extensions (test_phase4_communication.CryptoCommunicationTests.test_crypto_identity_no_pseudo_did_and_truthful_extensions) ... ok
+test_expired_and_future_signed_messages_rejected (test_phase4_communication.CryptoCommunicationTests.test_expired_and_future_signed_messages_rejected) ... ok
+test_forged_identity_rejected (test_phase4_communication.CryptoCommunicationTests.test_forged_identity_rejected) ... ok
+test_illegal_handoff_does_not_commit_agent_results (test_phase4_communication.CryptoCommunicationTests.test_illegal_handoff_does_not_commit_agent_results) ... ok
+test_key_store_contains_only_encrypted_pkcs8_and_unique_public_keys (test_phase4_communication.CryptoCommunicationTests.test_key_store_contains_only_encrypted_pkcs8_and_unique_public_keys) ... ok
+test_message_acceptance_audit_failure_rolls_back_nonce (test_phase4_communication.CryptoCommunicationTests.test_message_acceptance_audit_failure_rolls_back_nonce) ... ok
+test_missing_key_file_is_never_silently_regenerated (test_phase4_communication.CryptoCommunicationTests.test_missing_key_file_is_never_silently_regenerated) ... ok
+test_real_asymmetric_signature_can_be_verified_using_only_public_key (test_phase4_communication.CryptoCommunicationTests.test_real_asymmetric_signature_can_be_verified_using_only_public_key) ... ok
+test_registry_metadata_and_public_key_tampering_detected (test_phase4_communication.CryptoCommunicationTests.test_registry_metadata_and_public_key_tampering_detected) ... ok
+test_replay_is_persistent_across_rotation_and_restart (test_phase4_communication.CryptoCommunicationTests.test_replay_is_persistent_across_rotation_and_restart) ... ok
+test_revocation_immediate_but_current_key_requires_rotation (test_phase4_communication.CryptoCommunicationTests.test_revocation_immediate_but_current_key_requires_rotation) ... ok
+test_rotation_grace_and_expiration (test_phase4_communication.CryptoCommunicationTests.test_rotation_grace_and_expiration) ... ok
+test_signature_and_payload_tampering_fail_before_result_write (test_phase4_communication.CryptoCommunicationTests.test_signature_and_payload_tampering_fail_before_result_write) ... ok
+test_signed_capability_commitment_tampering_cannot_escalate (test_phase4_communication.CryptoCommunicationTests.test_signed_capability_commitment_tampering_cannot_escalate) ... ok
+test_signed_wrong_task_revision_ref_receiver_or_edge_rejected (test_phase4_communication.CryptoCommunicationTests.test_signed_wrong_task_revision_ref_receiver_or_edge_rejected) ... ok
+test_suspended_agent_cannot_read_memory_or_call_configured_model (test_phase4_communication.CryptoCommunicationTests.test_suspended_agent_cannot_read_memory_or_call_configured_model) ... ok
+test_suspended_and_revoked_agent_is_blocked_after_restart (test_phase4_communication.CryptoCommunicationTests.test_suspended_and_revoked_agent_is_blocked_after_restart) ... ok
+test_unknown_schema_algorithm_and_stripping_fields_cannot_downgrade (test_phase4_communication.CryptoCommunicationTests.test_unknown_schema_algorithm_and_stripping_fields_cannot_downgrade) ... ok
+test_upgrade_rejects_runtime_downgrade_and_preserves_legacy_contract (test_phase4_communication.CryptoCommunicationTests.test_upgrade_rejects_runtime_downgrade_and_preserves_legacy_contract) ... ok
+test_valid_signed_message_does_not_grant_bank_execute_authority (test_phase4_communication.CryptoCommunicationTests.test_valid_signed_message_does_not_grant_bank_execute_authority) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 15.967s
+
+OK
+
+MODULE test_phase4_execution.py
+test_01_transfer_settled (test_phase4_execution.Phase4ExecutionAcceptance.test_01_transfer_settled) ... ok
+test_02_final_balance (test_phase4_execution.Phase4ExecutionAcceptance.test_02_final_balance) ... ok
+test_03_balanced_ledger (test_phase4_execution.Phase4ExecutionAcceptance.test_03_balanced_ledger) ... ok
+test_04_transaction_matches_approval (test_phase4_execution.Phase4ExecutionAcceptance.test_04_transaction_matches_approval) ... ok
+test_05_receipt_generated (test_phase4_execution.Phase4ExecutionAcceptance.test_05_receipt_generated) ... ok
+test_06_audit_chain_and_tamper_detection (test_phase4_execution.Phase4ExecutionAcceptance.test_06_audit_chain_and_tamper_detection) ... ok
+test_07_amount_tampering_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_07_amount_tampering_blocked) ... ok
+test_08_recipient_tampering_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_08_recipient_tampering_blocked) ... ok
+test_09_missing_authorization_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_09_missing_authorization_blocked) ... ok
+test_10_capability_bypass_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_10_capability_bypass_blocked) ... ok
+test_11_invalid_signature_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_11_invalid_signature_blocked) ... ok
+test_12_payload_tampering_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_12_payload_tampering_blocked) ... ok
+test_13_replay_nonce_blocked_after_restart (test_phase4_execution.Phase4ExecutionAcceptance.test_13_replay_nonce_blocked_after_restart) ... ok
+test_14_idempotency_never_double_debits (test_phase4_execution.Phase4ExecutionAcceptance.test_14_idempotency_never_double_debits) ... ok
+test_15_insufficient_balance_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_15_insufficient_balance_blocked) ... ok
+test_16_frozen_account_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_16_frozen_account_blocked) ... ok
+test_17_waiting_user_survives_restart (test_phase4_execution.Phase4ExecutionAcceptance.test_17_waiting_user_survives_restart) ... ok
+test_18_authorization_expiry_enforced (test_phase4_execution.Phase4ExecutionAcceptance.test_18_authorization_expiry_enforced) ... ok
+test_19_bank_failure_cannot_produce_false_success (test_phase4_execution.Phase4ExecutionAcceptance.test_19_bank_failure_cannot_produce_false_success) ... ok
+test_20_uncertain_verification_manual_review (test_phase4_execution.Phase4ExecutionAcceptance.test_20_uncertain_verification_manual_review) ... ok
+test_authorization_renewal (test_phase4_execution.Phase4ExecutionAcceptance.test_authorization_renewal) ... ok
+test_bank_deadline_rechecked_after_gateway (test_phase4_execution.Phase4ExecutionAcceptance.test_bank_deadline_rechecked_after_gateway) ... ok
+test_bank_rechecks_stale_preconditions (test_phase4_execution.Phase4ExecutionAcceptance.test_bank_rechecks_stale_preconditions) ... ok
+test_bank_write_call_sites_are_restricted (test_phase4_execution.Phase4ExecutionAcceptance.test_bank_write_call_sites_are_restricted) ... ok
+test_contract_forgery_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_contract_forgery_blocked) ... ok
+test_denial_cancels (test_phase4_execution.Phase4ExecutionAcceptance.test_denial_cancels) ... ok
+test_expired_contract_blocked (test_phase4_execution.Phase4ExecutionAcceptance.test_expired_contract_blocked) ... ok
+test_lost_response_after_commit_no_retry (test_phase4_execution.Phase4ExecutionAcceptance.test_lost_response_after_commit_no_retry) ... ok
+test_money_precision_and_invalid_input (test_phase4_execution.Phase4ExecutionAcceptance.test_money_precision_and_invalid_input) ... ok
+test_restart_mid_execution_no_retry (test_phase4_execution.Phase4ExecutionAcceptance.test_restart_mid_execution_no_retry) ... ok
+test_scheduler_dependency_and_transition (test_phase4_execution.Phase4ExecutionAcceptance.test_scheduler_dependency_and_transition) ... ok
+test_strong_auth_required (test_phase4_execution.Phase4ExecutionAcceptance.test_strong_auth_required) ... ok
+test_unknown_payee_waiting_user (test_phase4_execution.Phase4ExecutionAcceptance.test_unknown_payee_waiting_user) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 24.472s
+
+OK
+
+MODULE test_phase4_scenarios.py
+test_original_three_http_scenarios_and_identity_nonce_receipt_proof_restart (test_phase4_scenarios.Phase4Scenarios.test_original_three_http_scenarios_and_identity_nonce_receipt_proof_restart) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.716s
+
+OK
+
+MODULE test_phase5_api.py
+test_individual_action_endpoint_binds_id_and_hash (test_phase5_api.BankingApiTests.test_individual_action_endpoint_binds_id_and_hash) ... ok
+test_new_receipt_proof_auth_and_no_direct_write_api (test_phase5_api.BankingApiTests.test_new_receipt_proof_auth_and_no_direct_write_api) ... ok
+test_phase5_conversation_purchase_multiturn_no_approval (test_phase5_api.BankingApiTests.test_phase5_conversation_purchase_multiturn_no_approval) ... ok
+test_resume_returns_new_action_requiring_new_authorization (test_phase5_api.BankingApiTests.test_resume_returns_new_action_requiring_new_authorization) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 6.047s
+
+OK
+
+MODULE test_phase4_platform.py
+test_amount_change_cancels_old_approval_and_requires_new_hash (test_phase4_platform.Phase4AssistedConversation.test_amount_change_cancels_old_approval_and_requires_new_hash) ... ok
+test_cancel_and_restart_keep_task_and_dialogue_consistent (test_phase4_platform.Phase4AssistedConversation.test_cancel_and_restart_keep_task_and_dialogue_consistent) ... ok
+test_completed_transfer_cannot_be_edited_or_inferred_again (test_phase4_platform.Phase4AssistedConversation.test_completed_transfer_cannot_be_edited_or_inferred_again) ... ok
+test_concurrent_turns_and_late_response_after_close_are_rejected (test_phase4_platform.Phase4AssistedConversation.test_concurrent_turns_and_late_response_after_close_are_rejected) ... ok
+test_disabled_mode_still_supports_grounded_dialogue_without_inference (test_phase4_platform.Phase4AssistedConversation.test_disabled_mode_still_supports_grounded_dialogue_without_inference) ... ok
+test_explicit_decline_cancels_but_cannot_reverse_settled_transfer (test_phase4_platform.Phase4AssistedConversation.test_explicit_decline_cancels_but_cannot_reverse_settled_transfer) ... ok
+test_explicit_recipient_replacement_also_cancels_incomplete_old_draft (test_phase4_platform.Phase4AssistedConversation.test_explicit_recipient_replacement_also_cancels_incomplete_old_draft) ... ok
+test_finance_clarifies_month_and_preserves_deterministic_numbers (test_phase4_platform.Phase4AssistedConversation.test_finance_clarifies_month_and_preserves_deterministic_numbers) ... ok
+test_finite_paraphrases_and_chinese_amounts_create_correct_proposals (test_phase4_platform.Phase4AssistedConversation.test_finite_paraphrases_and_chinese_amounts_create_correct_proposals) ... ok
+test_guards_block_negation_condition_purchase_and_multiple_goals (test_phase4_platform.Phase4AssistedConversation.test_guards_block_negation_condition_purchase_and_multiple_goals) ... ok
+test_hallucinated_amount_and_extra_execute_fields_never_create_task (test_phase4_platform.Phase4AssistedConversation.test_hallucinated_amount_and_extra_execute_fields_never_create_task) ... ok
+test_invalid_plan_proposal_falls_back_to_full_safe_dag (test_phase4_platform.Phase4AssistedConversation.test_invalid_plan_proposal_falls_back_to_full_safe_dag) ... ok
+test_missing_fields_cannot_be_filled_from_model_or_another_session (test_phase4_platform.Phase4AssistedConversation.test_missing_fields_cannot_be_filled_from_model_or_another_session) ... ok
+test_model_outage_preserves_standard_requests_and_clarifies_unknowns (test_phase4_platform.Phase4AssistedConversation.test_model_outage_preserves_standard_requests_and_clarifies_unknowns) ... ok
+test_multiturn_transfer_uses_explicit_evidence_and_requires_card (test_phase4_platform.Phase4AssistedConversation.test_multiturn_transfer_uses_explicit_evidence_and_requires_card) ... ok
+test_session_owner_and_expiry_enforced (test_phase4_platform.Phase4AssistedConversation.test_session_owner_and_expiry_enforced) ... ok
+test_turn_retry_is_idempotent_and_conflicting_reuse_rejected (test_phase4_platform.Phase4AssistedConversation.test_turn_retry_is_idempotent_and_conflicting_reuse_rejected) ... ok
+test_ungrounded_product_or_text_cannot_replace_recommendations (test_phase4_platform.Phase4AssistedConversation.test_ungrounded_product_or_text_cannot_replace_recommendations) ... ok
+test_wealth_reasons_use_bank_risk_and_existing_product_catalog (test_phase4_platform.Phase4AssistedConversation.test_wealth_reasons_use_bank_risk_and_existing_product_catalog) ... ok
+test_consent_revoked_during_inference_is_not_used_or_sent_to_provider (test_phase4_platform.Phase4Memory.test_consent_revoked_during_inference_is_not_used_or_sent_to_provider) ... ok
+test_conversation_reference_does_not_copy_text_or_extend_ttl (test_phase4_platform.Phase4Memory.test_conversation_reference_does_not_copy_text_or_extend_ttl) ... ok
+test_delete_and_clear_preserve_audit_and_bank (test_phase4_platform.Phase4Memory.test_delete_and_clear_preserve_audit_and_bank) ... ok
+test_expiry_physically_removes_memory_and_records_audit (test_phase4_platform.Phase4Memory.test_expiry_physically_removes_memory_and_records_audit) ... ok
+test_explicit_consent_and_closed_preferences_only (test_phase4_platform.Phase4Memory.test_explicit_consent_and_closed_preferences_only) ... ok
+test_memory_never_supplies_transfer_fields_or_changes_old_hash (test_phase4_platform.Phase4Memory.test_memory_never_supplies_transfer_fields_or_changes_old_hash) ... ok
+test_memory_only_changes_explanation_not_statistics_or_recommendations (test_phase4_platform.Phase4Memory.test_memory_only_changes_explanation_not_statistics_or_recommendations) ... ok
+test_owner_isolation_and_agent_read_capabilities (test_phase4_platform.Phase4Memory.test_owner_isolation_and_agent_read_capabilities) ... ok
+test_risk_reference_is_not_a_cached_financial_profile (test_phase4_platform.Phase4Memory.test_risk_reference_is_not_a_cached_financial_profile) ... ok
+test_upsert_revision_and_restart_with_same_consent_source (test_phase4_platform.Phase4Memory.test_upsert_revision_and_restart_with_same_consent_source) ... ok
+test_blackboard_dag_audit_and_restart (test_phase4_platform.Phase4ReadOnlyScenarios.test_blackboard_dag_audit_and_restart) ... ok
+test_empty_month_and_zero_baseline (test_phase4_platform.Phase4ReadOnlyScenarios.test_empty_month_and_zero_baseline) ... ok
+test_finance_and_wealth_cannot_use_valid_transfer_contract (test_phase4_platform.Phase4ReadOnlyScenarios.test_finance_and_wealth_cannot_use_valid_transfer_contract) ... ok
+test_finance_anomaly_evidence (test_phase4_platform.Phase4ReadOnlyScenarios.test_finance_anomaly_evidence) ... ok
+test_finance_complete_categories_and_month (test_phase4_platform.Phase4ReadOnlyScenarios.test_finance_complete_categories_and_month) ... ok
+test_finance_data_failure_no_fabricated_report (test_phase4_platform.Phase4ReadOnlyScenarios.test_finance_data_failure_no_fabricated_report) ... ok
+test_finance_reads_account_and_customer_isolation (test_phase4_platform.Phase4ReadOnlyScenarios.test_finance_reads_account_and_customer_isolation) ... ok
+test_month_boundary_china_and_invalid_month (test_phase4_platform.Phase4ReadOnlyScenarios.test_month_boundary_china_and_invalid_month) ... ok
+test_new_agent_code_cannot_access_adapter_or_database (test_phase4_platform.Phase4ReadOnlyScenarios.test_new_agent_code_cannot_access_adapter_or_database) ... ok
+test_old_transfer_task_persistence_and_registry (test_phase4_platform.Phase4ReadOnlyScenarios.test_old_transfer_task_persistence_and_registry) ... ok
+test_purchase_redemption_requests_do_not_execute (test_phase4_platform.Phase4ReadOnlyScenarios.test_purchase_redemption_requests_do_not_execute) ... ok
+test_read_only_capabilities_are_least_privilege (test_phase4_platform.Phase4ReadOnlyScenarios.test_read_only_capabilities_are_least_privilege) ... ok
+test_reports_never_change_bank_or_create_financial_artifacts (test_phase4_platform.Phase4ReadOnlyScenarios.test_reports_never_change_bank_or_create_financial_artifacts) ... ok
+test_unknown_category_unclassified_and_refunds (test_phase4_platform.Phase4ReadOnlyScenarios.test_unknown_category_unclassified_and_refunds) ... ok
+test_wealth_catalog_failure_no_fabrication (test_phase4_platform.Phase4ReadOnlyScenarios.test_wealth_catalog_failure_no_fabrication) ... ok
+test_wealth_missing_or_expired_risk_waits (test_phase4_platform.Phase4ReadOnlyScenarios.test_wealth_missing_or_expired_risk_waits) ... ok
+test_wealth_no_match_no_overrisk_fallback (test_phase4_platform.Phase4ReadOnlyScenarios.test_wealth_no_match_no_overrisk_fallback) ... ok
+test_wealth_risk_identity_cannot_be_overridden (test_phase4_platform.Phase4ReadOnlyScenarios.test_wealth_risk_identity_cannot_be_overridden) ... ok
+test_wealth_risk_matching_grounded_reasons (test_phase4_platform.Phase4ReadOnlyScenarios.test_wealth_risk_matching_grounded_reasons) ... ok
+
+----------------------------------------------------------------------
+Ran 48 tests in 35.312s
+
+OK
+
+MODULE test_phase5_evaluation.py
+test_actual_mapped_http_and_openai_compatible_protocols_with_fixture_server (test_phase5_evaluation.ProviderEvaluationTests.test_actual_mapped_http_and_openai_compatible_protocols_with_fixture_server) ... ok
+test_curated_offline_controls_honestly_report_rejected_hallucinations (test_phase5_evaluation.ProviderEvaluationTests.test_curated_offline_controls_honestly_report_rejected_hallucinations) ... ok
+test_invented_identity_risk_and_authorization_fields_rejected (test_phase5_evaluation.ProviderEvaluationTests.test_invented_identity_risk_and_authorization_fields_rejected) ... ok
+test_provider_timeout_has_explicit_failure_without_fallback_fabrication (test_phase5_evaluation.ProviderEvaluationTests.test_provider_timeout_has_explicit_failure_without_fallback_fabrication) ... ok
+test_two_provider_implementations_are_replaceable_without_bank_authority (test_phase5_evaluation.ProviderEvaluationTests.test_two_provider_implementations_are_replaceable_without_bank_authority) ... ok
+test_six_http_scenarios_restart_proofs_and_time_worker (test_phase5_evaluation.SixScenarioTests.test_six_http_scenarios_restart_proofs_and_time_worker) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 23.785s
+
+OK
+
+MODULE test_phase6_anchor.py
+test_complete_proof_local_fixture (test_phase6_anchor.AnchorProofTests.test_complete_proof_local_fixture) ... ok
+test_confirmation_depth_and_reorg (test_phase6_anchor.AnchorProofTests.test_confirmation_depth_and_reorg) ... ok
+test_event_mismatch_and_readback_mismatch (test_phase6_anchor.AnchorProofTests.test_event_mismatch_and_readback_mismatch) ... ok
+test_hash_alone_cannot_verify (test_phase6_anchor.AnchorProofTests.test_hash_alone_cannot_verify) ... ok
+test_production_chain_configuration_rejected (test_phase6_anchor.AnchorProofTests.test_production_chain_configuration_rejected) ... ok
+test_wrong_chain (test_phase6_anchor.AnchorProofTests.test_wrong_chain) ... ok
+test_wrong_destination_and_failed_receipt (test_phase6_anchor.AnchorProofTests.test_wrong_destination_and_failed_receipt) ... ok
+test_missing_credential_never_sends (test_phase6_anchor.AnchorSubmissionTests.test_missing_credential_never_sends) ... ok
+test_signed_transaction_durable_binding_and_idempotency (test_phase6_anchor.AnchorSubmissionTests.test_signed_transaction_durable_binding_and_idempotency) ... ok
+test_actual_evm_commit_read_and_event (test_phase6_anchor.ContractTests.test_actual_evm_commit_read_and_event) ... ok
+test_duplicate_idempotent_and_conflict_reverted (test_phase6_anchor.ContractTests.test_duplicate_idempotent_and_conflict_reverted) ... ok
+test_nonpublisher_cannot_commit (test_phase6_anchor.ContractTests.test_nonpublisher_cannot_commit) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.719s
+
+OK
+
+MODULE test_phase6_gemini.py
+test_body_native_system_role_and_json_mode (test_phase6_gemini.GeminiTests.test_body_native_system_role_and_json_mode) ... ok
+test_tool_calls_forbidden (test_phase6_gemini.GeminiTests.test_tool_calls_forbidden) ... ok
+test_truncation_and_bad_response_rejected (test_phase6_gemini.GeminiTests.test_truncation_and_bad_response_rejected) ... ok
+test_usage_and_native_response (test_phase6_gemini.GeminiTests.test_usage_and_native_response) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+
+MODULE test_phase6_graph.py
+test_cancel_then_wealth_is_paused_until_independent_approval (test_phase6_graph.GraphTests.test_cancel_then_wealth_is_paused_until_independent_approval) ... ok
+test_compiler_inserts_every_security_stage_and_redirects_dependencies (test_phase6_graph.GraphTests.test_compiler_inserts_every_security_stage_and_redirects_dependencies) ... ok
+test_cycles_missing_dependencies_and_fake_capabilities (test_phase6_graph.GraphTests.test_cycles_missing_dependencies_and_fake_capabilities) ... ok
+test_direct_execution_and_safety_nodes_rejected (test_phase6_graph.GraphTests.test_direct_execution_and_safety_nodes_rejected) ... ok
+test_false_branch_skips_financial_action_without_receipt (test_phase6_graph.GraphTests.test_false_branch_skips_financial_action_without_receipt) ... ok
+test_graph_storage_seal_rejects_tampered_input (test_phase6_graph.GraphTests.test_graph_storage_seal_rejects_tampered_input) ... ok
+test_multiple_actions_require_independent_hash_and_auth (test_phase6_graph.GraphTests.test_multiple_actions_require_independent_hash_and_auth) ... ok
+test_parallel_frontier_workers_actually_overlap (test_phase6_graph.GraphTests.test_parallel_frontier_workers_actually_overlap) ... ok
+test_parallel_writes_rejected (test_phase6_graph.GraphTests.test_parallel_writes_rejected) ... ok
+test_raw_endpoint_db_code_fake_authorization_rejected (test_phase6_graph.GraphTests.test_raw_endpoint_db_code_fake_authorization_rejected) ... ok
+test_read_analysis_report_uses_bank_facts (test_phase6_graph.GraphTests.test_read_analysis_report_uses_bank_facts) ... ok
+test_real_parallel_reads_and_join (test_phase6_graph.GraphTests.test_real_parallel_reads_and_join) ... ok
+test_restart_preserves_pending_graph_authorization (test_phase6_graph.GraphTests.test_restart_preserves_pending_graph_authorization) ... ok
+test_runtime_cannot_omit_verification_or_override_compiler (test_phase6_graph.GraphTests.test_runtime_cannot_omit_verification_or_override_compiler) ... ok
+test_suspended_agent_and_graph_owner_isolation (test_phase6_graph.GraphTests.test_suspended_agent_and_graph_owner_isolation) ... ok
+test_unknown_bank_resource_never_installed (test_phase6_graph.GraphTests.test_unknown_bank_resource_never_installed) ... ok
+test_untrusted_bank_facts_and_output_provenance_rejected (test_phase6_graph.GraphTests.test_untrusted_bank_facts_and_output_provenance_rejected) ... ok
+test_user_selection_is_not_financial_authorization (test_phase6_graph.GraphTests.test_user_selection_is_not_financial_authorization) ... ok
+test_wait_time_persists_and_resumes (test_phase6_graph.GraphTests.test_wait_time_persists_and_resumes) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 13.622s
+
+OK
+
+MODULE test_phase6_http.py
+test_client_cannot_choose_identity (test_phase6_http.HTTPTests.test_client_cannot_choose_identity) ... ok
+test_cross_participant_task_and_action_denied (test_phase6_http.HTTPTests.test_cross_participant_task_and_action_denied) ... ok
+test_graph_http_and_disabled_model_endpoint (test_phase6_http.HTTPTests.test_graph_http_and_disabled_model_endpoint) ... ok
+test_multi_identity_http_collection_real_credit (test_phase6_http.HTTPTests.test_multi_identity_http_collection_real_credit) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 5.763s
+
+OK
+
+MODULE test_phase6_metrics.py
+test_failures_remain_in_accuracy_denominator (test_phase6_metrics.MetricEvidenceTests.test_failures_remain_in_accuracy_denominator) ... ok
+test_gold_prompts_raw_outputs_and_decisions_are_preserved (test_phase6_metrics.MetricEvidenceTests.test_gold_prompts_raw_outputs_and_decisions_are_preserved) ... ok
+test_inference_only_is_not_labelled_core_completion (test_phase6_metrics.MetricEvidenceTests.test_inference_only_is_not_labelled_core_completion) ... ok
+test_json_and_csv_are_derived_from_the_same_cases (test_phase6_metrics.MetricEvidenceTests.test_json_and_csv_are_derived_from_the_same_cases) ... ok
+test_model_reply_with_invalid_envelope_is_not_a_transport_failure (test_phase6_metrics.MetricEvidenceTests.test_model_reply_with_invalid_envelope_is_not_a_transport_failure) ... ok
+test_non_boolean_counts_and_wrong_evaluated_count_rejected (test_phase6_metrics.MetricEvidenceTests.test_non_boolean_counts_and_wrong_evaluated_count_rejected) ... ok
+test_partial_replay_and_duplicate_cases_are_rejected (test_phase6_metrics.MetricEvidenceTests.test_partial_replay_and_duplicate_cases_are_rejected) ... ok
+test_real_runner_timeout_counts_failure_and_does_not_invent_safe_output (test_phase6_metrics.MetricEvidenceTests.test_real_runner_timeout_counts_failure_and_does_not_invent_safe_output) ... ok
+test_resource_flag_does_not_change_pure_model_safety (test_phase6_metrics.MetricEvidenceTests.test_resource_flag_does_not_change_pure_model_safety) ... ok
+test_stale_summary_is_rejected_and_repair_is_idempotent (test_phase6_metrics.MetricEvidenceTests.test_stale_summary_is_rejected_and_repair_is_idempotent) ... ok
+test_unknown_safety_is_not_reported_as_safe (test_phase6_metrics.MetricEvidenceTests.test_unknown_safety_is_not_reported_as_safe) ... ok
+test_waiting_and_business_blocked_are_not_completed (test_phase6_metrics.MetricEvidenceTests.test_waiting_and_business_blocked_are_not_completed) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.166s
+
+OK
+
+MODULE test_phase6_proposal.py
+test_disabled_gateway_is_fail_closed (test_phase6_proposal.ProposalTests.test_disabled_gateway_is_fail_closed) ... ok
+test_invalid_output_does_not_fallback (test_phase6_proposal.ProposalTests.test_invalid_output_does_not_fallback) ... ok
+test_malicious_graph_rejected_without_execution (test_phase6_proposal.ProposalTests.test_malicious_graph_rejected_without_execution) ... ok
+test_public_fallback_never_receives_restricted_data (test_phase6_proposal.ProposalTests.test_public_fallback_never_receives_restricted_data) ... ok
+test_real_gateway_route_to_validator_and_runtime (test_phase6_proposal.ProposalTests.test_real_gateway_route_to_validator_and_runtime) ... ok
+test_restricted_user_values_are_not_projected (test_phase6_proposal.ProposalTests.test_restricted_user_values_are_not_projected) ... ok
+test_retryable_fixture_fallback_is_distinguished_from_live (test_phase6_proposal.ProposalTests.test_retryable_fixture_fallback_is_distinguished_from_live) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 2.925s
+
+OK
+
+MODULE test_phase6_sdk.py
+test_accepted_without_settled_feed_not_verified (test_phase6_sdk.SDKTests.test_accepted_without_settled_feed_not_verified) ... ok
+test_agent_cannot_execute_even_valid_action (test_phase6_sdk.SDKTests.test_agent_cannot_execute_even_valid_action) ... ok
+test_auth_lifecycle_and_request_signature (test_phase6_sdk.SDKTests.test_auth_lifecycle_and_request_signature) ... ok
+test_canonical_reads_owner_and_currency (test_phase6_sdk.SDKTests.test_canonical_reads_owner_and_currency) ... ok
+test_core_verified_reference_fixture_only_after_authorization (test_phase6_sdk.SDKTests.test_core_verified_reference_fixture_only_after_authorization) ... ok
+test_currency_is_not_silently_converted (test_phase6_sdk.SDKTests.test_currency_is_not_silently_converted) ... ok
+test_environment_pinned (test_phase6_sdk.SDKTests.test_environment_pinned) ... ok
+test_pending_not_receipt (test_phase6_sdk.SDKTests.test_pending_not_receipt) ... ok
+test_safe_mode_default_disabled (test_phase6_sdk.SDKTests.test_safe_mode_default_disabled) ... ok
+test_settled_duplicate_returns_status_despite_balance_change (test_phase6_sdk.SDKTests.test_settled_duplicate_returns_status_despite_balance_change) ... ok
+test_uncertain_put_never_automatic_retry (test_phase6_sdk.SDKTests.test_uncertain_put_never_automatic_retry) ... ok
+test_virtual_provider_verification_binding (test_phase6_sdk.SDKTests.test_virtual_provider_verification_binding) ... ok
+test_webhook_signature_replay_and_no_authority (test_phase6_sdk.SDKTests.test_webhook_signature_replay_and_no_authority) ... ok
+test_known_error_and_rate_limit (test_phase6_sdk.TransportTests.test_known_error_and_rate_limit) ... ok
+test_paths_and_plain_external_endpoints_rejected (test_phase6_sdk.TransportTests.test_paths_and_plain_external_endpoints_rejected) ... ok
+test_read_500_known_error (test_phase6_sdk.TransportTests.test_read_500_known_error) ... ok
+test_write_500_uncertain (test_phase6_sdk.TransportTests.test_write_500_uncertain) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 9.857s
+
+OK
+
+MODULE test_phase5_banking.py
+test_agent_source_has_no_database_adapter_or_execute_calls (test_phase5_banking.BankingTests.test_agent_source_has_no_database_adapter_or_execute_calls) ... ok
+test_all_business_agents_denied_every_write_capability (test_phase5_banking.BankingTests.test_all_business_agents_denied_every_write_capability) ... ok
+test_authorization_cannot_be_reused_for_another_action (test_phase5_banking.BankingTests.test_authorization_cannot_be_reused_for_another_action) ... ok
+test_boolean_snapshot_and_business_blackboard_authority_forgery_rejected (test_phase5_banking.BankingTests.test_boolean_snapshot_and_business_blackboard_authority_forgery_rejected) ... ok
+test_card_freeze_unfreeze_limit_and_controls_real_state (test_phase5_banking.BankingTests.test_card_freeze_unfreeze_limit_and_controls_real_state) ... ok
+test_card_risk_increase_requires_strong_auth (test_phase5_banking.BankingTests.test_card_risk_increase_requires_strong_auth) ... ok
+test_cross_dag_dependencies_and_parallel_frontier (test_phase5_banking.BankingTests.test_cross_dag_dependencies_and_parallel_frontier) ... ok
+test_cross_independent_approvals_reject_one_branch (test_phase5_banking.BankingTests.test_cross_independent_approvals_reject_one_branch) ... ok
+test_detection_candidates_do_not_write_or_invent_authority (test_phase5_banking.BankingTests.test_detection_candidates_do_not_write_or_invent_authority) ... ok
+test_domain_commit_lost_response_manual_review_no_retry (test_phase5_banking.BankingTests.test_domain_commit_lost_response_manual_review_no_retry) ... ok
+test_hard_verifier_detects_missing_investment_ledger (test_phase5_banking.BankingTests.test_hard_verifier_detects_missing_investment_ledger) ... ok
+test_immediate_transfer_risk_upgrade_requires_new_strong_authorization (test_phase5_banking.BankingTests.test_immediate_transfer_risk_upgrade_requires_new_strong_authorization) ... ok
+test_legacy_three_results_under_phase5 (test_phase5_banking.BankingTests.test_legacy_three_results_under_phase5) ... ok
+test_lost_or_cancelled_card_never_unfreezes (test_phase5_banking.BankingTests.test_lost_or_cancelled_card_never_unfreezes) ... ok
+test_multi_turn_purchase_missing_amount_and_no_chat_approval (test_phase5_banking.BankingTests.test_multi_turn_purchase_missing_amount_and_no_chat_approval) ... ok
+test_new_domain_bank_rechecks_deadline (test_phase5_banking.BankingTests.test_new_domain_bank_rechecks_deadline) ... ok
+test_new_ir_schema_cannot_be_disabled_by_python_optimization (test_phase5_banking.BankingTests.test_new_ir_schema_cannot_be_disabled_by_python_optimization) ... ok
+test_non_cancelable_subscription_has_no_authorization (test_phase5_banking.BankingTests.test_non_cancelable_subscription_has_no_authorization) ... ok
+test_non_disableable_direct_debit_rejected_by_policy_and_bank (test_phase5_banking.BankingTests.test_non_disableable_direct_debit_rejected_by_policy_and_bank) ... ok
+test_operation_idempotency_concurrent_and_hash_conflict (test_phase5_banking.BankingTests.test_operation_idempotency_concurrent_and_hash_conflict) ... ok
+test_owner_isolation_all_resources_and_portfolio (test_phase5_banking.BankingTests.test_owner_isolation_all_resources_and_portfolio) ... ok
+test_phase4_migration_keeps_keys_receipt_proofs_and_suspended_status (test_phase5_banking.BankingTests.test_phase4_migration_keeps_keys_receipt_proofs_and_suspended_status) ... ok
+test_phase5_rejects_v2_and_downgrade (test_phase5_banking.BankingTests.test_phase5_rejects_v2_and_downgrade) ... ok
+test_phone_alias_explicit_account_and_ambiguous_payee (test_phase5_banking.BankingTests.test_phone_alias_explicit_account_and_ambiguous_payee) ... ok
+test_redemption_holding_period_and_excess (test_phase5_banking.BankingTests.test_redemption_holding_period_and_excess) ... ok
+test_restart_domain_receipts_and_public_proof (test_phase5_banking.BankingTests.test_restart_domain_receipts_and_public_proof) ... ok
+test_risk_change_after_approval_bank_atomic_recheck (test_phase5_banking.BankingTests.test_risk_change_after_approval_bank_atomic_recheck) ... ok
+test_schedule_account_balance_change_requires_new_exact_action (test_phase5_banking.BankingTests.test_schedule_account_balance_change_requires_new_exact_action) ... ok
+test_schedule_expired_authorization_rebuilds_and_requires_reapproval (test_phase5_banking.BankingTests.test_schedule_expired_authorization_rebuilds_and_requires_reapproval) ... ok
+test_schedule_lost_commit_not_retried_on_restart (test_phase5_banking.BankingTests.test_schedule_lost_commit_not_retried_on_restart) ... ok
+test_schedule_payee_disabled_no_write (test_phase5_banking.BankingTests.test_schedule_payee_disabled_no_write) ... ok
+test_schedule_policy_risk_upgrade_never_reuses_weak_auth (test_phase5_banking.BankingTests.test_schedule_policy_risk_upgrade_never_reuses_weak_auth) ... ok
+test_schedule_time_body_or_index_tamper_cannot_execute_early (test_phase5_banking.BankingTests.test_schedule_time_body_or_index_tamper_cannot_execute_early) ... ok
+test_scheduled_before_due_no_execution_due_valid_recheck_and_restart (test_phase5_banking.BankingTests.test_scheduled_before_due_no_execution_due_valid_recheck_and_restart) ... ok
+test_six_registry_and_v3_service_identity (test_phase5_banking.BankingTests.test_six_registry_and_v3_service_identity) ... ok
+test_split_exact_minor_units_and_no_payouts (test_phase5_banking.BankingTests.test_split_exact_minor_units_and_no_payouts) ... ok
+test_strict_action_schema_and_target_tampering (test_phase5_banking.BankingTests.test_strict_action_schema_and_target_tampering) ... ok
+test_subscription_cancel_and_direct_debit_disable (test_phase5_banking.BankingTests.test_subscription_cancel_and_direct_debit_disable) ... ok
+test_suspended_service_cannot_read_or_propose (test_phase5_banking.BankingTests.test_suspended_service_cannot_read_or_propose) ... ok
+test_weath_deterministic_suitability_blocks_r2_r4 (test_phase5_banking.BankingTests.test_weath_deterministic_suitability_blocks_r2_r4) ... ok
+test_weath_minimum_cash_inactive_currency_restrictions (test_phase5_banking.BankingTests.test_weath_minimum_cash_inactive_currency_restrictions) ... ok
+test_weath_purchase_and_redeem_real_cash_portfolio_transaction_ledger (test_phase5_banking.BankingTests.test_weath_purchase_and_redeem_real_cash_portfolio_transaction_ledger) ... ok
+test_zero_card_limit_and_explicit_api_scheduled_account_missing_time (test_phase5_banking.BankingTests.test_zero_card_limit_and_explicit_api_scheduled_account_missing_time) ... ok
+test_01_transfer_settled (test_phase5_banking.Phase5OriginalTransferAcceptance.test_01_transfer_settled) ... ok
+test_02_final_balance (test_phase5_banking.Phase5OriginalTransferAcceptance.test_02_final_balance) ... ok
+test_03_balanced_ledger (test_phase5_banking.Phase5OriginalTransferAcceptance.test_03_balanced_ledger) ... ok
+test_04_transaction_matches_approval (test_phase5_banking.Phase5OriginalTransferAcceptance.test_04_transaction_matches_approval) ... ok
+test_05_receipt_generated (test_phase5_banking.Phase5OriginalTransferAcceptance.test_05_receipt_generated) ... ok
+test_06_audit_chain_and_tamper_detection (test_phase5_banking.Phase5OriginalTransferAcceptance.test_06_audit_chain_and_tamper_detection) ... ok
+test_07_amount_tampering_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_07_amount_tampering_blocked) ... ok
+test_08_recipient_tampering_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_08_recipient_tampering_blocked) ... ok
+test_09_missing_authorization_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_09_missing_authorization_blocked) ... ok
+test_10_capability_bypass_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_10_capability_bypass_blocked) ... ok
+test_11_invalid_signature_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_11_invalid_signature_blocked) ... ok
+test_12_payload_tampering_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_12_payload_tampering_blocked) ... ok
+test_13_replay_nonce_blocked_after_restart (test_phase5_banking.Phase5OriginalTransferAcceptance.test_13_replay_nonce_blocked_after_restart) ... ok
+test_14_idempotency_never_double_debits (test_phase5_banking.Phase5OriginalTransferAcceptance.test_14_idempotency_never_double_debits) ... ok
+test_15_insufficient_balance_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_15_insufficient_balance_blocked) ... ok
+test_16_frozen_account_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_16_frozen_account_blocked) ... ok
+test_17_waiting_user_survives_restart (test_phase5_banking.Phase5OriginalTransferAcceptance.test_17_waiting_user_survives_restart) ... ok
+test_18_authorization_expiry_enforced (test_phase5_banking.Phase5OriginalTransferAcceptance.test_18_authorization_expiry_enforced) ... ok
+test_19_bank_failure_cannot_produce_false_success (test_phase5_banking.Phase5OriginalTransferAcceptance.test_19_bank_failure_cannot_produce_false_success) ... ok
+test_20_uncertain_verification_manual_review (test_phase5_banking.Phase5OriginalTransferAcceptance.test_20_uncertain_verification_manual_review) ... ok
+test_authorization_renewal (test_phase5_banking.Phase5OriginalTransferAcceptance.test_authorization_renewal) ... ok
+test_bank_deadline_rechecked_after_gateway (test_phase5_banking.Phase5OriginalTransferAcceptance.test_bank_deadline_rechecked_after_gateway) ... ok
+test_bank_rechecks_stale_preconditions (test_phase5_banking.Phase5OriginalTransferAcceptance.test_bank_rechecks_stale_preconditions) ... ok
+test_bank_write_call_sites_are_restricted (test_phase5_banking.Phase5OriginalTransferAcceptance.test_bank_write_call_sites_are_restricted) ... ok
+test_contract_forgery_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_contract_forgery_blocked) ... ok
+test_denial_cancels (test_phase5_banking.Phase5OriginalTransferAcceptance.test_denial_cancels) ... ok
+test_expired_contract_blocked (test_phase5_banking.Phase5OriginalTransferAcceptance.test_expired_contract_blocked) ... ok
+test_lost_response_after_commit_no_retry (test_phase5_banking.Phase5OriginalTransferAcceptance.test_lost_response_after_commit_no_retry) ... ok
+test_money_precision_and_invalid_input (test_phase5_banking.Phase5OriginalTransferAcceptance.test_money_precision_and_invalid_input) ... ok
+test_restart_mid_execution_no_retry (test_phase5_banking.Phase5OriginalTransferAcceptance.test_restart_mid_execution_no_retry) ... ok
+test_scheduler_dependency_and_transition (test_phase5_banking.Phase5OriginalTransferAcceptance.test_scheduler_dependency_and_transition) ... ok
+test_strong_auth_required (test_phase5_banking.Phase5OriginalTransferAcceptance.test_strong_auth_required) ... ok
+test_unknown_payee_waiting_user (test_phase5_banking.Phase5OriginalTransferAcceptance.test_unknown_payee_waiting_user) ... ok
+
+----------------------------------------------------------------------
+Ran 76 tests in 74.177s
+
+OK
+
+MODULE test_phase6_split.py
+test_cancel_keeps_paid_and_cancels_pending_auth (test_phase6_split.SplitTests.test_cancel_keeps_paid_and_cancels_pending_auth) ... ok
+test_declines_do_not_reduce_required_amount (test_phase6_split.SplitTests.test_declines_do_not_reduce_required_amount) ... ok
+test_draft_and_publish_authority (test_phase6_split.SplitTests.test_draft_and_publish_authority) ... ok
+test_duplicate_payment_never_debits_again (test_phase6_split.SplitTests.test_duplicate_payment_never_debits_again) ... ok
+test_exact_and_percentage_invalid_inputs (test_phase6_split.SplitTests.test_exact_and_percentage_invalid_inputs) ... ok
+test_expiry_and_direct_task_authorization_cannot_pay_late (test_phase6_split.SplitTests.test_expiry_and_direct_task_authorization_cannot_pay_late) ... ok
+test_hundred_yuan_three_people_exact_sum (test_phase6_split.SplitTests.test_hundred_yuan_three_people_exact_sum) ... ok
+test_independent_payment_receipts_real_collection (test_phase6_split.SplitTests.test_independent_payment_receipts_real_collection) ... ok
+test_one_cent_three_people_no_zero_transfer (test_phase6_split.SplitTests.test_one_cent_three_people_no_zero_transfer) ... ok
+test_organizer_and_cross_participant_cannot_authorize (test_phase6_split.SplitTests.test_organizer_and_cross_participant_cannot_authorize) ... ok
+test_organizer_creation_cannot_debit_participants (test_phase6_split.SplitTests.test_organizer_creation_cannot_debit_participants) ... ok
+test_partial_payment_restart (test_phase6_split.SplitTests.test_partial_payment_restart) ... ok
+test_participant_view_and_source_owner_isolation (test_phase6_split.SplitTests.test_participant_view_and_source_owner_isolation) ... ok
+test_percentage_decimal_largest_remainder (test_phase6_split.SplitTests.test_percentage_decimal_largest_remainder) ... ok
+test_unknown_receiver_and_unknown_participant (test_phase6_split.SplitTests.test_unknown_receiver_and_unknown_participant) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 14.767s
+
+OK
+
+MODULE test_privacy_proof.py
+test_artifact_pinning_and_unsupported_action (test_privacy_proof.PrivacyProofTests.test_artifact_pinning_and_unsupported_action) ... ok
+test_expiry_and_fresh_authoritative_fact_check (test_privacy_proof.PrivacyProofTests.test_expiry_and_fresh_authoritative_fact_check) ... ok
+test_http_proof_identity_and_authorization_boundary (test_privacy_proof.PrivacyProofTests.test_http_proof_identity_and_authorization_boundary) ... ok
+test_invalid_public_inputs_owner_signature_and_groth16_proof (test_privacy_proof.PrivacyProofTests.test_invalid_public_inputs_owner_signature_and_groth16_proof) ... ok
+test_real_circuit_rejects_insufficient_balance_and_risk (test_privacy_proof.PrivacyProofTests.test_real_circuit_rejects_insufficient_balance_and_risk) ... ok
+test_real_proof_independent_issuer_restart_replay_and_no_execution (test_privacy_proof.PrivacyProofTests.test_real_proof_independent_issuer_restart_replay_and_no_execution) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 20.488s
+
+OK
+
+MODULE test_revolut_sandbox_connect.py
+test_callback_state_mismatch_and_duplicates_rejected (test_revolut_sandbox_connect.RevolutBootstrapTests.test_callback_state_mismatch_and_duplicates_rejected) ... ok
+test_config_rejects_production_and_wrong_callback (test_revolut_sandbox_connect.RevolutBootstrapTests.test_config_rejects_production_and_wrong_callback) ... ok
+test_confirmation_form_keeps_origin_and_accepts_only_explicit_same_origin_post (test_revolut_sandbox_connect.RevolutBootstrapTests.test_confirmation_form_keeps_origin_and_accepts_only_explicit_same_origin_post) ... ok
+test_endpoint_allowlist_blocks_payments_and_redirects (test_revolut_sandbox_connect.RevolutBootstrapTests.test_endpoint_allowlist_blocks_payments_and_redirects) ... ok
+test_expired_code_is_not_exchanged (test_revolut_sandbox_connect.RevolutBootstrapTests.test_expired_code_is_not_exchanged) ... ok
+test_http_rejects_foreign_browser_host_and_post_origin (test_revolut_sandbox_connect.RevolutBootstrapTests.test_http_rejects_foreign_browser_host_and_post_origin) ... {"status": "LOCAL_CONFIRMATION_REJECTED", "reason": "ORIGIN_MISMATCH", "bank_requests_made": false}
+ok
+test_jwt_claims_and_signature (test_revolut_sandbox_connect.RevolutBootstrapTests.test_jwt_claims_and_signature) ... ok
+test_no_state_still_needs_explicit_confirmation_and_is_single_use (test_revolut_sandbox_connect.RevolutBootstrapTests.test_no_state_still_needs_explicit_confirmation_and_is_single_use) ... ok
+test_only_token_exchange_and_accounts_and_no_secret_in_report (test_revolut_sandbox_connect.RevolutBootstrapTests.test_only_token_exchange_and_accounts_and_no_secret_in_report) ... ok
+test_scope_escalation_is_not_saved_or_used (test_revolut_sandbox_connect.RevolutBootstrapTests.test_scope_escalation_is_not_saved_or_used) ... ok
+test_tls_certificate_is_for_localhost_and_not_a_ca (test_revolut_sandbox_connect.RevolutBootstrapTests.test_tls_certificate_is_for_localhost_and_not_a_ca) ... ok
+test_url_uses_read_scope_and_new_callback (test_revolut_sandbox_connect.RevolutBootstrapTests.test_url_uses_read_scope_and_new_callback) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.919s
+
+OK
+
+MODULE test_revolut_banking.py
+test_authenticated_catalog_and_native_balance (test_revolut_banking.BankUITests.test_authenticated_catalog_and_native_balance) ... ok
+test_records_read_without_exposing_sensitive_fields_and_readonly_payees_empty (test_revolut_banking.BankUITests.test_records_read_without_exposing_sensitive_fields_and_readonly_payees_empty) ... ok
+test_unauthorised_user_and_bad_query_denied (test_revolut_banking.BankUITests.test_unauthorised_user_and_bad_query_denied) ... ok
+test_missing_bank_consent_does_not_enable_profile_or_propose (test_revolut_banking.PreparationTests.test_missing_bank_consent_does_not_enable_profile_or_propose) ... ok
+test_preparation_only_proposes_and_reuses_same_pending_action (test_revolut_banking.PreparationTests.test_preparation_only_proposes_and_reuses_same_pending_action) ... ok
+test_bootstrap_pay_stores_separate_credentials_and_never_pays (test_revolut_banking.TransferAuthTests.test_bootstrap_pay_stores_separate_credentials_and_never_pays) ... ok
+test_browser_disconnect_does_not_report_successful_exchange_as_bank_failure (test_revolut_banking.TransferAuthTests.test_browser_disconnect_does_not_report_successful_exchange_as_bank_failure) ... ok
+test_explicit_pay_consent_marker_required_and_preserved_on_refresh (test_revolut_banking.TransferAuthTests.test_explicit_pay_consent_marker_required_and_preserved_on_refresh) ... ok
+test_management_sensitive_and_production_endpoints_denied (test_revolut_banking.TransferAuthTests.test_management_sensitive_and_production_endpoints_denied) ... ok
+test_read_token_can_discover_but_cannot_sign_payment (test_revolut_banking.TransferAuthTests.test_read_token_can_discover_but_cannot_sign_payment) ... ok
+test_403_does_not_refresh_or_retry_post (test_revolut_banking.TransferTests.test_403_does_not_refresh_or_retry_post) ... ok
+test_denial_and_wrong_hash_never_send_payment (test_revolut_banking.TransferTests.test_denial_and_wrong_hash_never_send_payment) ... ok
+test_extra_capabilities_and_scheduled_payments_denied (test_revolut_banking.TransferTests.test_extra_capabilities_and_scheduled_payments_denied) ... ok
+test_known_bank_id_duplicate_only_queries_status (test_revolut_banking.TransferTests.test_known_bank_id_duplicate_only_queries_status) ... ok
+test_lost_post_response_recovers_by_get_and_preserves_terminal_history (test_revolut_banking.TransferTests.test_lost_post_response_recovers_by_get_and_preserves_terminal_history) ... ok
+test_malformed_post_response_remains_unknown_and_cannot_resend (test_revolut_banking.TransferTests.test_malformed_post_response_remains_unknown_and_cannot_resend) ... ok
+test_native_eur_transfer_does_not_convert_currency (test_revolut_banking.TransferTests.test_native_eur_transfer_does_not_convert_currency) ... ok
+test_no_matching_lost_response_stays_manual_review (test_revolut_banking.TransferTests.test_no_matching_lost_response_stays_manual_review) ... ok
+test_original_pipeline_waits_for_explicit_authorization (test_revolut_banking.TransferTests.test_original_pipeline_waits_for_explicit_authorization) ... ok
+test_other_customer_and_tampered_contract_cannot_reconcile (test_revolut_banking.TransferTests.test_other_customer_and_tampered_contract_cannot_reconcile) ... ok
+test_pending_late_settlement_only_generates_supplementary_receipt (test_revolut_banking.TransferTests.test_pending_late_settlement_only_generates_supplementary_receipt) ... ok
+test_safe_mode_amount_owner_and_missing_contract_deny (test_revolut_banking.TransferTests.test_safe_mode_amount_owner_and_missing_contract_deny) ... ok
+test_wrong_amount_route_fee_reference_or_time_never_verified (test_revolut_banking.TransferTests.test_wrong_amount_route_fee_reference_or_time_never_verified) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 21.787s
+
+OK
+
+MODULE test_revolut_sdk.py
+test_401_refresh_then_retry_get_once (test_revolut_sdk.RevolutAuthTests.test_401_refresh_then_retry_get_once) ... ok
+test_auth_cannot_sign_payment_or_read_sensitive_card_endpoint (test_revolut_sdk.RevolutAuthTests.test_auth_cannot_sign_payment_or_read_sensitive_card_endpoint) ... ok
+test_concurrent_instances_refresh_once (test_revolut_sdk.RevolutAuthTests.test_concurrent_instances_refresh_once) ... ok
+test_expired_refresh_preserves_refresh_token_and_reuses_new_access (test_revolut_sdk.RevolutAuthTests.test_expired_refresh_preserves_refresh_token_and_reuses_new_access) ... ok
+test_refresh_scope_escalation_never_saved (test_revolut_sdk.RevolutAuthTests.test_refresh_scope_escalation_never_saved) ... ok
+test_revoked_invalid_owner_and_bad_scope_do_not_refresh (test_revolut_sdk.RevolutAuthTests.test_revoked_invalid_owner_and_bad_scope_do_not_refresh) ... ok
+test_signing_key_mismatch_blocks_refresh (test_revolut_sdk.RevolutAuthTests.test_signing_key_mismatch_blocks_refresh) ... ok
+test_account_currency_and_customer_mapping (test_revolut_sdk.RevolutSDKTests.test_account_currency_and_customer_mapping) ... ok
+test_agent_capability_grants_not_broadened (test_revolut_sdk.RevolutSDKTests.test_agent_capability_grants_not_broadened) ... ok
+test_bill_analysis_excludes_topup_and_uses_native_currency (test_revolut_sdk.RevolutSDKTests.test_bill_analysis_excludes_topup_and_uses_native_currency) ... ok
+test_card_refund_settlement_and_month_boundary (test_revolut_sdk.RevolutSDKTests.test_card_refund_settlement_and_month_boundary) ... ok
+test_configuration_read_only_and_sandbox_pinned (test_revolut_sdk.RevolutSDKTests.test_configuration_read_only_and_sandbox_pinned) ... ok
+test_empty_month_correct_currency_and_ambiguous_graph_summary_rejected (test_revolut_sdk.RevolutSDKTests.test_empty_month_correct_currency_and_ambiguous_graph_summary_rejected) ... ok
+test_finance_presentation_keeps_native_currency (test_revolut_sdk.RevolutSDKTests.test_finance_presentation_keeps_native_currency) ... ok
+test_graph_reads_via_gateway_and_retains_signed_audit (test_revolut_sdk.RevolutSDKTests.test_graph_reads_via_gateway_and_retains_signed_audit) ... ok
+test_manifest_write_and_unknown_capabilities_denied (test_revolut_sdk.RevolutSDKTests.test_manifest_write_and_unknown_capabilities_denied) ... ok
+test_mixed_currency_never_aggregated (test_revolut_sdk.RevolutSDKTests.test_mixed_currency_never_aggregated) ... ok
+test_money_exactness_and_fail_closed (test_revolut_sdk.RevolutSDKTests.test_money_exactness_and_fail_closed) ... ok
+test_no_cross_account_legs_or_sensitive_fields (test_revolut_sdk.RevolutSDKTests.test_no_cross_account_legs_or_sensitive_fields) ... ok
+test_no_matching_leg_or_wrong_currency_rejected (test_revolut_sdk.RevolutSDKTests.test_no_matching_leg_or_wrong_currency_rejected) ... ok
+test_pagination_overlap_deduplicated_completely (test_revolut_sdk.RevolutSDKTests.test_pagination_overlap_deduplicated_completely) ... ok
+test_provider_owner_denies_before_bank_call (test_revolut_sdk.RevolutSDKTests.test_provider_owner_denies_before_bank_call) ... ok
+test_timestamp_group_overflow_does_not_publish_partial_report (test_revolut_sdk.RevolutSDKTests.test_timestamp_group_overflow_does_not_publish_partial_report) ... ok
+test_wire_json_preserves_decimal_and_rejects_duplicates (test_revolut_sdk.RevolutSDKTests.test_wire_json_preserves_decimal_and_rejects_duplicates) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 10.921s
+
+OK
+
+MODULE test_revolut_simulation_consent.py
+test_business_authentication_rejects_write_credentials (test_revolut_simulation_consent.SimulationConsentTests.test_business_authentication_rejects_write_credentials) ... ok
+test_consent_saves_only_separate_operator_credentials_and_reads_accounts (test_revolut_simulation_consent.SimulationConsentTests.test_consent_saves_only_separate_operator_credentials_and_reads_accounts) ... ok
+test_extra_pay_or_sensitive_scope_is_rejected_before_storage (test_revolut_simulation_consent.SimulationConsentTests.test_extra_pay_or_sensitive_scope_is_rejected_before_storage) ... ok
+test_operator_scope_requires_explicit_mode_and_excludes_pay (test_revolut_simulation_consent.SimulationConsentTests.test_operator_scope_requires_explicit_mode_and_excludes_pay) ... ok
+test_start_page_explains_management_grant_and_does_not_exchange (test_revolut_simulation_consent.SimulationConsentTests.test_start_page_explains_management_grant_and_does_not_exchange) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.874s
+
+OK
+
+MODULE test_revolut_settlement.py
+test_business_sdk_cannot_invoke_simulator (test_revolut_settlement.SandboxSettlementTests.test_business_sdk_cannot_invoke_simulator) ... ok
+test_existing_authorised_pending_only_and_original_reconciliation (test_revolut_settlement.SandboxSettlementTests.test_existing_authorised_pending_only_and_original_reconciliation) ... ok
+test_known_bank_rejection_keeps_pending_without_retry_or_receipt (test_revolut_settlement.SandboxSettlementTests.test_known_bank_rejection_keeps_pending_without_retry_or_receipt) ... ok
+test_lost_simulator_response_never_repeats_or_resends_payment (test_revolut_settlement.SandboxSettlementTests.test_lost_simulator_response_never_repeats_or_resends_payment) ... ok
+test_mismatch_cannot_be_made_successful_with_simulation (test_revolut_settlement.SandboxSettlementTests.test_mismatch_cannot_be_made_successful_with_simulation) ... ok
+test_operator_trial_binds_audited_rejection_and_preserves_original_claim (test_revolut_settlement.SandboxSettlementTests.test_operator_trial_binds_audited_rejection_and_preserves_original_claim) ... ok
+test_prior_claim_pending_does_not_call_simulator (test_revolut_settlement.SandboxSettlementTests.test_prior_claim_pending_does_not_call_simulator) ... ok
+test_read_only_report_preserves_historical_bank_attempt (test_revolut_settlement.SandboxSettlementTests.test_read_only_report_preserves_historical_bank_attempt) ... ok
+test_second_trial_403_pending_never_retries (test_revolut_settlement.SandboxSettlementTests.test_second_trial_403_pending_never_retries) ... ok
+test_second_trial_lost_response_pending_never_retries (test_revolut_settlement.SandboxSettlementTests.test_second_trial_lost_response_pending_never_retries) ... ok
+test_tampered_rejection_or_stale_or_pay_credentials_block_operator_post (test_revolut_settlement.SandboxSettlementTests.test_tampered_rejection_or_stale_or_pay_credentials_block_operator_post) ... ok
+test_unapproved_task_and_production_are_denied (test_revolut_settlement.SandboxSettlementTests.test_unapproved_task_and_production_are_denied) ... ok
+test_uncertain_simulation_cannot_enable_operator_retry (test_revolut_settlement.SandboxSettlementTests.test_uncertain_simulation_cannot_enable_operator_retry) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 13.673s
+
+OK
+
+MODULE test_second_provider.py
+test_failures_stay_in_denominator_and_fixtures_are_not_live (test_second_provider.SecondProviderTests.test_failures_stay_in_denominator_and_fixtures_are_not_live) ... ok
+test_fallback_never_weakens_sensitivity (test_second_provider.SecondProviderTests.test_fallback_never_weakens_sensitivity) ... ok
+test_invalid_graph_never_falls_back (test_second_provider.SecondProviderTests.test_invalid_graph_never_falls_back) ... ok
+test_json_mode_does_not_claim_schema_enforcement (test_second_provider.SecondProviderTests.test_json_mode_does_not_claim_schema_enforcement) ... ok
+test_json_mode_invalid_and_conflicting_config_rejected (test_second_provider.SecondProviderTests.test_json_mode_invalid_and_conflicting_config_rejected) ... ok
+test_public_example_never_enables_customer_data_egress (test_second_provider.SecondProviderTests.test_public_example_never_enables_customer_data_egress) ... ok
+test_reasoning_content_is_not_returned_or_mistaken_for_plan (test_second_provider.SecondProviderTests.test_reasoning_content_is_not_returned_or_mistaken_for_plan) ... ok
+test_route_switch_and_retryable_failure_use_same_core (test_second_provider.SecondProviderTests.test_route_switch_and_retryable_failure_use_same_core) ... ok
+test_shadow_plan_does_not_install_even_when_valid (test_second_provider.SecondProviderTests.test_shadow_plan_does_not_install_even_when_valid) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 5.300s
+
+OK
+
+MODULE test_scenarios.py
+test_blackboard_dag_audit_and_restart (test_scenarios.ScenarioTests.test_blackboard_dag_audit_and_restart) ... ok
+test_empty_month_and_zero_baseline (test_scenarios.ScenarioTests.test_empty_month_and_zero_baseline) ... ok
+test_finance_and_wealth_cannot_use_valid_transfer_contract (test_scenarios.ScenarioTests.test_finance_and_wealth_cannot_use_valid_transfer_contract) ... ok
+test_finance_anomaly_evidence (test_scenarios.ScenarioTests.test_finance_anomaly_evidence) ... ok
+test_finance_complete_categories_and_month (test_scenarios.ScenarioTests.test_finance_complete_categories_and_month) ... ok
+test_finance_data_failure_no_fabricated_report (test_scenarios.ScenarioTests.test_finance_data_failure_no_fabricated_report) ... ok
+test_finance_reads_account_and_customer_isolation (test_scenarios.ScenarioTests.test_finance_reads_account_and_customer_isolation) ... ok
+test_month_boundary_china_and_invalid_month (test_scenarios.ScenarioTests.test_month_boundary_china_and_invalid_month) ... ok
+test_new_agent_code_cannot_access_adapter_or_database (test_scenarios.ScenarioTests.test_new_agent_code_cannot_access_adapter_or_database) ... ok
+test_old_transfer_task_persistence_and_registry (test_scenarios.ScenarioTests.test_old_transfer_task_persistence_and_registry) ... ok
+test_purchase_redemption_requests_do_not_execute (test_scenarios.ScenarioTests.test_purchase_redemption_requests_do_not_execute) ... ok
+test_read_only_capabilities_are_least_privilege (test_scenarios.ScenarioTests.test_read_only_capabilities_are_least_privilege) ... ok
+test_reports_never_change_bank_or_create_financial_artifacts (test_scenarios.ScenarioTests.test_reports_never_change_bank_or_create_financial_artifacts) ... ok
+test_unknown_category_unclassified_and_refunds (test_scenarios.ScenarioTests.test_unknown_category_unclassified_and_refunds) ... ok
+test_wealth_catalog_failure_no_fabrication (test_scenarios.ScenarioTests.test_wealth_catalog_failure_no_fabrication) ... ok
+test_wealth_missing_or_expired_risk_waits (test_scenarios.ScenarioTests.test_wealth_missing_or_expired_risk_waits) ... ok
+test_wealth_no_match_no_overrisk_fallback (test_scenarios.ScenarioTests.test_wealth_no_match_no_overrisk_fallback) ... ok
+test_wealth_risk_identity_cannot_be_overridden (test_scenarios.ScenarioTests.test_wealth_risk_identity_cannot_be_overridden) ... ok
+test_wealth_risk_matching_grounded_reasons (test_scenarios.ScenarioTests.test_wealth_risk_matching_grounded_reasons) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 11.867s
+
+OK
+
+MODULE test_sepolia_readiness.py
+test_approval_cannot_follow_changed_calldata (test_sepolia_readiness.ReadinessTests.test_approval_cannot_follow_changed_calldata) ... ok
+test_base_fee_cap (test_sepolia_readiness.ReadinessTests.test_base_fee_cap) ... ok
+test_broadcast_disabled_after_local_synthetic_sign (test_sepolia_readiness.ReadinessTests.test_broadcast_disabled_after_local_synthetic_sign) ... ok
+test_broadcast_wrong_chain (test_sepolia_readiness.ReadinessTests.test_broadcast_wrong_chain) ... ok
+test_commit_dynamic_quote_and_publisher (test_sepolia_readiness.ReadinessTests.test_commit_dynamic_quote_and_publisher) ... ok
+test_commit_gas_cap (test_sepolia_readiness.ReadinessTests.test_commit_gas_cap) ... ok
+test_deploy_gas_cap (test_sepolia_readiness.ReadinessTests.test_deploy_gas_cap) ... ok
+test_encrypted_local_synthetic_keystore (test_sepolia_readiness.ReadinessTests.test_encrypted_local_synthetic_keystore) ... ok
+test_no_signature_without_exact_approval (test_sepolia_readiness.ReadinessTests.test_no_signature_without_exact_approval) ... ok
+test_nonce_change (test_sepolia_readiness.ReadinessTests.test_nonce_change) ... ok
+test_priority_price_cap (test_sepolia_readiness.ReadinessTests.test_priority_price_cap) ... ok
+test_quote_expiry (test_sepolia_readiness.ReadinessTests.test_quote_expiry) ... ok
+test_raw_rpc_broadcast_and_remote_signing_rejected (test_sepolia_readiness.ReadinessTests.test_raw_rpc_broadcast_and_remote_signing_rejected) ... ok
+test_raw_signed_nonce_tampering (test_sepolia_readiness.ReadinessTests.test_raw_signed_nonce_tampering) ... ok
+test_residual_balance_protected (test_sepolia_readiness.ReadinessTests.test_residual_balance_protected) ... ok
+test_signer_mismatch (test_sepolia_readiness.ReadinessTests.test_signer_mismatch) ... ok
+test_signing_wrong_chain (test_sepolia_readiness.ReadinessTests.test_signing_wrong_chain) ... ok
+test_synthetic_eip1559_signature_and_broadcast_binding (test_sepolia_readiness.ReadinessTests.test_synthetic_eip1559_signature_and_broadcast_binding) ... ok
+test_total_fee_cap (test_sepolia_readiness.ReadinessTests.test_total_fee_cap) ... ok
+test_unknown_chain_fails_closed (test_sepolia_readiness.ReadinessTests.test_unknown_chain_fails_closed) ... ok
+test_unsigned_dynamic_quote (test_sepolia_readiness.ReadinessTests.test_unsigned_dynamic_quote) ... ok
+test_wrong_chain_stops_before_fee_or_wallet (test_sepolia_readiness.ReadinessTests.test_wrong_chain_stops_before_fee_or_wallet) ... ok
+test_wrong_code_pin (test_sepolia_readiness.ReadinessTests.test_wrong_code_pin) ... ok
+test_wrong_commit_schema (test_sepolia_readiness.ReadinessTests.test_wrong_commit_schema) ... ok
+test_wrong_deployment_artifact (test_sepolia_readiness.ReadinessTests.test_wrong_deployment_artifact) ... ok
+test_wrong_publisher (test_sepolia_readiness.ReadinessTests.test_wrong_publisher) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.118s
+
+OK
+
+MODULE test_targeted_anchor.py
+test_canonical_membership_and_event_block_binding_required (test_targeted_anchor.IndependentAnchorTests.test_canonical_membership_and_event_block_binding_required) ... ok
+test_code_hash_and_dual_rpc_consistency (test_targeted_anchor.IndependentAnchorTests.test_code_hash_and_dual_rpc_consistency) ... ok
+test_event_root_identifier_version_and_duplicate_rejected (test_targeted_anchor.IndependentAnchorTests.test_event_root_identifier_version_and_duplicate_rejected) ... ok
+test_mainnet_and_no_code_rejected (test_targeted_anchor.IndependentAnchorTests.test_mainnet_and_no_code_rejected) ... ok
+test_malformed_config_rejected (test_targeted_anchor.IndependentAnchorTests.test_malformed_config_rejected) ... ok
+test_missing_transaction_failed_receipt_and_changed_calldata (test_targeted_anchor.IndependentAnchorTests.test_missing_transaction_failed_receipt_and_changed_calldata) ... ok
+test_pinned_checkpoint_signature_required (test_targeted_anchor.IndependentAnchorTests.test_pinned_checkpoint_signature_required) ... ok
+test_readback_confirmations_and_reorg_rejected (test_targeted_anchor.IndependentAnchorTests.test_readback_confirmations_and_reorg_rejected) ... ok
+test_valid_public_evidence_needs_no_original_database_or_wallet (test_targeted_anchor.IndependentAnchorTests.test_valid_public_evidence_needs_no_original_database_or_wallet) ... ok
+test_wrong_contract_publisher_or_nonzero_value_rejected (test_targeted_anchor.IndependentAnchorTests.test_wrong_contract_publisher_or_nonzero_value_rejected) ... ok
+test_wrong_pinned_public_key_rejected (test_targeted_anchor.IndependentAnchorTests.test_wrong_pinned_public_key_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 2.042s
+
+OK
+
+MODULE test_targeted_planning.py
+test_authority_injection_not_repaired (test_targeted_planning.PlanningOptimizationTests.test_authority_injection_not_repaired) ... ok
+test_dialogue_owner_tamper_and_existing_slot_replacement_rejected (test_targeted_planning.PlanningOptimizationTests.test_dialogue_owner_tamper_and_existing_slot_replacement_rejected) ... ok
+test_dialogue_preserves_slots_and_does_not_inherit_consent (test_targeted_planning.PlanningOptimizationTests.test_dialogue_preserves_slots_and_does_not_inherit_consent) ... ok
+test_failed_repair_stops_at_two_calls (test_targeted_planning.PlanningOptimizationTests.test_failed_repair_stops_at_two_calls) ... ok
+test_function_and_parameter_schema_bound (test_targeted_planning.PlanningOptimizationTests.test_function_and_parameter_schema_bound) ... ok
+test_literal_money_not_repaired_or_executed (test_targeted_planning.PlanningOptimizationTests.test_literal_money_not_repaired_or_executed) ... ok
+test_one_repair_same_context_no_raw_or_customer_echo (test_targeted_planning.PlanningOptimizationTests.test_one_repair_same_context_no_raw_or_customer_echo) ... ok
+test_prompt_semantics_without_financial_values (test_targeted_planning.PlanningOptimizationTests.test_prompt_semantics_without_financial_values) ... ok
+test_repair_is_off_by_default_and_invalid_usage_retained (test_targeted_planning.PlanningOptimizationTests.test_repair_is_off_by_default_and_invalid_usage_retained) ... ok
+test_repair_settings_bounded (test_targeted_planning.PlanningOptimizationTests.test_repair_settings_bounded) ... ok
+test_transport_disconnect_retry_shares_total_budget (test_targeted_planning.PlanningOptimizationTests.test_transport_disconnect_retry_shares_total_budget) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 2.798s
+
+OK
+
+MODULE test_targeted_score.py
+test_all_missing_fields_required (test_targeted_score.TargetedScoreTests.test_all_missing_fields_required) ... ok
+test_explicit_order_is_scored (test_targeted_score.TargetedScoreTests.test_explicit_order_is_scored) ... ok
+test_raw_failure_not_replaced_by_installed_graph (test_targeted_score.TargetedScoreTests.test_raw_failure_not_replaced_by_installed_graph) ... ok
+test_unsupported_not_counted_as_legitimate_completion (test_targeted_score.TargetedScoreTests.test_unsupported_not_counted_as_legitimate_completion) ... ok
+test_waiting_is_proposal_not_funds_completed (test_targeted_score.TargetedScoreTests.test_waiting_is_proposal_not_funds_completed) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.317s
+
+OK
+
+AGGREGATE {"method": "two-worker unittest modules in isolated processes", "workers": 2, "modules": 48, "tests": 693, "skipped": 0, "duration_seconds": 274.997, "passed": true}

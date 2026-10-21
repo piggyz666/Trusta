@@ -1,0 +1,81 @@
+{
+  "live_observation": {
+    "gemini_successful_calls": 100,
+    "openai_attempt_status": "FAILED",
+    "openai_error": "LLM_PROVIDER_HTTP_ERROR"
+  },
+  "live_latency_ms": {
+    "median": 1291.275,
+    "max": 1657.67
+  },
+  "public_eligible": [
+    "gemini-live",
+    "openai-live"
+  ],
+  "restricted_eligible": [],
+  "restricted_rejected": {
+    "gemini-live": "DATA_SENSITIVITY",
+    "openai-live": "DATA_SENSITIVITY"
+  },
+  "fault_injection_scope": "LOCAL_FIXTURE; tests exercise timeout/429/protocol/fallback, never described as observed provider incidents",
+  "cross_provider_live_verified": false,
+  "actual_gateway_graph_trial": {
+    "scope": "ISOLATED_SYNTHETIC_FIXTURE; actual external API through Gateway/Router; no customer data or financial approval",
+    "provider": "synthetic-gemini",
+    "model": "gemini-3.1-flash-lite",
+    "status": "COMPLETED",
+    "errors": [],
+    "calls": [
+      {
+        "agent": "planner",
+        "attempts": [
+          {
+            "configured_model": "gemini-3.1-flash-lite",
+            "provider": "synthetic-gemini",
+            "status": "SUCCEEDED",
+            "usage": {
+              "input_tokens": 866,
+              "output_tokens": 469
+            }
+          }
+        ],
+        "config_version": "phase6-live",
+        "created_at": 1791275363.8054388,
+        "deadline": 1791275383.8054388,
+        "error_code": null,
+        "estimated_costs_usd": {
+          "synthetic-gemini": null
+        },
+        "finished_at": 1791275366.1225033,
+        "latency_ms": 2317.06,
+        "mode": "assisted",
+        "output_hash": "6949137bf26f51e3be581be46502ab6b4820f572e2da58a5adbb062e063be231",
+        "provider": "synthetic-gemini",
+        "purpose": "plan_proposal",
+        "rejected_routes": {},
+        "request_id": "bd41958d-936c-42bf-b94a-c1c44c81da20",
+        "security_level": "standard",
+        "sensitivity": "restricted",
+        "status": "SUCCEEDED",
+        "task_id": "892e56c0-5ad0-485f-a646-541a09df39fe",
+        "task_revision": 0,
+        "user_id": "demo"
+      }
+    ],
+    "bank_writes": 0,
+    "live_provider_called": true
+  },
+  "local_fault_injection_verified": {
+    "source": "docs/phase6-tests.txt plus tests/test_llm_gateway.py, tests/test_llm_providers.py, tests/test_phase6_proposal.py",
+    "events": [
+      "timeout",
+      "HTTP_429",
+      "provider_unavailable",
+      "malformed_output",
+      "retryable_fallback",
+      "invalid_output_no_fallback",
+      "restricted_data_no_public_fallback"
+    ],
+    "observed_live_incidents": []
+  }
+}

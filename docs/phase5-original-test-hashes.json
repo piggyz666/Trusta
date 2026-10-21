@@ -1,0 +1,21 @@
+{
+  "tests/test_acceptance.py": "a67b5e54945018346745dc9f55c156c3f107f8f95712896a213e7e3593035eb8",
+  "tests/test_api.py": "9af143f941223338074b881da05b3c59645e210e027931120406467ab66bcc3b",
+  "tests/test_communication.py": "f2adbacbe54b941f31d5bf889343d9f97da9c41a13339ac50d570a1409c76a11",
+  "tests/test_conversation.py": "f4efcd3b73a85a3d7d6cce6e721136467c80960392c12d4deb0fb3afbf61df23",
+  "tests/test_conversation_api.py": "39b59306e77ebca8aef6b373f830843fac940d5a2a8eee77b89dbede63674ad8",
+  "tests/test_llm_gateway.py": "3c05a0ddaee26a94dca8e688fc3969e65492c2f92a3a260eb234b8b2fc9f47c9",
+  "tests/test_llm_providers.py": "393e4b91e847416164c311c1951ba3f5c2cc060660949d386da8864bebce8206",
+  "tests/test_memory.py": "03f1bd4265fde0d710f33c8e44ac20658c78a371718962c14aafb82409c9681c",
+  "tests/test_memory_api.py": "aa8a44065b7c1c2765a453d3e1b4c2e7de55c68b3225a64ee27a5e5bee4b73a5",
+  "tests/test_model_router.py": "143eeca2afc286428aacbee380afdd52ad2691633a857bc3a1269a075cda03d3",
+  "tests/test_phase3_scenarios.py": "422e47760e1e6791e4b853b2dfb077912fda9102e92f09335a66cf66e4eea28f",
+  "tests/test_phase3_security_scenarios.py": "d9bc8f5d8e41b65a880ba982f7f99e382cca731bb0486fc69a85eb3aa5fb5d3c",
+  "tests/test_phase4_api.py": "b21bc9dce9335f2cd2bcf143ed8d5629ee8168eb7a4265ecfd83c67961e7f94f",
+  "tests/test_phase4_audit.py": "e1e150e869b1291ca6d3475df8df37e87ec611b8c05110ea0b3048a668eea093",
+  "tests/test_phase4_communication.py": "4b675ad21a2df76e5fae93d75beaf6816f243d19dcc92df3a4118119bf9748c3",
+  "tests/test_phase4_execution.py": "4e59a496407fdc1708a2e0606c44ce6f253684b50b1b580df89a050925dab6c1",
+  "tests/test_phase4_platform.py": "aec6ec65d809ead17fb7a3ee175e8f3dc42d5828e0d88a716bf7279f3434778e",
+  "tests/test_phase4_scenarios.py": "ab32a89ca422c656ea8977824d58fd041bc72786cbb2aba8aba9e00ebceac1c2",
+  "tests/test_scenarios.py": "125aa3e103e5ee6541f5872667fabb9d7d55a23e461e1fd4f63cacafc6f2cf31"
+}

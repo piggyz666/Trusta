@@ -1,0 +1,234 @@
+{
+  "TRANSFER": {
+    "request": "给张三转 2000 元",
+    "status": "COMPLETED",
+    "settlement": "SETTLED",
+    "balance_cents": 800000,
+    "verification": "VERIFIED",
+    "receipt_id": "d17a27ce-ae1d-42b0-8831-1ecdf40c8f75"
+  },
+  "BILL_ANALYSIS": {
+    "request": "分析2026-09消费",
+    "status": "COMPLETED",
+    "result": {
+      "analysis_basis": "仅统计已结算消费及退款；转账不计入消费；分类来源为银行记录。",
+      "anomalies": {
+        "flags": [
+          {
+            "amount": 500000,
+            "evidence_refs": [
+              "bank:consumption_records:sep-large"
+            ],
+            "merchant": "演示电子商店",
+            "reasons": [
+              "单笔金额超过本月消费中位数的10倍",
+              "单笔消费达到大额核对阈值"
+            ],
+            "rule_ids": [
+              "ABOVE_10X_MONTH_MEDIAN",
+              "LARGE_PURCHASE"
+            ],
+            "transaction_id": "sep-large"
+          },
+          {
+            "amount": 3000,
+            "evidence_refs": [
+              "bank:consumption_records:sep-repeat-1"
+            ],
+            "merchant": "演示咖啡店",
+            "reasons": [
+              "相同商户、金额与币种在短时间内出现重复记录"
+            ],
+            "rule_ids": [
+              "POSSIBLE_DUPLICATE"
+            ],
+            "transaction_id": "sep-repeat-1"
+          },
+          {
+            "amount": 3000,
+            "evidence_refs": [
+              "bank:consumption_records:sep-repeat-2"
+            ],
+            "merchant": "演示咖啡店",
+            "reasons": [
+              "相同商户、金额与币种在短时间内出现重复记录"
+            ],
+            "rule_ids": [
+              "POSSIBLE_DUPLICATE"
+            ],
+            "transaction_id": "sep-repeat-2"
+          }
+        ],
+        "interpretation": "规则提示需要核对，不代表已确认欺诈；不会冻结账户或修改交易。",
+        "rules": {
+          "duplicate_window_seconds": 300,
+          "large_amount_cents": 100000,
+          "median_multiplier": 10
+        }
+      },
+      "categories": [
+        {
+          "category": "FOOD",
+          "count": 5,
+          "evidence_refs": [
+            "bank:consumption_records:sep-coffee",
+            "bank:consumption_records:sep-lunch",
+            "bank:consumption_records:sep-repeat-1",
+            "bank:consumption_records:sep-repeat-2",
+            "bank:consumption_records:sep-end"
+          ],
+          "gross_share_bps": 264,
+          "gross_spend": 14500,
+          "label": "餐饮",
+          "net_spend": 14500,
+          "refunds": 0
+        },
+        {
+          "category": "GROCERIES",
+          "count": 1,
+          "evidence_refs": [
+            "bank:consumption_records:sep-market"
+          ],
+          "gross_share_bps": 219,
+          "gross_spend": 12000,
+          "label": "日用采购",
+          "net_spend": 12000,
+          "refunds": 0
+        },
+        {
+          "category": "SHOPPING",
+          "count": 3,
+          "evidence_refs": [
+            "bank:consumption_records:sep-shop",
+            "bank:consumption_records:sep-large",
+            "bank:consumption_records:sep-refund"
+          ],
+          "gross_share_bps": 9461,
+          "gross_spend": 518000,
+          "label": "购物",
+          "net_spend": 513000,
+          "refunds": 5000
+        },
+        {
+          "category": "TRANSPORT",
+          "count": 2,
+          "evidence_refs": [
+            "bank:consumption_records:sep-trip",
+            "bank:consumption_records:sep-ride"
+          ],
+          "gross_share_bps": 54,
+          "gross_spend": 3000,
+          "label": "交通",
+          "net_spend": 3000,
+          "refunds": 0
+        }
+      ],
+      "evidence_refs": [
+        "bank:consumption_records:sep-coffee",
+        "bank:consumption_records:sep-lunch",
+        "bank:consumption_records:sep-trip",
+        "bank:consumption_records:sep-market",
+        "bank:consumption_records:sep-ride",
+        "bank:consumption_records:sep-shop",
+        "bank:consumption_records:sep-large",
+        "bank:consumption_records:sep-repeat-1",
+        "bank:consumption_records:sep-repeat-2",
+        "bank:consumption_records:sep-refund",
+        "bank:consumption_records:sep-end",
+        "bank:consumption_records:aug-food",
+        "bank:consumption_records:aug-market",
+        "bank:consumption_records:aug-trip",
+        "bank:consumption_records:aug-shop"
+      ],
+      "month": "2026-09",
+      "monthly_comparison": {
+        "net_change": 512500,
+        "net_change_bps": 170833,
+        "previous_month": "2026-08",
+        "previous_summary": {
+          "currency": "CNY",
+          "excluded_count": 0,
+          "gross_spend": 30000,
+          "net_spend": 30000,
+          "purchase_count": 4,
+          "refund_count": 0,
+          "refunds": 0,
+          "settled_count": 4
+        }
+      },
+      "summary": {
+        "currency": "CNY",
+        "excluded_count": 1,
+        "gross_spend": 547500,
+        "net_spend": 542500,
+        "purchase_count": 10,
+        "refund_count": 1,
+        "refunds": 5000,
+        "settled_count": 11
+      },
+      "timezone": "Asia/Shanghai"
+    }
+  },
+  "WEALTH_RECOMMENDATION": {
+    "request": "推荐适合我的理财产品",
+    "status": "COMPLETED",
+    "result": {
+      "customer_risk_level": 2,
+      "evidence_refs": [
+        "bank:risk_profiles:demo",
+        "bank:wealth_products:sandbox-r1",
+        "bank:wealth_products:sandbox-r2"
+      ],
+      "limitations": "仅为虚构产品库的风险匹配演示，未评估预算与流动性需求，不保证收益。",
+      "message": "已生成只读推荐；未发起任何购买或赎回。",
+      "recommendations": [
+        {
+          "currency": "CNY",
+          "evidence_refs": [
+            "bank:risk_profiles:demo",
+            "bank:wealth_products:sandbox-r1"
+          ],
+          "minimum_amount": 10000,
+          "name": "演示低风险现金产品",
+          "product_id": "sandbox-r1",
+          "reason_codes": [
+            "RISK_WITHIN_PROFILE",
+            "ACTIVE_CATALOG_PRODUCT"
+          ],
+          "reasons": [
+            "产品风险等级 R1 不高于你的 R2。",
+            "产品库标记为在架；最低金额 100.00 元，持有期字段为 0 天。"
+          ],
+          "risk_level": 1,
+          "risk_note": "演示数据；不保证本金或收益",
+          "term_days": 0
+        },
+        {
+          "currency": "CNY",
+          "evidence_refs": [
+            "bank:risk_profiles:demo",
+            "bank:wealth_products:sandbox-r2"
+          ],
+          "minimum_amount": 100000,
+          "name": "演示稳健30天产品",
+          "product_id": "sandbox-r2",
+          "reason_codes": [
+            "RISK_WITHIN_PROFILE",
+            "ACTIVE_CATALOG_PRODUCT"
+          ],
+          "reasons": [
+            "产品风险等级 R2 不高于你的 R2。",
+            "产品库标记为在架；最低金额 1000.00 元，持有期字段为 30 天。"
+          ],
+          "risk_level": 2,
+          "risk_note": "持有期30天；存在净值波动",
+          "term_days": 30
+        }
+      ],
+      "selection_basis": "按有效风险等级筛选在架CNY产品，按风险等级、持有期和产品ID排序；最多3项。"
+    }
+  },
+  "read_only_balance_unchanged": true,
+  "audit_chain_valid": true,
+  "tasks_survive_restart": true
+}

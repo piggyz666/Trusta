@@ -1,0 +1,310 @@
+{
+  "phase": 6,
+  "created_at_utc": "2026-10-06T12:29:34.220328+00:00",
+  "local_implementation_and_regression_passed": true,
+  "all_external_integrations_completed": false,
+  "tests": {
+    "total": 449,
+    "original": 371,
+    "new": 78,
+    "duration_seconds": 341.137,
+    "passed": true,
+    "original_files_byte_identical": true,
+    "source": "phase6-tests.txt",
+    "supplemental_checks": [
+      "data/phase6-submit-sdk-tests.txt (29 passed)",
+      "data/phase6-final-sdk-api-tests.txt (24 passed)",
+      "data/phase6-final-proposal-tests.txt (7 passed; includes shadow no-install)"
+    ]
+  },
+  "metrics_repair_checks": {
+    "passed": true,
+    "tests": 12,
+    "source": "data/phase6-metrics-repair-tests.txt",
+    "full_regression_rerun_for_metrics_repair": false
+  },
+  "definition_of_done": {
+    "A": true,
+    "B": true,
+    "C": true,
+    "D": null,
+    "E": true,
+    "F": true,
+    "G": true,
+    "H": null,
+    "I": true,
+    "J": true,
+    "K": true,
+    "L": true,
+    "M": true,
+    "N": true,
+    "O": true,
+    "P": true,
+    "Q": true,
+    "R": true,
+    "S": true,
+    "T": true
+  },
+  "conditional_dod": {
+    "D": "No bank credential/config available; official sandbox live verification blocked",
+    "H": "No RPC/wallet/gas/deployed contract; external anchor blocked"
+  },
+  "real_bank_connected": false,
+  "official_bank_sandbox_verified": false,
+  "real_llm_verified": true,
+  "cross_provider_verified": false,
+  "external_blockchain_verified": false,
+  "capability_matrix": [
+    {
+      "capability": "Canonical Bank SDK / Virtual compatibility",
+      "classification": "LOCAL_SANDBOX_VERIFIED",
+      "evidence": "phase6-tests.txt; bank-integration-sdk.md"
+    },
+    {
+      "capability": "Starling reference protocol adapter",
+      "classification": "IMPLEMENTED_NOT_LIVE_VERIFIED",
+      "evidence": "test_phase6_sdk.py; reference-bank-validation.json"
+    },
+    {
+      "capability": "Official sandbox bank connection",
+      "classification": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+      "evidence": "reference-bank-validation.json"
+    },
+    {
+      "capability": "Gemini real inference, 100 synthetic requests",
+      "classification": "REAL_EXTERNAL_VERIFIED",
+      "evidence": "real-llm-evaluation.json/.csv"
+    },
+    {
+      "capability": "OpenAI cross-provider live experiment",
+      "classification": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+      "evidence": "real-llm-evaluation.json.cross_provider_attempt; authentication probe HTTP401"
+    },
+    {
+      "capability": "Real Gateway/Router semantic READ graph",
+      "classification": "REAL_EXTERNAL_VERIFIED",
+      "evidence": "phase6-gateway-live.json; model-router-live-evaluation.json"
+    },
+    {
+      "capability": "Privacy/fault/fallback controls",
+      "classification": "LOCAL_SANDBOX_VERIFIED",
+      "evidence": "test_llm_gateway.py; test_llm_providers.py; test_phase6_proposal.py"
+    },
+    {
+      "capability": "Audit contract and EVM/RPC protocol",
+      "classification": "LOCAL_SANDBOX_VERIFIED",
+      "evidence": "test_phase6_anchor.py; contracts/AuditAnchorContract.json"
+    },
+    {
+      "capability": "External Sepolia anchor/read-back",
+      "classification": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+      "evidence": "external-anchor-proof.json"
+    },
+    {
+      "capability": "AA multi-identity collection",
+      "classification": "LOCAL_SANDBOX_VERIFIED",
+      "evidence": "aa-demo.json; test_phase6_split.py; test_phase6_http.py"
+    },
+    {
+      "capability": "Constrained graph/compiler/runtime",
+      "classification": "LOCAL_SANDBOX_VERIFIED",
+      "evidence": "planning-benchmark.json; phase6-taskgraph-demo.json"
+    },
+    {
+      "capability": "Starling card/subscription/investment adapters",
+      "classification": "NOT_IMPLEMENTED",
+      "evidence": "Reference manifest deliberately excludes these capabilities"
+    },
+    {
+      "capability": "DID / ZKP future extensions",
+      "classification": "INTERFACE_ONLY",
+      "evidence": "backend/security/extensions.py"
+    }
+  ],
+  "planning": {
+    "scope": "LOCAL_SANDBOX_VERIFIED; hand-specified typed graph; not LLM generation accuracy",
+    "dataset_hash": "0dbc8e85f6cb058a667cc0cbab9b23ea29093a5074faef6a84b53f048b743031",
+    "dataset_size": 55,
+    "passed": true,
+    "unsafe_plan_acceptance": {
+      "numerator": 0,
+      "denominator": 42,
+      "rate": 0.0
+    },
+    "legal_acceptance": {
+      "numerator": 13,
+      "denominator": 13
+    }
+  },
+  "raw_llm_metrics": {
+    "intent_correct": 0.67,
+    "parameters_correct": 0.87,
+    "clarification_correct": 0.82,
+    "envelope_unsafe": 0.0
+  },
+  "llm_metrics": {
+    "intent_correct": 0.67,
+    "parameters_correct": 0.87,
+    "clarification_correct": 0.82,
+    "raw_unsafe": 0.15,
+    "system_rejected": 0.83
+  },
+  "detailed_llm_metrics": {
+    "raw_model": {
+      "intent_correct": {
+        "numerator": 67,
+        "denominator": 100,
+        "rate": 0.67,
+        "unknown": 0
+      },
+      "parameters_correct": {
+        "numerator": 87,
+        "denominator": 100,
+        "rate": 0.87,
+        "unknown": 0
+      },
+      "clarification_correct": {
+        "numerator": 82,
+        "denominator": 100,
+        "rate": 0.82,
+        "unknown": 0
+      },
+      "envelope_unsafe": {
+        "numerator": 0,
+        "denominator": 100,
+        "rate": 0.0,
+        "unknown": 0
+      }
+    },
+    "candidate_validation": {
+      "raw_plan_valid": {
+        "numerator": 91,
+        "denominator": 100,
+        "rate": 0.91,
+        "unknown": 0
+      },
+      "resource_grounding": {
+        "numerator": 35,
+        "denominator": 48,
+        "rate": 0.7291666666666666,
+        "unknown": 52
+      },
+      "graph_acceptance": {
+        "numerator": 0,
+        "denominator": 2,
+        "rate": 0.0,
+        "unknown": 98
+      },
+      "raw_unsafe": {
+        "numerator": 15,
+        "denominator": 100,
+        "rate": 0.15,
+        "unknown": 0
+      }
+    },
+    "system_final": {
+      "system_intent_correct": {
+        "numerator": 43,
+        "denominator": 100,
+        "rate": 0.43,
+        "unknown": 0
+      },
+      "system_parameters_correct": {
+        "numerator": 63,
+        "denominator": 100,
+        "rate": 0.63,
+        "unknown": 0
+      },
+      "system_clarification_correct": {
+        "numerator": 67,
+        "denominator": 100,
+        "rate": 0.67,
+        "unknown": 0
+      },
+      "system_rejected": {
+        "numerator": 83,
+        "denominator": 100,
+        "rate": 0.83,
+        "unknown": 0
+      },
+      "task_completion": {
+        "numerator": 4,
+        "denominator": 17,
+        "rate": 0.23529411764705882,
+        "unknown": 83
+      },
+      "task_completion_all_cases": {
+        "numerator": 4,
+        "denominator": 100,
+        "rate": 0.04,
+        "unknown": 83
+      }
+    },
+    "hallucination_rejection": {
+      "numerator": 5,
+      "denominator": 5,
+      "rate": 1.0,
+      "unknown": 0
+    },
+    "prompt_injection_rejection": {
+      "numerator": 17,
+      "denominator": 17,
+      "rate": 1.0,
+      "unknown": 0
+    },
+    "unsafe_system_execution": {
+      "numerator": 0,
+      "denominator": 100,
+      "rate": 0
+    }
+  },
+  "llm_metric_contract": {
+    "version": 2,
+    "stage": "CORE_REPLAY",
+    "accuracy_denominator": "All evaluated cases; missing observations count as failures.",
+    "check_denominator": "Cases with an observed boolean check; unknown count is explicit.",
+    "raw_model": "Accuracy and forbidden-envelope check before bank resource or graph validation.",
+    "raw_unsafe": "Legacy candidate flag: forbidden envelope OR invalid resource grounding OR rejected graph. Not a pure model metric, maliciousness verdict, or executed bank operation.",
+    "system_rejected": "Final case rejection at the declared stage; inference-only and core replay rates must not be mixed.",
+    "task_completion": "Completed tasks / admitted candidates with observed completion; WAITING_USER and BLOCKED are not completed.",
+    "task_completion_all_cases": "Completed tasks / all evaluated requests.",
+    "raw_plan_valid": "Legacy envelope shape and graph check; not proof of a complete executable banking plan."
+  },
+  "llm_outcomes": {
+    "evaluated": 100,
+    "model_response_returned": 100,
+    "model_call_failed": 0,
+    "core_replay_performed": true,
+    "accepted_candidates": 17,
+    "rejected_candidates": 83,
+    "accepted_completed": 4,
+    "accepted_waiting_user": 12,
+    "accepted_business_blocked": 1,
+    "accepted_other_status": 0,
+    "core_bank_writes": 0
+  },
+  "live_gateway_graph_status": "COMPLETED",
+  "demos": {
+    "aa": "aa-demo.json",
+    "dynamic_cross_budget": "phase6-taskgraph-demo.json",
+    "real_model_graph": "phase6-gateway-live.json"
+  },
+  "limits": [
+    "Synthetic local bank funds only; bank reference HTTP fixtures are not official sandbox",
+    "OpenAI credential probe failed; only Gemini live provider verified",
+    "Bank PAT signing/status assumptions await official sandbox validation",
+    "CNY Finance scenarios preserved; Reference exposes GBP canonical records with UNKNOWN consumption classification, no GBP Finance analysis claim",
+    "External chain unconfigured; local EVM tests are not blockchain live proof",
+    "Strict source grammar replay rejects many model candidates; no production-ready arbitrary-language accuracy claim",
+    "No automatic financial authorization/retry; cost null without verified price",
+    "DID/ZKP retained as interfaces; no added Agent"
+  ],
+  "specified_delivery_count": 20,
+  "all_specified_deliverables_present": true,
+  "followup_validation_files": [
+    "phase6-metrics-repair-validation.json",
+    "phase6-taskgraph-usability-validation.json",
+    "phase6-second-provider-validation.json"
+  ],
+  "baseline_note": "This is the original Phase 6 baseline. Latest second-provider follow-up has 486 passing tests and real DeepSeek graph regression plus bidirectional Gemini/DeepSeek routing. The reused 24-case metrics do not replace the original 100-case intent benchmark. Bank/external-chain/DID/ZKP live status is unchanged."
+}

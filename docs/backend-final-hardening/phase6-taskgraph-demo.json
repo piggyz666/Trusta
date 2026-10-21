@@ -1,0 +1,306 @@
+{
+  "scope": "LOCAL_SANDBOX_VERIFIED",
+  "semantic_graph": {
+    "schema_version": 1,
+    "nodes": [
+      {
+        "node_id": "Records",
+        "node_type": "READ",
+        "owner": "finance",
+        "capability": "transactions.read",
+        "input_refs": [
+          "input:account",
+          "input:month"
+        ],
+        "output_refs": [
+          "Records:result"
+        ],
+        "dependencies": [],
+        "condition": null,
+        "failure_policy": {
+          "mode": "STOP",
+          "max_retries": 0
+        },
+        "parameters": {
+          "account_id": "input:account",
+          "month": "input:month"
+        }
+      },
+      {
+        "node_id": "Subscriptions",
+        "node_type": "READ",
+        "owner": "service",
+        "capability": "subscriptions.read",
+        "input_refs": [],
+        "output_refs": [
+          "Subscriptions:result"
+        ],
+        "dependencies": [],
+        "condition": null,
+        "failure_policy": {
+          "mode": "STOP",
+          "max_retries": 0
+        },
+        "parameters": {}
+      },
+      {
+        "node_id": "Analyze",
+        "node_type": "ANALYZE",
+        "owner": "finance",
+        "capability": "finance.summary",
+        "input_refs": [
+          "Records:result"
+        ],
+        "output_refs": [
+          "Analyze:result"
+        ],
+        "dependencies": [
+          "Records"
+        ],
+        "condition": null,
+        "failure_policy": {
+          "mode": "STOP",
+          "max_retries": 0
+        },
+        "parameters": {
+          "records": "Records:result"
+        }
+      },
+      {
+        "node_id": "Cancel",
+        "node_type": "PROPOSE_ACTION",
+        "owner": "service",
+        "capability": "service.propose",
+        "input_refs": [
+          "input:account",
+          "input:kind",
+          "input:target",
+          "input:values"
+        ],
+        "output_refs": [
+          "Cancel:result"
+        ],
+        "dependencies": [
+          "Analyze",
+          "Subscriptions"
+        ],
+        "condition": null,
+        "failure_policy": {
+          "mode": "STOP",
+          "max_retries": 0
+        },
+        "parameters": {
+          "account_id": "input:account",
+          "action_type": "input:kind",
+          "target_id": "input:target",
+          "values": "input:values"
+        }
+      },
+      {
+        "node_id": "Budget",
+        "node_type": "ANALYZE",
+        "owner": "wealth",
+        "capability": "wealth.budget_plan",
+        "input_refs": [
+          "input:budget",
+          "Cancel:result",
+          "input:nextmonth"
+        ],
+        "output_refs": [
+          "Budget:result"
+        ],
+        "dependencies": [
+          "Cancel"
+        ],
+        "condition": null,
+        "failure_policy": {
+          "mode": "STOP",
+          "max_retries": 0
+        },
+        "parameters": {
+          "budget": "input:budget",
+          "cancellation": "Cancel:result",
+          "month": "input:nextmonth"
+        }
+      },
+      {
+        "node_id": "Report",
+        "node_type": "REPORT",
+        "owner": "supervisor",
+        "capability": "graph.report",
+        "input_refs": [],
+        "output_refs": [
+          "Report:result"
+        ],
+        "dependencies": [
+          "Budget"
+        ],
+        "condition": null,
+        "failure_policy": {
+          "mode": "STOP",
+          "max_retries": 0
+        },
+        "parameters": {}
+      }
+    ]
+  },
+  "compiled_steps": [
+    {
+      "dependencies": [],
+      "name": "READ",
+      "owner": "finance",
+      "status": "COMPLETED",
+      "step_id": "Records"
+    },
+    {
+      "dependencies": [],
+      "name": "READ",
+      "owner": "service",
+      "status": "COMPLETED",
+      "step_id": "Subscriptions"
+    },
+    {
+      "dependencies": [
+        "Records"
+      ],
+      "name": "ANALYZE",
+      "owner": "finance",
+      "status": "COMPLETED",
+      "step_id": "Analyze"
+    },
+    {
+      "dependencies": [
+        "Analyze",
+        "Subscriptions"
+      ],
+      "name": "PROPOSE_ACTION",
+      "owner": "service",
+      "status": "COMPLETED",
+      "step_id": "Cancel"
+    },
+    {
+      "dependencies": [
+        "Cancel"
+      ],
+      "name": "SCHEMA",
+      "owner": "schema",
+      "status": "COMPLETED",
+      "step_id": "CancelXSCHEMA"
+    },
+    {
+      "dependencies": [
+        "CancelXSCHEMA"
+      ],
+      "name": "CAPABILITY",
+      "owner": "schema",
+      "status": "COMPLETED",
+      "step_id": "CancelXCAPABILITY"
+    },
+    {
+      "dependencies": [
+        "CancelXCAPABILITY"
+      ],
+      "name": "POLICY",
+      "owner": "policy",
+      "status": "COMPLETED",
+      "step_id": "CancelXPOLICY"
+    },
+    {
+      "dependencies": [
+        "CancelXPOLICY"
+      ],
+      "name": "AUTHORIZATION",
+      "owner": "authorization",
+      "status": "COMPLETED",
+      "step_id": "CancelXAUTHORIZATION"
+    },
+    {
+      "dependencies": [
+        "CancelXAUTHORIZATION"
+      ],
+      "name": "CONTRACT",
+      "owner": "executor",
+      "status": "COMPLETED",
+      "step_id": "CancelXCONTRACT"
+    },
+    {
+      "dependencies": [
+        "CancelXCONTRACT"
+      ],
+      "name": "EXECUTE",
+      "owner": "executor",
+      "status": "COMPLETED",
+      "step_id": "CancelXEXECUTE"
+    },
+    {
+      "dependencies": [
+        "CancelXEXECUTE"
+      ],
+      "name": "VERIFY",
+      "owner": "verifier",
+      "status": "COMPLETED",
+      "step_id": "CancelXVERIFY"
+    },
+    {
+      "dependencies": [
+        "CancelXVERIFY"
+      ],
+      "name": "RECEIPT",
+      "owner": "receipts",
+      "status": "COMPLETED",
+      "step_id": "CancelXRECEIPT"
+    },
+    {
+      "dependencies": [
+        "CancelXRECEIPT"
+      ],
+      "name": "ANALYZE",
+      "owner": "wealth",
+      "status": "COMPLETED",
+      "step_id": "Budget"
+    },
+    {
+      "dependencies": [
+        "Budget"
+      ],
+      "name": "REPORT",
+      "owner": "supervisor",
+      "status": "COMPLETED",
+      "step_id": "Report"
+    }
+  ],
+  "before_approval": {
+    "status": "WAITING_USER",
+    "wealth_started": false,
+    "bank_changed": "ACTIVE"
+  },
+  "after_restart_and_approval": {
+    "status": "COMPLETED",
+    "budget": {
+      "month": "2026-11",
+      "base_budget": 300000,
+      "monthly_saving": 1999,
+      "planned_budget": 301999,
+      "receipt_ref": "09881864-de4d-48cd-83b6-04b96404bf93",
+      "financial_write": false,
+      "guaranteed_return": false
+    },
+    "receipts": [
+      {
+        "receipt_id": "09881864-de4d-48cd-83b6-04b96404bf93",
+        "task_id": "63cb2714-ce4b-4323-b0b5-3413a5e533a1",
+        "action_id": "ea391949-90c9-4cb6-89df-dcdad0508331",
+        "bank_transaction_id": "2fe36feb-2eb3-426d-b259-88f23e421cd0",
+        "approved_action_hash": "b8c5552601bfafc48f7b71cb02866c43edffcc122482bfc04f61cc49aae6f720",
+        "policy_decision_id": "00b64d13-8652-48f6-9e55-e50bf54354cd",
+        "authorization_id": "01d6ea5e-88cd-47e1-a3f4-b98d8f195a46",
+        "pre_state_hash": "af46c714867a0fae426156feee20d1b3268dd9630ab815430b4341aa766179aa",
+        "post_state_hash": "eecf2148041d5026e576f32d283e6c714afd7ed74d1b3dd2f9e5038dc74aaaed",
+        "verification_status": "VERIFIED",
+        "executed_at": 1791624090.2199368,
+        "audit_ref": "8c01859a-d20b-4de9-ac4c-1fc12d1d8e0e"
+      }
+    ]
+  },
+  "financial_path": "BankActionIR -> Capability -> Policy -> Authorization -> Contract -> Gateway -> Adapter -> Verification -> Receipt/Audit"
+}

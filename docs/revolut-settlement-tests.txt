@@ -1,0 +1,12 @@
+test_business_sdk_cannot_invoke_simulator (tests.test_revolut_settlement.SandboxSettlementTests.test_business_sdk_cannot_invoke_simulator) ... ok
+test_existing_authorised_pending_only_and_original_reconciliation (tests.test_revolut_settlement.SandboxSettlementTests.test_existing_authorised_pending_only_and_original_reconciliation) ... ok
+test_known_bank_rejection_keeps_pending_without_retry_or_receipt (tests.test_revolut_settlement.SandboxSettlementTests.test_known_bank_rejection_keeps_pending_without_retry_or_receipt) ... ok
+test_lost_simulator_response_never_repeats_or_resends_payment (tests.test_revolut_settlement.SandboxSettlementTests.test_lost_simulator_response_never_repeats_or_resends_payment) ... ok
+test_mismatch_cannot_be_made_successful_with_simulation (tests.test_revolut_settlement.SandboxSettlementTests.test_mismatch_cannot_be_made_successful_with_simulation) ... ok
+test_prior_claim_pending_does_not_call_simulator (tests.test_revolut_settlement.SandboxSettlementTests.test_prior_claim_pending_does_not_call_simulator) ... ok
+test_unapproved_task_and_production_are_denied (tests.test_revolut_settlement.SandboxSettlementTests.test_unapproved_task_and_production_are_denied) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 7.256s
+
+OK

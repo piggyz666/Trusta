@@ -1,0 +1,9 @@
+test_bad_identifiers_and_disabled_profile (tests.test_did_key.DIDTests.test_bad_identifiers_and_disabled_profile) ... ok
+test_binding_live_capabilities_tamper_expiry_and_restart (tests.test_did_key.DIDTests.test_binding_live_capabilities_tamper_expiry_and_restart) ... ok
+test_p256_external_example_and_stateless_roundtrip (tests.test_did_key.DIDTests.test_p256_external_example_and_stateless_roundtrip) ... ok
+test_rotation_and_revocation_are_registry_semantics (tests.test_did_key.DIDTests.test_rotation_and_revocation_are_registry_semantics) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.886s
+
+OK

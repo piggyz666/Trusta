@@ -1,0 +1,18 @@
+provider: deepseek
+model: deepseek-flash
+endpoint: https://api.deepseek.com/chat/completions
+api_key: ${DEEPSEEK_API_KEY}
+token_parameter: max_tokens
+authentication: bearer
+thinking_mode: disabled
+json_output: true
+timeout: 45
+locality: external
+max_sensitivity: restricted
+data_policy_reviewed: true
+max_input_chars: 40000
+gateway:
+  mode: assisted
+  max_output_tokens: 2048
+  max_fallbacks: 0
+  graph_format: semantic_v3

@@ -1,0 +1,18 @@
+test_busy_worker_cannot_be_cancelled_or_claim_stolen (tests.test_final_convergence.FinalConvergenceTests.test_busy_worker_cannot_be_cancelled_or_claim_stolen) ... ok
+test_cancel_graph_via_existing_service_does_not_start_next_payment (tests.test_final_convergence.FinalConvergenceTests.test_cancel_graph_via_existing_service_does_not_start_next_payment) ... ok
+test_cancel_wait_time_and_reject_stale_or_other_owner (tests.test_final_convergence.FinalConvergenceTests.test_cancel_wait_time_and_reject_stale_or_other_owner) ... ok
+test_chinese_amount_multiple_actions_have_distinct_provenance (tests.test_final_convergence.FinalConvergenceTests.test_chinese_amount_multiple_actions_have_distinct_provenance) ... ok
+test_global_negation_injection_ambiguity_never_extract_positive_action (tests.test_final_convergence.FinalConvergenceTests.test_global_negation_injection_ambiguity_never_extract_positive_action) ... ok
+test_missing_amount_and_ambiguous_chinese_short_form (tests.test_final_convergence.FinalConvergenceTests.test_missing_amount_and_ambiguous_chinese_short_form) ... ok
+test_model_cannot_change_amount_ref_or_dependency (tests.test_final_convergence.FinalConvergenceTests.test_model_cannot_change_amount_ref_or_dependency) ... ok
+test_model_equivalent_ids_and_transitive_report (tests.test_final_convergence.FinalConvergenceTests.test_model_equivalent_ids_and_transitive_report) ... ok
+test_multiple_payments_need_independent_approval_and_ledger (tests.test_final_convergence.FinalConvergenceTests.test_multiple_payments_need_independent_approval_and_ledger) ... ok
+test_partial_graph_cancel_preserves_paid_receipt (tests.test_final_convergence.FinalConvergenceTests.test_partial_graph_cancel_preserves_paid_receipt) ... ok
+test_reasoning_content_is_not_executable_content (tests.test_final_convergence.FinalConvergenceTests.test_reasoning_content_is_not_executable_content) ... ok
+test_six_scenario_explicit_mapping (tests.test_final_convergence.FinalConvergenceTests.test_six_scenario_explicit_mapping) ... ok
+test_thinking_default_backward_compatible_and_optional (tests.test_final_convergence.FinalConvergenceTests.test_thinking_default_backward_compatible_and_optional) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 6.697s
+
+OK

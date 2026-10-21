@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "audit_event_id": "8d5320df-48e2-4a4a-972d-0854142183a9",
+  "event": {
+    "action_id": "f57a5e24-ea10-4453-9e5e-b6d1e9a148ee",
+    "actor": "receipts",
+    "audit_event_id": "8d5320df-48e2-4a4a-972d-0854142183a9",
+    "event_hash": "e119cf0db1470fd1261fe9bff0386f1bde1c5b6d0037e9a0d468b404163a3607",
+    "event_type": "RECEIPT_GENERATED",
+    "payload_hash": "49a02173a17db2a4a47151c94f4d7bd51efbfbe6cd4479d5225728d0406be68c",
+    "previous_hash": "449e9943189dd79caffe664da393aa6575b9973e6a03e1db5e63a9b3c7622a8b",
+    "task_id": "e49e1778-0c4b-493f-a3fe-c023ca45ae8b",
+    "timestamp": 1791625307.882551
+  },
+  "event_hash": "e119cf0db1470fd1261fe9bff0386f1bde1c5b6d0037e9a0d468b404163a3607",
+  "event_sequence": 108,
+  "leaf_index": 107,
+  "inclusion_proof": [
+    {
+      "side": "LEFT",
+      "hash": "3ef7f45f21f9775b2aa810151e3d9ee184ded83ebf1a052a5b4d7d9e1b3b3a16"
+    },
+    {
+      "side": "LEFT",
+      "hash": "de03365a93b31781d9e7b8b611bce49fa26c5a25fdf9643a2ea6718fead435cf"
+    },
+    {
+      "side": "RIGHT",
+      "hash": "13114abfc1545dad7d17dcc5eed61a07df44360727e25b8c824d995eea3e80df"
+    },
+    {
+      "side": "LEFT",
+      "hash": "18cc01fc62ade0555c3d46af67207394332a6c6cf318a1c6ebfd6d669ca90b42"
+    },
+    {
+      "side": "RIGHT",
+      "hash": "1eaaa9906b26a9adb73e4621d1206db300820b866d3fcb3dd02cfe8de7db38f6"
+    },
+    {
+      "side": "LEFT",
+      "hash": "fcd3be004d2bd97d59394dbcc059d0ad0faa6ade73c1681c84758812f9e5042a"
+    },
+    {
+      "side": "LEFT",
+      "hash": "37eaf2a5fedb8b0d5537f9f441aee2330600b9c4e94fe9b1664fc047bfe6d8c7"
+    }
+  ],
+  "merkle_root": "646a1acd015c07d0170a476a36a7df5436d0219d089f2676e4586ff1451d502e",
+  "checkpoint": {
+    "canonicalization": "TRUSTA-JSON-v1",
+    "checkpoint_id": "626260cc-0dfb-46b3-9b3f-449292f363bd",
+    "checkpoint_signature": "MEYCIQD4WqksNzxvZqr5pGWX5zRBv/rzR5hDX+1108Ed987PswIhAL49HVpFepspeAisNepF6Bd79u44JjmYz7lxLyQMzB+V",
+    "created_at": 1791625308090,
+    "first_event_sequence": 1,
+    "last_event_sequence": 122,
+    "leaf_count": 122,
+    "merkle_root": "646a1acd015c07d0170a476a36a7df5436d0219d089f2676e4586ff1451d502e",
+    "previous_checkpoint_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "public_key_fingerprint": "eef87f81f6195a245a363c04bc1bfe29a1a67eae866323d23527347402323076",
+    "schema_version": 1,
+    "signature_algorithm": "ECDSA-P256-SHA256",
+    "signer_identity": "urn:trusta:4b4f7101-2293-4562-ac39-64401cadfd22:audit-checkpoint",
+    "signer_key_id": "key-2fa51f70-e942-4d39-a3da-bf80f62229d9",
+    "tree_algorithm": "RFC6962-SHA256-event-hash-v1"
+  },
+  "signature_status": "VALID",
+  "signer_key_status": "ACTIVE",
+  "signer_public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7k+FwlLvEOMLj7/SQHXYF3orebPd\neEYPfBcCgSWWmVvTiWudnenf2LwzikwHRud4GjADhpBytOIF6n24floKBg==\n-----END PUBLIC KEY-----\n",
+  "anchor": {
+    "adapter": null,
+    "anchor_ref": null,
+    "attempts": 0,
+    "checkpoint_hash": "12e5551a7b0b3c21ece909158948ac2cfe5d6d052239fda94b4bf16f550fe2d0",
+    "checkpoint_id": "626260cc-0dfb-46b3-9b3f-449292f363bd",
+    "error": null,
+    "root": "646a1acd015c07d0170a476a36a7df5436d0219d089f2676e4586ff1451d502e",
+    "schema_version": 1,
+    "status": "PENDING",
+    "updated_at": 1791625308090
+  },
+  "anchor_status": "PENDING",
+  "receipt": {
+    "action_id": "f57a5e24-ea10-4453-9e5e-b6d1e9a148ee",
+    "approved_action_hash": "2e1592f60840388d57fadc7170067622b7f35f4140c08293fbac5a47a058a5df",
+    "audit_ref": "8d5320df-48e2-4a4a-972d-0854142183a9",
+    "authorization_id": "52e0f6ba-4f1f-4a97-8139-03e97c8a5094",
+    "bank_transaction_id": "d4413abf-81fc-42a8-83ce-200b88fef245",
+    "executed_at": 1791625307.7626095,
+    "policy_decision_id": "af19ec55-1d16-44df-b99e-5abd2df12123",
+    "post_state_hash": "e36373c225ac09d1ae3c82692ffb9e683ae0ca58a25359972522f562bdd0ab07",
+    "pre_state_hash": "09af43cd747d7f472a0626192431b49093369feb82141c04865b8ad6bc96788c",
+    "receipt_id": "89581352-aa97-483b-a993-748f37e343dd",
+    "task_id": "e49e1778-0c4b-493f-a3fe-c023ca45ae8b",
+    "verification_status": "VERIFIED"
+  },
+  "receipt_schema_version": 1,
+  "record_verified": true
+}

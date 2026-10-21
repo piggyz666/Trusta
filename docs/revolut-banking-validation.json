@@ -1,0 +1,88 @@
+{
+  "updated_at": "2026-10-08T08:54:15.115460+00:00",
+  "status": "OFFICIAL_SANDBOX_SIMULATED_SETTLEMENT_READBACK_VERIFIED",
+  "scope": "Revolut official Sandbox only; no production banking",
+  "frontend_official_read_verified": true,
+  "readonly_browser_account_count": 5,
+  "readonly_browser_record_count": 5,
+  "bank_oauth_requested_scope": "READ,PAY",
+  "bank_oauth_reported_scope": null,
+  "bank_oauth_account_read_count": 5,
+  "bank_scope_request_is_not_payment_acceptance_proof": true,
+  "sandbox_transfer_route": "EUR -> DE; same currency",
+  "demo_amount_minor_units": 1,
+  "maximum_amount_minor_units": 100,
+  "bank_operation_claim_count": 1,
+  "bank_operation_states": [
+    "SETTLED"
+  ],
+  "task_status": "MANUAL_REVIEW",
+  "verification_status": "MANUAL_REVIEW",
+  "supplementary_verification_status": "VERIFIED",
+  "receipt_present": true,
+  "core_frozen_files": {
+    "backend/service.py": true,
+    "backend/config.py": true,
+    "backend/runtime/taskgraph.py": true,
+    "backend/runtime/graph_runtime.py": true,
+    "backend/execution/gateway.py": true,
+    "backend/execution/contract.py": true,
+    "backend/policy.py": true,
+    "backend/authorization.py": true,
+    "backend/schema_validator.py": true,
+    "backend/security/registry.py": true
+  },
+  "original_test_files_unchanged": true,
+  "original_test_file_count": 36,
+  "all_tests": {
+    "status": "PASSED",
+    "count": 545,
+    "seconds": 624.898
+  },
+  "new_banking_tests": 23,
+  "bootstrap_and_banking_targeted_tests": 35,
+  "final_protocol_targeted_tests": {
+    "status": "PASSED",
+    "count": 35,
+    "seconds": 33.777,
+    "note": "Fresh process after correcting singular /counterparty/{id} and /transaction/{id}; also verified these GETs against the official Sandbox."
+  },
+  "browser_modes": [
+    "synthetic_readonly",
+    "synthetic_transfer",
+    "synthetic_pending",
+    "live_readonly"
+  ],
+  "official_payment_submission_verified": true,
+  "financial_settlement_verified": true,
+  "bank_simulation_control_plane_attempted": true,
+  "bank_simulation_outcome": "SIMULATOR_REPORTED_COMPLETED",
+  "bank_simulation_http_status": null,
+  "bank_simulation_history": [
+    {
+      "outcome": "SIMULATION_REJECTED",
+      "http_status": 403,
+      "post_calls": 1
+    },
+    {
+      "outcome": "SIMULATOR_REPORTED_COMPLETED",
+      "http_status": null,
+      "post_calls": 1
+    }
+  ],
+  "bank_simulation_post_calls": 2,
+  "settlement_operator_targeted_tests": {
+    "status": "PASSED",
+    "count": 13,
+    "seconds": 14.9
+  },
+  "production_bank_write_calls": 0,
+  "llm_calls": 0,
+  "limits": [
+    "Sandbox only; completion used official simulation control",
+    "GBP/GB and EUR/DE only; no FX",
+    "Business credentials READ/PAY; separate operator READ/WRITE trial; no sensitive card scope requested",
+    "No automatic payment POST retry",
+    "No DID/ZKP/Blockchain implementation added"
+  ]
+}

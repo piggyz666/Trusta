@@ -1,0 +1,725 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "method": "Classification from actual saved raw content and current deterministic decoder. No retry/repair/model call.",
+  "source_path": "docs/final-backend/LLM_Live_Benchmark.json",
+  "source_sha256": "25c6af0ea5877078fb54696451abb1e7753a012ccc11604ea2602618599438c9",
+  "cases": [
+    {
+      "provider": "deepseek",
+      "case_id": "FC01",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "1b683f88f2025b3702a05533a70fbafc48c1489d90b54b5200694c9521a5fb11",
+      "raw_correct": false,
+      "root_causes": [
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "PROMPT_AMOUNT_UNIT_SPAN_AMBIGUITY"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 359,
+        "output_tokens": 1754
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC01",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "14ded5f823791a187fb0ab3db3feec3e5031ec6dd38ddce7505365be99e82b17",
+      "raw_correct": false,
+      "root_causes": [
+        "INTENT_SEMANTICS",
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 309,
+        "output_tokens": 43
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC02",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "7102e5788d507edd71b34839dd21de3e6ce8fa1d8dd9961fdc64e31a51c7fd95",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2046,
+        "output_tokens": 191
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC02",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "c5fd7f5b31c31565c2b5bbe078bc49119719bd5efbee1b45647b87d5b1d9a3e7",
+      "raw_correct": false,
+      "root_causes": [
+        "SEMANTIC_OR_FORMAT_FAILURE_REQUIRES_MANUAL_REVIEW"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1788,
+        "output_tokens": 29
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC03",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "4d6b8891ae0c7650f3014fcc05c23225bf15b7373b04357de7460294081bfac3",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2108,
+        "output_tokens": 449
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC03",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "527aadc2b4bdcc6d0bc02aabcc7afc445a41a754e19550b6124a350ee59c485c",
+      "raw_correct": false,
+      "root_causes": [
+        "VALID_SCHEMA_WRONG_OPERATIONS_OR_ORDER"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1846,
+        "output_tokens": 147
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC04",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "93ee0d06c7fc7bf400d0c21fed3a55715b31b20c4c01b94d671b24f44fbb2b4c",
+      "raw_correct": false,
+      "root_causes": [
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "PROMPT_AMOUNT_UNIT_SPAN_AMBIGUITY"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 360,
+        "output_tokens": 1057
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC04",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "76f4052063c05d69a268fbbb0a03f46ad8f6c56e4cf137c900ed918c5c2d3374",
+      "raw_correct": false,
+      "root_causes": [
+        "INTENT_SEMANTICS",
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 309,
+        "output_tokens": 31
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC05",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "6d4c6ba2d66140ff5ec6227442bfa4872c39ec3c9b26b416558976376a810358",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 355,
+        "output_tokens": 400
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC05",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "bc6cf1d7659281f5eb9f3efb3967b91466b4419fabda7d4d0d1f33801a88ec13",
+      "raw_correct": false,
+      "root_causes": [
+        "INTENT_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 305,
+        "output_tokens": 31
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC06",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "a2c2e394a150311ace744aade35b20e43e4c99801d6a0516cbb5751fcda0b4cd",
+      "raw_correct": false,
+      "root_causes": [
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "PROMPT_AMOUNT_UNIT_SPAN_AMBIGUITY"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 358,
+        "output_tokens": 635
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC06",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "677e477886a7294b2356d2658fa3da4847cf438523b4550727998d623483dfd7",
+      "raw_correct": false,
+      "root_causes": [
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 307,
+        "output_tokens": 31
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC07",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "06db6b75cc999a1420e48198802eba99b8194173817aed204d8d049a04636a62",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 358,
+        "output_tokens": 241
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC07",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "bc6cf1d7659281f5eb9f3efb3967b91466b4419fabda7d4d0d1f33801a88ec13",
+      "raw_correct": false,
+      "root_causes": [
+        "SLOT_SUBSTRING_OR_CONTEXT"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 308,
+        "output_tokens": 46
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC08",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "8c36903d32016b13f3a458e316f70ebafd3c92c4f93bcf1465dd65a994446096",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 359,
+        "output_tokens": 491
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC08",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "4451a9abec4eb9966dc85aed0ecc19070cf42aa7ea69aaaed94efb2fad2f5187",
+      "raw_correct": false,
+      "root_causes": [
+        "SCHEMA_ECHO_NOT_INSTANCE",
+        "INTENT_SEMANTICS",
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 308,
+        "output_tokens": 152
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC09",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "6d4c6ba2d66140ff5ec6227442bfa4872c39ec3c9b26b416558976376a810358",
+      "raw_correct": false,
+      "root_causes": [
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 358,
+        "output_tokens": 247
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC09",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "fae050a73925173de64b8ecefe2b7f6dd7459ab0a0df5d5456e8da6dce2e24d7",
+      "raw_correct": false,
+      "root_causes": [
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 308,
+        "output_tokens": 46
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC10",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "c3ff28b99037e776a3b146b87c6dd46e84577116c8da9363e1dafcbb0f576042",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2079,
+        "output_tokens": 276
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC10",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "22469d7c7a1a27662b55ce441c16e9872e99b1d9a813412b1fb8796144815b0a",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1819,
+        "output_tokens": 92
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC11",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "dfefa7096b2b0c3348f130b9b2c806a983496f8d29daff189e6e2d33ce76ea08",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2288,
+        "output_tokens": 313
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC11",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "ad9c8a47393658d21a7b21e80d01e36f2e2064e5d1a74e9e2df75432f8ffd4f0",
+      "raw_correct": false,
+      "root_causes": [
+        "VALIDATOR_UNSAFE_PARALLEL_WRITES"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 2005,
+        "output_tokens": 146
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC12",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "06db6b75cc999a1420e48198802eba99b8194173817aed204d8d049a04636a62",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 363,
+        "output_tokens": 202
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC12",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "14ded5f823791a187fb0ab3db3feec3e5031ec6dd38ddce7505365be99e82b17",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 314,
+        "output_tokens": 43
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC13",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "06db6b75cc999a1420e48198802eba99b8194173817aed204d8d049a04636a62",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 361,
+        "output_tokens": 381
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC13",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "14ded5f823791a187fb0ab3db3feec3e5031ec6dd38ddce7505365be99e82b17",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 311,
+        "output_tokens": 43
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC14",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "06db6b75cc999a1420e48198802eba99b8194173817aed204d8d049a04636a62",
+      "raw_correct": false,
+      "root_causes": [
+        "INTENT_SEMANTICS",
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 358,
+        "output_tokens": 802
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC14",
+      "mode": "B_INTENT",
+      "raw_output_sha256": "4451a9abec4eb9966dc85aed0ecc19070cf42aa7ea69aaaed94efb2fad2f5187",
+      "raw_correct": false,
+      "root_causes": [
+        "SCHEMA_ECHO_NOT_INSTANCE",
+        "INTENT_SEMANTICS",
+        "SLOT_SUBSTRING_OR_CONTEXT",
+        "CLARIFICATION_SEMANTICS"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 308,
+        "output_tokens": 152
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC15",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "b0a51c78c63e4f73f91bcd912a8b438b4ad48950c4af6b7cf05680554875d887",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2050,
+        "output_tokens": 156
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC15",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "e0d3e21fb396733ddc4fe05e12ed1060cb3e35db7ffc9d1cb700e2dbbde96fbc",
+      "raw_correct": false,
+      "root_causes": [
+        "SEMANTIC_OR_FORMAT_FAILURE_REQUIRES_MANUAL_REVIEW"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1792,
+        "output_tokens": 25
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC16",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "d7a7dcb923d2928c03fd4beacfb248099f518117a4b5cb9a1de4b80060cf3150",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2179,
+        "output_tokens": 406
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC16",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "dd898869f540212cb68936619ff56a0441b071c2af1acbc89d777639f71efc9c",
+      "raw_correct": false,
+      "root_causes": [
+        "SEMANTIC_OR_FORMAT_FAILURE_REQUIRES_MANUAL_REVIEW"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1904,
+        "output_tokens": 63
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC17",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "27a72aaf06d6ea79c782416b4be75fa865eb83974fa65faae681d54965c3590a",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2183,
+        "output_tokens": 654
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC17",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "4141be85239e31db2033a530929a1e830e264740961973101227e775ac76e7aa",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1907,
+        "output_tokens": 114
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC18",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "b42fbaa7306ed8a989685e2eea3738d16d5c889c9f8efeadefc9683adf12b343",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2057,
+        "output_tokens": 106
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC18",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "e0d3e21fb396733ddc4fe05e12ed1060cb3e35db7ffc9d1cb700e2dbbde96fbc",
+      "raw_correct": false,
+      "root_causes": [
+        "SEMANTIC_OR_FORMAT_FAILURE_REQUIRES_MANUAL_REVIEW"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1797,
+        "output_tokens": 24
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC19",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "b42fbaa7306ed8a989685e2eea3738d16d5c889c9f8efeadefc9683adf12b343",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2047,
+        "output_tokens": 99
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC19",
+      "mode": "A_GRAPH",
+      "raw_output_sha256": "c5fd7f5b31c31565c2b5bbe078bc49119719bd5efbee1b45647b87d5b1d9a3e7",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1790,
+        "output_tokens": 29
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC20",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "0ea495754a22bc7f5c6f92b6859134511257f82dc8db70b51fdbaec104b439ec",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2308,
+        "output_tokens": 427
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC20",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "32a5f25add4b18a31b6eea703bbd95d313d488b0ea522b35adb385dcd0c3ca66",
+      "raw_correct": false,
+      "root_causes": [
+        "VALIDATOR_UNSAFE_PARALLEL_WRITES"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 2024,
+        "output_tokens": 146
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC21",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "362570b71c8d3603d32d825e16d2ee9d83b1b79b6f07826d6e34ce72c60e07ef",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2050,
+        "output_tokens": 470
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC21",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "e0d3e21fb396733ddc4fe05e12ed1060cb3e35db7ffc9d1cb700e2dbbde96fbc",
+      "raw_correct": false,
+      "root_causes": [
+        "VALIDATOR_GRAPH_COMPACT_SCHEMA",
+        "MISSING_OR_WRONG_VERSION_ENVELOPE"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1792,
+        "output_tokens": 24
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC22",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "c1b9f6b5847368fcf1d6bc6cd0f6ffa5ede972a892b42bc537c537c47cbbe7cf",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2226,
+        "output_tokens": 1487
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC22",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "91652aa1d0fb1224a72b6633888a9058731dd01d3f322de3e8a5f7c030f154a1",
+      "raw_correct": false,
+      "root_causes": [
+        "VALIDATOR_CYCLIC_OR_MISSING_DEPENDENCY"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 1952,
+        "output_tokens": 209
+      }
+    },
+    {
+      "provider": "deepseek",
+      "case_id": "FC23",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "8afad82b6cabbd300bf3bf44b59ec26ec1b89357e3ee7846f6ec9eb688cd820b",
+      "raw_correct": true,
+      "root_causes": [],
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 2291,
+        "output_tokens": 1156
+      }
+    },
+    {
+      "provider": "glm",
+      "case_id": "FC23",
+      "mode": "B_GRAPH",
+      "raw_output_sha256": "ad9c8a47393658d21a7b21e80d01e36f2e2064e5d1a74e9e2df75432f8ffd4f0",
+      "raw_correct": false,
+      "root_causes": [
+        "VALIDATOR_UNSAFE_PARALLEL_WRITES"
+      ],
+      "finish_reason": "stop",
+      "returned_model": "glm-4-flash-250414",
+      "usage": {
+        "input_tokens": 2008,
+        "output_tokens": 231
+      }
+    }
+  ],
+  "remote_requests": 0,
+  "new_cost_usd": 0,
+  "limits": [
+    "Historical failures are not a fresh blind evaluation",
+    "Earlier GLM 4.7 API 429/truncation probes are separate historical evidence",
+    "Working glm-4-flash quality cannot characterize all GLM models",
+    "No financial rules or missing fields auto-repaired"
+  ]
+}

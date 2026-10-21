@@ -1,0 +1,21 @@
+{
+  "reviewed_at_utc": "2026-10-08T12:43:21.481737+00:00",
+  "classification": "HISTORICAL_OFFICIAL_SANDBOX_EVIDENCE_REVERIFIED",
+  "fresh_bank_http_calls_this_round": 0,
+  "production_funds_operations": 0,
+  "historical_readback_checks": {
+    "passed": 20,
+    "total": 20
+  },
+  "pinned_public_key_receipt_proof_valid": true,
+  "receipt_identifiers_match": true,
+  "historical_task_status": "MANUAL_REVIEW",
+  "supplementary_verification_status": "VERIFIED",
+  "historical_payment_claims": 1,
+  "bank_signed_attestation": false,
+  "source_hashes": {
+    "docs/revolut-settled-readback.json": "90ad34143a8f2c28133ea610e252227326e08a4a71b2ad38565e08a707b055a3",
+    "docs/revolut-transfer-receipt-proof.json": "51047d562297b1c120a571dd388e06eedb7368179fddc63c9683b245e189701a",
+    "docs/revolut-transfer-audit-public.pem": "2c0c008c5ffe6b567a1c81b7fe26562bae6eac09165eb3d66d53d74076731bd5"
+  }
+}

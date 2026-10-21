@@ -1,0 +1,24 @@
+{
+  "classification": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+  "external_blockchain_verified": false,
+  "live_submitted": false,
+  "tx_hash": null,
+  "receipt": null,
+  "chain_id": 11155111,
+  "contract": null,
+  "read_back": null,
+  "REQUIRED_EXTERNAL_CONFIGURATION": [
+    "ANCHOR_RPC_URL",
+    "ANCHOR_CONTRACT_ADDRESS",
+    "ANCHOR_WALLET_PRIVATE_KEY",
+    "testnet ETH for gas",
+    "ANCHOR_CONFIRMATIONS (default 3)",
+    "ANCHOR_REQUIRE_FINALIZED (optional)"
+  ],
+  "missing_configuration": [
+    "ANCHOR_RPC_URL",
+    "ANCHOR_CONTRACT_ADDRESS",
+    "ANCHOR_WALLET_PRIVATE_KEY"
+  ],
+  "local_evm_test_scope": "tests/test_phase6_anchor.py; EthereumTester is not an external testnet"
+}

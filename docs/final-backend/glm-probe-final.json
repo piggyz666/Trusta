@@ -1,0 +1,9 @@
+{
+  "model": "glm-4.7-flash",
+  "thinking": "disabled",
+  "max_tokens": 512,
+  "status": "FAILED",
+  "error_code": "LLM_PROVIDER_UNAVAILABLE",
+  "raw": null,
+  "latency_ms": 216.1980999953812
+}

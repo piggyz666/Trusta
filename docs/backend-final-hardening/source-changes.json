@@ -1,0 +1,24 @@
+{
+  "modified": [
+    "backend\\server.py",
+    "backend\\llm\\gateway.py",
+    "backend\\llm\\graph_proposal.py",
+    "backend\\llm\\graph_protocol.py",
+    "backend\\llm\\grounded_request.py"
+  ],
+  "added": [
+    "backend\\llm\\subscription_workflow.py",
+    "benchmarks\\hardening_natural_language.py",
+    "scripts\\hardening_delivery.py",
+    "scripts\\hardening_llm_offline.py",
+    "scripts\\hardening_local_acceptance.py",
+    "scripts\\hardening_rpc_probe.py",
+    "scripts\\hardening_workflow_demo.py",
+    "tests\\test_backend_final_hardening.py"
+  ],
+  "deleted": [],
+  "original_test_files_unchanged": true,
+  "frozen_financial_security_agent_contract_modules_unchanged": true,
+  "git_repository": false,
+  "local_env_change": "Only verified public ANCHOR_VERIFY_RPC_URL configured; .env ignored; secret values not recorded"
+}

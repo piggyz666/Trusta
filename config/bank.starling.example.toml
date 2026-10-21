@@ -1,0 +1,11 @@
+provider = "starling"
+environment = "sandbox"
+customer_id = "sandbox-customer"
+token_env = "BANK_ACCESS_TOKEN"
+key_path = ""
+key_id = ""
+writes_enabled = false
+source_accounts = []
+payees = []
+maximum_amount = 100
+scheduled_enabled = false

@@ -1,0 +1,23 @@
+# Explicit opt-in Phase 3.2 demo. All inference is offline; no paid API is called.
+# Copy to config/llm.toml and set TRUSTA_LLM_CONFIG; restart to apply.
+[gateway]
+mode = "assisted"
+version = "phase3.2-offline-example"
+timeout_seconds = 10
+max_output_tokens = 512
+max_request_chars = 20000
+max_fallbacks = 1
+
+[[providers]]
+name = "offline"
+kind = "mock"
+model = "offline-fixture"
+locality = "local"
+max_sensitivity = "restricted"
+cost_per_1k_tokens_usd = 0
+
+[routes]
+conversation_intent = ["offline"]
+plan_proposal = ["offline"]
+finance_presentation = ["offline"]
+wealth_presentation = ["offline"]

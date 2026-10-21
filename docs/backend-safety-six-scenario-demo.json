@@ -1,0 +1,61 @@
+{
+  "mode": "ISOLATED_VIRTUAL_BANK",
+  "safety_profile": "competition",
+  "scenarios": [
+    {
+      "request": "给张三转 600 元",
+      "task_type": "TRANSFER",
+      "status": "COMPLETED",
+      "errors": [],
+      "action_count": 1
+    },
+    {
+      "request": "分析2026-09消费",
+      "task_type": "BILL_ANALYSIS",
+      "status": "COMPLETED",
+      "errors": [],
+      "action_count": 0
+    },
+    {
+      "request": "购买sandbox-r1 100元",
+      "task_type": "INVESTMENT_PURCHASE",
+      "status": "COMPLETED",
+      "errors": [],
+      "action_count": 1
+    },
+    {
+      "request": "冻结card-demo",
+      "task_type": "CARD_MANAGEMENT",
+      "status": "COMPLETED",
+      "errors": [],
+      "action_count": 1
+    },
+    {
+      "request": "解冻card-demo",
+      "task_type": "CARD_MANAGEMENT",
+      "status": "COMPLETED",
+      "errors": [],
+      "action_count": 1
+    },
+    {
+      "request": "关闭代扣dd-electric",
+      "task_type": "DIRECT_DEBIT_MANAGEMENT",
+      "status": "COMPLETED",
+      "errors": [],
+      "action_count": 1
+    },
+    {
+      "request": "分析2026-09消费，找出可能的订阅，我逐项确认后取消",
+      "task_type": "CROSS_SCENARIO",
+      "status": "COMPLETED",
+      "errors": [],
+      "action_count": 2
+    }
+  ],
+  "six_scenario_smoke_passed": true,
+  "audit_chain_verified": true,
+  "external_bank_calls": 0,
+  "llm_calls": 0,
+  "authentication": "real TOTP algorithm with explicitly controlled test clock",
+  "note": "Existing scenarios only; does not assert new card issuance, annual reporting or event triggers implemented"
+}

@@ -1,0 +1,361 @@
+{
+  "method": "two-worker unittest modules in isolated processes",
+  "workers": 2,
+  "modules": 50,
+  "tests": 735,
+  "skipped": 0,
+  "duration_seconds": 326.924,
+  "passed": true,
+  "results": [
+    {
+      "module": "test_api.py",
+      "exit_code": 0,
+      "tests": 7,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_api.txt"
+    },
+    {
+      "module": "test_acceptance.py",
+      "exit_code": 0,
+      "tests": 33,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_acceptance.txt"
+    },
+    {
+      "module": "test_backend_final_hardening.py",
+      "exit_code": 0,
+      "tests": 21,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_backend_final_hardening.txt"
+    },
+    {
+      "module": "test_backend_maintenance.py",
+      "exit_code": 0,
+      "tests": 2,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_backend_maintenance.txt"
+    },
+    {
+      "module": "test_backend_hardening.py",
+      "exit_code": 0,
+      "tests": 23,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_backend_hardening.txt"
+    },
+    {
+      "module": "test_backend_recovery.py",
+      "exit_code": 0,
+      "tests": 8,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_backend_recovery.txt"
+    },
+    {
+      "module": "test_backend_scenarios.py",
+      "exit_code": 0,
+      "tests": 12,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_backend_scenarios.txt"
+    },
+    {
+      "module": "test_banking_safety.py",
+      "exit_code": 0,
+      "tests": 22,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_banking_safety.txt"
+    },
+    {
+      "module": "test_communication.py",
+      "exit_code": 0,
+      "tests": 15,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_communication.txt"
+    },
+    {
+      "module": "test_conversation_api.py",
+      "exit_code": 0,
+      "tests": 6,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_conversation_api.txt"
+    },
+    {
+      "module": "test_conversation.py",
+      "exit_code": 0,
+      "tests": 20,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_conversation.txt"
+    },
+    {
+      "module": "test_did_key.py",
+      "exit_code": 0,
+      "tests": 4,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_did_key.txt"
+    },
+    {
+      "module": "test_graph_protocol.py",
+      "exit_code": 0,
+      "tests": 16,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_graph_protocol.txt"
+    },
+    {
+      "module": "test_final_convergence.py",
+      "exit_code": 0,
+      "tests": 21,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_final_convergence.txt"
+    },
+    {
+      "module": "test_llm_providers.py",
+      "exit_code": 0,
+      "tests": 8,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_llm_providers.txt"
+    },
+    {
+      "module": "test_llm_gateway.py",
+      "exit_code": 0,
+      "tests": 17,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_llm_gateway.txt"
+    },
+    {
+      "module": "test_memory.py",
+      "exit_code": 0,
+      "tests": 10,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_memory.txt"
+    },
+    {
+      "module": "test_memory_api.py",
+      "exit_code": 0,
+      "tests": 7,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_memory_api.txt"
+    },
+    {
+      "module": "test_model_router.py",
+      "exit_code": 0,
+      "tests": 7,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_model_router.txt"
+    },
+    {
+      "module": "test_phase3_scenarios.py",
+      "exit_code": 0,
+      "tests": 1,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase3_scenarios.txt"
+    },
+    {
+      "module": "test_phase3_security_scenarios.py",
+      "exit_code": 0,
+      "tests": 1,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase3_security_scenarios.txt"
+    },
+    {
+      "module": "test_phase4_api.py",
+      "exit_code": 0,
+      "tests": 7,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase4_api.txt"
+    },
+    {
+      "module": "test_phase4_audit.py",
+      "exit_code": 0,
+      "tests": 21,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase4_audit.txt"
+    },
+    {
+      "module": "test_phase4_communication.py",
+      "exit_code": 0,
+      "tests": 24,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase4_communication.txt"
+    },
+    {
+      "module": "test_phase4_execution.py",
+      "exit_code": 0,
+      "tests": 33,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase4_execution.txt"
+    },
+    {
+      "module": "test_phase4_scenarios.py",
+      "exit_code": 0,
+      "tests": 1,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase4_scenarios.txt"
+    },
+    {
+      "module": "test_phase5_api.py",
+      "exit_code": 0,
+      "tests": 4,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase5_api.txt"
+    },
+    {
+      "module": "test_phase4_platform.py",
+      "exit_code": 0,
+      "tests": 48,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase4_platform.txt"
+    },
+    {
+      "module": "test_phase5_evaluation.py",
+      "exit_code": 0,
+      "tests": 6,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase5_evaluation.txt"
+    },
+    {
+      "module": "test_phase6_anchor.py",
+      "exit_code": 0,
+      "tests": 12,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_anchor.txt"
+    },
+    {
+      "module": "test_phase6_gemini.py",
+      "exit_code": 0,
+      "tests": 4,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_gemini.txt"
+    },
+    {
+      "module": "test_phase6_graph.py",
+      "exit_code": 0,
+      "tests": 19,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_graph.txt"
+    },
+    {
+      "module": "test_phase6_http.py",
+      "exit_code": 0,
+      "tests": 4,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_http.txt"
+    },
+    {
+      "module": "test_phase6_metrics.py",
+      "exit_code": 0,
+      "tests": 12,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_metrics.txt"
+    },
+    {
+      "module": "test_phase6_proposal.py",
+      "exit_code": 0,
+      "tests": 7,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_proposal.txt"
+    },
+    {
+      "module": "test_phase6_sdk.py",
+      "exit_code": 0,
+      "tests": 17,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_sdk.txt"
+    },
+    {
+      "module": "test_phase5_banking.py",
+      "exit_code": 0,
+      "tests": 76,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase5_banking.txt"
+    },
+    {
+      "module": "test_phase6_split.py",
+      "exit_code": 0,
+      "tests": 15,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_phase6_split.txt"
+    },
+    {
+      "module": "test_privacy_proof.py",
+      "exit_code": 0,
+      "tests": 6,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_privacy_proof.txt"
+    },
+    {
+      "module": "test_revolut_sandbox_connect.py",
+      "exit_code": 0,
+      "tests": 12,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_revolut_sandbox_connect.txt"
+    },
+    {
+      "module": "test_revolut_banking.py",
+      "exit_code": 0,
+      "tests": 23,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_revolut_banking.txt"
+    },
+    {
+      "module": "test_revolut_sdk.py",
+      "exit_code": 0,
+      "tests": 24,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_revolut_sdk.txt"
+    },
+    {
+      "module": "test_revolut_simulation_consent.py",
+      "exit_code": 0,
+      "tests": 5,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_revolut_simulation_consent.txt"
+    },
+    {
+      "module": "test_revolut_settlement.py",
+      "exit_code": 0,
+      "tests": 13,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_revolut_settlement.txt"
+    },
+    {
+      "module": "test_second_provider.py",
+      "exit_code": 0,
+      "tests": 9,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_second_provider.txt"
+    },
+    {
+      "module": "test_sepolia_readiness.py",
+      "exit_code": 0,
+      "tests": 26,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_sepolia_readiness.txt"
+    },
+    {
+      "module": "test_scenarios.py",
+      "exit_code": 0,
+      "tests": 19,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_scenarios.txt"
+    },
+    {
+      "module": "test_targeted_anchor.py",
+      "exit_code": 0,
+      "tests": 11,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_targeted_anchor.txt"
+    },
+    {
+      "module": "test_targeted_score.py",
+      "exit_code": 0,
+      "tests": 5,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_targeted_score.txt"
+    },
+    {
+      "module": "test_targeted_planning.py",
+      "exit_code": 0,
+      "tests": 11,
+      "skipped": 0,
+      "log": "D:\\TRUSTA\u91d1\u878d\u79d1\u6280\\data\\hardening-final-logs\\test_targeted_planning.txt"
+    }
+  ]
+}

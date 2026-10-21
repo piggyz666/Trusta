@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_actual_child_cannot_read_parent_memory_connect_network_or_write_runtime",
+      "passed": true,
+      "duration_ms": 3525.905300004524
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_blocked_pipe_write_is_inside_exchange_timeout",
+      "passed": true,
+      "duration_ms": 2278.952099994058
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_committed_read_survives_restart_and_lost_ack_without_second_bank_read",
+      "passed": true,
+      "duration_ms": 1468.6381000065012
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_default_restart_conservatively_fails_running_task",
+      "passed": true,
+      "duration_ms": 1353.0007999943336
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_dispatched_crash_retries_only_bounded_read_and_preserves_write_boundary",
+      "passed": true,
+      "duration_ms": 1364.2527000047266
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_read_retry_exhaustion_remains_sealed_and_no_fallback",
+      "passed": true,
+      "duration_ms": 309.47950000700075
+    }
+  ],
+  "semantics": "sealed persistent read delivery; result reuse before ACK; bounded read retry; conservative default Core restart",
+  "automatic_financial_write_retries": 0,
+  "automatic_claim_ttl_takeover": false,
+  "limitations": [
+    "controlled crash injection, not power-cut filesystem testing",
+    "no automatic RUNNING workflow resume",
+    "terminal claim release is trusted operator maintenance"
+  ]
+}

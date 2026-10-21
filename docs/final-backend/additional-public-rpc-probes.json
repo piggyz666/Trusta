@@ -1,0 +1,17 @@
+[
+  {
+    "endpoint": "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
+    "status": "FAILED",
+    "error": "ANCHOR_RPC_UNAVAILABLE"
+  },
+  {
+    "endpoint": "https://1rpc.io/sepolia",
+    "status": "FAILED",
+    "error": "ANCHOR_RPC_UNAVAILABLE"
+  },
+  {
+    "endpoint": "https://rpc.sepolia.org",
+    "status": "FAILED",
+    "error": "ANCHOR_RPC_UNAVAILABLE"
+  }
+]

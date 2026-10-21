@@ -1,0 +1,48 @@
+{
+  "changed_existing_backend_and_test_files": {
+    "backend/audit_trust/external_anchor.py": {
+      "before": "fffb1b6a4e24dc994a306f2b3fd3d007b7888108f122edf096456254f4c8e7c3",
+      "after": "7bca28387dc70090b22a9c3d318e67443bfe6506ead0aba502150886913af052"
+    },
+    "tests/test_phase6_anchor.py": {
+      "before": "dcdd75d17c9b6bfb7e822245cb6a6a174f93e7bfbe9118a1645c3c3fb7347d39",
+      "after": "d5f661e8280366de2e181e5dca28643304e12f4e1d87a853e341abb426677942"
+    }
+  },
+  "new_files": {
+    "backend/audit_trust/transaction_safety.py": "43d252bf9993ccd66364c52f5ca7fa8963eeb5b803bf4f768f36f71c75346fff",
+    "scripts/sepolia_deployment_readiness.py": "e023f1eee0bc3eecbaf6bdec3ce0a7656581070615ac1485b2998233bb879bc6",
+    "tests/test_sepolia_readiness.py": "2e470c11a247e1128c4013fc89773dbd7d437ac456b540af7990970c99475105"
+  },
+  "other_touched_files": {
+    "scripts/deploy_audit_anchor.py": "36f9cf0567926ce6c92656cf76efee283157c9ba037e1e56d2ccae176a7d7f81",
+    "scripts/estimate_sepolia_costs.py": "93267a21c987a4d54205c99cbd7e5230581ffe3cd9155a6530bda1679331fe6a",
+    ".env.sepolia.example": "57ca4d884604947cf9a963768f319b711b2d53350f0f1f22285d5a6307876765"
+  },
+  "frozen_modules_unchanged": true,
+  "original_tests_removed": 0,
+  "original_anchor_fixture_update": "Added dynamic RPC fixture responses, synthetic explicit approval, and approved-plan reuse across a 2-second time shift; original assertions retained.",
+  "full_regression": {
+    "method": "two-worker unittest modules in isolated processes",
+    "workers": 2,
+    "modules": 48,
+    "tests": 693,
+    "skipped": 0,
+    "duration_seconds": 274.997,
+    "passed": true
+  },
+  "targeted_tests": 49,
+  "real_signatures": 0,
+  "broadcasts": 0,
+  "test_eth_spent": 0,
+  "local_config_sepolia": true,
+  "local_config_git_ignored": true,
+  "secret_values_in_readiness_report": false,
+  "delivery_artifact_hashes": {
+    "docs\\Sepolia_Deployment_Readiness_Report_20261010.md": "4b37e1d281db2c2852aa67751e64a841fa33c502eff38860ae4c29476d92abd8",
+    "docs\\sepolia-deployment-readiness.json": "5037146d6c61d0c51918f34594fcee2a1e35a098897aaf1eed7db3e3a9fa73f0",
+    "docs\\sepolia-anchor-targeted-tests.txt": "1dab36ee1878a1604f42d03b8625ff522beb919373455e0dd07e8f1cfc91634f",
+    "docs\\sepolia-readiness-full-tests.txt": "f4c5d7ae280ff5d0474f9ab48e6dfe887f851708589ed7eaeb3d02f46257668b"
+  },
+  "prior_complete_regression": 274.539
+}

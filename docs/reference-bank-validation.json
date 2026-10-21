@@ -1,0 +1,20 @@
+{
+  "provider": "starling",
+  "adapter_status": "ADAPTER_IMPLEMENTED_NOT_LIVE_VERIFIED",
+  "bank_status": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+  "real_bank_connected": false,
+  "official_bank_sandbox_verified": false,
+  "live_attempted": false,
+  "local_contract_and_transport_tests": "tests/test_phase6_sdk.py",
+  "REQUIRED_EXTERNAL_CONFIGURATION": [
+    "TRUSTA_BANK_CONFIG (path to config/bank.starling.example.toml copy)",
+    "BANK_ACCESS_TOKEN (Starling PAT)",
+    "customer_id (local owner mapping)",
+    "key_path/key_id (Starling registered signing key, writes only)",
+    "source_accounts/payees/maximum_amount/writes_enabled (allowlists, writes only)"
+  ],
+  "missing_configuration": [
+    "TRUSTA_BANK_CONFIG",
+    "BANK_ACCESS_TOKEN"
+  ]
+}

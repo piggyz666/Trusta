@@ -1,0 +1,47 @@
+FC01 deepseek {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': False, 'clarification_correct': True, 'multi_turn_success': None, 'audit_valid': True}
+FC01 glm {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': False, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': None, 'audit_valid': True}
+FC02 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC02 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC03 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'dependency_correct': True, 'audit_valid': True}
+FC03 glm {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'dependency_correct': False, 'audit_valid': True}
+FC04 deepseek {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': False, 'clarification_correct': True, 'multi_turn_success': None, 'audit_valid': True}
+FC04 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': False, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': None, 'audit_valid': True}
+FC05 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': True, 'clarification_correct': True, 'multi_turn_success': None, 'audit_valid': True}
+FC05 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'intent_correct': False, 'slots_correct': True, 'clarification_correct': True, 'multi_turn_success': None, 'audit_valid': True}
+FC06 deepseek {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': False, 'clarification_correct': True, 'multi_turn_success': None, 'audit_valid': True}
+FC06 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': None, 'audit_valid': True}
+FC07 deepseek {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'error': 'EVALUATION_REJECTED'}
+FC07 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'error': 'EVALUATION_REJECTED'}
+FC08 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': True, 'clarification_correct': True, 'multi_turn_success': None, 'audit_valid': True}
+FC08 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': False, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': None, 'audit_valid': True}
+FC09 deepseek {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': False, 'audit_valid': True}
+FC09 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': False, 'audit_valid': True}
+FC10 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC10 glm {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC11 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'dependency_correct': True, 'audit_valid': True}
+FC11 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'error': 'REJECT_PLAN'}
+FC12 deepseek {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'error': 'EVALUATION_REJECTED'}
+FC12 glm {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'error': 'EVALUATION_REJECTED'}
+FC13 deepseek {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'error': 'EVALUATION_REJECTED'}
+FC13 glm {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': True, 'error': 'EVALUATION_REJECTED'}
+FC14 deepseek {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': False, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': None, 'audit_valid': True}
+FC14 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'intent_correct': False, 'slots_correct': False, 'clarification_correct': False, 'multi_turn_success': None, 'audit_valid': True}
+FC15 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC15 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC16 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC16 glm {'raw_correct': False, 'validator_accepted': True, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC17 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC17 glm {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC18 deepseek {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC18 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC19 deepseek {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC19 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'audit_valid': True}
+FC20 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'dependency_correct': True, 'audit_valid': True}
+FC20 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'error': 'REJECT_PLAN'}
+FC21 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'dependency_correct': True, 'audit_valid': True}
+FC21 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'error': 'GRAPH_COMPACT_SCHEMA'}
+FC22 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'dependency_correct': True, 'audit_valid': True}
+FC22 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'error': 'REJECT_PLAN'}
+FC23 deepseek {'raw_correct': True, 'validator_accepted': True, 'e2e_expected_outcome': True, 'unauthorized_bank_writes': 0, 'dependency_correct': True, 'audit_valid': True}
+FC23 glm {'raw_correct': False, 'validator_accepted': False, 'e2e_expected_outcome': False, 'unauthorized_bank_writes': 0, 'error': 'REJECT_PLAN'}
+{"deepseek": {"cases": 23, "requests": 23, "raw_correct": 13, "validator_accepted": 17, "e2e_expected_outcome": 13, "unauthorized_bank_writes": 0, "api_errors": 0, "p50_ms": 2220.462, "p95_ms": 6648.744, "cost_usd_estimate": 0.0243303}, "glm": {"cases": 23, "requests": 23, "raw_correct": 2, "validator_accepted": 7, "e2e_expected_outcome": 4, "unauthorized_bank_writes": 0, "api_errors": 0, "p50_ms": 1678.451, "p95_ms": 5588.948, "cost_usd_estimate": 0.0}}

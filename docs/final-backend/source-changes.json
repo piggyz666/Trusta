@@ -1,0 +1,25 @@
+{
+  "modified": [
+    "backend\\server.py",
+    "backend\\service.py",
+    "backend\\llm\\compact_graph.py",
+    "backend\\llm\\configuration.py",
+    "backend\\llm\\prompts.py",
+    "backend\\runtime\\graph_runtime.py",
+    "backend\\llm\\providers\\openai_compatible.py",
+    "scripts\\phase4_demo.py",
+    "scripts\\phase5_demo.py",
+    "scripts\\phase6_demo.py"
+  ],
+  "added": [
+    "backend\\llm\\grounded_request.py",
+    "scripts\\amend_final_llm_scores.py",
+    "scripts\\anchor_operator.py",
+    "scripts\\final_backend_delivery.py",
+    "scripts\\final_local_acceptance.py",
+    "benchmarks\\final_live_evaluation.py",
+    "tests\\test_final_convergence.py"
+  ],
+  "original_tests_modified": [],
+  "git_repository": false
+}

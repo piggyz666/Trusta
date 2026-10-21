@@ -1,0 +1,5 @@
+id,group,category,passed,system_status,task_outcome,installed_graph,latency_ms,cost_usd,unauthorized_bank_writes
+DEV-CARD,development,valid,False,BLOCKED,BLOCKED,False,2508.561,,0
+DEV-MISSING,development,missing,True,BLOCKED,BLOCKED,False,2026.422,,0
+DEV-SUM,development,valid,True,COMPLETED,COMPLETED,True,2645.186,,0
+DEV-WEALTH,development,valid,True,COMPLETED,COMPLETED,True,2531.84,,0

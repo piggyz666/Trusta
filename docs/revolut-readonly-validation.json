@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-08T04:25:11.314596+00:00",
+  "provider": "revolut",
+  "environment": "sandbox",
+  "status": "SUCCEEDED",
+  "scope": "READ_ONLY_BUSINESS_INTEGRATION",
+  "scope_returned": null,
+  "account_count": 5,
+  "balance_read_verified": true,
+  "month": "2026-10",
+  "month_basis": "CREATED_AT_ASIA_SHANGHAI",
+  "summary": {
+    "currency": "GBP",
+    "excluded_count": 2,
+    "gross_spend": 27250,
+    "net_spend": 27250,
+    "purchase_count": 3,
+    "refund_count": 0,
+    "refunds": 0,
+    "settled_count": 3
+  },
+  "category_labels": [
+    "UNCLASSIFIED"
+  ],
+  "absolute_cny_anomaly_threshold_applied": false,
+  "bill_analysis_status": "COMPLETED",
+  "taskgraph_status": "COMPLETED",
+  "summary_agreement": true,
+  "requests": {
+    "ACCOUNTS_GET": 12,
+    "TRANSACTIONS_GET": 4
+  },
+  "refresh_count": 0,
+  "bank_business_write_calls": 0,
+  "llm_calls": 0,
+  "raw_credentials_exported": false,
+  "signed_messages_accepted": 6,
+  "sdk_read_audit_events": 11,
+  "audit_chain_valid": true,
+  "checkpoints_verified": 1,
+  "checkpoint_trust_source": "LOCAL_REGISTRY_PINNED_KEY",
+  "blockchain_submission": false,
+  "financial_state_rows_before": {
+    "accounts": 0,
+    "transfers": 0,
+    "transactions": 0,
+    "ledger_entries": 0,
+    "actions": 0,
+    "authorizations": 0,
+    "execution_contracts": 0,
+    "receipts": 0
+  },
+  "financial_state_rows_after": {
+    "accounts": 0,
+    "transfers": 0,
+    "transactions": 0,
+    "ledger_entries": 0,
+    "actions": 0,
+    "authorizations": 0,
+    "execution_contracts": 0,
+    "receipts": 0
+  },
+  "unsupported_capabilities_rejected": {
+    "payments.create": "BANK_READ_ONLY",
+    "investments.purchase": "BANK_READ_ONLY",
+    "cards.freeze": "BANK_READ_ONLY"
+  },
+  "frontend_default": "VIRTUAL_BANK_UNCHANGED"
+}

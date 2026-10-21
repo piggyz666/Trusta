@@ -1,0 +1,3 @@
+# Optional ANCHOR integration only; the frozen banking runtime is unchanged.
+numpy==2.4.2
+scipy==1.17.1

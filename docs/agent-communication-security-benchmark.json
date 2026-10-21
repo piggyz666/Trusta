@@ -1,0 +1,165 @@
+{
+  "classification": "PROCESS_ISOLATION_VERIFIED",
+  "method": "actual unittest attack attempts; original assertions retained",
+  "tests": 31,
+  "passed": true,
+  "skips": 0,
+  "cases": [
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_claim_cannot_be_taken_over_by_time_or_active_task_recovery",
+      "passed": true,
+      "duration_ms": 198.98250000551343
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_compact_clarification_cannot_request_bank_facts",
+      "passed": true,
+      "duration_ms": 153.3027000259608
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_compact_does_not_extract_inline_amount_or_bank_records",
+      "passed": true,
+      "duration_ms": 149.43250000942498
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_compact_extra_authority_and_unknown_function_rejected",
+      "passed": true,
+      "duration_ms": 152.33089996036142
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_compact_metadata_expansion_keeps_original_validator",
+      "passed": true,
+      "duration_ms": 149.68160004355013
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_compact_missing_ancestor_and_cycle_rejected",
+      "passed": true,
+      "duration_ms": 151.83450002223253
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_database_graph_claim_blocks_other_runtime_instance",
+      "passed": true,
+      "duration_ms": 317.4591000424698
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_handoff_capability_snapshot_or_plan_tamper_rejected",
+      "passed": true,
+      "duration_ms": 536.8685000576079
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_handoff_duplicate_and_reordered_entries_rejected",
+      "passed": true,
+      "duration_ms": 512.9418999422342
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_handoff_offline_verification_with_out_of_band_keys",
+      "passed": true,
+      "duration_ms": 509.8450999939814
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_handoff_other_customer_export_denied",
+      "passed": true,
+      "duration_ms": 435.01569994259626
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_handoff_tampered_parents_and_missing_causal_entry",
+      "passed": true,
+      "duration_ms": 496.39849993400276
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_handoff_wrong_key_owner_and_untrusted_key_rejected",
+      "passed": true,
+      "duration_ms": 495.83290005102754
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_nonce_audit_evidence_and_result_rollback_atomically",
+      "passed": true,
+      "duration_ms": 190.13980007730424
+    },
+    {
+      "id": "tests.test_backend_hardening.HardeningTests.test_terminal_claim_recovery_is_audited_and_owned",
+      "passed": true,
+      "duration_ms": 178.30050003249198
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_child_rejects_tampering_wrong_receiver_parent_refs_and_signature",
+      "passed": true,
+      "duration_ms": 2481.6327000735328
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_child_replay_nonce_is_rejected",
+      "passed": true,
+      "duration_ms": 2400.5533000454307
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_compromised_child_cannot_read_key_database_or_adapter",
+      "passed": true,
+      "duration_ms": 2428.5488000605255
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_no_generic_signer_or_write_rpc_exists",
+      "passed": true,
+      "duration_ms": 2364.9778000544757
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_outbox_storage_tamper_is_not_repaired",
+      "passed": true,
+      "duration_ms": 2366.4102000184357
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_process_failure_never_falls_back_to_parent_agent",
+      "passed": true,
+      "duration_ms": 288.41919999103993
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_real_process_roundtrip_signed_request_result_and_evidence",
+      "passed": true,
+      "duration_ms": 2480.329699930735
+    },
+    {
+      "id": "tests.test_backend_hardening.ProcessTests.test_rotation_uses_new_public_snapshot_and_revocation_fails_closed",
+      "passed": true,
+      "duration_ms": 5208.066499908455
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_actual_child_cannot_read_parent_memory_connect_network_or_write_runtime",
+      "passed": true,
+      "duration_ms": 3371.595700038597
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_blocked_pipe_write_is_inside_exchange_timeout",
+      "passed": true,
+      "duration_ms": 2301.198200089857
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_committed_read_survives_restart_and_lost_ack_without_second_bank_read",
+      "passed": true,
+      "duration_ms": 1455.765400081873
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_default_restart_conservatively_fails_running_task",
+      "passed": true,
+      "duration_ms": 1426.5268000308424
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_dispatched_crash_retries_only_bounded_read_and_preserves_write_boundary",
+      "passed": true,
+      "duration_ms": 1412.4676999635994
+    },
+    {
+      "id": "tests.test_backend_recovery.RecoveryTests.test_read_retry_exhaustion_remains_sealed_and_no_fallback",
+      "passed": true,
+      "duration_ms": 287.92140004225075
+    },
+    {
+      "id": "tests.test_backend_recovery.ReliabilityTests.test_concurrent_confirmation_authorizes_exactly_one_transition",
+      "passed": true,
+      "duration_ms": 1234.469199902378
+    },
+    {
+      "id": "tests.test_backend_recovery.ReliabilityTests.test_invalid_process_profile_does_not_silently_disable_isolation",
+      "passed": true,
+      "duration_ms": 152.31000003404915
+    }
+  ],
+  "scope": "Finance GENERAL_GRAPH read/summary/anomalies only; trusted host broker; not HSM/all-Agent isolation"
+}

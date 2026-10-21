@@ -1,0 +1,30 @@
+{
+  "inference": "OFFLINE_FIXTURES_ONLY",
+  "TRANSFER": {
+    "clarification": "请补充转账金额，例如：2000元。",
+    "chat_confirmation_did_not_execute": true,
+    "old_approval_rejected": true,
+    "revised_amount_cents": 250000,
+    "balance_cents": 750000,
+    "status": "COMPLETED",
+    "verification": "VERIFIED",
+    "transaction_count": 1
+  },
+  "BILL_ANALYSIS": {
+    "status": "COMPLETED",
+    "net_spend_cents": 542500,
+    "presentation": "2026-09已结算记录 11 条，净支出 5425.00 元。"
+  },
+  "WEALTH_RECOMMENDATION": {
+    "status": "COMPLETED",
+    "bank_risk_level": 2,
+    "product_ids": [
+      "sandbox-r1",
+      "sandbox-r2"
+    ],
+    "presentation": "演示低风险现金产品：风险等级 R1 不高于生成推荐时的银行档案 R2；产品库持有期为 0 天。演示稳健30天产品：风险等级 R2 不高于生成推荐时的银行档案 R2；产品库持有期为 30 天。"
+  },
+  "audit_chain_valid": true,
+  "read_only_balance_unchanged": true,
+  "conversation_turns_survive_restart": true
+}

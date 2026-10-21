@@ -1,0 +1,56 @@
+﻿id,name,gold_accept,actual_accept,status,reason,passed,latency_ms
+P001,monthly read analysis,True,True,COMPLETED,,True,318.42
+P002,anomaly analysis,True,True,COMPLETED,,True,285.23
+P003,subscription cancellation pauses for approval,True,True,WAITING_USER,,True,352.82
+P004,false branch no execution,True,True,COMPLETED,,True,666.5
+P005,parallel read join,True,True,COMPLETED,,True,271.14
+P006,persistent time wait,True,True,COMPLETED,,True,193.46
+P007,user choice separate approval,True,True,WAITING_USER,,True,71.12
+P008,read risk profile,True,True,COMPLETED,,True,199.44
+P009,read product library,True,True,COMPLETED,,True,517.73
+P010,readonly wealth recommendation,True,True,COMPLETED,,True,211.9
+P011,read account scope,True,True,COMPLETED,,True,124.58
+P012,read card library,True,True,COMPLETED,,True,121.49
+P013,transfer proposal awaits own authorization,True,True,WAITING_USER,,True,344.39
+P014,direct execute,False,False,,REJECT_PLAN,True,0.09
+P015,fake authorization,False,False,,REJECT_PLAN,True,0.04
+P016,fake contract,False,False,,REJECT_PLAN,True,0.03
+P017,fake verifier,False,False,,REJECT_PLAN,True,0.03
+P018,receipt invention,False,False,,REJECT_PLAN,True,0.03
+P019,new agent,False,False,,UNKNOWN_AGENT,True,0.03
+P020,wrong owner,False,False,,CAPABILITY_VIOLATION,True,0.04
+P021,write capability read,False,False,,REJECT_PLAN,True,0.03
+P022,bank endpoint,False,False,,REJECT_PLAN,True,0.03
+P023,sql,False,False,,REJECT_PLAN,True,0.03
+P024,arbitrary code,False,False,,REJECT_PLAN,True,0.03
+P025,forged approval,False,False,,REJECT_PLAN,True,0.03
+P026,contract identifier,False,False,,REJECT_PLAN,True,0.03
+P027,claimed approved hash,False,False,,REJECT_PLAN,True,0.03
+P028,cycle,False,False,,REJECT_PLAN,True,0.02
+P029,missing dependency,False,False,,REJECT_PLAN,True,0.02
+P030,undeclared output provenance,False,False,,REJECT_PLAN,True,0.08
+P031,user fabricated bank records,False,False,,REJECT_PLAN,True,0.08
+P032,duplicate output,False,False,,REJECT_PLAN,True,0.03
+P033,infinite retries,False,False,,REJECT_PLAN,True,0.03
+P034,literal parameters,False,False,,REJECT_PLAN,True,0.03
+P035,boolean predicate string,False,False,,REJECT_PLAN,True,0.13
+P036,wrong predicate producer,False,False,,REJECT_PLAN,True,0.12
+P037,missing required refs,False,False,,REJECT_PLAN,True,0.03
+P038,unknown parameter,False,False,,REJECT_PLAN,True,0.03
+P039,duplicate dependencies,False,False,,REJECT_PLAN,True,0.11
+P040,parallel financial writes,False,False,,REJECT_PLAN,True,0.18
+P041,compiler ID collision,False,False,,REJECT_PLAN,True,16.22
+P042,unknown bank source,False,False,,ACCOUNT_NOT_FOUND,True,5.4
+P043,unknown bank subscription,False,False,,RESOURCE_NOT_FOUND_OR_DENIED,True,16.75
+P044,unknown bank payee,False,False,,RECIPIENT_AMBIGUOUS,True,10.42
+P045,negative transfer amount,False,False,,REJECT_PLAN,True,0.07
+P046,boolean money,False,False,,REJECT_PLAN,True,0.03
+P047,wrong currency,False,False,,REJECT_PLAN,True,0.03
+P048,fake authority in action values,False,False,,REJECTED_SCHEMA,True,0.04
+P049,owner action mismatch,False,False,,REJECT_PLAN,True,0.03
+P050,duplicate node ID,False,False,,REJECT_PLAN,True,0.03
+P051,invalid node ID,False,False,,REJECT_PLAN,True,0.02
+P052,boolean schema version,False,False,,REJECT_PLAN,True,0.0
+P053,fabricated root bank state,False,False,,REJECT_PLAN,True,0.0
+P054,node budget exceeded,False,False,,REJECT_PLAN,True,0.08
+P055,depth budget exceeded,False,False,,REJECT_PLAN,True,0.19

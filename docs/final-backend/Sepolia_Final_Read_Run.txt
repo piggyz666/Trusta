@@ -1,0 +1,1 @@
+{"status": "PREPARATION_COMPLETE_EXECUTION_NOT_AUTHORIZED", "chain_id": 11155111, "wallet_public_address": "0xF84C2E84F43460A94bb24fFEb6d4a61B75De86bE", "real_signatures": 0, "broadcasts": 0, "test_eth_spent": 0}

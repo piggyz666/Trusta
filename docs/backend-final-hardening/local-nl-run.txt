@@ -1,0 +1,1 @@
+{"status": "LOCAL_VERIFIED", "evaluated_cases": 24, "passed": 21, "legal_local_outcomes": {"numerator": 16, "denominator": 19}, "remote_llm_requests": 0}

@@ -1,0 +1,74 @@
+{
+  "scope": "LOCAL_SANDBOX_VERIFIED; real loopback HTTP identities, virtual bank money only",
+  "bill": {
+    "account_id": "acct-demo",
+    "currency": "CNY",
+    "expires_at": 1791360948.9829278,
+    "id": "0f8b09a6-912e-4ef2-aafa-6241362edafd",
+    "method": "EQUAL",
+    "organizer": "demo",
+    "participants": {
+      "alice": {
+        "amount": 3334,
+        "receipt_id": "4e05eb6e-1011-40fb-bc43-c562a98b7449",
+        "request_id": "764bf1f1-757f-4762-b5b1-c11960fd911f",
+        "status": "PAID",
+        "task_id": "5c68ff08-bbf4-4c88-ab08-b3535c5ecb0e",
+        "user_id": "alice"
+      },
+      "bob": {
+        "amount": 3333,
+        "receipt_id": "5d9a3417-6cad-4eed-bb3e-b90918cf5da7",
+        "request_id": "1efd6665-5739-4459-92fc-15ee25b073fc",
+        "status": "PAID",
+        "task_id": "60d14518-13d9-4b27-9ee1-d2227a42d47e",
+        "user_id": "bob"
+      },
+      "carol": {
+        "amount": 3333,
+        "receipt_id": "b8d2a276-8941-46b5-be3c-0f0be3f2e2d9",
+        "request_id": "1a6bd328-7ff3-496d-afc3-c6dc50e50a47",
+        "status": "PAID",
+        "task_id": "70a20888-3f46-4b91-adaa-f1eb03891402",
+        "user_id": "carol"
+      }
+    },
+    "status": "COMPLETED",
+    "total_amount": 10000
+  },
+  "payments": [
+    {
+      "payer": "alice",
+      "amount": 3334,
+      "task_id": "5c68ff08-bbf4-4c88-ab08-b3535c5ecb0e",
+      "authorization_id": "e41b879f-dc58-4331-8c9c-b8141c715793",
+      "action_hash": "986ca922ca11af529f6b1abd4f45a6e2486dce5402a45f24a3b882a2c4fd50a6",
+      "receipt_id": "4e05eb6e-1011-40fb-bc43-c562a98b7449",
+      "status": "COMPLETED",
+      "collection_status": "PARTIALLY_PAID"
+    },
+    {
+      "payer": "bob",
+      "amount": 3333,
+      "task_id": "60d14518-13d9-4b27-9ee1-d2227a42d47e",
+      "authorization_id": "3f150026-8b17-427d-a354-ba067a9cbf27",
+      "action_hash": "942b9fed1cf151bb3eab32d6ff434e2eebc7c16850e55521b597ea7c58f00322",
+      "receipt_id": "5d9a3417-6cad-4eed-bb3e-b90918cf5da7",
+      "status": "COMPLETED",
+      "collection_status": "PARTIALLY_PAID"
+    },
+    {
+      "payer": "carol",
+      "amount": 3333,
+      "task_id": "70a20888-3f46-4b91-adaa-f1eb03891402",
+      "authorization_id": "1ad020c5-b4c0-407c-a03a-38d15e8f4ae9",
+      "action_hash": "6021b7e0e0e3ce786bcb41619ac1a2a1332949ad96946c6856584b6712e12b0d",
+      "receipt_id": "b8d2a276-8941-46b5-be3c-0f0be3f2e2d9",
+      "status": "COMPLETED",
+      "collection_status": "COMPLETED"
+    }
+  ],
+  "receiver_balance": 1010000,
+  "independent_authorizations": 3,
+  "audit_chain_valid": true
+}

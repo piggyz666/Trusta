@@ -1,0 +1,26 @@
+# Copy and set a reviewed deployment policy; no secret belongs in this file.
+# Shadow validates proposals without installing or executing them.
+[gateway]
+mode = "shadow"
+version = "hardening-compact-example"
+graph_format = "compact_v2"
+# 0 preserves one-shot behavior; opt in to 1 for at most one shared
+# structure/temporary-transport retry under the original total timeout.
+graph_repair_attempts = 0
+timeout_seconds = 30
+max_output_tokens = 4096
+max_fallbacks = 0
+
+[[providers]]
+name = "operator-model"
+kind = "openai_compatible"
+model = "REPLACE_WITH_DEPLOYMENT_MODEL"
+endpoint = "https://api.deepseek.com/chat/completions"
+api_key_env = "DEEPSEEK_API_KEY"
+locality = "external"
+max_sensitivity = "public"
+data_policy_reviewed = false
+json_output = true
+max_input_chars = 40000
+# Restricted customer goals remain ineligible until an operator explicitly
+# reviews the data policy. Example is intentionally not a customer-data grant.

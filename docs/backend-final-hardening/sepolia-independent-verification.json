@@ -1,0 +1,121 @@
+{
+  "measured_at": "2026-10-10T09:17:41.828601+00:00",
+  "status": "LIVE_TESTED",
+  "scope": "PUBLIC_RPC_CHAIN_AND_COMMON_BLOCK_ONLY_NOT_ANCHOR_ACCEPTANCE",
+  "primary_chain_id": 11155111,
+  "primary_common_block_number": 11883516,
+  "primary_common_block_hash": "0x45d757b1a9603d4b140b8f558b73cfba03864897f208254399bfc09b35594c63",
+  "candidates": [
+    {
+      "provider": "Alchemy",
+      "public_endpoint": "https://eth-sepolia.g.alchemy.com/v2/demo",
+      "official_source": "https://www.alchemy.com/docs/choosing-a-web3-network",
+      "methods": [
+        "eth_chainId"
+      ],
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "ANCHOR_CHAIN_UNVERIFIED",
+      "diagnostic_http_status": 429
+    },
+    {
+      "provider": "OMNIA",
+      "public_endpoint": "https://endpoints.omniatech.io/v1/eth/sepolia/public",
+      "official_source": "https://docs.omniatech.io/public-rpc-endpoints",
+      "methods": [
+        "eth_chainId"
+      ],
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "ANCHOR_CHAIN_UNVERIFIED",
+      "diagnostic_http_status": 521
+    },
+    {
+      "provider": "Pocket Network",
+      "public_endpoint": "https://eth-sepolia-testnet.api.pocket.network",
+      "official_source": "https://docs.pocket.network/developers/supported-chains/",
+      "methods": [
+        "eth_chainId",
+        "eth_getBlockByNumber"
+      ],
+      "chain_id": 11155111,
+      "common_block_number": 11883516,
+      "common_block_hash": "0x45d757b1a9603d4b140b8f558b73cfba03864897f208254399bfc09b35594c63",
+      "matches_primary": true,
+      "status": "LIVE_TESTED"
+    }
+  ],
+  "actual_contract_verification": false,
+  "signatures": 0,
+  "broadcasts": 0,
+  "spent_wei": 0,
+  "configuration_changed": true,
+  "read_protocol_checks": {
+    "stable_block_match": true,
+    "stable_block_number": 11883516,
+    "sample_transaction_hash": "0x160e06b930caa9533e5755261d7e3506f0db0a938d3e4e343261283dedfbbdd8",
+    "transaction_query": true,
+    "receipt_query": true,
+    "canonical_receipt": true,
+    "event_logs_match": true,
+    "sample_event_count": 0,
+    "confirmations": 65,
+    "sample_code_query_match": true,
+    "sample_code_nonempty": true,
+    "eth_call_protocol": true
+  },
+  "provider_independence_basis": "Pocket Network Foundation public portal vs Infura; independently named operator. This does not prove all underlying nodes have no shared infrastructure.",
+  "anchor_readback_status": "BLOCKED_EXTERNAL_CONTRACT_NOT_DEPLOYED",
+  "prior_attempts": [
+    {
+      "measured_at": "2026-10-10T09:16:42.180943+00:00",
+      "status": "BLOCKED_EXTERNAL",
+      "scope": "PUBLIC_RPC_CHAIN_AND_COMMON_BLOCK_ONLY_NOT_ANCHOR_ACCEPTANCE",
+      "primary_chain_id": 11155111,
+      "primary_common_block_number": 11883576,
+      "primary_common_block_hash": "0x9bba2c8619cc723a9ff741f093b576026ef4d1edf32f5c2592d8842cbcba02cc",
+      "candidates": [
+        {
+          "provider": "Alchemy",
+          "public_endpoint": "https://eth-sepolia.g.alchemy.com/v2/demo",
+          "official_source": "https://www.alchemy.com/docs/choosing-a-web3-network",
+          "methods": [
+            "eth_chainId"
+          ],
+          "status": "BLOCKED_EXTERNAL",
+          "reason": "ANCHOR_CHAIN_UNVERIFIED",
+          "diagnostic_http_status": 429
+        },
+        {
+          "provider": "OMNIA",
+          "public_endpoint": "https://endpoints.omniatech.io/v1/eth/sepolia/public",
+          "official_source": "https://docs.omniatech.io/public-rpc-endpoints",
+          "methods": [
+            "eth_chainId"
+          ],
+          "status": "BLOCKED_EXTERNAL",
+          "reason": "ANCHOR_CHAIN_UNVERIFIED",
+          "diagnostic_http_status": 521
+        },
+        {
+          "provider": "Pocket Network",
+          "public_endpoint": "https://eth-sepolia-testnet.api.pocket.network",
+          "official_source": "https://docs.pocket.network/developers/supported-chains/",
+          "methods": [
+            "eth_chainId",
+            "eth_getBlockByNumber"
+          ],
+          "status": "BLOCKED_EXTERNAL",
+          "reason": "TypeError",
+          "diagnostic_http_status": 200
+        }
+      ],
+      "actual_contract_verification": false,
+      "signatures": 0,
+      "broadcasts": 0,
+      "spent_wei": 0,
+      "configuration_changed": false,
+      "read_protocol_checks": {},
+      "provider_independence_basis": "Pocket Network Foundation public portal vs Infura; independently named operator. This does not prove all underlying nodes have no shared infrastructure.",
+      "anchor_readback_status": "BLOCKED_EXTERNAL_CONTRACT_NOT_DEPLOYED"
+    }
+  ]
+}

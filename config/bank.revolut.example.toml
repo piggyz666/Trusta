@@ -1,0 +1,11 @@
+provider = "revolut"
+environment = "sandbox"
+customer_id = "demo" # Explicit mapping of the consenting sandbox company to one local customer.
+client_id = "YOUR_REGISTERED_SANDBOX_CLIENT_ID"
+issuer = "trusta.localhost"
+key_path = "C:/YOUR_PRIVATE_DIRECTORY/privatecert.pem"
+certificate_path = "revolut-sandbox/publiccert.cer"
+token_path = "C:/YOUR_PRIVATE_DIRECTORY/oauth-tokens.local.json"
+writes_enabled = false
+page_size = 1000
+max_pages = 20

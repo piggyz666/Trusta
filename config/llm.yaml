@@ -1,0 +1,20 @@
+# Public example. Set TRUSTA_LLM_CONFIG=config/llm.yaml to use this file.
+# API keys belong in local environment variables, never this shared file.
+# Switching providers also requires the matching model and exact API endpoint.
+provider: deepseek
+model: deepseek-flash
+endpoint: https://api.deepseek.com/chat/completions
+api_key: ${DEEPSEEK_API_KEY}
+timeout: 30
+locality: external
+max_sensitivity: public
+data_policy_reviewed: false
+json_output: true
+gateway:
+  mode: disabled
+  version: llm-agnostic-1
+  max_output_tokens: 512
+  max_fallbacks: 0
+# Existing business requests require internal/restricted routing. Administrators
+# must explicitly review data policy before enabling those scopes; merely
+# changing the model does not grant an agent permission to export bank data.

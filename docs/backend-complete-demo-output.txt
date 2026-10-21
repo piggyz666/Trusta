@@ -1,0 +1,1 @@
+{"six_scenarios": 6, "real_zkp_verified": true, "audit_chain_verified": true, "external_bank_calls": 0}

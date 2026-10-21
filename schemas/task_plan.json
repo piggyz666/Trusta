@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_id", "goal", "steps"],
+  "properties": {
+    "task_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+    "goal": {"type": "string", "minLength": 1, "maxLength": 4000},
+    "steps": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/TaskNode"}}
+  },
+  "$defs": {
+    "TaskNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "agent", "action", "parameters", "dependency"],
+      "properties": {
+        "node_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]{0,31}$"},
+        "agent": {"type": "string", "enum": ["supervisor", "planner", "finance", "wealth", "transaction", "service"]},
+        "action": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.]{0,63}$"},
+        "parameters": {
+          "type": "object", "maxProperties": 16,
+          "propertyNames": {"pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$"},
+          "additionalProperties": {"type": "string", "pattern": "^(input:[A-Za-z][A-Za-z0-9_]{0,63}|[A-Za-z][A-Za-z0-9]{0,31}:result)$"}
+        },
+        "dependency": {"type": "array", "maxItems": 16, "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]{0,31}$"}}
+      }
+    }
+  }
+}

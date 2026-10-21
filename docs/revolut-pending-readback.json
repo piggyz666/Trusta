@@ -1,0 +1,27 @@
+{
+  "verified_at": "2026-10-08T08:33:43.346650+00:00",
+  "task_id": "c98bfc75-772b-444e-890a-78e51e936f05",
+  "bank_transaction_id": "05677bc9-99a7-e35d-0040-00ab31651da6",
+  "provider_status": "PENDING",
+  "amount_minor_units": 1,
+  "currency": "EUR",
+  "recipient": "Acme Corp.",
+  "completed_at_present": false,
+  "checks": {
+    "action_hash": true,
+    "amount": true,
+    "currency": true,
+    "recipient": true,
+    "bank_type": true,
+    "request_id": true,
+    "reference": true,
+    "zero_fee": true,
+    "created_in_authorised_submission_window": true,
+    "account_balance_expected": true,
+    "leg_balance_expected": true
+  },
+  "bank_pay_submission_claims": 1,
+  "bank_pay_repeated": false,
+  "audit_chain_valid": true,
+  "simulation_control_plane_attempt_recorded": true
+}

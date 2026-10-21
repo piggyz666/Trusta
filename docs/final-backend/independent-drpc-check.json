@@ -1,0 +1,11 @@
+{
+  "operators": [
+    "Infura/Consensys",
+    "dRPC"
+  ],
+  "secondary_public_endpoint": "https://sepolia.drpc.org",
+  "checked_at_unix": 1791572821,
+  "read_only": true,
+  "status": "FAILED",
+  "error_code": "ValueError"
+}

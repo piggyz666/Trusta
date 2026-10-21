@@ -1,0 +1,9 @@
+from typing import Protocol
+from backend.llm.contracts import ProviderRequest, ProviderResponse
+
+
+class Provider(Protocol):
+    """Adapters are trusted deployment code and must honor bounded transport timeouts."""
+    def describe_capabilities(self) -> dict: ...
+    def infer(self, request: ProviderRequest) -> ProviderResponse: ...
+    def health(self) -> dict: ...

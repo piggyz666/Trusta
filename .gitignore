@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.env
+data/
+.venv/
+node_modules/
+config/llm.toml
+config/llm*.local.yaml
+config/llm*.local.yml
+*.keys/
+config/bank.*.local.toml

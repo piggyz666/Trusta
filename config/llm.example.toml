@@ -1,0 +1,41 @@
+# Copy to config/llm.toml and set TRUSTA_LLM_CONFIG to its path.
+# Supports disabled / shadow / assisted. Financial execution stays deterministic.
+# For the explicit offline dialogue demo, see llm.assisted.example.toml.
+[gateway]
+mode = "disabled"
+version = "phase3.2-example"
+timeout_seconds = 10
+max_output_tokens = 512
+max_request_chars = 20000
+max_fallbacks = 1
+
+# Offline fixture, not an actual LLM. This is the safe default for the demo.
+[[providers]]
+name = "offline"
+kind = "mock"
+model = "offline-fixture"
+locality = "local"
+max_sensitivity = "restricted"
+cost_per_1k_tokens_usd = 0
+
+[routes]
+intent_normalization = ["offline"]
+plan_proposal = ["offline"]
+finance_explanation = ["offline"]
+wealth_explanation = ["offline"]
+conversation_intent = ["offline"]
+finance_presentation = ["offline"]
+wealth_presentation = ["offline"]
+
+# For a real deployment, add an administrator-approved provider BEFORE [routes],
+# then reference its name in the desired route. Provider model identifiers are your choice.
+# [[providers]]
+# name = "private-model"
+# kind = "openai_compatible"  # Chat Completions; native API uses "http" or a Provider adapter.
+# model = "YOUR_DEPLOYMENT_ID"
+# endpoint = "https://YOUR_APPROVED_HOST/v1/chat/completions"
+# api_key_env = "TRUSTA_PRIVATE_LLM_KEY"
+# locality = "private"
+# max_sensitivity = "restricted"
+# data_policy_reviewed = true  # Explicit deployment data/retention review; not an API guarantee.
+# structured_outputs = false  # Enable only after endpoint capability verification.

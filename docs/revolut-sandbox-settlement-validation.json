@@ -1,0 +1,21 @@
+{
+  "task_id": "c98bfc75-772b-444e-890a-78e51e936f05",
+  "bank_transaction_id": "05677bc9-99a7-e35d-0040-00ab31651da6",
+  "amount_minor_units": 1,
+  "currency": "EUR",
+  "mode": "OFFICIAL_SANDBOX_SETTLEMENT_CONTROL",
+  "simulation_post_calls": 1,
+  "payment_post_calls": 0,
+  "production_bank_write_calls": 0,
+  "observed_state": "SIMULATION_REJECTED",
+  "error": "BANK_SCOPE_DENIED",
+  "task_status": "MANUAL_REVIEW",
+  "verification_status": "MANUAL_REVIEW",
+  "receipt_present": false,
+  "receipt_id": null,
+  "audit_chain_valid": true,
+  "verified_at": "2026-10-08T08:08:35.840715+00:00",
+  "previous_report_observed_state": "SIMULATION_RESPONSE_UNCERTAIN",
+  "http_status": 403,
+  "reporting_correction": "Known BANK_SCOPE_DENIED from the bank transport maps to HTTP 403; this reporting correction did not invoke the simulator again or modify historical audit records."
+}

@@ -1,0 +1,35 @@
+{
+  "scope": "OFFICIAL_SANDBOX_EXISTING_PAYMENT_READBACK",
+  "checked_at_unix": 1791573213,
+  "bank_business_write_calls": 0,
+  "simulator_calls": 0,
+  "status": "LIVE_TESTED",
+  "checks": {
+    "settled": true,
+    "amount": true,
+    "currency": true,
+    "recipient": true,
+    "request_id": true,
+    "action_hash": true,
+    "reference": true,
+    "fee": true,
+    "balance": true,
+    "receipt": true,
+    "reconciliation": true,
+    "unique_receipt": true,
+    "audit": true,
+    "proof": true
+  },
+  "bank_transaction_id": "05677bc9-99a7-e35d-0040-00ab31651da6",
+  "task_id": "c98bfc75-772b-444e-890a-78e51e936f05",
+  "receipt_id": "ec24b28f-c172-48ce-b3ef-d41417f69175",
+  "provider_status": "SETTLED",
+  "amount_minor": 1,
+  "currency": "EUR",
+  "requests": {
+    "OAUTH_REFRESH": 1,
+    "GET": 2
+  },
+  "operator_simulated_settlement": true,
+  "bank_signed_attestation": false
+}

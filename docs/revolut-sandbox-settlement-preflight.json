@@ -1,0 +1,20 @@
+{
+  "task_id": "c98bfc75-772b-444e-890a-78e51e936f05",
+  "bank_transaction_id": "05677bc9-99a7-e35d-0040-00ab31651da6",
+  "amount_minor_units": 1,
+  "currency": "EUR",
+  "mode": "OFFICIAL_SANDBOX_SETTLEMENT_CONTROL",
+  "simulation_post_calls": 0,
+  "payment_post_calls": 0,
+  "production_bank_write_calls": 0,
+  "observed_state": "SIMULATION_PREFLIGHT_READY",
+  "credential_purpose": "OPERATOR_ONLY_READ_WRITE_TRIAL",
+  "prior_rejection_audit_ref": "1bebae51-ec22-4cbe-9ac8-bfa7b0f1e3f7",
+  "bank_reported_scope": null,
+  "task_status": "MANUAL_REVIEW",
+  "verification_status": "MANUAL_REVIEW",
+  "receipt_present": false,
+  "receipt_id": null,
+  "audit_chain_valid": true,
+  "verified_at": "2026-10-08T08:38:36.948615+00:00"
+}

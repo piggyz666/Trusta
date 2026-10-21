@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "D:\TRUSTA金融科技\scripts\phase6_demo.py", line 53, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "D:\TRUSTA金融科技\scripts\phase6_demo.py", line 37, in main
+    aa['receipt_proofs']=[s.records.query(r['payer'],receipt_id=r['receipt_id']) for r in timeline]
+                          ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\TRUSTA金融科技\backend\audit_trust\records.py", line 65, in query
+    bundle = self.checkpoints.generate_inclusion_proof(audit_event_id)
+  File "D:\TRUSTA金融科技\backend\audit_trust\checkpoints.py", line 101, in generate_inclusion_proof
+    raise Rejected("AUDIT_CHECKPOINT_PENDING")
+backend.domain.Rejected: AUDIT_CHECKPOINT_PENDING

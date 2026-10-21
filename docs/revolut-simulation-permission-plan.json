@@ -1,0 +1,46 @@
+{
+  "updated_at": "2026-10-08T08:50:20.227879+00:00",
+  "status": "OPERATOR_CONSENT_RECEIVED_AND_SIMULATOR_ACCESS_VERIFIED",
+  "sandbox_only": true,
+  "existing_payment_amount_minor_units": 1,
+  "existing_payment_currency": "EUR",
+  "existing_payment_state": "SETTLED",
+  "bank_scope_trial": "READ,WRITE",
+  "scope_granted_verified": false,
+  "simulation_permission_verified": true,
+  "scope_mapping_note": "A freshly issued token requested with READ,WRITE successfully completed the same Sandbox transfer. The exact bank-issued scope set remains unreported.",
+  "operator_token_available": true,
+  "separate_bank_application": false,
+  "operator_credentials_registered_with_agents": false,
+  "bank_payment_post_calls_this_stage": 0,
+  "bank_simulation_post_calls_this_stage": 1,
+  "production_bank_write_calls": 0,
+  "core_frozen_files": {
+    "backend/service.py": true,
+    "backend/config.py": true,
+    "backend/runtime/taskgraph.py": true,
+    "backend/runtime/graph_runtime.py": true,
+    "backend/execution/gateway.py": true,
+    "backend/execution/contract.py": true,
+    "backend/policy.py": true,
+    "backend/authorization.py": true,
+    "backend/schema_validator.py": true,
+    "backend/security/registry.py": true
+  },
+  "original_test_files_unchanged": true,
+  "targeted_tests": {
+    "count": 53,
+    "seconds": 23.231,
+    "status": "PASSED"
+  },
+  "changed_files": [
+    "scripts/revolut_sandbox_connect.py",
+    "backend/bank_sdk/revolut_auth.py",
+    "tests/test_revolut_simulation_consent.py"
+  ],
+  "sources": [
+    "https://developer.revolut.com/docs/guides/api-console/signing-requirements",
+    "https://developer.revolut.com/docs/guides/manage-accounts/api-usage-and-testing/test-flows-with-simulations"
+  ],
+  "note": "Bank token scope still missing; verified access to this simulator endpoint, not the complete scope set. Original READ/PAY credentials remained usable for independent transaction/account GET."
+}

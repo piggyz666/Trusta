@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "captured_outputs_gold_usage_decisions_preserved": true,
+  "dataset_hash_preserved": true,
+  "original_test_files_unchanged": 22,
+  "json_csv_validation_agree": true,
+  "new_metric_tests": 12,
+  "core_replay_cases": 100,
+  "core_bank_writes": 0,
+  "outcomes": {
+    "evaluated": 100,
+    "model_response_returned": 100,
+    "model_call_failed": 0,
+    "core_replay_performed": true,
+    "accepted_candidates": 17,
+    "rejected_candidates": 83,
+    "accepted_completed": 4,
+    "accepted_waiting_user": 12,
+    "accepted_business_blocked": 1,
+    "accepted_other_status": 0,
+    "core_bank_writes": 0
+  },
+  "new_external_calls": 0,
+  "full_regression_rerun": false
+}

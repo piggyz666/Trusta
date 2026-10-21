@@ -1,0 +1,15 @@
+{
+  "dataset_sha256": "45b9380ce03c95cd44cc862ddf9ee48aaa65496ea3fe8692fe076cbcf1520456",
+  "source_sha256": "15ed90a31e4073f907a7aac99442b8bd4b4fd71449819e0ef7e018293153ba9d",
+  "method": "author-created synthetic 3 dev / 8 locked / 12 holdout; all frozen before either model; once-only; no repair/fallback; not independently authored blind gold",
+  "data_policy": "isolated synthetic users/accounts only; no real bank data/secrets",
+  "historical_budget": {
+    "requests": 752,
+    "cost_usd_upper_estimate": 1.0656932500000025,
+    "max_requests": 800,
+    "max_usd": 5,
+    "historical_sha256": "daf0c5e05492a02fb1a2b9581b8fdb88f50c457e079fbb975ebcde2a33e9e102",
+    "probe_requests": 5,
+    "attempts": []
+  }
+}

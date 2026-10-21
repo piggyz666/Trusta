@@ -1,0 +1,16 @@
+{
+  "checked_at_utc": "2026-10-08T12:43:21.482714+00:00",
+  "classification": "BLOCKED_BY_EXTERNAL_CREDENTIAL",
+  "missing_configuration": [
+    "ANCHOR_RPC_URL",
+    "ANCHOR_CONTRACT_ADDRESS",
+    "ANCHOR_WALLET_PRIVATE_KEY"
+  ],
+  "live_submitted": false,
+  "external_blockchain_verified": false,
+  "chain_id": 11155111,
+  "tx_hash": null,
+  "production_claim": false,
+  "gas_and_deployed_contract_not_verified": true,
+  "local_evm_evidence": "tests/test_phase6_anchor.py; not a Sepolia confirmation"
+}

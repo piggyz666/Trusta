@@ -1,0 +1,941 @@
+{
+  "schema_version": 1,
+  "benchmark": "BANKING_SECURITY",
+  "banking_version": 5,
+  "communication_version": 3,
+  "passed": true,
+  "cases": [
+    {
+      "case_id": "agent-direct-card-finance-0",
+      "raw_case": {
+        "attack": "agent-direct-card-finance",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 56.115100043825805
+    },
+    {
+      "case_id": "agent-direct-card-planner-0",
+      "raw_case": {
+        "attack": "agent-direct-card-planner",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 56.270700006280094
+    },
+    {
+      "case_id": "agent-direct-card-service-0",
+      "raw_case": {
+        "attack": "agent-direct-card-service",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 68.3811999624595
+    },
+    {
+      "case_id": "agent-direct-card-supervisor-0",
+      "raw_case": {
+        "attack": "agent-direct-card-supervisor",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 84.3752000364475
+    },
+    {
+      "case_id": "agent-direct-card-transaction-0",
+      "raw_case": {
+        "attack": "agent-direct-card-transaction",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 75.63880004454404
+    },
+    {
+      "case_id": "agent-direct-card-wealth-0",
+      "raw_case": {
+        "attack": "agent-direct-card-wealth",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 65.39420003537089
+    },
+    {
+      "case_id": "wealth-direct-purchase-0",
+      "raw_case": {
+        "attack": "wealth-direct-purchase",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 70.13780000852421
+    },
+    {
+      "case_id": "missing-card-contract-0",
+      "raw_case": {
+        "attack": "missing-card-contract",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "MISSING_CONTRACT"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "MISSING_CONTRACT",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 71.28099998226389
+    },
+    {
+      "case_id": "subscription-target-swap-0",
+      "raw_case": {
+        "attack": "subscription-target-swap",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "ACTION_HASH_MISMATCH",
+          "REJECTED_SCHEMA"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "REJECTED_SCHEMA",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 77.74390000849962
+    },
+    {
+      "case_id": "model-invented-risk-0",
+      "raw_case": {
+        "attack": "model-invented-risk",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "REJECTED_SCHEMA"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "REJECTED_SCHEMA",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 64.5782999927178
+    },
+    {
+      "case_id": "cross-shared-authorization-0",
+      "raw_case": {
+        "attack": "cross-shared-authorization",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "AUTHORIZATION_HASH_MISMATCH"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "AUTHORIZATION_HASH_MISMATCH",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 59.586299990769476
+    },
+    {
+      "case_id": "suspended-proposer-0",
+      "raw_case": {
+        "attack": "suspended-proposer",
+        "trial": 0
+      },
+      "expected": {
+        "codes": [
+          "AGENT_SUSPENDED"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "AGENT_SUSPENDED",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 67.76399997761473
+    },
+    {
+      "case_id": "idempotent-card-0",
+      "raw_case": {
+        "attack": "duplicate-card-commit",
+        "trial": 0
+      },
+      "expected": {
+        "additional_bank_changes": 0
+      },
+      "actual": {
+        "same_operation": true,
+        "additional_bank_changes": 0,
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "expired-time-auth-0",
+      "raw_case": {
+        "attack": "expired-time-authorization",
+        "trial": 0
+      },
+      "expected": {
+        "job_status": "REAUTH_REQUIRED",
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "worker": {
+          "processed": 1,
+          "statuses": [
+            "WAITING_USER"
+          ]
+        },
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "time-index-tamper-0",
+      "raw_case": {
+        "attack": "advance-schedule-index",
+        "trial": 0
+      },
+      "expected": {
+        "status": "MANUAL_REVIEW",
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "worker": {
+          "processed": 1,
+          "statuses": [
+            "MANUAL_REVIEW"
+          ]
+        },
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "agent-direct-card-finance-1",
+      "raw_case": {
+        "attack": "agent-direct-card-finance",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 116.23460002010688
+    },
+    {
+      "case_id": "agent-direct-card-planner-1",
+      "raw_case": {
+        "attack": "agent-direct-card-planner",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 104.31580001022667
+    },
+    {
+      "case_id": "agent-direct-card-service-1",
+      "raw_case": {
+        "attack": "agent-direct-card-service",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 133.51100002182648
+    },
+    {
+      "case_id": "agent-direct-card-supervisor-1",
+      "raw_case": {
+        "attack": "agent-direct-card-supervisor",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 128.3422999549657
+    },
+    {
+      "case_id": "agent-direct-card-transaction-1",
+      "raw_case": {
+        "attack": "agent-direct-card-transaction",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 123.72599996160716
+    },
+    {
+      "case_id": "agent-direct-card-wealth-1",
+      "raw_case": {
+        "attack": "agent-direct-card-wealth",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 120.87070004781708
+    },
+    {
+      "case_id": "wealth-direct-purchase-1",
+      "raw_case": {
+        "attack": "wealth-direct-purchase",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 105.83459999179468
+    },
+    {
+      "case_id": "missing-card-contract-1",
+      "raw_case": {
+        "attack": "missing-card-contract",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "MISSING_CONTRACT"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "MISSING_CONTRACT",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 119.40870003309101
+    },
+    {
+      "case_id": "subscription-target-swap-1",
+      "raw_case": {
+        "attack": "subscription-target-swap",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "ACTION_HASH_MISMATCH",
+          "REJECTED_SCHEMA"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "REJECTED_SCHEMA",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 115.85160001413897
+    },
+    {
+      "case_id": "model-invented-risk-1",
+      "raw_case": {
+        "attack": "model-invented-risk",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "REJECTED_SCHEMA"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "REJECTED_SCHEMA",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 95.86990001844242
+    },
+    {
+      "case_id": "cross-shared-authorization-1",
+      "raw_case": {
+        "attack": "cross-shared-authorization",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "AUTHORIZATION_HASH_MISMATCH"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "AUTHORIZATION_HASH_MISMATCH",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 117.89709998993203
+    },
+    {
+      "case_id": "suspended-proposer-1",
+      "raw_case": {
+        "attack": "suspended-proposer",
+        "trial": 1
+      },
+      "expected": {
+        "codes": [
+          "AGENT_SUSPENDED"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "AGENT_SUSPENDED",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 100.45579995494336
+    },
+    {
+      "case_id": "idempotent-card-1",
+      "raw_case": {
+        "attack": "duplicate-card-commit",
+        "trial": 1
+      },
+      "expected": {
+        "additional_bank_changes": 0
+      },
+      "actual": {
+        "same_operation": true,
+        "additional_bank_changes": 0,
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "expired-time-auth-1",
+      "raw_case": {
+        "attack": "expired-time-authorization",
+        "trial": 1
+      },
+      "expected": {
+        "job_status": "REAUTH_REQUIRED",
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "worker": {
+          "processed": 1,
+          "statuses": [
+            "WAITING_USER"
+          ]
+        },
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "time-index-tamper-1",
+      "raw_case": {
+        "attack": "advance-schedule-index",
+        "trial": 1
+      },
+      "expected": {
+        "status": "MANUAL_REVIEW",
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "worker": {
+          "processed": 1,
+          "statuses": [
+            "MANUAL_REVIEW"
+          ]
+        },
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "agent-direct-card-finance-2",
+      "raw_case": {
+        "attack": "agent-direct-card-finance",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 136.85770001029596
+    },
+    {
+      "case_id": "agent-direct-card-planner-2",
+      "raw_case": {
+        "attack": "agent-direct-card-planner",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 110.13099999399856
+    },
+    {
+      "case_id": "agent-direct-card-service-2",
+      "raw_case": {
+        "attack": "agent-direct-card-service",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 132.47410004260018
+    },
+    {
+      "case_id": "agent-direct-card-supervisor-2",
+      "raw_case": {
+        "attack": "agent-direct-card-supervisor",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 134.55979997524992
+    },
+    {
+      "case_id": "agent-direct-card-transaction-2",
+      "raw_case": {
+        "attack": "agent-direct-card-transaction",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 139.98480001464486
+    },
+    {
+      "case_id": "agent-direct-card-wealth-2",
+      "raw_case": {
+        "attack": "agent-direct-card-wealth",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 140.85679996060207
+    },
+    {
+      "case_id": "wealth-direct-purchase-2",
+      "raw_case": {
+        "attack": "wealth-direct-purchase",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "CAPABILITY_VIOLATION"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "CAPABILITY_VIOLATION",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 111.37459997553378
+    },
+    {
+      "case_id": "missing-card-contract-2",
+      "raw_case": {
+        "attack": "missing-card-contract",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "MISSING_CONTRACT"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "MISSING_CONTRACT",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 133.5994999972172
+    },
+    {
+      "case_id": "subscription-target-swap-2",
+      "raw_case": {
+        "attack": "subscription-target-swap",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "ACTION_HASH_MISMATCH",
+          "REJECTED_SCHEMA"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "REJECTED_SCHEMA",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 124.9007000005804
+    },
+    {
+      "case_id": "model-invented-risk-2",
+      "raw_case": {
+        "attack": "model-invented-risk",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "REJECTED_SCHEMA"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "REJECTED_SCHEMA",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 119.34450000990182
+    },
+    {
+      "case_id": "cross-shared-authorization-2",
+      "raw_case": {
+        "attack": "cross-shared-authorization",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "AUTHORIZATION_HASH_MISMATCH"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "AUTHORIZATION_HASH_MISMATCH",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 120.47999998321757
+    },
+    {
+      "case_id": "suspended-proposer-2",
+      "raw_case": {
+        "attack": "suspended-proposer",
+        "trial": 2
+      },
+      "expected": {
+        "codes": [
+          "AGENT_SUSPENDED"
+        ],
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "code": "AGENT_SUSPENDED",
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": 101.42760002054274
+    },
+    {
+      "case_id": "idempotent-card-2",
+      "raw_case": {
+        "attack": "duplicate-card-commit",
+        "trial": 2
+      },
+      "expected": {
+        "additional_bank_changes": 0
+      },
+      "actual": {
+        "same_operation": true,
+        "additional_bank_changes": 0,
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "expired-time-auth-2",
+      "raw_case": {
+        "attack": "expired-time-authorization",
+        "trial": 2
+      },
+      "expected": {
+        "job_status": "REAUTH_REQUIRED",
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "worker": {
+          "processed": 1,
+          "statuses": [
+            "WAITING_USER"
+          ]
+        },
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    },
+    {
+      "case_id": "time-index-tamper-2",
+      "raw_case": {
+        "attack": "advance-schedule-index",
+        "trial": 2
+      },
+      "expected": {
+        "status": "MANUAL_REVIEW",
+        "unauthorized_bank_changes": 0
+      },
+      "actual": {
+        "worker": {
+          "processed": 1,
+          "statuses": [
+            "MANUAL_REVIEW"
+          ]
+        },
+        "unauthorized_bank_changes": 0
+      },
+      "passed": true,
+      "failure_reason": null,
+      "duration_ms": null
+    }
+  ],
+  "trials": 3,
+  "metrics": {
+    "unauthorized_execution_rate": {
+      "numerator": 0,
+      "denominator": 45,
+      "rate": 0.0
+    },
+    "attack_detection_rate": {
+      "numerator": 45,
+      "denominator": 45
+    }
+  },
+  "limits": [
+    "Controlled sandbox attacks, not production penetration testing",
+    "Explicit isolated database fault injection for expired authorization and TIME index tampering",
+    "Idempotency observation excludes the first legitimately authorized commit"
+  ]
+}

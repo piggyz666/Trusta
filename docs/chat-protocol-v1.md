@@ -381,9 +381,164 @@ IM 规则：IM 用户需要先和 TRUSTA 账户绑定；**RED 级别的动作在
 
 ---
 
-## 10. 待定问题
+## 10. 已定决策（2026-10-21）
 
-1. LLM 主力用 DeepSeek 还是同时保留 Gemini 作为回退？（影响 B3 的 Provider 配置）
-2. "资金锁定"是在活期账户里冻结一部分余额，还是转入一个单独的"心愿金"子账户？（影响 B8 的数据模型和演示效果）
-3. IM 先做飞书还是企业微信？
-4. 演示环境的短信验证码直接在响应里返回（`dev_code`），还是要在前端单独显示一个"模拟手机"？
+1. **模型**：主力 DeepSeek（`deepseek-flash`，关闭 thinking 以降低延迟）。模型不可用时自动退回规则解析，回复里标明“智能理解暂不可用”。
+2. **资金锁定**：做成独立的“心愿金”子账户（B8 实现）。
+3. **IM**：先接飞书（B10 实现）。
+4. **短信验证码**：两种都支持——演示模式下接口返回 `dev_code`，前端另做“模拟手机”弹窗（B9 实现）。
+
+## 11. 实现状态（v1 后端，2026-10-21）
+
+| 模块 | 状态 | 位置 |
+|---|---|---|
+| B1 会话服务、状态机、幂等、owner 隔离 | ✅ 已实现 | `backend/chat/service.py`、`backend/chat/store.py` |
+| B2 HTTP + SSE 路由 | ✅ 已实现 | `backend/chat/http.py`（`server.py` 只加了转发） |
+| B3 工具 schema + DeepSeek function calling | ✅ 已实现 | `backend/chat/tools.py`、`backend/chat/llm.py` |
+| B4 校验器（span 出处、金额复核、资源目录、权限字段） | ✅ 已实现 | `backend/chat/validator.py`、`backend/chat/amounts.py` |
+| B5 LLM 主导 + 规则兜底 | ✅ 已实现（对话入口内） | `ChatService._understand` / `_rule_steps` |
+| B6 输入安全检查（注入 / 反诈 / 信息套取，3 次注入锁会话 10 分钟） | ✅ 第一版 | `backend/chat/guard.py` |
+| B7 回复生成 | ✅ 模板化：所有数字来自银行数据；模型自由文本仅在不含数字时展示 | `backend/chat/cards.py` |
+| B8 业务补齐 | ✅ 已实现（见第 12 节） | `backend/banking/*`、`backend/runtime/event_plans.py`、`backend/chat/risk.py` |
+| B9 短信验证码 | ✅ 已实现（见第 13 节） | `backend/security/banking_controls.py` |
+| B10 飞书 | ✅ 已实现（见第 14 节） | `backend/channels/feishu.py` |
+| B11 评测集 | ✅ 51 例，`python -m benchmarks.chat_eval --rules`（离线基线）/ `--live`（真实模型，需授权预算） | `benchmarks/chat_eval.py` |
+
+与第 6 节的差异（v1 实现以此为准）：
+- `plan` 字段在心愿金计划时返回节点列表；普通多意图按顺序执行，`plan` 为 `null`。
+
+### 运行
+
+```powershell
+# .env 里配置（不要提交）：
+DEEPSEEK_API_KEY=sk-...
+# 可选：TRUSTA_CHAT_LLM_MODEL=deepseek-flash  TRUSTA_CHAT_LLM_TIMEOUT=30  TRUSTA_CHAT_LLM_PROXY=http://...
+python -m backend.server
+```
+
+没有配置 key 时，`/api/chat` 照常可用，自动用规则解析（`understanding: "rules"`）。
+
+### 前端联调注意
+
+- 服务只接受 `Host: 127.0.0.1:8000`，并校验 `Origin`。前端开发服务器（如 Vite）请用代理把 `/api` 转发到 `http://127.0.0.1:8000`，并**保持 Host 不变**（`changeOrigin: false`），这样浏览器看到的是同源，不需要 CORS。
+- 鉴权：`Authorization: Bearer <data/api.token 里的令牌>`。
+- SSE 用 `fetch` + `ReadableStream` 读取（`EventSource` 不能发 POST 和自定义头）。
+
+## 12. B8 业务补齐（2026-10-21）
+
+### 新增银行动作（与原有动作走同一条链：快照 → 业务规则 → 期望状态 → 执行 → 独立核验）
+
+| 动作 | 等级 | 说明 |
+|---|---|---|
+| `FUND_LOCK` | 黄（≥ 大额阈值为红） | 从活期锁定一笔钱到心愿金子账户；复式记账进内部账户 `wish-pool` |
+| `WISH_ORDER` | 黄 | 用心愿金向商户下单；**价格只取银行商户目录**，模型或调用方给的价格对不上直接拦截（`MERCHANT_PRICE_MISMATCH`） |
+| `FUND_RELEASE` | 黄 | 剩余资金退回活期 |
+| `CARD_CANCEL_LOST` | 红 | 解除挂失（找回卡）；交易开关保持关闭，需用户自行重新开启 |
+| `CARD_PIN_RESET` | 红 | 向预留手机号发送设置新密码的安全链接；**密码本身从不进入 TRUSTA 或模型** |
+| `RISK_PROFILE_UPDATE` | 黄 | 根据问卷结果更新风险等级，有效期一年；评分是确定性规则，不经过模型 |
+
+新增读取（复用已有的 `account.read` 授权，Agent 能力承诺不变，旧数据库可直接升级）：`wish_fund.get/list`、`merchant.list`、`life_event.list`。
+
+### 新增 / 扩展的 LLM 工具
+
+- `propose_transfer` 新增 `memo`（备注，必须是用户原话）和 `recurrence`（每月 / 每周、次数）。周期转账**不预先授权**：每期到时生成一张确认卡。
+- `propose_card_operation` 新增 `CANCEL_LOST`、`PIN_RESET`。
+- `start_risk_assessment`：返回 `questionnaire` 卡片。
+- `list_wish_funds`、`propose_wish_plan`、`propose_fund_release`。
+
+### 新卡片：`questionnaire`
+
+```json
+{ "type": "questionnaire", "questionnaire_id": "risk-v1", "title": "理财风险测评（5 题）",
+  "questions": [{ "id": "q1", "text": "您的年龄段？", "options": [{ "value": "A", "label": "18–30 岁" }] }] }
+```
+
+提交：`POST /api/chat/sessions/{sid}/risk-assessment`，body `{"answers": {"q1":"A","q2":"C",...}}` → 返回带 `RISK_PROFILE_UPDATE` 确认卡的 ChatTurn。
+
+### 跨场景心愿金计划（题目示例）
+
+用户：“我爱人生日快到了，锁 1000，生日前两天订花和蛋糕”
+
+1. 现在：一张 `FUND_LOCK` 确认卡；`ChatTurn.plan` 返回 3 个节点（锁定 → 下单 → 到期释放）。
+2. 生日前 2 天 10:00：后台生成 `WISH_ORDER` 确认卡（花 + 蛋糕一张卡）。
+3. 生日次日 23:59：生成 `FUND_RELEASE` 确认卡。
+
+拒绝锁定 → 后续两个计划自动取消。到期的计划会在用户下次打开会话（`GET /api/chat/sessions/{sid}`）或发消息时，作为“提醒”消息和确认卡出现在对话里。
+
+### 演示快进（仅演示环境）
+
+`.env` 设置 `TRUSTA_DEMO_MODE=true` 后可用：`POST /api/chat/sessions/{sid}/demo/advance`，body `{"event_id": "..."}`，把某个待执行计划提前到现在（写审计）。默认关闭，关闭时返回 403 `DEMO_MODE_DISABLED`。事件 id 可用现有的 `GET /api/events` 查询。
+
+## 13. 短信验证码、人工接管、回退、多步计划、主动提醒（2026-10-21）
+
+### 短信验证码（模拟短信网关）
+
+红色确认卡的 `required_verification` 为 `["TOTP", "SMS"]`，任选其一。没绑定认证器的用户可以直接用短信。
+
+| 接口 | 说明 |
+|---|---|
+| `POST /api/chat/sessions/{sid}/actions/{action_id}/sms` body `{}` | 发送验证码 → `{"sent_to":"138****0000","expires_at":…,"channel":"SIMULATED_SMS","dev_code":"482913"}`；`dev_code` 仅在 `TRUSTA_DEMO_MODE=true` 时返回，前端“模拟手机”弹窗显示它 |
+| 决定接口 `verification: {"method":"SMS","code":"482913"}` | 校验 |
+
+规则：验证码**只绑定这一张卡**（授权 id + 动作哈希），5 分钟有效，单码最多试 3 次，重新获取会让旧码作废；同一授权最多发 3 次、同一用户 10 分钟最多 6 次（429 `SMS_RATE_LIMITED`）；输错计入账户认证失败次数，达到上限锁定账户。
+
+### 人工接管
+
+- 用户说“转人工 / 找客服 / 投诉”→ 工具 `request_human`，会话进入 `HANDED_OFF` 状态，返回 `{"type":"handoff","handoff_id":"H-xxxx"}` 卡片。
+- 接管期间用户消息**不再发给模型**，进入人工队列；用户说“取消转人工”可回到智能助手。
+- 客服端（需要 `X-TRUSTA-Operator` 头，值为 `.env` 的 `TRUSTA_SECURITY_OPERATOR_TOKEN`）：
+  - `POST /api/chat/operator/handoffs` body `{}`：列出待处理工单（含最近 10 条对话、待确认操作标题、排队消息）
+  - `POST /api/chat/operator/handoffs/{id}/reply` body `{"text":"…","close":false}`：回复用户（消息角色 `human_agent`）；`close:true` 结束接管
+- 客服**没有任何授权接口**，不能替用户确认资金操作。
+
+### 回退（撤销已执行的操作）
+
+工具 `undo_last`：对本会话最近一个已成功执行的操作生成**反向操作的确认卡**（仍需确认，红色照样要验证）。
+
+| 已执行 | 反向操作 |
+|---|---|
+| 冻结 / 解冻、挂失 / 解除挂失 | 互为反向 |
+| 调整限额、交易开关 | 恢复到执行前的值 |
+| 锁定心愿金 | 释放心愿金 |
+| 申购 / 赎回 | 赎回 / 申购同等金额（受持有期等规则约束） |
+| 转账、心愿金下单、取消订阅、关闭代扣、重置密码、申请卡、风险测评 | **不可撤销**，回复里说明原因和可行的补救办法，不伪造回退 |
+
+`interrupt` 会取消所有未执行节点，并提示可以用“撤销”回退已执行的部分。
+
+### 多步计划
+
+一句话里有 2 个以上操作时，`ChatTurn.plan` 返回有序节点（`depends_on` 指向前一个节点）。节点状态随确认 / 拒绝 / 中断更新，决定接口和中断接口的响应都带最新 `plan`。
+
+### 主动提醒（只读，不会自己生成操作）
+
+打开会话或发消息时检查：
+- 3 天内要扣费的订阅 / 代扣 → “提醒：演示视频将在 11月01日扣费 ¥19.99……”
+- 30 天内的生日 / 纪念日（且还没有对应心愿金）→ “爱人王芳的生日还有 25 天……需要我帮你提前锁定一笔心愿金吗？”
+
+每条提醒只出现一次。
+
+## 14. 飞书渠道
+
+### 配置（`.env`）
+
+```
+FEISHU_APP_ID=cli_xxx
+FEISHU_APP_SECRET=xxx
+FEISHU_VERIFICATION_TOKEN=xxx          # 事件订阅页面的 Verification Token
+FEISHU_ENCRYPT_KEY=xxx                 # 可选；配置后要求签名并支持加密推送
+FEISHU_USER_BINDINGS=ou_xxxx:demo      # 飞书 open_id → TRUSTA 客户，多个用逗号分隔
+TRUSTA_APP_URL=http://127.0.0.1:8000/  # 红色操作卡片上“去 APP 验证”的链接
+```
+
+### 飞书开放平台设置
+
+1. 创建企业自建应用，开启“机器人”能力。
+2. 权限：`im:message`（接收消息）、`im:message:send_as_bot`（发送消息）。
+3. 事件订阅：请求地址填 `https://<你的内网穿透域名>/api/channels/feishu/webhook`，订阅 `im.message.receive_v1`；卡片回调（`card.action.trigger`）也填同一地址。
+4. 服务只监听 `127.0.0.1:8000`，需要用 cpolar / ngrok 等把公网地址转发到本机 8000 端口。
+
+### 行为
+
+- 同一个飞书会话对应一个 TRUSTA 会话；消息去重（飞书会重试推送）；回复异步发送，保证 3 秒内响应回调。
+- 黄色操作：卡片上有“确认 / 拒绝”按钮，只有绑定的本人能点（群聊里别人点无效）。
+- 红色操作：卡片只有“去 APP 验证”链接，**飞书内无法完成**——IM 账号本身不算第二因子。

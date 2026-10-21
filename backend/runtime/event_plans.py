@@ -10,7 +10,8 @@ from backend.domain import Rejected, canonical, digest, uid
 
 
 class EventPlans:
-    TYPES = {'BIRTHDAY_TRANSFER','SPENDING_REVIEW'}
+    TYPES = {'BIRTHDAY_TRANSFER','SPENDING_REVIEW','RECURRING_TRANSFER','WISH_ORDER','WISH_RELEASE'}
+    FREQUENCIES = {'MONTHLY','WEEKLY'}
 
     def __init__(self, service, recover=True):
         self.s = service
@@ -61,6 +62,28 @@ class EventPlans:
                     or not 1<=len(parameters['recipient_name'])<=100): raise Rejected('INVALID_EVENT_PLAN')
             # Resolve real authority now; resolve again when the event triggers.
             self.s.transaction.recipient(owner,parameters['recipient_name'])
+        elif event_type=='RECURRING_TRANSFER':
+            if (set(parameters)!={'recipient_name','amount','frequency','remaining','series_id'}
+                    or type(parameters['amount']) is not int or not 0<parameters['amount']<=10**12
+                    or parameters['frequency'] not in self.FREQUENCIES or type(parameters['remaining']) is not int
+                    or not 1<=parameters['remaining']<=24 or not isinstance(parameters['recipient_name'],str)
+                    or not 1<=len(parameters['recipient_name'])<=100 or not isinstance(parameters['series_id'],str)
+                    or not 1<=len(parameters['series_id'])<=64): raise Rejected('INVALID_EVENT_PLAN')
+            self.s.transaction.recipient(owner,parameters['recipient_name'])
+        elif event_type in {'WISH_ORDER','WISH_RELEASE'}:
+            fund=parameters.get('wish_fund_id')
+            if not isinstance(fund,str) or not fund.startswith('wish-') or not 6<=len(fund)<=40: raise Rejected('INVALID_EVENT_PLAN')
+            if event_type=='WISH_RELEASE':
+                if set(parameters)!={'wish_fund_id'}: raise Rejected('INVALID_EVENT_PLAN')
+            else:
+                items=parameters.get('items')
+                if set(parameters)!={'wish_fund_id','items'} or not isinstance(items,list) or not 1<=len(items)<=5:
+                    raise Rejected('INVALID_EVENT_PLAN')
+                catalogue={m['id']:m for m in self.s.service_agent.resources(owner,'merchant')}
+                for item in items:
+                    # Prices are fixed from the bank's merchant catalogue at planning time and re-checked at execution.
+                    if (not isinstance(item,dict) or set(item)!={'merchant_id','amount'} or item['merchant_id'] not in catalogue
+                            or item['amount']!=catalogue[item['merchant_id']]['price']): raise Rejected('INVALID_EVENT_PLAN')
         elif parameters:
             raise Rejected('INVALID_EVENT_PLAN')
         intent={'account_id':account_id,'event_type':event_type,'execute_at':execute_at,'parameters':parameters}
@@ -116,14 +139,37 @@ class EventPlans:
                 # while parallel Agents read would deadlock their identity checks.
                 try:
                     intent=body['intent']
-                    if intent['event_type']=='BIRTHDAY_TRANSFER':
-                        p=intent['parameters']
+                    p=intent['parameters']
+                    if intent['event_type'] in {'BIRTHDAY_TRANSFER','RECURRING_TRANSFER'}:
                         normalized={'task_type':'TRANSFER','recipient_name':p['recipient_name'],'amount':p['amount'],'currency':'CNY','needs_clarification':False}
-                        task=self.s._create_task('生日转账事件：需要逐笔审批',owner,intent['account_id'],normalized)
+                        label='生日转账事件' if intent['event_type']=='BIRTHDAY_TRANSFER' else '周期转账到期'
+                        task=self.s._create_task(label+'：需要逐笔审批',owner,intent['account_id'],normalized)
+                        if intent['event_type']=='RECURRING_TRANSFER' and p['remaining']>1:
+                            # Next occurrence is a new proposal-only plan; nothing is pre-authorised.
+                            nxt=next_occurrence(intent['execute_at'],p['frequency'])
+                            self.create(owner,f"{p['series_id']}#{int(nxt)}",intent['account_id'],'RECURRING_TRANSFER',nxt,
+                                        p|{'remaining':p['remaining']-1})
+                    elif intent['event_type'] in {'WISH_ORDER','WISH_RELEASE'}:
+                        fund=self.s.gateway.read('service',owner,'wish_fund.get',resource_id=p['wish_fund_id'])
+                        if fund['status']!='ACTIVE':
+                            raise Rejected('WISH_FUND_NOT_ACTIVE')
+                        if intent['event_type']=='WISH_ORDER':
+                            amount=sum(i['amount'] for i in p['items'])
+                            normalized={'task_type':'WISH_FUND_MANAGEMENT','operation':'WISH_ORDER','target_id':p['wish_fund_id'],
+                                        'parameters':{'amount':amount,'currency':'CNY','items':p['items']},'needs_clarification':False}
+                        else:
+                            normalized={'task_type':'WISH_FUND_MANAGEMENT','operation':'FUND_RELEASE','target_id':p['wish_fund_id'],
+                                        'parameters':{},'needs_clarification':False}
+                        task=self.s.banking.create('心愿金计划到期：需要确认',owner,fund['account_id'],normalized)
                     else:
                         normalized={'task_type':'CROSS_SCENARIO','month':datetime.now(CHINA).strftime('%Y-%m'),'needs_clarification':False}
                         task=self.s.banking.create('事件触发支出分析与订阅审查：需要逐项审批',owner,intent['account_id'],normalized)
                     body.update(status='PROPOSED',task_id=task['task_id'],task_status=task['status'])
+                except Rejected as exc:
+                    if exc.code=='WISH_FUND_NOT_ACTIVE':  # lock was declined or already released: nothing to do
+                        body.update(status='SKIPPED',reason=exc.code)
+                    else:
+                        body.update(status='MANUAL_REVIEW',reason='EVENT_TRIGGER_UNCERTAIN')
                 except Exception:
                     # A task may already exist. No automatic retry with a new task/action key.
                     body.update(status='MANUAL_REVIEW',reason='EVENT_TRIGGER_UNCERTAIN')
@@ -132,6 +178,22 @@ class EventPlans:
                     self.s.audit.append_in(conn,body['task_id'],None,'EVENT_TRIGGER_RESULT','runtime',{'event_id':body['id'],'status':body['status']})
                 results.append(body)
         return {'processed':len(results),'events':results}
+
+    def advance_for_demo(self, owner, event_id):
+        """Demo-only fast forward (TRUSTA_DEMO_MODE=true): makes one PENDING event due now. Audited; never authorises."""
+        import os
+        if os.environ.get('TRUSTA_DEMO_MODE','false').lower()!='true':
+            raise Rejected('DEMO_MODE_DISABLED')
+        with self.s.db.transaction() as conn:
+            row=conn.execute("SELECT * FROM event_plans WHERE id=? AND owner=?",(event_id,owner)).fetchone()
+            if not row: raise Rejected('EVENT_NOT_FOUND_OR_DENIED')
+            body=self._decode(row)
+            if body['status']!='PENDING': raise Rejected('EVENT_CANNOT_ADVANCE')
+            now=time.time()
+            body['execute_at']=now
+            conn.execute('UPDATE event_plans SET execute_at=?,body=? WHERE id=?',(now,self._encode(body),event_id))
+            self.s.audit.append_in(conn,None,None,'EVENT_DEMO_ADVANCED','runtime',{'event_id':event_id})
+        return self.tick(owner)
 
     def reminders(self, owner, account_id):
         self.s.gateway.read('service',owner,'account.get',account_id=account_id)
@@ -163,3 +225,14 @@ class EventPlans:
                 if not exists:
                     self.s.audit.append_in(conn,None,None,'RENEWAL_REMINDER_CREATED','runtime',{'reminder_id':reminder['id'],'evidence_hash':reminder['evidence_hash']})
         return {'reminders':current,'bank_write':False,'delivery':'LOCAL_BACKEND_QUEUE'}
+
+
+def next_occurrence(stamp, frequency):
+    """Same wall-clock time next week / next month (day clamped to month end), Asia/Shanghai."""
+    from calendar import monthrange
+    from datetime import timedelta
+    moment=datetime.fromtimestamp(stamp,CHINA)
+    if frequency=='WEEKLY':
+        return (moment+timedelta(days=7)).timestamp()
+    year,month=(moment.year+1,1) if moment.month==12 else (moment.year,moment.month+1)
+    return moment.replace(year=year,month=month,day=min(moment.day,monthrange(year,month)[1])).timestamp()

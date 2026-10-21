@@ -21,6 +21,10 @@ CREATE TABLE IF NOT EXISTS banking_daily_claims(idempotency_key TEXT PRIMARY KEY
  currency TEXT NOT NULL, day TEXT NOT NULL, amount INTEGER NOT NULL CHECK(amount>0), body TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS daily_claim_owner ON banking_daily_claims(owner,currency,day);
 CREATE TABLE IF NOT EXISTS banking_review_cases(task_id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS banking_sms_otps(id TEXT PRIMARY KEY, owner TEXT NOT NULL, authorization_id TEXT NOT NULL,
+ created_at REAL NOT NULL, body TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS sms_otp_auth ON banking_sms_otps(authorization_id);
+CREATE INDEX IF NOT EXISTS sms_otp_owner ON banking_sms_otps(owner,created_at);
 CREATE TRIGGER IF NOT EXISTS safety_profile_no_delete BEFORE DELETE ON banking_safety_profile BEGIN SELECT RAISE(ABORT,'security profile cannot be deleted'); END;
 CREATE TRIGGER IF NOT EXISTS security_user_no_delete BEFORE DELETE ON banking_security_users BEGIN SELECT RAISE(ABORT,'security state cannot be deleted'); END;
 CREATE TRIGGER IF NOT EXISTS totp_no_delete BEFORE DELETE ON banking_totp BEGIN SELECT RAISE(ABORT,'MFA cannot be reset by deleting enrollment'); END;
@@ -205,12 +209,86 @@ class BankingControls:
             raise Rejected(error)
         return {"totp_enrolled":True}
 
+    SMS_TTL = 300
+    SMS_MAX_ATTEMPTS = 3
+    SMS_PER_AUTHORIZATION = 3
+    SMS_PER_OWNER_10MIN = 6
+
+    def _sms_hash(self, otp_id, code):
+        return hmac.new(self.key, f"sms-otp:{otp_id}:{code}".encode(), hashlib.sha256).hexdigest()
+
+    def issue_sms(self, owner, auth, phone="13800000000", demo=False):
+        """Second factor bound to ONE authorization (action hash). Simulated SMS gateway: the code is only
+        returned to the caller in demo mode; otherwise it would go to the customer's registered phone."""
+        if not self.enabled:
+            raise Rejected("COMPETITION_SAFETY_DISABLED")
+        if auth["user_id"] != owner or auth["status"] != "PENDING_STRONG_AUTH" or auth.get("auth_method") != "totp":
+            raise Rejected("SMS_NOT_APPLICABLE")
+        now = time.time()
+        if now >= auth["expires_at"]:
+            raise Rejected("AUTHORIZATION_EXPIRED")
+        with self.db.transaction() as conn:
+            self.assert_unlocked(owner, conn)
+            if conn.execute("SELECT COUNT(*) FROM banking_sms_otps WHERE authorization_id=?", (auth["authorization_id"],)).fetchone()[0] >= self.SMS_PER_AUTHORIZATION:
+                raise Rejected("SMS_RATE_LIMITED")
+            if conn.execute("SELECT COUNT(*) FROM banking_sms_otps WHERE owner=? AND created_at>?", (owner, now - 600)).fetchone()[0] >= self.SMS_PER_OWNER_10MIN:
+                raise Rejected("SMS_RATE_LIMITED")
+            # A new code supersedes earlier unused ones for the same authorization.
+            for row in conn.execute("SELECT id, body FROM banking_sms_otps WHERE authorization_id=?", (auth["authorization_id"],)).fetchall():
+                old = self._load(row["body"])
+                if old["status"] == "SENT":
+                    old["status"] = "SUPERSEDED"
+                    conn.execute("UPDATE banking_sms_otps SET body=? WHERE id=?", (self._pack(old), row["id"]))
+            otp_id, code = uid(), f"{secrets.randbelow(10**6):06d}"
+            body = {"id": otp_id, "owner": owner, "authorization_id": auth["authorization_id"], "action_hash": auth["action_hash"],
+                    "code_hash": self._sms_hash(otp_id, code), "created_at": now,
+                    "expires_at": min(now + self.SMS_TTL, auth["expires_at"]), "attempts": 0, "status": "SENT"}
+            conn.execute("INSERT INTO banking_sms_otps VALUES(?,?,?,?,?)", (otp_id, owner, auth["authorization_id"], now, self._pack(body)))
+            self.audit.append_in(conn, None, None, "SMS_OTP_SENT", "security",
+                                 {"owner": owner, "authorization_id": auth["authorization_id"], "otp_id": otp_id})
+        masked = phone[:3] + "****" + phone[-4:]
+        result = {"sent_to": masked, "expires_at": body["expires_at"], "channel": "SIMULATED_SMS"}
+        if demo:
+            result["dev_code"] = code
+        return result
+
+    def _verify_sms(self, conn, auth, action, code):
+        owner = auth["user_id"]
+        self.assert_unlocked(owner, conn)
+        rows = conn.execute("SELECT id, body FROM banking_sms_otps WHERE authorization_id=? ORDER BY created_at DESC", (auth["authorization_id"],)).fetchall()
+        live = [(r["id"], self._load(r["body"])) for r in rows]
+        live = [(i, b) for i, b in live if b["status"] == "SENT" and time.time() < b["expires_at"]]
+        if not live:
+            self._failure(conn, owner, "authentication", "SMS_NOT_SENT_OR_EXPIRED")
+            return None, "SMS_NOT_SENT_OR_EXPIRED"
+        otp_id, body = live[0]
+        if body["owner"] != owner or body["action_hash"] != digest(action):
+            raise Rejected("SECURITY_STATE_INVALID")
+        ok = isinstance(code, str) and len(code) == 6 and code.isdigit() and hmac.compare_digest(body["code_hash"], self._sms_hash(otp_id, code))
+        body["attempts"] += 1
+        body["status"] = "USED" if ok else ("EXHAUSTED" if body["attempts"] >= self.SMS_MAX_ATTEMPTS else "SENT")
+        conn.execute("UPDATE banking_sms_otps SET body=? WHERE id=?", (self._pack(body), otp_id))
+        if not ok:
+            self._failure(conn, owner, "authentication", "SMS_INVALID")
+            return None, "SMS_INVALID"
+        state = self._user(conn, owner)
+        state["authentication_failures"] = 0
+        self._save_user(conn, state)
+        return otp_id, None
+
     def verify_authorization(self, conn, auth, action, code):
-        counter,error = self._verify_code(conn,auth["user_id"],code)
+        if isinstance(code, str) and code.startswith("sms:"):
+            reference, error = self._verify_sms(conn, auth, action, code[4:])
+            method, counter = "sms", None
+        else:
+            counter, error = self._verify_code(conn, auth["user_id"], code)
+            method, reference = "totp", None
         if error:
             return None,error
         proof = {"authorization_id":auth["authorization_id"],"owner":auth["user_id"],"action_hash":digest(action),
-                 "verified_at":time.time(),"expires_at":auth["expires_at"],"counter":counter,"method":"totp"}
+                 "verified_at":time.time(),"expires_at":auth["expires_at"],"counter":counter,"method":method}
+        if reference:
+            proof["otp_id"] = reference
         self.audit.append_in(conn,action["task_id"],action["action_id"],"STRONG_AUTH_VERIFIED","security",proof)
         return self._pack(proof),None
 
@@ -222,7 +300,7 @@ class BankingControls:
         proof = self._load(auth["strong_auth_proof"])
         return (proof["authorization_id"]==auth["authorization_id"] and proof["owner"]==auth["user_id"]
                 and proof["action_hash"]==auth["action_hash"] and proof["expires_at"]==auth["expires_at"]
-                and auth["created_at"] <= proof["verified_at"] < auth["expires_at"] and proof["method"]=="totp")
+                and auth["created_at"] <= proof["verified_at"] < auth["expires_at"] and proof["method"] in {"totp","sms"})
 
     def _day(self):
         now = datetime.fromtimestamp(time.time(),timezone(timedelta(hours=8)))

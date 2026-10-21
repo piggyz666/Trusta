@@ -49,7 +49,13 @@ class BoundedHTTPServer(ThreadingHTTPServer):
         with self._count_lock:self.request_errors+=1
 
 
-def create_server(service, token, port=8000, identities=None, *, max_workers=64, input_timeout=10):
+def _chat_for(service):
+    from backend.chat.service import ChatService
+    service.chat=ChatService(service)
+    return service.chat
+
+
+def create_server(service, token, port=8000, identities=None, *, max_workers=64, input_timeout=10, chat_service=None, feishu_channel=None):
     if type(max_workers) is not int or not 1<=max_workers<=256:
         raise Rejected('INVALID_HTTP_CAPACITY')
     if type(input_timeout) not in (int,float) or not .05<=input_timeout<=30:
@@ -59,6 +65,13 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
         raise Rejected("INVALID_LOCAL_IDENTITIES")
     from backend.tx.api import TransactionQueries
     tx_queries=TransactionQueries(service.db)
+    from backend.chat import http as chat_http
+    chat=chat_service if chat_service is not None else (getattr(service,'chat',None) or (_chat_for(service) if service.banking else None))
+    if feishu_channel is None and chat is not None:
+        from backend.channels.feishu import FeishuChannel, FeishuConfig
+        feishu_config=FeishuConfig.from_env()
+        feishu_channel=FeishuChannel(chat,feishu_config) if feishu_config.enabled else None
+    feishu=feishu_channel
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
             super().setup()
@@ -120,6 +133,8 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                     file, content_type = files[path]
                     return self.reply(200, (FRONTEND / file).read_bytes(), content_type)
                 user_id = self.identity()
+                if path.startswith('/api/chat/') and chat is not None:
+                    return chat_http.handle_get(self, chat, path, user_id)
                 if path.startswith('/api/v1/tx/') and len(path.split('/'))==5:
                     return self.reply(200,tx_queries.transaction(path.split('/')[-1],user_id))
                 if path.startswith('/api/v1/anchor/') and len(path.split('/'))==5:
@@ -187,6 +202,8 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                         return self.reply(200, {"valid": service.audit.verify_chain()})
                 self.reply(404, {"error": "NOT_FOUND"})
             except (Rejected, InferenceError) as exc:
+                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_")):
+                    return self.reply(chat_http.status_for(exc.code), {"error": exc.code, "message": str(exc)})
                 self.reply(403 if exc.code in {"TX_ACCESS_DENIED", "UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED", "AUDIT_ACCESS_DENIED"} else 400,
                            {"error": exc.code, "message": str(exc)})
             except Exception:
@@ -209,10 +226,15 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                 except InferenceError: raise Rejected('INVALID_INPUT') from None
                 if not isinstance(body, dict):
                     raise Rejected("INVALID_INPUT")
+                # IM platform callbacks carry platform signatures, not the local bearer token.
+                if urlparse(self.path).path == "/api/channels/feishu/webhook" and feishu is not None:
+                    return self.reply(200, feishu.handle(self.headers, raw))
                 # Consume bounded input before rejecting identity, avoiding TCP resets
                 # from unread POST bytes when returning a 403 on Windows.
                 user_id = self.identity()
                 path = urlparse(self.path).path
+                if path.startswith("/api/chat/") and chat is not None:
+                    return chat_http.handle_post(self, chat, path, body, user_id)
                 if path == "/api/tasks":
                     if set(body) - {"text", "source_account_id"} or not isinstance(body.get("text"), str):
                         raise Rejected("INVALID_INPUT")
@@ -360,6 +382,8 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             except (ValueError, TypeError, KeyError):
                 self.reply(400, {"error": "INVALID_INPUT"})
             except (Rejected, InferenceError) as exc:
+                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_")):
+                    return self.reply(chat_http.status_for(exc.code), {"error": exc.code, "message": str(exc)})
                 self.reply(403 if exc.code in {"UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED"} else 400,
                            {"error": exc.code, "message": str(exc)})
             except Exception:

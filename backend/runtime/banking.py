@@ -105,13 +105,16 @@ class BankingRuntime:
                         balance = s.transaction.balance(user_id,account_id)
                         return {"actions":[s.transaction.propose(task,recipient,account,balance)]}
                     if normalized.get("operation") in {"LIST","DETECT"}:
-                        resource = {"CARD_MANAGEMENT":"card","SUBSCRIPTION_MANAGEMENT":"subscription","DIRECT_DEBIT_MANAGEMENT":"direct_debit"}[kind]
+                        resource = {"CARD_MANAGEMENT":"card","SUBSCRIPTION_MANAGEMENT":"subscription","DIRECT_DEBIT_MANAGEMENT":"direct_debit",
+                                    "WISH_FUND_MANAGEMENT":"wish_fund"}[kind]
                         report={"resources":s.service_agent.resources(user_id,resource)}
                         if normalized["operation"]=="DETECT":
                             report["candidates"]=s.finance.recurring(user_id,account_id)
                             report["resolutions"]=s.service_agent.resolve_subscriptions(report["candidates"],report["resources"])
                         return {"report":report,"actions":[]}
-                    if kind in {"INVESTMENT_PURCHASE","INVESTMENT_REDEEM"}:
+                    if kind == "RISK_ASSESSMENT":
+                        action=s.wealth.propose(task,"RISK_PROFILE_UPDATE",user_id,normalized["parameters"],account_id,s.config.action_ttl)
+                    elif kind in {"INVESTMENT_PURCHASE","INVESTMENT_REDEEM"}:
                         action=s.wealth.propose(task,kind,normalized["target_id"],normalized["parameters"],account_id,s.config.action_ttl)
                     else:
                         action=s.service_agent.propose(task,normalized["operation"],normalized["target_id"],normalized["parameters"],account_id)

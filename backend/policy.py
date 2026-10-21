@@ -22,7 +22,7 @@ class PolicyEngine:
                 values = action["parameters"]
                 increased = action["action_type"] == "CARD_LIMIT_CHANGE" and values["spending_limit"] > current["target"]["spending_limit"]
                 enabled = action["action_type"] == "CARD_TRANSACTION_CONTROL" and any(values[key] and not current["target"][key] for key in values)
-                if action["action_type"] in {"CARD_UNFREEZE","CARD_REPORT_LOST"} or increased or enabled or values.get("amount", 0) >= self.config.high_risk_threshold:
+                if action["action_type"] in {"CARD_UNFREEZE","CARD_REPORT_LOST","CARD_CANCEL_LOST","CARD_PIN_RESET"} or increased or enabled or values.get("amount", 0) >= self.config.high_risk_threshold:
                     decision = "STRONG_AUTH"
                     rules.append("HIGH_RISK_CHANGE")
                 if self.safety and self.safety.enabled and action["action_type"] in {"INVESTMENT_PURCHASE", "INVESTMENT_REDEEM"}:

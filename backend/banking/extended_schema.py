@@ -29,4 +29,13 @@ CREATE TABLE IF NOT EXISTS investment_transactions(id TEXT PRIMARY KEY REFERENCE
 CREATE TABLE IF NOT EXISTS scheduled_jobs(schedule_id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(id),
  execute_at REAL NOT NULL, status TEXT NOT NULL, body TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS scheduled_due ON scheduled_jobs(status,execute_at);
+CREATE TABLE IF NOT EXISTS wish_funds(id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, account_id TEXT NOT NULL,
+ name TEXT NOT NULL, balance INTEGER NOT NULL CHECK(balance>=0), target_amount INTEGER NOT NULL CHECK(target_amount>=0),
+ release_at REAL NOT NULL, status TEXT NOT NULL, version INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS merchants(id TEXT PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, item TEXT NOT NULL,
+ price INTEGER NOT NULL CHECK(price>0), status TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS life_events(id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, person TEXT NOT NULL,
+ relation TEXT NOT NULL, kind TEXT NOT NULL, month INTEGER NOT NULL, day INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS card_pin_resets(id TEXT PRIMARY KEY, card_id TEXT NOT NULL, customer_id TEXT NOT NULL,
+ channel TEXT NOT NULL, expires_at REAL NOT NULL, status TEXT NOT NULL);
 """

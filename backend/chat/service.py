@@ -1,0 +1,792 @@
+"""Unified chat entry: guard -> understand (LLM tools or rules) -> validate -> six-agent runtime -> cards.
+
+This layer owns dialogue state only. Every proposal is created by the existing
+runtime and every decision goes through the existing per-action authorization
+(hash-bound, TTL, strong auth, replay rules unchanged).
+"""
+import re
+import time
+from backend.chat import guard
+from backend.chat.cards import CardRenderer, OPERATIONS
+from backend.chat.llm import DeepSeekToolClient, LLMUnavailable, build_system_prompt
+from backend.chat.store import ChatStore
+from backend.chat.tools import TOOLS
+from backend.chat.validator import Clarify, InjectionDetected, ToolCallValidator
+from backend.domain import Rejected, digest
+
+CONFIRM_WORDS = re.compile(r"^(确认|确定|好的?|可以|没问题|是的?|对的?|ok|okay|yes|执行吧?|转吧|同意)[。.!！~～]*$", re.I)
+CANCEL_WORDS = re.compile(r"^(算了|不要了|不用了|取消(吧|刚才的)?|不转了|先不(了|转了)?|别转了|停)[。.!！~～]*$")
+STRIKE_LIMIT = 3
+LOCK_SECONDS = 600
+SMALLTALK = {
+    "GREETING": "你好，我是 TRUSTA 银行助手。可以帮你查余额和账单、转账、管理银行卡和订阅、推荐理财产品。",
+    "THANKS": "不客气，还有什么可以帮你？",
+    "CAPABILITIES": "我可以帮你：① 转账（按姓名 / 手机号 / 称呼，支持定时）和 AA 收款；② 账单分析和异常交易识别；"
+                    "③ 理财推荐、对比、申购赎回；④ 卡片冻结、挂失、限额和交易开关；⑤ 订阅和代扣的识别与取消。"
+                    "所有资金操作都需要你逐笔确认。",
+}
+HUMAN_WORDS = re.compile(r"转人工|人工客服|真人客服|找客服|投诉|要人工")
+BACK_TO_AGENT = re.compile(r"取消转人工|不用人工|回到智能助手|继续用智能助手")
+UNDO_WORDS = re.compile(r"撤销|撤回|回退|恢复刚才|改回去|弄错了.*恢复")
+STATE_LABELS = {"HANDED_OFF": "已转人工", "IDLE": "空闲", "CLARIFYING": "等待用户补充信息", "AWAITING_CONFIRMATION": "等待用户在确认卡上决定", "LOCKED": "已锁定"}
+
+
+class ChatService:
+    def __init__(self, service, llm_client=None):
+        if not service.banking:
+            raise Rejected("CHAT_REQUIRES_BANKING_V5")
+        self.s = service
+        self.store = ChatStore(service.db, service.audit)
+        self.llm = llm_client if llm_client is not None else DeepSeekToolClient()
+
+    # ---- catalogue ---------------------------------------------------------------------------
+    def catalog(self, owner):
+        s = self.s
+        accounts = []
+        for row in s.db.rows("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,)):
+            name = "储蓄账户" if "saving" in row["id"] else "活期账户"
+            accounts.append({"id": row["id"], "display": f"{name}（{row['id']}）"})
+        status_zh = {"ACTIVE": "正常", "FROZEN": "已冻结", "LOST": "已挂失", "CLOSED": "已注销"}
+        cards = [{"id": c["id"], "display": f"{'借记卡' if c['card_type'] == 'DEBIT' else '虚拟卡'}（{c['id']}，{status_zh.get(c['status'], c['status'])}）",
+                  "status": c["status"], "controls": {"online": c["online_enabled"], "international": c["international_enabled"],
+                                                      "contactless": c["contactless_enabled"]}}
+                 for c in s.service_agent.resources(owner, "card")]
+        subs = [{"id": r["id"], "display": f"{r['merchant']} 每月{r['amount'] / 100:.2f}元"}
+                for r in s.service_agent.resources(owner, "subscription") if r["status"] == "ACTIVE"]
+        debits = [{"id": r["id"], "display": f"{r['merchant']} 每月{r['amount'] / 100:.2f}元"}
+                  for r in s.service_agent.resources(owner, "direct_debit") if r["status"] == "ACTIVE"]
+        products = [{"id": p["id"], "display": f"{p['name']}（R{p['risk_level']}，{p['term_days']}天）"}
+                    for p in s.wealth.products(owner) if p["active"]]
+        months = lambda e: f"{e['month']}月{e['day']}日"
+        events = [{"id": e["id"], "display": f"{e['relation']}{e['person']}{'生日' if e['kind'] == 'BIRTHDAY' else '纪念日'}（{months(e)}）",
+                   "month": e["month"], "day": e["day"]} for e in s.service_agent.resources(owner, "life_event")]
+        merchants = [{"id": m["id"], "display": f"{m['name']}·{m['item']}（{m['price'] / 100:.2f}元）", "price": m["price"]}
+                     for m in s.service_agent.resources(owner, "merchant")]
+        funds = [{"id": f["id"], "display": f"心愿金“{f['name']}”（余 {f['balance'] / 100:.2f} 元）"}
+                 for f in s.service_agent.resources(owner, "wish_fund") if f["status"] == "ACTIVE"]
+        return {"accounts": accounts, "cards": cards, "subscriptions": subs, "direct_debits": debits, "products": products,
+                "life_events": events, "merchants": merchants, "wish_funds": funds}
+
+    # ---- sessions ----------------------------------------------------------------------------
+    def create_session(self, owner, channel="app", default_account_id="acct-demo"):
+        catalog = self.catalog(owner)
+        if default_account_id not in {a["id"] for a in catalog["accounts"]}:
+            raise Rejected("ACCOUNT_ACCESS_DENIED")
+        body = self.store.create(owner, channel, default_account_id, catalog["accounts"])
+        if self._sync_events(body, owner):
+            body = self.store.save(body)
+        view = self.view(body)
+        view["suggestions"] = ["我这个月花了多少钱", "给张三转500元", "我的卡丢了", "帮我看看有哪些订阅"]
+        return view
+
+    def view(self, body):
+        return {"session_id": body["session_id"], "revision": body["revision"], "state": self._state(body),
+                "channel": body["channel"], "default_account_id": body["default_account_id"],
+                "accounts": body["accounts"], "llm_mode": "deepseek" if getattr(self.llm, "available", False) else "rules",
+                "messages": [{k: m[k] for k in ("role", "text", "at", "message_id", "cards") if k in m} for m in body["messages"]],
+                "pending": [p["card"] for p in body["pending"]]}
+
+    def get(self, session_id, owner):
+        body = self.store.get(session_id, owner)
+        if not body["closed"] and not body["busy"] and self._sync_events(body, owner):
+            body = self.store.save(body)
+        return self.view(body)
+
+    EVENT_LABELS = {"RECURRING_TRANSFER": "周期转账", "WISH_ORDER": "心愿金下单", "WISH_RELEASE": "心愿金到期释放",
+                    "BIRTHDAY_TRANSFER": "生日转账", "SPENDING_REVIEW": "支出与订阅复查"}
+
+    def _sync_events(self, body, owner, before_last=False):
+        """Due proposal-only events become confirmation cards in the conversation (never auto-approved)."""
+        try:
+            self.s.events.tick(owner)
+        except Rejected:
+            pass
+        surfaced = body.setdefault("surfaced_events", [])
+        renderer, added = None, []
+        for event in self.s.events.list(owner):
+            if event["status"] != "PROPOSED" or event["id"] in surfaced or not event.get("task_id"):
+                continue
+            surfaced.append(event["id"])
+            renderer = renderer or CardRenderer(self.s, owner, self.catalog(owner))
+            task = self.s.get_task(event["task_id"], owner)
+            new_cards, _ = renderer.task_cards(task)
+            for card in new_cards:
+                if card["type"] == "confirm":
+                    body["pending"].append({"task_id": task["task_id"], "action_id": card["action_id"], "card": card,
+                                            "task_type": task["task_type"], "key": "event:" + event["id"]})
+            label = self.EVENT_LABELS.get(event["intent"]["event_type"], "计划任务")
+            added.append({"role": "assistant", "message_id": "event-" + event["id"][:12], "at": time.time(), "cards": new_cards,
+                          "text": f"提醒：{label}到时间了，请确认后执行。" if any(c["type"] == "confirm" for c in new_cards)
+                          else f"提醒：{label}到时间了，但这次没能生成待确认的操作。"})
+        added += self._proactive(body, owner, surfaced)
+        if not added:
+            return False
+        del surfaced[:-200]
+        if before_last:  # keep the user's message last so the turn reads naturally
+            last = body["messages"].pop()
+            body["messages"].extend(added + [last])
+        else:
+            body["messages"].extend(added)
+        return True
+
+    def _proactive(self, body, owner, surfaced):
+        """Proactive, read-only nudges (renewals due within 3 days, life events within 30 days). Never a proposal by itself."""
+        from datetime import datetime, date
+        from backend.business import CHINA
+        from backend.chat.amounts import format_cents
+        messages = []
+        try:
+            reminders = self.s.events.reminders(owner, body["default_account_id"])["reminders"]
+        except Rejected:
+            reminders = []
+        for r in reminders:
+            key = "renewal:" + r["id"]
+            if r["status"] in {"DUE", "OVERDUE"} and key not in surfaced:
+                surfaced.append(key)
+                when = datetime.fromtimestamp(r["next_charge_at"], CHINA).strftime("%m月%d日")
+                messages.append({"role": "assistant", "message_id": "nudge-" + r["id"][:12], "at": time.time(), "cards": [],
+                                 "text": f"提醒：{r['merchant']} 将在 {when} 扣费 {format_cents(r['amount'])}。不需要的话，可以直接说“取消{r['merchant']}”。"})
+        today = datetime.now(CHINA).date()
+        funds = [f["name"] for f in self.s.service_agent.resources(owner, "wish_fund") if f["status"] == "ACTIVE"]
+        for event in self.s.service_agent.resources(owner, "life_event"):
+            day = date(today.year, event["month"], event["day"])
+            if day < today:
+                day = date(today.year + 1, event["month"], event["day"])
+            days, key = (day - today).days, f"life:{event['id']}:{day.year}"
+            if not 0 < days <= 30 or key in surfaced or any(event["relation"] in n or event["person"] in n for n in funds):
+                continue
+            surfaced.append(key)
+            kind = "生日" if event["kind"] == "BIRTHDAY" else "纪念日"
+            messages.append({"role": "assistant", "message_id": "nudge-" + event["id"][:12], "at": time.time(), "cards": [],
+                             "text": f"{event['relation']}{event['person']}的{kind}还有 {days} 天（{day.month}月{day.day}日）。"
+                                     f"需要我帮你提前锁定一笔心愿金，并在{kind}前两天预订鲜花和蛋糕吗？"})
+        return messages
+
+    def submit_assessment(self, session_id, owner, answers):
+        from backend.chat import risk
+        try:
+            level, answers_hash = risk.score(answers)
+        except ValueError:
+            raise Rejected("INVALID_ANSWERS") from None
+        body = self.store.get(session_id, owner)
+        if body["closed"]:
+            raise Rejected("CHAT_CLOSED")
+        normalized = {"task_type": "RISK_ASSESSMENT", "parameters": risk.parameters(level, answers_hash), "needs_clarification": False}
+        task = self._run("理财风险测评", owner, body["default_account_id"], normalized)
+        cards, texts = CardRenderer(self.s, owner, self.catalog(owner)).task_cards(task)
+        for card in cards:
+            if card["type"] == "confirm":
+                body["pending"].append({"task_id": task["task_id"], "action_id": card["action_id"], "card": card,
+                                        "task_type": "RISK_ASSESSMENT", "key": "risk"})
+        text = f"测评结果：R{level} {risk.LEVELS[level]}。确认后更新你的风险等级，有效期一年。" + "".join(texts[1:])
+        body["messages"].append({"role": "assistant", "message_id": "risk-" + answers_hash[:12], "text": text, "cards": cards, "at": time.time()})
+        body = self.store.save(body)
+        return {"session_id": session_id, "revision": body["revision"], "state": self._state(body),
+                "reply": {"text": text, "cards": cards}, "plan": None}
+
+    def demo_advance(self, session_id, owner, event_id):
+        """TRUSTA_DEMO_MODE only: bring one scheduled step forward so a judge can see it without waiting days."""
+        self.store.get(session_id, owner)
+        self.s.events.advance_for_demo(owner, event_id)
+        return self.get(session_id, owner)
+
+    def close(self, session_id, owner):
+        body = self.store.get(session_id, owner)
+        self._cancel_pending(body, owner)
+        body["closed"] = True
+        return self.view(self.store.save(body))
+
+    @staticmethod
+    def _state(body):
+        if body.get("locked_until", 0) > time.time():
+            return "LOCKED"
+        if (body.get("handoff") or {}).get("status") == "OPEN":
+            return "HANDED_OFF"
+        if body["pending"]:
+            return "AWAITING_CONFIRMATION"
+        if body.get("clarify"):
+            return "CLARIFYING"
+        return "IDLE"
+
+    # ---- turn --------------------------------------------------------------------------------
+    def send(self, session_id, owner, message_id, revision, text, account_id=None, on_event=None):
+        emit = on_event or (lambda name, data: None)
+        body, replay = self.store.claim(session_id, owner, message_id, revision, text, account_id)
+        if replay is not None:
+            return replay
+        account = account_id or body["default_account_id"]
+        emit("turn.started", {"message_id": message_id, "revision": body["revision"]})
+        try:
+            if account not in {a["id"] for a in body["accounts"]}:
+                raise Rejected("ACCOUNT_ACCESS_DENIED")
+            outcome = self._process(body, owner, text.strip(), account, emit)
+        except Exception as exc:  # The turn fails closed: no new proposal survives.
+            code = exc.code if isinstance(exc, Rejected) else "CHAT_FAILED"
+            self.s.audit.append(None, None, "CHAT_TURN_FAILED", "chat", {"session_id": session_id, "message_id": message_id, "code": code})
+            outcome = {"text": "抱歉，这次没有处理成功，没有执行任何操作。请稍后再试或换个说法。", "cards": [], "mode": "error",
+                       "tools": [], "error": code}
+        return self._finish(body, owner, message_id, outcome, emit)
+
+    def _finish(self, body, owner, message_id, outcome, emit):
+        reply = {"text": outcome["text"], "cards": outcome["cards"]}
+        body["messages"].append({"role": "assistant", "message_id": message_id, "text": outcome["text"],
+                                 "cards": outcome["cards"], "at": time.time()})
+        body["busy"] = None
+        turn = {"session_id": body["session_id"], "message_id": message_id, "revision": body["revision"] + 1,
+                "state": None, "reply": reply, "plan": outcome.get("plan"), "understanding": outcome.get("mode"),
+                "tools": outcome.get("tools", [])}
+        if outcome.get("error"):
+            turn["error"] = outcome["error"]
+        if outcome.get("fallback_reason"):
+            turn["fallback_reason"] = outcome["fallback_reason"]
+        body["turns"][message_id]["response"] = turn
+        turn["state"] = self._state(body)
+        body = self.store.save(body)
+        turn["state"] = self._state(body)
+        body["turns"][message_id]["response"] = turn
+        self.store.save(body, bump=False)
+        self.s.audit.append(None, None, "CHAT_TURN_COMPLETED", "chat",
+                            {"session_id": body["session_id"], "message_id": message_id, "text_hash": digest(body["messages"][-2]["text"]),
+                             "understanding": outcome.get("mode"), "tools": outcome.get("tools", []), "state": turn["state"]})
+        for card in outcome["cards"]:
+            emit("card", card)
+        emit("message.delta", {"text": outcome["text"]})
+        emit("turn.completed", turn)
+        return turn
+
+    def _corpus(self, body):
+        return [m["text"] for m in body["messages"] if m["role"] == "user"][-8:]
+
+    def _process(self, body, owner, text, account, emit):
+        cards, texts, tools = [], [], []
+        now = time.time()
+        if body.get("locked_until", 0) > now:
+            return {"text": "出于安全考虑，本会话已暂时锁定，请稍后再试或新开会话。", "cards": [], "mode": "locked", "tools": []}
+        self._sync_events(body, owner, before_last=True)
+        if self._state(body) == "HANDED_OFF":
+            return self._handoff_message(body, owner, text)
+        # 1. chat words never authorise anything
+        if body["pending"] and CONFIRM_WORDS.match(text):
+            return {"text": "请直接在确认卡上点“确认”完成授权（需要时输入验证码）。聊天消息不能代替授权。",
+                    "cards": [p["card"] for p in body["pending"]], "mode": "rules", "tools": []}
+        # 2. deterministic input guard
+        hit = guard.inspect(text)
+        emit("guard.result", {"passed": hit is None, "category": hit and hit["category"]})
+        if hit:
+            return self._risk(body, owner, hit, tools)
+        # 3. understanding
+        catalog = self.catalog(owner)
+        fallback = None
+        try:
+            calls, mode = self._understand(body, owner, text, catalog), "deepseek"
+        except LLMUnavailable as exc:
+            calls, mode, fallback = None, "rules", exc.code
+            self.s.audit.append(None, None, "CHAT_LLM_FALLBACK", "chat", {"session_id": body["session_id"], "reason": exc.code})
+        if calls is None:
+            steps, clarifications = self._rule_steps(body, text, catalog)
+        else:
+            steps, clarifications = [], []
+            validator = ToolCallValidator(self._corpus(body), catalog,
+                                          lambda value: self.s.gateway.read("transaction", owner, "payee.resolve", name=value),
+                                          default_account_id=account)
+            for call in calls:
+                tools.append(call["name"])
+                try:
+                    steps.extend(validator.validate(call["name"], call["arguments"]))
+                except InjectionDetected as exc:
+                    hit = {"category": "PROMPT_INJECTION", "severity": "HIGH", "blocking": True,
+                           "message": guard.MESSAGES["PROMPT_INJECTION"], "evidence": exc.code}
+                    return self._risk(body, owner, hit, tools, mode)
+                except Clarify as exc:
+                    clarifications.append(exc)
+        emit("intent.recognized", {"tools": tools or [s.get("tool") for s in steps], "mode": mode})
+        # 4. control steps
+        for step in [s for s in steps if s["kind"] == "control"]:
+            name, args = step["tool"], step.get("args", {})
+            if name == "flag_risk":
+                category = args["category"]
+                hit = {"category": category, "severity": "HIGH", "blocking": True,
+                       "message": guard.MESSAGES[category].format(pattern="可疑转账要求"), "evidence": args.get("evidence_span", "")}
+                return self._risk(body, owner, hit, tools, mode)
+            if name == "request_human":
+                return self._open_handoff(body, owner, args.get("reason") or text, mode, tools)
+            if name == "undo_last":
+                undo_steps, undo_text = self._undo_steps(body, owner)
+                steps.extend(undo_steps)
+                if undo_text:
+                    texts.append(undo_text)
+                continue
+            if name == "cancel_pending":
+                cancelled = self._cancel_pending(body, owner)
+                body["clarify"] = None
+                texts.append(f"好的，已取消 {cancelled} 项待确认的操作，没有执行任何操作。" if cancelled else "好的，当前没有需要取消的操作。")
+            elif name == "ask_user":
+                clarifications.append(Clarify("MODEL_ASKED", args["slot"], args["question"], args.get("options")))
+            elif name == "smalltalk":
+                texts.append(SMALLTALK[args["kind"]])
+            elif name == "out_of_scope":
+                texts.append("这个我暂时帮不上忙。" + SMALLTALK["CAPABILITIES"])
+        # 5. execute reads, register proposals
+        renderer = CardRenderer(self.s, owner, catalog)
+        goal = text
+        plan, last_lock, nodes = None, None, []
+        for index, step in enumerate([s for s in steps if s["kind"] in {"read", "propose", "plan"}]):
+            emit("tool.started", {"tool": step["tool"]})
+            node = {"id": f"n{len(nodes) + 1}", "title": self._step_title(step), "kind": "WRITE" if step["kind"] != "read" else "READ",
+                    "status": "SUCCEEDED", "action_ids": [], "depends_on": [nodes[-1]["id"]] if nodes else []}
+            if step["kind"] != "plan":
+                nodes.append(node)
+            try:
+                if step["kind"] == "plan":
+                    if step.get("link_to_previous") and last_lock is None:
+                        continue  # the lock proposal failed: never schedule orders against a fund that will not exist
+                    request = f"chat:{body['session_id']}:{body['messages'][-1]['message_id']}:{index}"
+                    event_ids = [self.s.events.create(owner, f"{request}:{i}", account, e["event_type"], e["execute_at"],
+                                                      e["parameters"] | ({"series_id": request} if e["event_type"] == "RECURRING_TRANSFER" else {}))["id"]
+                                 for i, e in enumerate(step["events"])]
+                    self.s.audit.append(None, None, "CHAT_PLAN_CREATED", "chat", {"session_id": body["session_id"], "events": event_ids})
+                    if step.get("link_to_previous"):
+                        last_lock["linked_events"] = event_ids
+                        plan = dict(step["plan"], plan_id="p_" + event_ids[0][:8])
+                        texts.append("计划已排好：先确认锁定，之后的步骤到时间会再提醒你逐项确认。")
+                    else:  # recurring transfer
+                        d = step["display"]
+                        cards.append({"type": "report", "card_id": "c_" + event_ids[0][:8], "report_type": "STANDING_PLAN",
+                                      "items": [{"event_id": event_ids[0], "payee": d["payee"], "amount": d["amount"], "first_run": d["when"],
+                                                 "frequency": d["frequency"], "count": d["count"], "memo": step.get("memo")}]})
+                        texts.append(f"已设置{d['frequency']}给 {d['payee']} 转账 {d['amount']}，共 {d['count']} 次，首次 {d['when']}。"
+                                     "每次到期我会提醒你，确认后才会转出。")
+                    emit("tool.finished", {"tool": step["tool"], "status": "OK"})
+                    continue
+                if step.get("op") == "RISK_QUESTIONNAIRE":
+                    from backend.chat import risk
+                    cards.append(risk.card() | {"card_id": "c_risk_" + str(body["revision"])})
+                    texts.append("请完成下面 5 道题，我会根据结果更新你的风险等级（需要你确认）。")
+                    emit("tool.finished", {"tool": step["tool"], "status": "OK"})
+                    continue
+                if step.get("op") == "BALANCE":
+                    balance = self.s.transaction.balance(owner, step["account_id"])
+                    display = next((a["display"] for a in catalog["accounts"] if a["id"] == step["account_id"]), step["account_id"])
+                    card, line = renderer.balance_card(balance, display)
+                    cards.append(card), texts.append(line)
+                elif step.get("op") == "REMINDERS":
+                    card, line = renderer.reminders_card(self.s.events.reminders(owner, step["account_id"]))
+                    cards.append(card), texts.append(line)
+                else:
+                    if step["kind"] == "propose":
+                        self._supersede(body, owner, step["normalized"])
+                    task = self._run(goal, owner, account, step["normalized"])
+                    new_cards, new_texts = renderer.task_cards(task, step)
+                    cards.extend(new_cards), texts.extend(new_texts)
+                    for card in new_cards:
+                        if card["type"] == "confirm":
+                            if step.get("memo"):
+                                card["fields"].insert(2, {"label": "备注", "value": step["memo"]})
+                            entry = {"task_id": task["task_id"], "action_id": card["action_id"], "card": card, "memo": step.get("memo"),
+                                     "task_type": step["normalized"]["task_type"], "key": self._key(step["normalized"])}
+                            body["pending"].append(entry)
+                            node["action_ids"].append(card["action_id"])
+                            node["status"] = "AWAITING_CONFIRMATION"
+                            if step["normalized"].get("operation") == "FUND_LOCK":
+                                last_lock = entry
+                    if task.get("status") in {"BLOCKED", "FAILED"} and not node["action_ids"]:
+                        node["status"] = "FAILED"
+                    elif task.get("status") == "WAITING_USER" and not node["action_ids"]:
+                        node["status"] = "NEEDS_INPUT"
+                emit("tool.finished", {"tool": step["tool"], "status": "OK"})
+            except Rejected as exc:
+                node["status"] = "FAILED"
+                emit("tool.finished", {"tool": step["tool"], "status": exc.code})
+                label = (OPERATIONS.get(step["normalized"]["task_type"], "这项操作") if step.get("normalized")
+                         else "计划" if step["kind"] == "plan" else "查询")
+                texts.append(f"{label}没有完成：" + self._error(exc.code))
+        if plan is None and len(nodes) >= 2:
+            # Multi-intent turn: show it as an ordered plan; each write node is still decided card by card.
+            plan = {"plan_id": "p_" + digest([body["session_id"], body["messages"][-1]["message_id"]])[:10], "goal": text[:60], "nodes": nodes}
+            if clarifications:
+                plan["nodes"].append({"id": f"n{len(nodes) + 1}", "title": "等待补充信息", "kind": "WRITE", "status": "NEEDS_INPUT",
+                                      "action_ids": [], "depends_on": [nodes[-1]["id"]]})
+        if plan is not None:
+            body["plan"] = plan
+            emit("plan.created", plan)
+        # 6. clarifications (one question at a time keeps the dialogue short)
+        if clarifications:
+            first = clarifications[0]
+            cards.append(renderer.clarify_card(first.slot, first.question, first.options))
+            texts.append(first.question)
+            body["clarify"] = {"slot": first.slot, "code": first.code, "text": text if mode == "rules" else None}
+        elif steps:
+            body["clarify"] = None
+        if not texts:
+            texts.append("我没太理解你的意思，可以换个说法吗？例如“给张三转500元”或“我这个月花了多少钱”。")
+            if mode == "rules":
+                texts[-1] = "智能理解暂不可用，我目前只能识别标准说法。" + texts[-1]
+        return {"text": "".join(t if t.endswith(("。", "？", "！")) else t + "。" for t in texts), "plan": plan,
+                "cards": cards, "mode": mode, "tools": tools or [s.get("tool") for s in steps], "fallback_reason": fallback}
+
+    def _error(self, code):
+        from backend.chat.cards import error_text
+        return error_text([code]) + "。"
+
+    def _run(self, goal, owner, account, normalized):
+        from backend.runtime.banking_plan import TASKS
+        if normalized["task_type"] in TASKS:
+            return self.s.banking.create(goal, owner, account, normalized)
+        return self.s._create_task(goal, owner, account, normalized)
+
+    @staticmethod
+    def _key(normalized):
+        return normalized.get("recipient_name") or normalized.get("target_id") or normalized["task_type"]
+
+    def _supersede(self, body, owner, normalized):
+        """A changed proposal for the same target replaces the old undecided one (new hash, new card)."""
+        key, kind = self._key(normalized), normalized["task_type"]
+        kinds = {kind} | ({"TRANSFER", "SCHEDULED_TRANSFER"} if kind in {"TRANSFER", "SCHEDULED_TRANSFER"} else set())
+        keep = []
+        for entry in body["pending"]:
+            if entry["task_type"] in kinds and entry["key"] == key:
+                self._cancel_task(entry["task_id"], owner, entry.get("linked_events"))
+                self.s.audit.append(entry["task_id"], entry["action_id"], "CHAT_PROPOSAL_SUPERSEDED", "chat",
+                                    {"session_id": body["session_id"]})
+            else:
+                keep.append(entry)
+        body["pending"] = keep
+
+    def _cancel_task(self, task_id, owner, linked_events=()):
+        try:
+            self.s.cancel_draft(task_id, owner)
+        except Rejected:
+            pass
+        self._cancel_events(owner, linked_events)
+
+    def _cancel_events(self, owner, event_ids):
+        for event_id in event_ids or ():
+            try:
+                self.s.events.cancel(event_id, owner)
+            except Rejected:
+                pass
+
+    def _cancel_pending(self, body, owner):
+        count = 0
+        for task_id in dict.fromkeys(entry["task_id"] for entry in body["pending"]):
+            self._cancel_task(task_id, owner, [e for p in body["pending"] if p["task_id"] == task_id for e in p.get("linked_events", [])])
+            count += sum(1 for e in body["pending"] if e["task_id"] == task_id)
+        body["pending"] = []
+        return count
+
+    def _risk(self, body, owner, hit, tools, mode="guard"):
+        event = self.s.audit.append(None, None, "CHAT_RISK_FLAGGED", "chat",
+                                    {"session_id": body["session_id"], "category": hit["category"],
+                                     "evidence_hash": digest(hit.get("evidence", ""))})
+        text = hit["message"]
+        body["clarify"] = None
+        if hit["category"] == "PROMPT_INJECTION":
+            body["strikes"] = body.get("strikes", 0) + 1
+            if body["strikes"] >= STRIKE_LIMIT:
+                body["locked_until"] = time.time() + LOCK_SECONDS
+                self._cancel_pending(body, owner)
+                hit = hit | {"category": "ACCOUNT_LOCKED", "cooldown_seconds": LOCK_SECONDS}
+                text += "多次尝试绕过安全规则，本会话已锁定 10 分钟，待确认的操作已全部取消。"
+                self.s.audit.append(None, None, "CHAT_SESSION_LOCKED", "chat", {"session_id": body["session_id"]})
+        if hit["category"] == "FRAUD_SUSPECTED":
+            self._cancel_pending(body, owner)
+        card = CardRenderer.risk_card(hit, event.get("event_id") if isinstance(event, dict) else None)
+        return {"text": text, "cards": [card], "mode": mode, "tools": tools, "risk": hit["category"]}
+
+    # ---- understanding -----------------------------------------------------------------------
+    def _understand(self, body, owner, text, catalog):
+        if not getattr(self.llm, "available", False):
+            raise LLMUnavailable("LLM_NOT_CONFIGURED")
+        history = []
+        for message in body["messages"][-12:]:
+            if message["role"] in {"user", "assistant"} and message.get("text"):
+                history.append({"role": message["role"], "content": message["text"][:500]})
+        pending = "；".join(p["card"]["title"] + "（" + "，".join(f["value"] for f in p["card"]["fields"][:2]) + "）"
+                           for p in body["pending"])
+        prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog)
+        result = self.llm.complete(prompt, history)
+        calls = [c for c in result["calls"] if isinstance(c, dict) and isinstance(c.get("name"), str)]
+        if not calls:
+            # Plain model text is shown only when it carries no numbers it could have invented.
+            content = (result.get("text") or "").strip()
+            if content and not re.search(r"[0-9０-９]", content) and len(content) <= 200:
+                return self._plain(content)
+            return [{"name": "out_of_scope", "arguments": {}}]
+        return calls
+
+    @staticmethod
+    def _plain(content):
+        # Represented as a control step the validator knows: ask_user carries the model's question verbatim.
+        return [{"name": "ask_user", "arguments": {"slot": "other", "question": content[:120]}}]
+
+    def _rule_steps(self, body, text, catalog):
+        """Fallback when the model is unavailable: the original finite grammar."""
+        if CANCEL_WORDS.match(text):
+            return [{"kind": "control", "tool": "cancel_pending", "args": {}}], []
+        if HUMAN_WORDS.search(text):
+            return [{"kind": "control", "tool": "request_human", "args": {}}], []
+        if UNDO_WORDS.search(text):
+            return [{"kind": "control", "tool": "undo_last", "args": {}}], []
+        intent = self.s.intent.normalize(text)
+        previous = (body.get("clarify") or {}).get("text")
+        if intent.get("needs_clarification") and previous:
+            combined = self.s.intent.normalize(previous + " " + text)
+            if not combined.get("needs_clarification"):
+                intent = combined
+        if intent.get("needs_clarification"):
+            if intent["task_type"] == "TRANSFER" and "转" not in text:
+                return [], []
+            return [], [Clarify("RULE_CLARIFICATION", "other", intent["clarification"])]
+        kind = intent["task_type"]
+        read = kind in {"BILL_ANALYSIS", "WEALTH_RECOMMENDATION", "PRODUCT_COMPARE"} or intent.get("operation") in {"LIST", "DETECT"}
+        return [{"kind": "read" if read else "propose", "tool": "rules:" + kind.lower(), "normalized": intent}], []
+
+    # ---- decisions ---------------------------------------------------------------------------
+    def decide(self, session_id, owner, action_id, action_hash, approve, verification=None):
+        if type(approve) is not bool or not isinstance(action_hash, str):
+            raise Rejected("INVALID_INPUT")
+        secret = ""
+        if verification is not None:
+            if (not isinstance(verification, dict) or set(verification) != {"method", "code"}
+                    or verification["method"] not in {"TOTP", "SMS", "DEMO_SECRET"} or not isinstance(verification["code"], str)
+                    or not 0 < len(verification["code"]) <= 64):
+                raise Rejected("INVALID_VERIFICATION")
+            secret = ("sms:" if verification["method"] == "SMS" else "") + verification["code"]
+        body = self.store.get(session_id, owner)
+        entry = next((p for p in body["pending"] if p["action_id"] == action_id), None)
+        if not entry:
+            raise Rejected("ACTION_NOT_PENDING")
+        if entry["card"]["action_hash"] != action_hash:
+            raise Rejected("ACTION_HASH_MISMATCH")
+        task = self.s.get_task(entry["task_id"], owner)
+        try:
+            if "action_records" in task:
+                task = self.s.banking.authorize(entry["task_id"], owner, action_hash, approve, secret, action_id)
+            else:
+                task = self.s.authorize(entry["task_id"], owner, action_hash, approve, secret)
+        except Rejected as exc:
+            retry = exc.code.startswith(("TOTP_", "STRONG_AUTH", "SMS_")) and exc.code != "TOTP_NOT_ENROLLED"
+            texts = {"TOTP_NOT_ENROLLED": "你还没有绑定认证器，可以改用短信验证码完成验证。",
+                     "SMS_NOT_SENT_OR_EXPIRED": "短信验证码未发送或已过期，请重新获取。",
+                     "BANKING_SECURITY_LOCKED": "验证失败次数过多，账户已安全锁定，请联系客服解锁。"}
+            text = texts.get(exc.code, "验证码不正确或已过期，请重新输入。" if retry else "这项操作已失效，请重新发起。")
+            if not retry and exc.code not in {"TOTP_NOT_ENROLLED"}:
+                body["pending"] = [p for p in body["pending"] if p["action_id"] != action_id]
+            self.s.audit.append(entry["task_id"], action_id, "CHAT_DECISION_REJECTED", "chat",
+                                {"session_id": session_id, "code": exc.code})
+            body["messages"].append({"role": "assistant", "message_id": "decision-" + action_id[:12] + "-" + str(body["revision"]),
+                                     "text": text, "cards": [], "at": time.time()})
+            body = self.store.save(body)
+            return {"session_id": session_id, "revision": body["revision"], "state": self._state(body),
+                    "reply": {"text": text, "cards": []}, "plan": None, "error": exc.code}
+        renderer = CardRenderer(self.s, owner, self.catalog(owner))
+        still = {a["action_id"] for a, _, _ in renderer.pending_actions(task)}
+        cards = [] if action_id in still else renderer.result_cards(task, action_id)
+        if cards:
+            self._record_outcome(body, task, action_id, cards[0]["status"])
+        if action_id in still:
+            text = "验证没有通过，请重新输入验证码。" if approve else "操作仍在等待确认。"
+        else:
+            if cards and entry.get("memo"):
+                cards[0]["message"] += f"备注：{entry['memo']}。"
+            if cards and cards[0]["status"] in {"CANCELLED", "FAILED"} and entry.get("linked_events"):
+                self._cancel_events(owner, entry["linked_events"])
+                cards[0]["message"] += "相关的后续计划也已取消。"
+            if cards and cards[0]["status"] == "SUCCEEDED" and entry["card"]["action_type"] == "CARD_PIN_RESET":
+                cards[0]["message"] = "已向你的预留手机号发送设置新密码的安全链接（15 分钟内有效）。新密码只在银行页面输入，不会经过我。"
+            text = cards[0]["message"] if cards else "已处理。"
+        body["pending"] = [p for p in body["pending"] if p["action_id"] != action_id or p["action_id"] in still]
+        message_id = "decision-" + action_id[:12] + "-" + str(body["revision"])
+        body["messages"].append({"role": "assistant", "message_id": message_id, "text": text, "cards": cards, "at": time.time()})
+        body = self.store.save(body)
+        return {"session_id": session_id, "message_id": message_id, "revision": body["revision"], "state": self._state(body),
+                "reply": {"text": text, "cards": cards}, "plan": body.get("plan")}
+
+    # ---- plan / execution bookkeeping ---------------------------------------------------------
+    TOOL_TITLES = {"get_balance": "查询余额", "analyze_spending": "账单分析", "recommend_products": "理财推荐", "compare_products": "产品对比",
+                   "list_subscriptions": "查询订阅", "list_direct_debits": "查询代扣", "list_cards": "查询银行卡",
+                   "renewal_reminders": "续费提醒", "start_risk_assessment": "风险测评", "list_wish_funds": "查询心愿金",
+                   "review_subscriptions": "识别可取消的订阅"}
+
+    def _step_title(self, step):
+        normalized = step.get("normalized") or {}
+        if step.get("tool") in self.TOOL_TITLES:
+            return self.TOOL_TITLES[step["tool"]]
+        operation = normalized.get("operation") or normalized.get("task_type")
+        title = OPERATIONS.get(operation, OPERATIONS.get(normalized.get("task_type"), "操作"))
+        display = step.get("display") or {}
+        detail = " ".join(str(display[k]) for k in ("payee", "amount", "card", "subscription", "product") if k in display)
+        return f"{title} {detail}".strip()
+
+    def _record_outcome(self, body, task, action_id, status):
+        for node in (body.get("plan") or {}).get("nodes", []):
+            if action_id in node.get("action_ids", []):
+                node["status"] = status
+        if status != "SUCCEEDED":
+            return
+        if "action_records" in task:
+            action = next(e["action"] for e in task["action_records"] if e["action"]["action_id"] == action_id)
+        else:
+            action = task["proposed_actions"][0]
+        body.setdefault("executed", []).append({
+            "task_id": task["task_id"], "action_id": action_id, "action_type": action["action_type"],
+            "target_id": (action.get("target") or {}).get("id"), "account_id": action.get("source_account_id"),
+            "parameters": action.get("parameters") or {}, "before": (action.get("preconditions") or {}).get("target"),
+            "at": time.time(), "undo": None})
+        del body["executed"][:-20]
+
+    IRREVERSIBLE = {
+        "TRANSFER": "转账已经到账，银行无法单方面撤回。可以联系收款人退回，或者我帮你向对方发起一笔收款请求。",
+        "WISH_ORDER": "商户订单已支付，需要联系商户办理退款。",
+        "SUBSCRIPTION_CANCEL": "订阅已取消，需要在商户那里重新开通。",
+        "DIRECT_DEBIT_DISABLE": "代扣已关闭，需要在缴费机构重新签约。",
+        "CARD_PIN_RESET": "密码重置链接已发出；不使用链接，原密码继续有效。",
+        "CARD_APPLY": "卡片申请已提交，如需撤回请联系客服。",
+        "RISK_PROFILE_UPDATE": "风险等级只能通过重新测评更新，不能直接改回。",
+        "FUND_RELEASE": "心愿金已释放，如需要可以重新锁定一笔。",
+    }
+
+    def _undo_steps(self, body, owner):
+        """回退：for the latest executed action, propose its inverse. The inverse is a NEW action that still needs consent."""
+        done = [e for e in body.get("executed", []) if e["undo"] is None]
+        if not done:
+            return [], "这个会话里还没有已执行的操作可以撤销。"
+        last = done[-1]
+        kind, target, params, before = last["action_type"], last["target_id"], last["parameters"], last["before"] or {}
+        card = lambda op, values=None: {"task_type": "CARD_MANAGEMENT", "operation": op, "target_id": target,
+                                        "parameters": values or {}, "needs_clarification": False}
+        inverse = {
+            "CARD_FREEZE": lambda: card("CARD_UNFREEZE"), "CARD_UNFREEZE": lambda: card("CARD_FREEZE"),
+            "CARD_REPORT_LOST": lambda: card("CARD_CANCEL_LOST"), "CARD_CANCEL_LOST": lambda: card("CARD_REPORT_LOST"),
+            "CARD_LIMIT_CHANGE": lambda: card("CARD_LIMIT_CHANGE", {"spending_limit": before["spending_limit"]}),
+            "CARD_TRANSACTION_CONTROL": lambda: card("CARD_TRANSACTION_CONTROL", {
+                "online_enabled": bool(before["online_enabled"]), "international_enabled": bool(before["international_enabled"]),
+                "contactless_enabled": bool(before["contactless_enabled"])}),
+            "FUND_LOCK": lambda: {"task_type": "WISH_FUND_MANAGEMENT", "operation": "FUND_RELEASE", "target_id": target,
+                                  "parameters": {}, "needs_clarification": False},
+            "INVESTMENT_PURCHASE": lambda: {"task_type": "INVESTMENT_REDEEM", "operation": "INVESTMENT_REDEEM", "target_id": target,
+                                            "parameters": dict(params), "needs_clarification": False},
+            "INVESTMENT_REDEEM": lambda: {"task_type": "INVESTMENT_PURCHASE", "operation": "INVESTMENT_PURCHASE", "target_id": target,
+                                          "parameters": dict(params), "needs_clarification": False},
+        }.get(kind)
+        last["undo"] = "PROPOSED" if inverse else "IRREVERSIBLE"
+        self.s.audit.append(last["task_id"], last["action_id"], "CHAT_UNDO_REQUESTED", "chat",
+                            {"session_id": body["session_id"], "reversible": bool(inverse)})
+        if not inverse:
+            return [], f"刚才的“{OPERATIONS.get(kind, kind)}”不能直接撤销：" + self.IRREVERSIBLE.get(kind, "请联系客服处理。")
+        return ([{"kind": "propose", "tool": "undo_last", "normalized": inverse()}],
+                f"可以撤销刚才的“{OPERATIONS.get(kind, kind)}”。下面是反向操作，确认后生效。")
+
+    # ---- human takeover ------------------------------------------------------------------------
+    def _open_handoff(self, body, owner, reason, mode, tools):
+        from backend.domain import uid, canonical
+        handoff_id = "H-" + uid()[:8].upper()
+        transcript = [{"role": m["role"], "text": m.get("text", "")[:300]} for m in body["messages"][-10:]]
+        case = {"id": handoff_id, "owner": owner, "session_id": body["session_id"], "status": "OPEN", "reason": str(reason)[:120],
+                "created_at": time.time(), "transcript": transcript, "pending": [p["card"]["title"] for p in body["pending"]],
+                "queue": []}
+        with self.s.db.transaction() as conn:
+            conn.execute("INSERT INTO chat_handoffs VALUES(?,?,?,?,?,?)",
+                         (handoff_id, owner, body["session_id"], "OPEN", case["created_at"], canonical(case)))
+            self.s.audit.append_in(conn, None, None, "CHAT_HANDOFF_OPENED", "chat", {"session_id": body["session_id"], "handoff_id": handoff_id})
+        body["handoff"] = {"id": handoff_id, "status": "OPEN"}
+        text = (f"已为你转接人工客服（工单 {handoff_id}），客服会看到我们刚才的对话记录。"
+                "人工客服可以解答和协助，但资金操作仍然需要你本人在确认卡上确认。想回到智能助手，说“取消转人工”即可。")
+        return {"text": text, "cards": [{"type": "handoff", "card_id": "c_" + handoff_id, "handoff_id": handoff_id, "status": "OPEN"}],
+                "mode": mode, "tools": tools}
+
+    def _handoff_message(self, body, owner, text):
+        handoff_id = body["handoff"]["id"]
+        if BACK_TO_AGENT.search(text):
+            self._close_handoff_row(handoff_id, "CANCELLED_BY_USER")
+            body["handoff"] = {"id": handoff_id, "status": "CLOSED"}
+            return {"text": "好的，已回到智能助手，有什么可以帮你？", "cards": [], "mode": "human", "tools": []}
+        hit = guard.inspect(text)
+        with self.s.db.transaction() as conn:
+            row = conn.execute("SELECT body FROM chat_handoffs WHERE id=?", (handoff_id,)).fetchone()
+            import json
+            case = json.loads(row["body"])
+            case["queue"].append({"text": text[:500], "at": time.time(), "risk": hit and hit["category"]})
+            case["queue"] = case["queue"][-50:]
+            from backend.domain import canonical
+            conn.execute("UPDATE chat_handoffs SET body=? WHERE id=?", (canonical(case), handoff_id))
+        return {"text": f"已转给人工客服（工单 {handoff_id}），请稍候，客服回复会显示在这里。", "cards": [], "mode": "human", "tools": []}
+
+    def _close_handoff_row(self, handoff_id, status):
+        import json
+        from backend.domain import canonical
+        with self.s.db.transaction() as conn:
+            row = conn.execute("SELECT body FROM chat_handoffs WHERE id=?", (handoff_id,)).fetchone()
+            case = json.loads(row["body"])
+            case["status"] = status
+            conn.execute("UPDATE chat_handoffs SET status=?, body=? WHERE id=?", ("CLOSED", canonical(case), handoff_id))
+            self.s.audit.append_in(conn, None, None, "CHAT_HANDOFF_CLOSED", "chat", {"handoff_id": handoff_id, "status": status})
+
+    def _operator(self, token):
+        import hmac
+        expected = self.s.config.security_operator_token
+        if not expected or not isinstance(token, str) or not hmac.compare_digest(token.encode(), expected.encode()):
+            raise Rejected("SECURITY_OPERATOR_REQUIRED")
+
+    def operator_handoffs(self, token):
+        import json
+        self._operator(token)
+        return {"handoffs": [json.loads(r["body"]) for r in self.s.db.rows(
+            "SELECT body FROM chat_handoffs WHERE status='OPEN' ORDER BY created_at")]}
+
+    def operator_reply(self, token, handoff_id, text, close=False):
+        """A human agent can talk to the customer; it cannot approve anything (no authorization API is exposed here)."""
+        self._operator(token)
+        if not isinstance(text, str) or not 1 <= len(text.strip()) <= 500:
+            raise Rejected("INVALID_INPUT")
+        row = self.s.db.one("SELECT owner, session_id, status FROM chat_handoffs WHERE id=?", (handoff_id,))
+        if not row or row["status"] != "OPEN":
+            raise Rejected("HANDOFF_NOT_OPEN")
+        body = self.store.get(row["session_id"], row["owner"])
+        body["messages"].append({"role": "human_agent", "message_id": f"human-{handoff_id}-{len(body['messages'])}",
+                                 "text": text.strip(), "cards": [], "at": time.time()})
+        self.s.audit.append(None, None, "CHAT_HANDOFF_REPLY", "local_operator", {"handoff_id": handoff_id, "text_hash": digest(text)})
+        if close:
+            self._close_handoff_row(handoff_id, "RESOLVED")
+            body["handoff"] = {"id": handoff_id, "status": "CLOSED"}
+            body["messages"].append({"role": "assistant", "message_id": f"human-{handoff_id}-end", "cards": [], "at": time.time(),
+                                     "text": "人工客服已结束本次服务，智能助手继续为你服务。"})
+        body = self.store.save(body)
+        return {"handoff_id": handoff_id, "status": "CLOSED" if close else "OPEN", "session_revision": body["revision"]}
+
+    def send_sms(self, session_id, owner, action_id):
+        """Simulated SMS second factor for a RED card. The code is bound to that card's authorization only."""
+        import os
+        body = self.store.get(session_id, owner)
+        entry = next((p for p in body["pending"] if p["action_id"] == action_id), None)
+        if not entry:
+            raise Rejected("ACTION_NOT_PENDING")
+        task = self.s.get_task(entry["task_id"], owner)
+        if "action_records" in task:
+            record = next((e for e in task["action_records"] if e["action"]["action_id"] == action_id), None)
+            auth = record and record.get("authorization")
+        else:
+            auth = task.get("authorization")
+        if not auth:
+            raise Rejected("ACTION_NOT_PENDING")
+        return self.s.safety.issue_sms(owner, auth, demo=os.environ.get("TRUSTA_DEMO_MODE", "false").lower() == "true")
+
+    def interrupt(self, session_id, owner, revision):
+        body = self.store.get(session_id, owner)
+        if type(revision) is not int or revision != body["revision"]:
+            raise Rejected("CHAT_STALE")
+        cancelled = self._cancel_pending(body, owner)
+        body["clarify"] = None
+        for node in (body.get("plan") or {}).get("nodes", []):
+            if node["status"] in {"AWAITING_CONFIRMATION", "NEEDS_INPUT", "SCHEDULED", "PENDING"}:
+                node["status"] = "CANCELLED"
+        text = (f"已中断，取消了 {cancelled} 项未执行的操作。已经执行完成的操作不会自动回滚；"
+                "如需撤销，可以说“撤销刚才的操作”，我会生成反向操作给你确认。")
+        body["messages"].append({"role": "assistant", "message_id": "interrupt-" + str(body["revision"]), "text": text,
+                                 "cards": [], "at": time.time()})
+        body = self.store.save(body)
+        return {"session_id": session_id, "revision": body["revision"], "state": self._state(body),
+                "reply": {"text": text, "cards": []}, "plan": body.get("plan")}
+
+
+assert {"ask_user", "cancel_pending", "flag_risk", "smalltalk", "out_of_scope"} <= set(TOOLS)

@@ -4,9 +4,10 @@ import time
 from datetime import datetime
 from backend.business import CHINA
 from backend.domain import Rejected, canonical, digest, uid
-from backend.banking.actions import domain_errors, expected_state
+from backend.banking.actions import domain_errors, expected_state, risk_target
 
 RESOURCE_TABLES = {"card": "cards", "card_application":"card_applications", "subscription": "subscriptions", "direct_debit": "direct_debits"}
+WISH_POOL = "wish-pool"  # internal ledger account holding earmarked (locked) customer funds
 
 
 def seed_extended(conn):
@@ -26,6 +27,12 @@ def seed_extended(conn):
             conn.execute("INSERT OR IGNORE INTO recurring_charges VALUES(?,'demo','acct-demo',?,?,'CNY',?,'SETTLED')",
                          (f"rec-{merchant}-{month}", merchant, amount, datetime(2026, month, 1, tzinfo=CHINA).timestamp()))
     conn.execute("INSERT OR IGNORE INTO product_restrictions SELECT id,1,1 FROM wealth_products")
+    conn.execute(f"INSERT OR IGNORE INTO accounts VALUES('{WISH_POOL}',NULL,'CNY',0,0,0)")
+    for row in (("m-flower", "演示花店", "FLOWERS", "生日花束", 29900), ("m-cake", "演示蛋糕店", "CAKE", "生日蛋糕（6寸）", 19900),
+                ("m-gift", "演示礼品店", "GIFT", "礼品卡", 50000)):
+        conn.execute("INSERT OR IGNORE INTO merchants VALUES(?,?,?,?,?,'ACTIVE')", row)
+    conn.execute("INSERT OR IGNORE INTO life_events VALUES('le-spouse-birthday','demo','王芳','爱人','BIRTHDAY',11,15)")
+    conn.execute("INSERT OR IGNORE INTO life_events VALUES('le-mother-birthday','demo','李秀英','妈妈','BIRTHDAY',3,8)")
 
 
 class ExtendedBank:
@@ -36,6 +43,15 @@ class ExtendedBank:
         if kind=='card_application' and resource_id:
             with self.db.transaction() as conn:
                 return self.application(conn,customer,resource_id)
+        if kind == 'wish_fund':
+            with self.db.transaction() as conn:
+                if resource_id:
+                    return self.wish_fund(conn, customer, resource_id)
+                return [dict(r) for r in conn.execute("SELECT * FROM wish_funds WHERE customer_id=? ORDER BY id", (customer,)).fetchall()]
+        if kind == 'merchant':
+            return self.db.rows("SELECT * FROM merchants WHERE status='ACTIVE' ORDER BY id")
+        if kind == 'life_event':
+            return self.db.rows("SELECT * FROM life_events WHERE customer_id=? ORDER BY month,day,id", (customer,))
         table = RESOURCE_TABLES[kind]
         rows = self.db.rows(f"SELECT * FROM {table} WHERE customer_id=?" + (" AND id=?" if resource_id else "") + " ORDER BY id",
                             (customer, resource_id) if resource_id else (customer,))
@@ -52,6 +68,22 @@ class ExtendedBank:
         row=conn.execute('SELECT * FROM card_applications WHERE id=? AND customer_id=?',(account_id,customer)).fetchone()
         return dict(row) if row else {'id':account_id,'customer_id':customer,'account_id':account_id,
                                      'card_type':'VIRTUAL_DEBIT','status':'AVAILABLE','version':0}
+
+    @staticmethod
+    def wish_fund(conn, customer, fund_id, account_id=None):
+        """A not-yet-created fund has a deterministic AVAILABLE placeholder (same pattern as card applications)."""
+        if not isinstance(fund_id, str) or not fund_id.startswith("wish-") or not 6 <= len(fund_id) <= 40:
+            raise Rejected("RESOURCE_NOT_FOUND_OR_DENIED")
+        row = conn.execute("SELECT * FROM wish_funds WHERE id=?", (fund_id,)).fetchone()
+        if row:
+            if row["customer_id"] != customer:
+                raise Rejected("RESOURCE_NOT_FOUND_OR_DENIED")
+            return dict(row)
+        if account_id is None:
+            owned = conn.execute("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (customer,)).fetchall()
+            account_id = "acct-demo" if any(r["id"] == "acct-demo" for r in owned) else (owned[0]["id"] if owned else "")
+        return {"id": fund_id, "customer_id": customer, "account_id": account_id, "name": "", "balance": 0,
+                "target_amount": 0, "release_at": 0.0, "status": "AVAILABLE", "version": 0}
 
     @staticmethod
     def _position(conn, customer, account_id, product_id):
@@ -74,6 +106,17 @@ class ExtendedBank:
         if not account:
             raise Rejected("ACCOUNT_ACCESS_DENIED")
         kind = action["target"]["kind"]
+        if kind == 'wish_fund':
+            target = ExtendedBank.wish_fund(conn, customer, target_id, account_id)
+            if target["account_id"] != account_id:
+                raise Rejected("RESOURCE_ACCOUNT_MISMATCH")
+            merchants = [dict(r) for r in conn.execute("SELECT * FROM merchants WHERE status='ACTIVE' ORDER BY id").fetchall()]
+            return {"account": dict(account), "target": target, "merchants": merchants}
+        if kind == 'risk_profile':
+            if target_id != customer:
+                raise Rejected("RESOURCE_NOT_FOUND_OR_DENIED")
+            row = conn.execute("SELECT * FROM risk_profiles WHERE customer_id=?", (customer,)).fetchone()
+            return {"account": dict(account), "target": risk_target(dict(row) if row else None, customer)}
         if kind=='card_application':
             if target_id!=account_id: raise Rejected('RESOURCE_ACCOUNT_MISMATCH')
             return {'account':dict(account),'target':ExtendedBank.application(conn,customer,target_id)}
@@ -114,7 +157,14 @@ class ExtendedBank:
                 raise Rejected("BANK_POSTCONDITION_INVALID")
             operation_id, now = uid(), time.time()
             kind = action["target"]["kind"]
-            if kind in RESOURCE_TABLES:
+            if kind == "wish_fund":
+                self._apply_wish_fund(conn, action, before, after, operation_id)
+            elif kind == "risk_profile":
+                t = after["target"]
+                conn.execute("INSERT INTO risk_profiles VALUES(?,?,?,?) ON CONFLICT(customer_id) DO UPDATE SET risk_level=excluded.risk_level,"
+                             "assessed_at=excluded.assessed_at,expires_at=excluded.expires_at",
+                             (t["customer_id"], t["risk_level"], t["assessed_at"], t["expires_at"]))
+            elif kind in RESOURCE_TABLES:
                 target = after["target"]
                 if kind=='card_application':
                     conn.execute('INSERT INTO card_applications VALUES(?,?,?,?,?,?)',tuple(target[key] for key in
@@ -122,6 +172,10 @@ class ExtendedBank:
                 elif kind == "card":
                     conn.execute("UPDATE cards SET status=?,spending_limit=?,online_enabled=?,international_enabled=?,contactless_enabled=?,version=? WHERE id=?",
                                  tuple(target[key] for key in ("status", "spending_limit", "online_enabled", "international_enabled", "contactless_enabled", "version", "id")))
+                    if action["action_type"] == "CARD_PIN_RESET":
+                        # A one-time out-of-band reset link; the PIN itself never enters TRUSTA or the model.
+                        conn.execute("INSERT INTO card_pin_resets VALUES(?,?,?,?,?,?)",
+                                     (operation_id, target["id"], action["customer_id"], "SMS_LINK", now + 900, "SENT"))
                 else:
                     conn.execute(f"UPDATE {RESOURCE_TABLES[kind]} SET status=?,version=? WHERE id=?", (target["status"], target["version"], target["id"]))
             else:
@@ -146,3 +200,32 @@ class ExtendedBank:
                 conn.execute("INSERT INTO investment_transactions VALUES(?,?,?,?,?,?,?,?,?)", (operation_id, action["customer_id"], action["source_account_id"],
                              action["target"]["id"], "PURCHASE" if purchase else "REDEEM", amount, "CNY", "SETTLED", now))
             return record
+
+    @staticmethod
+    def _apply_wish_fund(conn, action, before, after, operation_id):
+        fund, account = after["target"], after["account"]
+        kind, amount = action["action_type"], action["parameters"].get("amount")
+        if kind == "FUND_LOCK":
+            conn.execute("INSERT INTO wish_funds VALUES(?,?,?,?,?,?,?,?,?)", tuple(fund[k] for k in (
+                "id", "customer_id", "account_id", "name", "balance", "target_amount", "release_at", "status", "version")))
+            moves = ((account["id"], "DEBIT"), (WISH_POOL, "CREDIT"))
+        else:
+            conn.execute("UPDATE wish_funds SET balance=?,status=?,version=? WHERE id=? AND version=?",
+                         (fund["balance"], fund["status"], fund["version"], fund["id"], before["target"]["version"]))
+            if kind == "FUND_RELEASE":
+                amount = before["target"]["balance"]
+                moves = ((WISH_POOL, "DEBIT"), (account["id"], "CREDIT"))
+            else:  # WISH_ORDER pays the merchant's settlement account from the earmarked pool
+                moves = ((WISH_POOL, "DEBIT"), ("settlement", "CREDIT"))
+        if kind != "WISH_ORDER":
+            conn.execute("UPDATE accounts SET balance=?,version=? WHERE id=?", (account["balance"], account["version"], account["id"]))
+        if amount:
+            pool = conn.execute("SELECT balance FROM accounts WHERE id=?", (WISH_POOL,)).fetchone()["balance"]
+            delta = amount if kind == "FUND_LOCK" else -amount
+            if pool + delta < 0:
+                raise Rejected("WISH_POOL_INCONSISTENT")
+            conn.execute("UPDATE accounts SET balance=balance+?,version=version+1 WHERE id=?", (delta, WISH_POOL))
+            if kind == "WISH_ORDER":
+                conn.execute("UPDATE accounts SET balance=balance+?,version=version+1 WHERE id='settlement'", (amount,))
+            for account_id, side in moves:
+                conn.execute("INSERT INTO ledger_entries VALUES(?,?,?,?,?)", (uid(), operation_id, account_id, side, amount))

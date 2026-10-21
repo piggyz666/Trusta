@@ -7,7 +7,8 @@ class CanonicalBankAdapter:
         self.provider = provider
         self.external = provider.manifest.environment != 'local'
         self.supported_currencies = provider.manifest.currencies
-        self.manifest = {tool:{'risk_class':'WRITE' if tool in {'transfer.create','card.apply','card.report_lost','card.freeze','card.unfreeze','card.limit_change','card.transaction_control','subscription.cancel','direct_debit.disable','investment.purchase','investment.redeem'} else 'READ',
+        self.manifest = {tool:{'risk_class':'WRITE' if tool in {'transfer.create','card.apply','card.report_lost','card.freeze','card.unfreeze','card.limit_change','card.transaction_control','subscription.cancel','direct_debit.disable','investment.purchase','investment.redeem',
+                               'card.cancel_lost','card.pin_reset','wish_fund.lock','wish_fund.release','wish_fund.order','risk_profile.update'} else 'READ',
                                'requires_auth':True,'supports_idempotency':True}
                          for tool,cap in CANONICAL.items() if cap in provider.manifest.capabilities}
 

@@ -17,7 +17,10 @@ class CapabilityManager:
                 "subscription.list": "subscription.read", "subscription.get": "subscription.read",
                 "direct_debit.list": "direct_debit.read", "direct_debit.get": "direct_debit.read",
                 "portfolio.get": "portfolio.read", "operation.get": "operation.read",
-                "transaction.recurring_history": "transaction.read", "operation.evidence": "operation.read"}
+                "transaction.recurring_history": "transaction.read", "operation.evidence": "operation.read",
+                # B8: earmarked funds, merchant catalogue and life events are account-scoped reads.
+                "wish_fund.get": "account.read", "wish_fund.list": "account.read",
+                "merchant.list": "account.read", "life_event.list": "account.read"}
     GRANTS = BANK_GRANTS  # Compatibility view; the registry is the single definition.
 
     def check(self, actor, capability):

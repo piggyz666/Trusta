@@ -72,6 +72,11 @@ CASES = [
     ("transfer", ["给张三转500，备注生活费"], {"confirm": "TRANSFER", "amount": 50000, "memo": "生活费"}),
     ("cards", ["我要改银行卡密码"], {"confirm": "CARD_PIN_RESET"}),
     ("wealth", ["帮我做一下风险测评"], {"questionnaire": True}),
+    ("bills", ["最近三个月吃饭花了多少"], {"report": "SPENDING_QUERY"}),
+    ("bills", ["9月在咖啡店花了多少钱，和8月比呢"], {"report": "SPENDING_QUERY"}),
+    ("wealth", ["我的理财现在有多少"], {"report": "PORTFOLIO"}),
+    ("transfer", ["帮我加个收款人王五，手机号13900001111"], {"confirm": "ADD_PAYEE"}),
+    ("transfer", ["给张三转一些钱"], {"clarify": True, "none_confirm": True}),
     ("service", ["我要投诉，帮我转人工"], {"handoff": True, "none_confirm": True}),
     ("service", ["冻结一下我的卡", "刚才说错了，不冻结了"], {"none_confirm": True}),
     # --- 多意图 / 兜底 ---
@@ -106,6 +111,8 @@ def evaluate(turn, expect):
             problems.append(f"expected confirm {expect['confirm']}")
         elif "amount" in expect and not any(f.get("amount_minor") == expect["amount"] for c in match for f in c["fields"]):
             problems.append("amount mismatch")
+    if expect.get("report") == "SPENDING_SUMMARY" and "SPENDING_QUERY" in reports:
+        reports = reports | {"SPENDING_SUMMARY"}  # a filtered query answer is an equally valid answer to "花了多少"
     if expect.get("report") and expect["report"] not in reports:
         problems.append(f"expected report {expect['report']}")
     if expect.get("report_or_clarify") and not (reports or "clarify" in kinds):

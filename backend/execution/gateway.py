@@ -12,9 +12,9 @@ class ToolGateway:
             raise Rejected("CAPABILITY_VIOLATION")
         self.capabilities.check(actor, self.capabilities.READ_MAP[capability])
         if capability in {"card.list", "card.get", "card_application.get", "subscription.list", "subscription.get", "direct_debit.list", "direct_debit.get", "portfolio.get", "operation.get", "operation.evidence", "transaction.recurring_history",
-                          "wish_fund.get", "wish_fund.list", "merchant.list", "life_event.list"}:
+                          "wish_fund.get", "wish_fund.list", "merchant.list", "life_event.list", "payee_entry.get", "payee_contact.list"}:
             required = {"card.get": {"resource_id"}, "subscription.get": {"resource_id"}, "direct_debit.get": {"resource_id"},
-                        "card_application.get":{"resource_id"}, "wish_fund.get": {"resource_id"},
+                        "card_application.get":{"resource_id"}, "wish_fund.get": {"resource_id"}, "payee_entry.get": {"resource_id"},
                         "portfolio.get": {"account_id", "product_id"}, "operation.get": {"operation_id"}, "operation.evidence": {"operation_id"}, "transaction.recurring_history": {"account_id"}}
             if set(params) != required.get(capability, set()) or any(not isinstance(value, str) or not value for value in params.values()):
                 raise Rejected("INVALID_READ_PARAMETERS")
@@ -59,7 +59,7 @@ class ToolGateway:
         self.capabilities.check(actor, capability)
         if self.capabilities.registry.banking_version == 5:
             owner = action.get("initiating_agent")
-            proposal = "transfer.propose" if action.get("action_type")=="TRANSFER" else "wealth.propose" if owner=="wealth" else "service.propose"
+            proposal = "transfer.propose" if action.get("action_type")=="TRANSFER" or owner=="transaction" else "wealth.propose" if owner=="wealth" else "service.propose"
             self.capabilities.check(owner,proposal)
         if action.get("action_type") != "TRANSFER":
             from backend.banking.actions import ACTION_SPECS

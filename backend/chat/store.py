@@ -8,6 +8,7 @@ SESSION_TTL = 24 * 3600
 TURN_DEADLINE = 120
 MAX_MESSAGES = 60
 MAX_TURNS = 80
+RATE_LIMIT_PER_MINUTE = 20
 MESSAGE_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
 
 
@@ -72,6 +73,8 @@ class ChatStore:
                 raise Rejected("CHAT_STALE")
             if body["busy"] and body["busy"]["deadline"] > now:
                 raise Rejected("CHAT_BUSY")
+            if sum(1 for m in body["messages"] if m["role"] == "user" and now - m["at"] < 60) >= RATE_LIMIT_PER_MINUTE:
+                raise Rejected("CHAT_RATE_LIMITED")
             body["busy"] = {"message_id": message_id, "deadline": now + TURN_DEADLINE}
             body["turns"][message_id] = {"fingerprint": fingerprint, "response": None, "at": now}
             body["messages"].append({"role": "user", "message_id": message_id, "text": text, "at": now})

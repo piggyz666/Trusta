@@ -7,7 +7,7 @@ risk levels or structured intents.
 import json
 from backend.domain import Rejected, canonical
 
-STATUS = {"FEISHU_UNVERIFIED": 401, "FEISHU_DISABLED": 404, "SECURITY_OPERATOR_REQUIRED": 403, "HANDOFF_NOT_OPEN": 409, "SMS_RATE_LIMITED": 429, "DEMO_MODE_DISABLED": 403, "CHAT_ACCESS_DENIED": 403, "CHAT_NOT_FOUND": 404, "CHAT_BUSY": 409, "ACCOUNT_ACCESS_DENIED": 403,
+STATUS = {"CHAT_RATE_LIMITED": 429, "TRACE_NOT_FOUND": 404, "FEISHU_UNVERIFIED": 401, "FEISHU_DISABLED": 404, "SECURITY_OPERATOR_REQUIRED": 403, "HANDOFF_NOT_OPEN": 409, "SMS_RATE_LIMITED": 429, "DEMO_MODE_DISABLED": 403, "CHAT_ACCESS_DENIED": 403, "CHAT_NOT_FOUND": 404, "CHAT_BUSY": 409, "ACCOUNT_ACCESS_DENIED": 403,
           "BANKING_SECURITY_LOCKED": 423}
 
 
@@ -17,8 +17,13 @@ def status_for(code):
 
 def handle_get(handler, chat, path, user_id):
     parts = path.strip("/").split("/")
+    if parts == ["api", "chat", "permissions"]:
+        from backend.security.permission_matrix import public_matrix
+        return handler.reply(200, public_matrix())
     if len(parts) == 4 and parts[:3] == ["api", "chat", "sessions"]:
         return handler.reply(200, chat.get(parts[3], user_id))
+    if len(parts) == 6 and parts[:3] == ["api", "chat", "sessions"] and parts[4] == "trace":
+        return handler.reply(200, chat.trace(parts[3], user_id, parts[5]))
     return handler.reply(404, {"error": "NOT_FOUND"})
 
 

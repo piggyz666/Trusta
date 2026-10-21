@@ -18,7 +18,7 @@ class VirtualBankAdapter:
             for spec in ACTION_SPECS.values():
                 self.manifest[spec["tool"]] = {"risk_class": "WRITE", "requires_auth": True, "supports_idempotency": True, "reversible": False}
             for tool in ("card.list", "card.get", "card_application.get", "subscription.list", "subscription.get", "direct_debit.list", "direct_debit.get", "portfolio.get", "operation.get", "operation.evidence", "transaction.recurring_history",
-                         "wish_fund.get", "wish_fund.list", "merchant.list", "life_event.list"):
+                         "wish_fund.get", "wish_fund.list", "merchant.list", "life_event.list", "payee_entry.get", "payee_contact.list"):
                 self.manifest[tool] = {"risk_class": "READ"}
 
     def read_domain(self, customer_id, capability, **params):

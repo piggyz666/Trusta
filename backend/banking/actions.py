@@ -2,6 +2,7 @@
 from dataclasses import asdict, dataclass
 import copy
 import math
+import re
 import time
 from backend.domain import Rejected, digest, uid
 
@@ -23,7 +24,9 @@ ACTION_SPECS = {
     "FUND_RELEASE": {"agent": "service", "kind": "wish_fund", "capability": "banking.wish_fund.release", "tool": "wish_fund.release"},
     "WISH_ORDER": {"agent": "service", "kind": "wish_fund", "capability": "banking.wish_fund.order", "tool": "wish_fund.order"},
     "RISK_PROFILE_UPDATE": {"agent": "wealth", "kind": "risk_profile", "capability": "banking.risk_profile.update", "tool": "risk_profile.update"},
+    "ADD_PAYEE": {"agent": "transaction", "kind": "payee_entry", "capability": "banking.payee.add", "tool": "payee.add"},
 }
+PHONE = re.compile(r"1[3-9][0-9]{9}")
 WISH_FUND_MAX_SECONDS = 400 * 86400
 RISK_PROFILE_SECONDS = 365 * 86400
 
@@ -56,7 +59,8 @@ def validate_parameters(kind, values):
             {"online_enabled", "international_enabled", "contactless_enabled"},
             "INVESTMENT_PURCHASE": {"amount", "currency"}, "INVESTMENT_REDEEM": {"amount", "currency"},
             "FUND_LOCK": {"amount", "currency", "name", "release_at"}, "WISH_ORDER": {"amount", "currency", "items"},
-            "RISK_PROFILE_UPDATE": {"risk_level", "assessed_at", "expires_at", "answers_hash"}}
+            "RISK_PROFILE_UPDATE": {"risk_level", "assessed_at", "expires_at", "answers_hash"},
+            "ADD_PAYEE": {"name", "phone", "alias"}}
     if set(values) != keys.get(kind, set()):
         raise Rejected("REJECTED_SCHEMA")
     if kind == "FUND_LOCK" and (not isinstance(values["name"], str) or not 1 <= len(values["name"]) <= 40
@@ -69,6 +73,10 @@ def validate_parameters(kind, values):
                        or not 1 <= len(i["merchant_id"]) <= 64 or type(i["amount"]) is not int or i["amount"] <= 0 for i in items)
                 or len({i["merchant_id"] for i in items}) != len(items) or sum(i["amount"] for i in items) != values["amount"]):
             raise Rejected("REJECTED_SCHEMA")
+    if kind == "ADD_PAYEE" and (not isinstance(values["name"], str) or not 1 <= len(values["name"].strip()) <= 20
+                                or not isinstance(values["phone"], str) or not PHONE.fullmatch(values["phone"])
+                                or not isinstance(values["alias"], str) or len(values["alias"]) > 10):
+        raise Rejected("REJECTED_SCHEMA")
     if kind == "RISK_PROFILE_UPDATE" and (
             type(values["risk_level"]) is not int or not 1 <= values["risk_level"] <= 5
             or any(type(values[k]) not in (int, float) or not math.isfinite(values[k]) for k in ("assessed_at", "expires_at"))
@@ -118,6 +126,13 @@ def domain_errors(kind, snapshot, parameters, now=None):
                 errors.append("MERCHANT_PRICE_MISMATCH")  # prices come from the bank's merchant catalogue, never the model
         if parameters["amount"] > target["balance"]:
             errors.append("WISH_FUND_INSUFFICIENT")
+    elif kind == "ADD_PAYEE":
+        if target["status"] != "AVAILABLE":
+            errors.append("PAYEE_EXISTS")
+        if any(c["phone"] == parameters["phone"] for c in snapshot["contacts"]):
+            errors.append("PAYEE_PHONE_EXISTS")
+        if parameters["alias"] and any(c["alias"] == parameters["alias"] for c in snapshot["contacts"]):
+            errors.append("PAYEE_ALIAS_EXISTS")
     elif kind == "RISK_PROFILE_UPDATE":
         if not parameters["assessed_at"] <= now < parameters["expires_at"]:
             errors.append("RISK_ASSESSMENT_EXPIRED")
@@ -188,6 +203,10 @@ def expected_state(kind, snapshot, values, approval_deadline):
         target.update(balance=0, status="RELEASED")
     elif kind == "WISH_ORDER":
         target["balance"] -= values["amount"]
+    elif kind == "ADD_PAYEE":
+        target.update(name=values["name"].strip(), phone=values["phone"], alias=values["alias"], status="ACTIVE", is_new=1)
+        result["contacts"] = sorted(result["contacts"] + [{"payee_id": target["id"], "phone": values["phone"], "alias": values["alias"]}],
+                                    key=lambda c: c["payee_id"])
     elif kind == "RISK_PROFILE_UPDATE":
         target.update(risk_level=values["risk_level"], assessed_at=values["assessed_at"], expires_at=values["expires_at"])
         return result
@@ -230,6 +249,9 @@ def snapshot_from_gateway(gateway, actor, user_id, account_id, kind, target_id):
         if target["account_id"] != account_id:
             raise Rejected("RESOURCE_ACCOUNT_MISMATCH")
         return {"account": account, "target": target, "merchants": gateway.read(actor, user_id, "merchant.list")}
+    if resource_kind == "payee_entry":
+        return {"account": account, "target": gateway.read(actor, user_id, "payee_entry.get", resource_id=target_id),
+                "contacts": gateway.read(actor, user_id, "payee_contact.list")}
     if resource_kind == "risk_profile":
         if target_id != user_id:
             raise Rejected("RESOURCE_NOT_FOUND_OR_DENIED")

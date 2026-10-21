@@ -240,6 +240,12 @@ class ChatService:
         if outcome.get("fallback_reason"):
             turn["fallback_reason"] = outcome["fallback_reason"]
         body["turns"][message_id]["response"] = turn
+        if outcome.get("trace"):
+            # The full decision chain lives with the session; its hash is anchored in the append-only audit chain.
+            trace = outcome["trace"] | {"message_id": message_id, "at": time.time()}
+            event_id = self.s.audit.append(None, None, "CHAT_DECISION_TRACE", "chat", trace)
+            body["turns"][message_id]["trace"] = trace | {"audit_event_id": event_id}
+            turn["trace_id"] = event_id
         turn["state"] = self._state(body)
         body = self.store.save(body)
         turn["state"] = self._state(body)
@@ -258,6 +264,14 @@ class ChatService:
         return [m["text"] for m in body["messages"] if m["role"] == "user"][-8:]
 
     def _process(self, body, owner, text, account, emit):
+        trace = {"text_hash": digest(text), "guard": None, "calls": [], "steps": [], "clarifications": []}
+        outcome = self._process_inner(body, owner, text, account, emit, trace)
+        trace.update(understanding=outcome.get("mode"), fallback_reason=outcome.get("fallback_reason"), risk=outcome.get("risk"),
+                     model=getattr(self.llm, "model", None) if outcome.get("mode") == "deepseek" else None)
+        outcome["trace"] = trace
+        return outcome
+
+    def _process_inner(self, body, owner, text, account, emit, trace):
         cards, texts, tools = [], [], []
         now = time.time()
         if body.get("locked_until", 0) > now:
@@ -272,6 +286,7 @@ class ChatService:
         # 2. deterministic input guard
         hit = guard.inspect(text)
         emit("guard.result", {"passed": hit is None, "category": hit and hit["category"]})
+        trace["guard"] = hit and {"category": hit["category"], "evidence": hit.get("evidence")}
         if hit:
             return self._risk(body, owner, hit, tools)
         # 3. understanding
@@ -282,22 +297,41 @@ class ChatService:
         except LLMUnavailable as exc:
             calls, mode, fallback = None, "rules", exc.code
             self.s.audit.append(None, None, "CHAT_LLM_FALLBACK", "chat", {"session_id": body["session_id"], "reason": exc.code})
+        rule_text = text
         if calls is None:
-            steps, clarifications = self._rule_steps(body, text, catalog)
-        else:
+            from backend.chat.rules import rule_calls
+            steps, clarifications = self._rule_control(text), []
+            if not steps:
+                previous = (body.get("clarify") or {}).get("text")
+                payee = next((p["key"] for p in reversed(body["pending"]) if p["task_type"] == "TRANSFER"), None)
+                if previous:  # multi-turn slot filling without a model: "帮我给张三转账" + "两千"
+                    rule_text = previous + " " + text
+                    calls = rule_calls(rule_text, catalog, payee) or None
+                if calls is None:
+                    rule_text = text
+                    calls = rule_calls(text, catalog, payee) or None
+            if calls is None and not steps:
+                steps, clarifications = self._rule_steps(body, text, catalog)
+            if calls is None:
+                trace["calls"] = [{"name": s.get("tool"), "arguments": s.get("normalized") or s.get("args"), "verdict": "RULES"} for s in steps]
+        if calls is not None:
             steps, clarifications = [], []
             validator = ToolCallValidator(self._corpus(body), catalog,
                                           lambda value: self.s.gateway.read("transaction", owner, "payee.resolve", name=value),
                                           default_account_id=account)
             for call in calls:
                 tools.append(call["name"])
+                record = {"name": call["name"], "arguments": call["arguments"], "verdict": "ACCEPTED"}
+                trace["calls"].append(record)
                 try:
                     steps.extend(validator.validate(call["name"], call["arguments"]))
                 except InjectionDetected as exc:
+                    record["verdict"] = "INJECTION:" + exc.code
                     hit = {"category": "PROMPT_INJECTION", "severity": "HIGH", "blocking": True,
                            "message": guard.MESSAGES["PROMPT_INJECTION"], "evidence": exc.code}
                     return self._risk(body, owner, hit, tools, mode)
                 except Clarify as exc:
+                    record["verdict"] = "CLARIFY:" + exc.code
                     clarifications.append(exc)
         emit("intent.recognized", {"tools": tools or [s.get("tool") for s in steps], "mode": mode})
         # 4. control steps
@@ -336,6 +370,7 @@ class ChatService:
                     "status": "SUCCEEDED", "action_ids": [], "depends_on": [nodes[-1]["id"]] if nodes else []}
             if step["kind"] != "plan":
                 nodes.append(node)
+                trace["steps"].append({"tool": step["tool"], "kind": step["kind"], "node": node})
             try:
                 if step["kind"] == "plan":
                     if step.get("link_to_previous") and last_lock is None:
@@ -369,6 +404,19 @@ class ChatService:
                     display = next((a["display"] for a in catalog["accounts"] if a["id"] == step["account_id"]), step["account_id"])
                     card, line = renderer.balance_card(balance, display)
                     cards.append(card), texts.append(line)
+                elif step.get("op") == "SPENDING_QUERY":
+                    result = self.s.finance.query(owner, account, step["months"], step["category"], step["merchant"], step["compare"])
+                    self.s.audit.append(None, None, "CHAT_READ", "finance", {"session_id": body["session_id"], "op": "SPENDING_QUERY",
+                                                                             "evidence_hash": digest(result["evidence_refs"])})
+                    card, line = renderer.spending_query_card(result)
+                    cards.append(card), texts.append(line)
+                elif step.get("op") == "PORTFOLIO":
+                    positions = []
+                    for product in self.s.wealth.products(owner):
+                        position = self.s.gateway.read("wealth", owner, "portfolio.get", account_id=step["account_id"], product_id=product["id"])
+                        positions.append(position | {"name": product["name"], "risk_level": product["risk_level"]})
+                    card, line = renderer.portfolio_card(positions)
+                    cards.append(card), texts.append(line)
                 elif step.get("op") == "REMINDERS":
                     card, line = renderer.reminders_card(self.s.events.reminders(owner, step["account_id"]))
                     cards.append(card), texts.append(line)
@@ -376,6 +424,7 @@ class ChatService:
                     if step["kind"] == "propose":
                         self._supersede(body, owner, step["normalized"])
                     task = self._run(goal, owner, account, step["normalized"])
+                    node["task_id"] = task["task_id"]
                     new_cards, new_texts = renderer.task_cards(task, step)
                     cards.extend(new_cards), texts.extend(new_texts)
                     for card in new_cards:
@@ -410,11 +459,12 @@ class ChatService:
             body["plan"] = plan
             emit("plan.created", plan)
         # 6. clarifications (one question at a time keeps the dialogue short)
+        trace["clarifications"] = [c.code for c in clarifications]
         if clarifications:
             first = clarifications[0]
             cards.append(renderer.clarify_card(first.slot, first.question, first.options))
             texts.append(first.question)
-            body["clarify"] = {"slot": first.slot, "code": first.code, "text": text if mode == "rules" else None}
+            body["clarify"] = {"slot": first.slot, "code": first.code, "text": rule_text if mode == "rules" else None}
         elif steps:
             body["clarify"] = None
         if not texts:
@@ -490,17 +540,37 @@ class ChatService:
                 self.s.audit.append(None, None, "CHAT_SESSION_LOCKED", "chat", {"session_id": body["session_id"]})
         if hit["category"] == "FRAUD_SUSPECTED":
             self._cancel_pending(body, owner)
-        card = CardRenderer.risk_card(hit, event.get("event_id") if isinstance(event, dict) else None)
+        card = CardRenderer.risk_card(hit, event)
         return {"text": text, "cards": [card], "mode": mode, "tools": tools, "risk": hit["category"]}
 
     # ---- understanding -----------------------------------------------------------------------
+    BREAKER_FAILURES, BREAKER_WINDOW, BREAKER_OPEN_SECONDS = 3, 60, 120
+
     def _understand(self, body, owner, text, catalog):
         if not getattr(self.llm, "available", False):
             raise LLMUnavailable("LLM_NOT_CONFIGURED")
+        now = time.time()
+        if now < getattr(self, "_breaker_open_until", 0):
+            raise LLMUnavailable("LLM_CIRCUIT_OPEN")  # model kept failing: serve from rules, retry after cool-down
+        try:
+            return self._understand_once(body, owner, text, catalog)
+        except LLMUnavailable as exc:
+            failures = [t for t in getattr(self, "_llm_failures", []) if now - t < self.BREAKER_WINDOW] + [now]
+            self._llm_failures = failures
+            if len(failures) >= self.BREAKER_FAILURES:
+                self._breaker_open_until, self._llm_failures = now + self.BREAKER_OPEN_SECONDS, []
+                self.s.audit.append(None, None, "CHAT_LLM_CIRCUIT_OPEN", "chat", {"reason": exc.code, "seconds": self.BREAKER_OPEN_SECONDS})
+            raise
+
+    def _understand_once(self, body, owner, text, catalog):
         history = []
         for message in body["messages"][-12:]:
             if message["role"] in {"user", "assistant"} and message.get("text"):
-                history.append({"role": message["role"], "content": message["text"][:500]})
+                content = message["text"][:500]
+                if message is not body["messages"][-1] and guard.inspect(content):
+                    # Earlier blocked attempts (or bank data echoed in a reply) are not replayed to the model.
+                    content = "[已拦截的消息]" if message["role"] == "user" else "[系统回复，内容已省略]"
+                history.append({"role": message["role"], "content": content})
         pending = "；".join(p["card"]["title"] + "（" + "，".join(f["value"] for f in p["card"]["fields"][:2]) + "）"
                            for p in body["pending"])
         prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog)
@@ -519,14 +589,18 @@ class ChatService:
         # Represented as a control step the validator knows: ask_user carries the model's question verbatim.
         return [{"name": "ask_user", "arguments": {"slot": "other", "question": content[:120]}}]
 
-    def _rule_steps(self, body, text, catalog):
-        """Fallback when the model is unavailable: the original finite grammar."""
+    @staticmethod
+    def _rule_control(text):
         if CANCEL_WORDS.match(text):
-            return [{"kind": "control", "tool": "cancel_pending", "args": {}}], []
+            return [{"kind": "control", "tool": "cancel_pending", "args": {}}]
         if HUMAN_WORDS.search(text):
-            return [{"kind": "control", "tool": "request_human", "args": {}}], []
+            return [{"kind": "control", "tool": "request_human", "args": {}}]
         if UNDO_WORDS.search(text):
-            return [{"kind": "control", "tool": "undo_last", "args": {}}], []
+            return [{"kind": "control", "tool": "undo_last", "args": {}}]
+        return []
+
+    def _rule_steps(self, body, text, catalog):
+        """Last resort when neither the model nor the colloquial rules matched: the original finite grammar."""
         intent = self.s.intent.normalize(text)
         previous = (body.get("clarify") or {}).get("text")
         if intent.get("needs_clarification") and previous:
@@ -603,7 +677,7 @@ class ChatService:
                 "reply": {"text": text, "cards": cards}, "plan": body.get("plan")}
 
     # ---- plan / execution bookkeeping ---------------------------------------------------------
-    TOOL_TITLES = {"get_balance": "查询余额", "analyze_spending": "账单分析", "recommend_products": "理财推荐", "compare_products": "产品对比",
+    TOOL_TITLES = {"get_balance": "查询余额", "analyze_spending": "账单分析", "query_spending": "消费查询", "get_portfolio": "理财持仓", "recommend_products": "理财推荐", "compare_products": "产品对比",
                    "list_subscriptions": "查询订阅", "list_direct_debits": "查询代扣", "list_cards": "查询银行卡",
                    "renewal_reminders": "续费提醒", "start_risk_assessment": "风险测评", "list_wish_funds": "查询心愿金",
                    "review_subscriptions": "识别可取消的订阅"}
@@ -753,6 +827,44 @@ class ChatService:
                                      "text": "人工客服已结束本次服务，智能助手继续为你服务。"})
         body = self.store.save(body)
         return {"handoff_id": handoff_id, "status": "CLOSED" if close else "OPEN", "session_revision": body["revision"]}
+
+    def trace(self, session_id, owner, message_id):
+        """完整决策链路: words -> guard -> model tool calls + validator verdicts -> policy -> authorization ->
+        execution -> verification -> receipt, plus the audit events and a tamper check of the trace itself."""
+        import json
+        body = self.store.get(session_id, owner)
+        record = (body["turns"].get(message_id) or {}).get("trace")
+        if not record:
+            raise Rejected("TRACE_NOT_FOUND")
+        stored = {k: v for k, v in record.items() if k != "audit_event_id"}
+        row = self.s.db.one("SELECT body FROM audit_events WHERE json_extract(body,'$.audit_event_id')=?", (record["audit_event_id"],))
+        anchored = bool(row) and json.loads(row["body"])["payload_hash"] == digest(stored)
+        tasks = []
+        for step in record["steps"]:
+            task_id = step["node"].get("task_id")
+            if not task_id:
+                continue
+            task = self.s.get_task(task_id, owner)
+            records = task.get("action_records")
+            if records is None:  # legacy transfer task shape
+                records = [{"action": a, "policy": task.get("policy_decision"), "authorization": task.get("authorization"),
+                            "execution": task.get("execution"), "verification": task.get("verification"), "receipt": task.get("receipt"),
+                            "status": task["status"]} for a in task.get("proposed_actions", [])]
+            actions = []
+            for entry in records:
+                policy, auth = entry.get("policy") or {}, entry.get("authorization") or {}
+                actions.append({"action_id": entry["action"]["action_id"], "action_type": entry["action"]["action_type"],
+                                "action_hash": digest(entry["action"]), "status": entry.get("status"),
+                                "policy": {k: policy.get(k) for k in ("decision", "risk_level", "reason_codes")},
+                                "authorization": {k: auth.get(k) for k in ("status", "auth_method", "expires_at")},
+                                "verification": {k: (entry.get("verification") or {}).get(k) for k in ("status", "reason")},
+                                "receipt_id": (entry.get("receipt") or {}).get("receipt_id")})
+            events = [json.loads(r["body"]) for r in self.s.db.rows(
+                "SELECT body FROM audit_events WHERE json_extract(body,'$.task_id')=? ORDER BY seq", (task_id,))]
+            tasks.append({"task_id": task_id, "task_type": task["task_type"], "status": task["status"], "actions": actions,
+                          "audit_events": [{k: e[k] for k in ("audit_event_id", "event_type", "actor", "timestamp", "event_hash")} for e in events]})
+        return {"session_id": session_id, "message_id": message_id, "trace": record, "trace_anchored_in_audit": anchored,
+                "tasks": tasks, "audit_chain_valid": self.s.audit.verify_chain()}
 
     def send_sms(self, session_id, owner, action_id):
         """Simulated SMS second factor for a RED card. The code is bound to that card's authorization only."""

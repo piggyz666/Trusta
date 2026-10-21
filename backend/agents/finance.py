@@ -154,3 +154,53 @@ class FinanceAgent:
                            "rule_ids": sorted(flagged[r["id"]]), "reasons": [descriptions[c] for c in sorted(flagged[r["id"]])],
                            "evidence_refs": [f"bank:consumption_records:{r['id']}"]} for r in purchases if r["id"] in flagged],
                 "interpretation": "规则提示需要核对，不代表已确认欺诈；不会冻结账户或修改交易。"}
+
+    # ---- E1: flexible grounded queries (any month range, category / merchant filter, period-over-period) ----
+    MAX_QUERY_MONTHS = 12
+
+    def query(self, customer_id, account_id, months, category=None, merchant=None, compare=True):
+        """Read-only aggregation over 1..12 consecutive months. Every figure is traceable to bank record ids."""
+        if (not isinstance(months, list) or not 1 <= len(months) <= self.MAX_QUERY_MONTHS
+                or len(set(months)) != len(months) or category is not None and category not in CATEGORIES
+                or merchant is not None and (not isinstance(merchant, str) or not 1 <= len(merchant) <= 40)):
+            raise Rejected("INVALID_QUERY")
+        months = sorted(months)
+        for month in months:
+            month_window(month)
+        def select(rows):
+            return [r for r in rows if (category is None or r["category"] == category)
+                    and (merchant is None or merchant in r["merchant"])]
+        current = {m: select(self.records(customer_id, account_id, m)) for m in months}
+        rows = [r for m in months for r in current[m]]
+        currency = self._currency(rows)
+        eligible = self.eligible(rows, currency)
+        summary = self.summarize(rows, currency)
+        by_category, by_merchant = defaultdict(lambda: [0, 0]), defaultdict(lambda: [0, 0])
+        for row in eligible:
+            sign = 1 if row["kind"] == "PURCHASE" else -1
+            for bucket, key in ((by_category, row["category"] if row["category"] in CATEGORIES else "OTHER"), (by_merchant, row["merchant"])):
+                bucket[key][0] += sign * row["amount"]
+                bucket[key][1] += 1
+        result = {"months": months, "filters": {"category": category, "category_label": CATEGORIES.get(category), "merchant": merchant},
+                  "summary": summary,
+                  "by_month": [{"month": m, **{k: v for k, v in self.summarize(current[m], currency).items() if k in {"net_spend", "settled_count"}}}
+                               for m in months],
+                  "categories": sorted(({"category": k, "label": CATEGORIES.get(k, "其他"), "net_spend": v[0], "count": v[1]}
+                                        for k, v in by_category.items()), key=lambda c: -c["net_spend"]),
+                  "top_merchants": sorted(({"merchant": k, "net_spend": v[0], "count": v[1]} for k, v in by_merchant.items()),
+                                          key=lambda c: -c["net_spend"])[:5],
+                  "largest": [{"transaction_id": r["id"], "merchant": r["merchant"], "amount": r["amount"], "occurred_at": r["occurred_at"]}
+                              for r in sorted((r for r in eligible if r["kind"] == "PURCHASE"), key=lambda r: -r["amount"])[:3]],
+                  "evidence_refs": [f"bank:consumption_records:{r['id']}" for r in eligible],
+                  "analysis_basis": "仅统计已结算消费及退款；转账不计入消费；按上海时区自然月。"}
+        if compare:
+            previous, cursor = [], months[0]
+            for _ in months:
+                cursor = month_window(cursor)[2]
+                previous.append(cursor)
+            prior_rows = [r for m in previous for r in select(self.records(customer_id, account_id, m))]
+            prior = self.summarize(prior_rows, currency)
+            delta = summary["net_spend"] - prior["net_spend"]
+            result["comparison"] = {"previous_months": sorted(previous), "previous_net_spend": prior["net_spend"], "net_change": delta,
+                                    "net_change_bps": delta * 10000 // prior["net_spend"] if prior["net_spend"] > 0 else None}
+        return result

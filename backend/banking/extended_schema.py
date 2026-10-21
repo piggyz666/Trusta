@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS merchants(id TEXT PRIMARY KEY, name TEXT NOT NULL, ca
  price INTEGER NOT NULL CHECK(price>0), status TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS life_events(id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, person TEXT NOT NULL,
  relation TEXT NOT NULL, kind TEXT NOT NULL, month INTEGER NOT NULL, day INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS payee_registrations(payee_id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, created_at REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS card_pin_resets(id TEXT PRIMARY KEY, card_id TEXT NOT NULL, customer_id TEXT NOT NULL,
  channel TEXT NOT NULL, expires_at REAL NOT NULL, status TEXT NOT NULL);
 """

@@ -112,7 +112,9 @@ class BankingRuntime:
                             report["candidates"]=s.finance.recurring(user_id,account_id)
                             report["resolutions"]=s.service_agent.resolve_subscriptions(report["candidates"],report["resources"])
                         return {"report":report,"actions":[]}
-                    if kind == "RISK_ASSESSMENT":
+                    if kind == "PAYEE_MANAGEMENT":
+                        action=s.transaction.propose_action(task,normalized["operation"],normalized["target_id"],normalized["parameters"],account_id)
+                    elif kind == "RISK_ASSESSMENT":
                         action=s.wealth.propose(task,"RISK_PROFILE_UPDATE",user_id,normalized["parameters"],account_id,s.config.action_ttl)
                     elif kind in {"INVESTMENT_PURCHASE","INVESTMENT_REDEEM"}:
                         action=s.wealth.propose(task,kind,normalized["target_id"],normalized["parameters"],account_id,s.config.action_ttl)
@@ -161,7 +163,7 @@ class BankingRuntime:
             conn.execute("INSERT INTO actions VALUES(?,?)",(action["action_id"],canonical(action)))
         def schema():
             s.schema.validate(action)
-            s.capabilities.check(spec_actor,"transfer.propose" if action["action_type"]=="TRANSFER" else "wealth.propose" if spec_actor=="wealth" else "service.propose")
+            s.capabilities.check(spec_actor,"transfer.propose" if action["action_type"]=="TRANSFER" or spec_actor=="transaction" else "wealth.propose" if spec_actor=="wealth" else "service.propose")
             s.capabilities.check("executor",action["requested_capability"])
         s._step(task_id,prefix+"S",schema)
         policy=s._step(task_id,prefix+"P",lambda:s.policy.evaluate(action))
@@ -280,7 +282,7 @@ class BankingRuntime:
         action,prefix=entry["action"],entry["prefix"]
         try:
             s.schema.validate(action)
-            s.capabilities.check(action["initiating_agent"],"transfer.propose" if action["action_type"]=="TRANSFER" else "wealth.propose" if action["initiating_agent"]=="wealth" else "service.propose")
+            s.capabilities.check(action["initiating_agent"],"transfer.propose" if action["action_type"]=="TRANSFER" or action["initiating_agent"]=="transaction" else "wealth.propose" if action["initiating_agent"]=="wealth" else "service.propose")
             policy=s.policy.evaluate(action)  # Every execution, including TIME triggers, uses fresh authority.
             if policy["decision"]=="BLOCK":
                 raise Rejected("POLICY_BLOCKED")

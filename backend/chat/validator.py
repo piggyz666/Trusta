@@ -106,6 +106,11 @@ class ToolCallValidator:
 
     def amount(self, value, slot="amount", label="金额"):
         self.span(value["span"], slot, label)
+        span = _norm(value["span"])
+        # "一些 / 一点 / 一下" are not amounts: the span must occur at least once as a standalone number.
+        if not any(self.corpus[m.end():m.end() + 1] not in "些点下会儿" or m.end() == len(self.corpus)
+                   for m in re.finditer(re.escape(span), self.corpus)):
+            raise Clarify("AMOUNT_NOT_GROUNDED", slot, f"请确认{label}是多少元？")
         expected = parse_amount_value(value["value"])
         parsed = parse_amount_span(value["span"])
         if expected is None or parsed is None or parsed != expected:
@@ -124,7 +129,7 @@ class ToolCallValidator:
             rows, name = self.resolve_payee(span), span
         if not rows:
             raise Clarify("PAYEE_NOT_FOUND", "payee",
-                          f"通讯录里没有找到“{value['value']}”。请告诉我收款人的全名或手机号；新收款人需要先在银行添加。")
+                          f"通讯录里没有找到“{value['value']}”。如果是新收款人，请告诉我对方的姓名和手机号，我先帮你添加（需要验证）。")
         if len(rows) > 1:
             raise Clarify("PAYEE_AMBIGUOUS", "payee", f"找到多个“{value['value']}”，要转给哪一位？",
                           [row["name"] for row in rows][:6])
@@ -193,6 +198,27 @@ class ToolCallValidator:
         month = a.get("month") or datetime.fromtimestamp(self.now, CHINA).strftime("%Y-%m")
         return [{"normalized": {"task_type": "BILL_ANALYSIS", "month": month, "needs_clarification": False}}]
 
+    def _query_spending(self, a):
+        from backend.business import month_window
+        if "months" in a:
+            months = sorted(set(a["months"]))
+        else:
+            count = a.get("recent_months", 1)
+            months = [datetime.fromtimestamp(self.now, CHINA).strftime("%Y-%m")]
+            while len(months) < count:
+                months.insert(0, month_window(months[0])[2])
+        merchant = None
+        if "merchant" in a:
+            self.span(a["merchant"]["span"], "other", "商户")
+            if _norm(a["merchant"]["text"]) not in _norm(a["merchant"]["span"]):
+                raise Clarify("MERCHANT_NOT_GROUNDED", "other", "是哪个商户？")
+            merchant = a["merchant"]["text"].strip()
+        return [{"op": "SPENDING_QUERY", "months": months, "category": a.get("category"), "merchant": merchant,
+                 "compare": a.get("compare", True)}]
+
+    def _get_portfolio(self, a):
+        return [{"op": "PORTFOLIO", "account_id": self.account_id}]
+
     def _recommend_products(self, a):
         return [{"normalized": {"task_type": "WEALTH_RECOMMENDATION", "needs_clarification": False}}]
 
@@ -250,6 +276,22 @@ class ToolCallValidator:
             normalized = {"task_type": "TRANSFER", "recipient_name": name, "amount": cents, "currency": "CNY",
                           "needs_clarification": False}
         return [{"normalized": normalized, "spans": spans, "display": display, "memo": memo}]
+
+    def _propose_add_payee(self, a):
+        from backend.domain import uid
+        name = self.span(a["name"]["span"], "payee", "收款人姓名") and a["name"]["value"].strip()
+        if _norm(name) not in _norm(a["name"]["span"]):
+            raise Clarify("PAYEE_NAME_NOT_GROUNDED", "payee", "收款人叫什么名字？")
+        self.span(a["phone"]["span"], "payee", "手机号")
+        if a["phone"]["value"] not in re.sub(r"[\s-]", "", _norm(a["phone"]["span"])):
+            raise Clarify("PHONE_NOT_GROUNDED", "payee", "请再说一下对方的手机号。")
+        alias = ""
+        if "alias" in a:
+            self.span(a["alias"]["span"], "payee", "备注名")
+            alias = a["alias"]["value"].strip()
+        return [{"normalized": {"task_type": "PAYEE_MANAGEMENT", "operation": "ADD_PAYEE", "target_id": "payee-n" + uid().replace("-", "")[:10],
+                                "parameters": {"name": name, "phone": a["phone"]["value"], "alias": alias}, "needs_clarification": False},
+                 "spans": {"payee": a["name"]["span"], "phone": a["phone"]["span"]}, "display": {"payee": name}}]
 
     def _propose_split(self, a):
         cents = self.amount(a["total"], "amount", "总金额")

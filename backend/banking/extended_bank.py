@@ -48,6 +48,9 @@ class ExtendedBank:
                 if resource_id:
                     return self.wish_fund(conn, customer, resource_id)
                 return [dict(r) for r in conn.execute("SELECT * FROM wish_funds WHERE customer_id=? ORDER BY id", (customer,)).fetchall()]
+        if kind in {'payee_entry', 'payee_contact'}:
+            with self.db.transaction() as conn:
+                return self.payee_entry(conn, customer, resource_id) if kind == 'payee_entry' else self.payee_contacts(conn, customer)
         if kind == 'merchant':
             return self.db.rows("SELECT * FROM merchants WHERE status='ACTIVE' ORDER BY id")
         if kind == 'life_event':
@@ -86,6 +89,25 @@ class ExtendedBank:
                 "target_amount": 0, "release_at": 0.0, "status": "AVAILABLE", "version": 0}
 
     @staticmethod
+    def payee_entry(conn, customer, payee_id):
+        if not isinstance(payee_id, str) or not payee_id.startswith("payee-") or not 7 <= len(payee_id) <= 40:
+            raise Rejected("RESOURCE_NOT_FOUND_OR_DENIED")
+        row = conn.execute("SELECT p.id,p.customer_id,p.name,p.is_new,c.phone,c.alias,c.status FROM payees p "
+                           "LEFT JOIN payee_contacts c ON c.payee_id=p.id WHERE p.id=?", (payee_id,)).fetchone()
+        if row:
+            if row["customer_id"] != customer:
+                raise Rejected("RESOURCE_NOT_FOUND_OR_DENIED")
+            return {"id": row["id"], "customer_id": customer, "name": row["name"], "is_new": row["is_new"],
+                    "phone": row["phone"] or "", "alias": row["alias"] or "", "status": row["status"] or "ACTIVE", "version": 1}
+        return {"id": payee_id, "customer_id": customer, "name": "", "is_new": 1, "phone": "", "alias": "", "status": "AVAILABLE", "version": 0}
+
+    @staticmethod
+    def payee_contacts(conn, customer):
+        return [{"payee_id": r["payee_id"], "phone": r["phone"], "alias": r["alias"]} for r in conn.execute(
+            "SELECT c.payee_id,c.phone,c.alias FROM payee_contacts c JOIN payees p ON p.id=c.payee_id WHERE p.customer_id=? "
+            "ORDER BY c.payee_id", (customer,)).fetchall()]
+
+    @staticmethod
     def _position(conn, customer, account_id, product_id):
         row = conn.execute("SELECT * FROM portfolio WHERE customer_id=? AND account_id=? AND product_id=?",
                            (customer, account_id, product_id)).fetchone()
@@ -112,6 +134,9 @@ class ExtendedBank:
                 raise Rejected("RESOURCE_ACCOUNT_MISMATCH")
             merchants = [dict(r) for r in conn.execute("SELECT * FROM merchants WHERE status='ACTIVE' ORDER BY id").fetchall()]
             return {"account": dict(account), "target": target, "merchants": merchants}
+        if kind == 'payee_entry':
+            return {"account": dict(account), "target": ExtendedBank.payee_entry(conn, customer, target_id),
+                    "contacts": ExtendedBank.payee_contacts(conn, customer)}
         if kind == 'risk_profile':
             if target_id != customer:
                 raise Rejected("RESOURCE_NOT_FOUND_OR_DENIED")
@@ -159,6 +184,11 @@ class ExtendedBank:
             kind = action["target"]["kind"]
             if kind == "wish_fund":
                 self._apply_wish_fund(conn, action, before, after, operation_id)
+            elif kind == "payee_entry":
+                t = after["target"]
+                conn.execute("INSERT INTO payees VALUES(?,?,?,1)", (t["id"], t["customer_id"], t["name"]))
+                conn.execute("INSERT INTO payee_contacts VALUES(?,?,?,'ACTIVE')", (t["id"], t["phone"], t["alias"]))
+                conn.execute("INSERT INTO payee_registrations VALUES(?,?,?)", (t["id"], t["customer_id"], now))
             elif kind == "risk_profile":
                 t = after["target"]
                 conn.execute("INSERT INTO risk_profiles VALUES(?,?,?,?) ON CONFLICT(customer_id) DO UPDATE SET risk_level=excluded.risk_level,"

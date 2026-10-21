@@ -209,6 +209,9 @@ class BankingControls:
             raise Rejected(error)
         return {"totp_enrolled":True}
 
+    VELOCITY_WINDOW, VELOCITY_LIMIT = 600, 3
+    NEW_PAYEE_LIMIT = 50000
+
     SMS_TTL = 300
     SMS_MAX_ATTEMPTS = 3
     SMS_PER_AUTHORIZATION = 3
@@ -331,8 +334,24 @@ class BankingControls:
             with self.db.transaction() as current:
                 return self.risk(action,current)
         day,total = self._daily(conn,action)
-        strong = action["currency"]!="CNY" or total+action["amount"]>self.config.daily_transfer_limit
-        return {"risk_level":"RED" if strong else "YELLOW", "requires_strong_auth":strong,
+        reasons = []
+        if action["currency"]!="CNY":
+            reasons.append("FOREIGN_CURRENCY_STRONG_AUTH")
+        if total+action["amount"]>self.config.daily_transfer_limit:
+            reasons.append("DAILY_TRANSFER_STRONG_AUTH")
+        # Velocity: several executed transfers in a short window is a classic account-takeover / scam pattern.
+        recent = conn.execute("SELECT COUNT(*) FROM banking_daily_claims WHERE owner=? AND json_extract(body,'$.body.created_at')>?",
+                              (action["customer_id"], time.time()-self.VELOCITY_WINDOW)).fetchone()[0]
+        if recent >= self.VELOCITY_LIMIT:
+            reasons.append("TRANSFER_VELOCITY_STRONG_AUTH")
+        # A payee added within 24h receiving a meaningful amount: the typical "new account from a scammer" case.
+        fresh = conn.execute("SELECT 1 FROM payee_registrations WHERE payee_id=? AND customer_id=? AND created_at>?",
+                             (action.get("recipient_id"), action["customer_id"], time.time()-86400)).fetchone() \
+            if conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='payee_registrations'").fetchone() else None
+        if fresh and action["amount"] >= self.NEW_PAYEE_LIMIT:
+            reasons.append("NEW_PAYEE_STRONG_AUTH")
+        strong = bool(reasons)
+        return {"risk_level":"RED" if strong else "YELLOW", "requires_strong_auth":strong, "reasons":reasons,
                 "day":day,"currency":action["currency"],"prior_amount_minor":total,
                 "projected_amount_minor":total+action["amount"],"scope":"TRUSTA_INITIATED"}
 

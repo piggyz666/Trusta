@@ -13,7 +13,9 @@ RISK_REASONS = {
     "V1_CONFIRM_ALL": "资金操作需要你本人确认", "CONFIRM_EACH_ACTION": "该操作需要你本人确认",
     "NEW_RECIPIENT": "首次向该收款人转账", "HIGH_RISK_AMOUNT": "金额达到大额阈值",
     "DAILY_TRANSFER_STRONG_AUTH": "今日累计转账将超过 ¥1,000.00", "FOREIGN_CURRENCY_STRONG_AUTH": "外币转账需要强验证",
-    "HIGH_RISK_CHANGE": "该操作属于高风险变更", "INVESTMENT_STRONG_AUTH": "理财申购 / 赎回需要强验证",
+    "HIGH_RISK_CHANGE": "该操作属于高风险变更",
+    "TRANSFER_VELOCITY_STRONG_AUTH": "10 分钟内已连续转账 3 笔，需要额外验证",
+    "NEW_PAYEE_STRONG_AUTH": "向 24 小时内新添加的收款人转账 ≥ ¥500.00，需要额外验证", "INVESTMENT_STRONG_AUTH": "理财申购 / 赎回需要强验证",
 }
 ERRORS = {
     "INSUFFICIENT_BALANCE": "余额不足", "UNKNOWN_PAYEE": "收款人不在你的收款人列表中", "FROZEN_SOURCE": "付款账户已冻结",
@@ -29,6 +31,7 @@ ERRORS = {
     "CARD_STATE_INVALID": "卡片当前状态不支持该操作", "RISK_PROFILE_REQUIRED": "需要先完成风险测评",
     "SUITABILITY_RISK_MISMATCH": "产品风险等级高于你的风险承受能力", "BELOW_PRODUCT_MINIMUM": "低于产品起购金额",
     "HOLDING_PERIOD_NOT_MET": "尚未到可赎回时间",
+    "PAYEE_PHONE_EXISTS": "这个手机号已经在你的收款人列表里", "PAYEE_ALIAS_EXISTS": "这个备注名已经被使用", "PAYEE_EXISTS": "收款人已存在",
 }
 OPERATIONS = {
     "TRANSFER": "转账", "CARD_APPLY": "申请虚拟卡", "CARD_FREEZE": "冻结卡片", "CARD_UNFREEZE": "解冻卡片",
@@ -36,7 +39,7 @@ OPERATIONS = {
     "SUBSCRIPTION_CANCEL": "取消订阅", "DIRECT_DEBIT_DISABLE": "关闭代扣",
     "INVESTMENT_PURCHASE": "申购理财", "INVESTMENT_REDEEM": "赎回理财",
     "CARD_CANCEL_LOST": "解除挂失", "CARD_PIN_RESET": "重置卡密码", "FUND_LOCK": "锁定心愿金", "FUND_RELEASE": "释放心愿金",
-    "WISH_ORDER": "心愿金下单", "RISK_PROFILE_UPDATE": "更新风险等级",
+    "WISH_ORDER": "心愿金下单", "RISK_PROFILE_UPDATE": "更新风险等级", "ADD_PAYEE": "添加收款人", "PAYEE_MANAGEMENT": "添加收款人",
     "WISH_FUND_MANAGEMENT": "心愿金", "RISK_ASSESSMENT": "风险测评",
 }
 RISK_LABELS = {1: "保守型", 2: "稳健型", 3: "平衡型", 4: "成长型", 5: "进取型"}
@@ -118,6 +121,13 @@ class CardRenderer:
                 fields.append({"label": "商品", "value": catalogue.get(item["merchant_id"], item["merchant_id"])})
             fields += [{"label": "合计", "value": format_cents(params["amount"]), "amount_minor": params["amount"], "currency": "CNY"},
                        {"label": "支付来源", "value": "心愿金“" + (pre.get("target") or {}).get("name", "") + "”"}]
+            return fields
+        if kind == "ADD_PAYEE":
+            fields += [{"label": "姓名", "value": params["name"]},
+                       {"label": "手机号", "value": params["phone"][:3] + "****" + params["phone"][-4:]}]
+            if params["alias"]:
+                fields.append({"label": "备注名", "value": params["alias"]})
+            fields.append({"label": "提示", "value": "请确认对方身份。添加后首次转账也会单独确认"})
             return fields
         if kind == "RISK_PROFILE_UPDATE":
             level = params["risk_level"]
@@ -221,6 +231,8 @@ class CardRenderer:
                 message = f"已用心愿金下单，共 {format_cents(params['amount'])}，银行核验通过。"
             elif action.get("action_type") == "FUND_RELEASE":
                 message = "心愿金剩余资金已退回活期，银行核验通过。"
+            elif action.get("action_type") == "ADD_PAYEE":
+                message = f"已添加收款人 {params['name']}，现在可以说“给{params['name']}转多少钱”。"
             elif action.get("action_type") == "RISK_PROFILE_UPDATE":
                 message = f"风险等级已更新为 R{params['risk_level']} {RISK_LABELS[params['risk_level']]}，有效期一年。"
             else:
@@ -333,6 +345,43 @@ class CardRenderer:
             first = min(items, key=lambda i: i["next_charge_at"])
             text += f"最近一笔是 {first['merchant']} {format_cents(first['amount_minor'])}，{_date(first['next_charge_at'])[:10]}。"
         return card, text
+
+    @staticmethod
+    def spending_query_card(result):
+        months = result["months"]
+        period = months[0] if len(months) == 1 else f"{months[0]} 至 {months[-1]}"
+        filters = result["filters"]
+        scope = (filters["category_label"] or "") + (f"在“{filters['merchant']}”" if filters["merchant"] else "")
+        total = result["summary"]["net_spend"]
+        card = {"type": "report", "card_id": "c_" + uid()[:8], "report_type": "SPENDING_QUERY", "period": period,
+                "filters": filters, "summary": {"total_minor": total, "currency": result["summary"]["currency"],
+                                                 "tx_count": result["summary"]["settled_count"]},
+                "by_month": result["by_month"], "breakdown": result["categories"], "top_merchants": result["top_merchants"],
+                "comparison": result.get("comparison"), "chart_hint": "bar" if len(months) > 1 else "pie"}
+        text = f"{period}{scope}共消费 {format_cents(total)}（{result['summary']['settled_count']} 笔）"
+        if result["top_merchants"] and not filters["merchant"]:
+            top = result["top_merchants"][0]
+            text += f"，花得最多的是{top['merchant']} {format_cents(top['net_spend'])}"
+        comparison = result.get("comparison")
+        if comparison and comparison["previous_net_spend"] > 0:
+            change = comparison["net_change"]
+            text += f"；比之前同样长的时段{'多' if change > 0 else '少'}花了 {format_cents(abs(change))}"
+            if comparison["net_change_bps"] is not None:
+                text += f"（{abs(comparison['net_change_bps']) / 100:.1f}%）"
+        elif comparison:
+            text += "；之前同样长的时段没有消费记录，无法对比"
+        return card, text + "。"
+
+    @staticmethod
+    def portfolio_card(positions):
+        held = [p for p in positions if p["amount_cents"] > 0]
+        card = {"type": "report", "card_id": "c_" + uid()[:8], "report_type": "PORTFOLIO",
+                "items": [{"product_id": p["product_id"], "name": p["name"], "amount_minor": p["amount_cents"],
+                           "redeemable_at": p["redeemable_at"], "risk_level": p["risk_level"]} for p in held]}
+        if not held:
+            return card, "你目前没有理财持仓。"
+        total = sum(p["amount_cents"] for p in held)
+        return card, f"你持有 {len(held)} 款理财，合计本金 {format_cents(total)}（按申购金额计，不含收益）。"
 
     @staticmethod
     def risk_card(hit, audit_event_id=None):

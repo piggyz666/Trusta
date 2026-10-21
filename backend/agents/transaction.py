@@ -31,3 +31,10 @@ class TransactionAgent:
                             expected_postconditions={"after_balance": balance["balance"] - normalized["amount"], "status": "SETTLED"},
                             created_at=time.time(), expires_at=time.time() + self.config.action_ttl,
                             idempotency_key=uid()).to_dict()
+
+    def propose_action(self, task, kind, target_id, values, account_id):
+        """Non-transfer payment-domain proposals (e.g. adding a payee). Same snapshot/expected-state IR as Service actions."""
+        from backend.banking.actions import snapshot_from_gateway, build_action
+        self.gateway.capabilities.check("transaction", "transfer.propose")
+        snapshot = snapshot_from_gateway(self.gateway, "transaction", task["user_id"], account_id, kind, target_id)
+        return build_action(task, kind, target_id, values, snapshot, self.config.action_ttl)

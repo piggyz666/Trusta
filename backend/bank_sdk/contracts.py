@@ -18,7 +18,8 @@ CANONICAL = {
     'card.cancel_lost':'cards.report_lost.cancel','card.pin_reset':'cards.pin.reset',
     'wish_fund.get':'savings.goals.read','wish_fund.list':'savings.goals.read','wish_fund.lock':'savings.goals.lock',
     'wish_fund.release':'savings.goals.release','wish_fund.order':'savings.goals.pay','merchant.list':'merchants.read',
-    'life_event.list':'customers.events.read','risk_profile.update':'customers.risk.update'}
+    'life_event.list':'customers.events.read','risk_profile.update':'customers.risk.update',
+    'payee_entry.get':'payees.read','payee_contact.list':'payees.read','payee.add':'payees.create'}
 
 class BankError(Rejected):
     def __init__(self, code, http_status=None, retry_after=None):

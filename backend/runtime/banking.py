@@ -93,6 +93,17 @@ class BankingRuntime:
                     task = s.blackboard.get(task_id)
                     if kind == "PRODUCT_COMPARE":
                         return {"report":s.wealth.compare(user_id,normalized["product_ids"]),"actions":[]}
+                    if kind == "BALANCE_QUERY":
+                        return {"report":{"balance":s.transaction.balance(user_id,account_id),"account":account},"actions":[]}
+                    if kind == "SPENDING_QUERY":
+                        return {"report":s.finance.query(user_id,account_id,normalized["months"],normalized.get("category"),
+                                                         normalized.get("merchant"),normalized.get("compare",True)),"actions":[]}
+                    if kind == "PORTFOLIO_QUERY":
+                        positions=[s.gateway.read("wealth",user_id,"portfolio.get",account_id=account_id,product_id=p["id"])
+                                   | {"name":p["name"],"risk_level":p["risk_level"]} for p in s.wealth.products(user_id)]
+                        return {"report":{"positions":positions},"actions":[]}
+                    if kind == "RENEWAL_QUERY":
+                        return {"report":s.events.reminders(user_id,account_id),"actions":[]}
                     if kind == "SPLIT_REQUEST":
                         payees = [s.transaction.recipient(user_id,name) for name in normalized["participants"]]
                         if len({payee["id"] for payee in payees}) != len(payees):

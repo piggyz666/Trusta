@@ -408,6 +408,10 @@ def main():
     server = create_server(service, token)
     print("TRUSTA V1 — 本地虚拟银行")
     print("Trusted Communication: V3 / ECDSA-P256-SHA256" if config.communication_version == 3 else "Trusted Communication: V2 / HMAC-SHA256 (explicit compatibility profile)")
+    chat = getattr(service, "chat", None)
+    if chat is not None:
+        mode = "DeepSeek（" + chat.llm.model + "）" if getattr(chat.llm, "available", False) else "规则兜底（未配置 DEEPSEEK_API_KEY）"
+        print("对话理解：" + mode)
     print(f"打开 http://127.0.0.1:8000/#token={token}")
     print("Ctrl+C 停止；任务和银行状态将保留。")
     try:

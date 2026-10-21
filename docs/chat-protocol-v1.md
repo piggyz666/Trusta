@@ -570,3 +570,19 @@ TRUSTA_APP_URL=http://127.0.0.1:8000/  # 红色操作卡片上“去 APP 验证�
 - AA 收款目前只生成收款请求汇总；项目已有的真实分账模块要求每个参与人都是 TRUSTA 注册客户，演示通讯录里的联系人不是，因此对话入口未接入。
 - 规则兜底不理解日期和周期，心愿金计划也需要模型；这些情况下会追问。
 - 模型评测集为团队自拟，不能代表评委的全部说法。
+
+## 16. 可信通信可见化与工具（2026-10-21）
+
+- 所有对话回答（包括余额、消费查询、持仓、续费提醒）都以多 Agent 任务执行，产生签名消息和交接证据。
+- `GET /api/chat/sessions/{sid}/trace/{message_id}`：每个任务新增 `agent_messages`，逐条重新验签（`message_signature_valid`、`evidence_signature_valid`、`causal_parents_known`）。
+- `GET /api/chat/sessions/{sid}/evidence/{task_id}`：`{bundle, public_registry, verify_with}`，可离线验证。
+- 意图中的 `origin` 字段（原话哈希、理解方式、模型、工具调用哈希）被 Supervisor 的签名 REQUEST 覆盖。
+- 详细检查结论：`docs/trusted-agent-communication-review.md`。
+
+### 命令行测试工具
+
+```powershell
+.\start.ps1                              # 一次启动：API 服务 + 审计检查点 worker + 定时计划 worker
+python -m scripts.chat_cli                # 另开窗口，连接正在运行的服务（真实数据库）
+python -m scripts.chat_cli --sandbox      # 或：进程内启动 + 临时数据库，不影响 data/
+```

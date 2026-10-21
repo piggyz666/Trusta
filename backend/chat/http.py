@@ -22,6 +22,8 @@ def handle_get(handler, chat, path, user_id):
         return handler.reply(200, public_matrix())
     if len(parts) == 4 and parts[:3] == ["api", "chat", "sessions"]:
         return handler.reply(200, chat.get(parts[3], user_id))
+    if len(parts) == 6 and parts[:3] == ["api", "chat", "sessions"] and parts[4] == "evidence":
+        return handler.reply(200, chat.evidence_bundle(parts[3], user_id, parts[5]))
     if len(parts) == 6 and parts[:3] == ["api", "chat", "sessions"] and parts[4] == "trace":
         return handler.reply(200, chat.trace(parts[3], user_id, parts[5]))
     return handler.reply(404, {"error": "NOT_FOUND"})

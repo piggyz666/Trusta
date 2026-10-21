@@ -403,49 +403,31 @@ class ChatService:
                     texts.append("请完成下面 5 道题，我会根据结果更新你的风险等级（需要你确认）。")
                     emit("tool.finished", {"tool": step["tool"], "status": "OK"})
                     continue
-                if step.get("op") == "BALANCE":
-                    balance = self.s.transaction.balance(owner, step["account_id"])
-                    display = next((a["display"] for a in catalog["accounts"] if a["id"] == step["account_id"]), step["account_id"])
-                    card, line = renderer.balance_card(balance, display)
-                    cards.append(card), texts.append(line)
-                elif step.get("op") == "SPENDING_QUERY":
-                    result = self.s.finance.query(owner, account, step["months"], step["category"], step["merchant"], step["compare"])
-                    self.s.audit.append(None, None, "CHAT_READ", "finance", {"session_id": body["session_id"], "op": "SPENDING_QUERY",
-                                                                             "evidence_hash": digest(result["evidence_refs"])})
-                    card, line = renderer.spending_query_card(result)
-                    cards.append(card), texts.append(line)
-                elif step.get("op") == "PORTFOLIO":
-                    positions = []
-                    for product in self.s.wealth.products(owner):
-                        position = self.s.gateway.read("wealth", owner, "portfolio.get", account_id=step["account_id"], product_id=product["id"])
-                        positions.append(position | {"name": product["name"], "risk_level": product["risk_level"]})
-                    card, line = renderer.portfolio_card(positions)
-                    cards.append(card), texts.append(line)
-                elif step.get("op") == "REMINDERS":
-                    card, line = renderer.reminders_card(self.s.events.reminders(owner, step["account_id"]))
-                    cards.append(card), texts.append(line)
-                else:
-                    if step["kind"] == "propose":
-                        self._supersede(body, owner, step["normalized"])
-                    task = self._run(goal, owner, account, step["normalized"])
-                    node["task_id"] = task["task_id"]
-                    new_cards, new_texts = renderer.task_cards(task, step)
-                    cards.extend(new_cards), texts.extend(new_texts)
-                    for card in new_cards:
-                        if card["type"] == "confirm":
-                            if step.get("memo"):
-                                card["fields"].insert(2, {"label": "备注", "value": step["memo"]})
-                            entry = {"task_id": task["task_id"], "action_id": card["action_id"], "card": card, "memo": step.get("memo"),
-                                     "task_type": step["normalized"]["task_type"], "key": self._key(step["normalized"])}
-                            body["pending"].append(entry)
-                            node["action_ids"].append(card["action_id"])
-                            node["status"] = "AWAITING_CONFIRMATION"
-                            if step["normalized"].get("operation") == "FUND_LOCK":
-                                last_lock = entry
-                    if task.get("status") in {"BLOCKED", "FAILED"} and not node["action_ids"]:
-                        node["status"] = "FAILED"
-                    elif task.get("status") == "WAITING_USER" and not node["action_ids"]:
-                        node["status"] = "NEEDS_INPUT"
+                if step["kind"] == "propose":
+                    self._supersede(body, owner, step["normalized"])
+                origin = {"channel": body["channel"], "session_id": body["session_id"], "message_id": body["messages"][-1]["message_id"],
+                          "utterance_hash": trace["text_hash"], "understanding": mode,
+                          "model": getattr(self.llm, "model", None) if mode == "deepseek" else None,
+                          "tool_calls_hash": digest(trace["calls"])}
+                task = self._run(goal, owner, account, step["normalized"], origin)
+                node["task_id"] = task["task_id"]
+                new_cards, new_texts = renderer.task_cards(task, step)
+                cards.extend(new_cards), texts.extend(new_texts)
+                for card in new_cards:
+                    if card["type"] == "confirm":
+                        if step.get("memo"):
+                            card["fields"].insert(2, {"label": "备注", "value": step["memo"]})
+                        entry = {"task_id": task["task_id"], "action_id": card["action_id"], "card": card, "memo": step.get("memo"),
+                                 "task_type": step["normalized"]["task_type"], "key": self._key(step["normalized"])}
+                        body["pending"].append(entry)
+                        node["action_ids"].append(card["action_id"])
+                        node["status"] = "AWAITING_CONFIRMATION"
+                        if step["normalized"].get("operation") == "FUND_LOCK":
+                            last_lock = entry
+                if task.get("status") in {"BLOCKED", "FAILED"} and not node["action_ids"]:
+                    node["status"] = "FAILED"
+                elif task.get("status") == "WAITING_USER" and not node["action_ids"]:
+                    node["status"] = "NEEDS_INPUT"
                 emit("tool.finished", {"tool": step["tool"], "status": "OK"})
             except Rejected as exc:
                 node["status"] = "FAILED"
@@ -482,8 +464,12 @@ class ChatService:
         from backend.chat.cards import error_text
         return error_text([code]) + "。"
 
-    def _run(self, goal, owner, account, normalized):
+    def _run(self, goal, owner, account, normalized, origin=None):
+        """Hand a validated intent to the six-agent runtime. `origin` (provenance of the interpretation) rides inside the
+        normalized intent, so the Supervisor's signed REQUEST message attests where the request came from."""
         from backend.runtime.banking_plan import TASKS
+        if origin:
+            normalized = normalized | {"origin": origin}
         if normalized["task_type"] in TASKS:
             return self.s.banking.create(goal, owner, account, normalized)
         return self.s._create_task(goal, owner, account, normalized)
@@ -866,9 +852,54 @@ class ChatService:
             events = [json.loads(r["body"]) for r in self.s.db.rows(
                 "SELECT body FROM audit_events WHERE json_extract(body,'$.task_id')=? ORDER BY seq", (task_id,))]
             tasks.append({"task_id": task_id, "task_type": task["task_type"], "status": task["status"], "actions": actions,
+                          "agent_messages": self._agent_messages(task_id),
                           "audit_events": [{k: e[k] for k in ("audit_event_id", "event_type", "actor", "timestamp", "event_hash")} for e in events]})
         return {"session_id": session_id, "message_id": message_id, "trace": record, "trace_anchored_in_audit": anchored,
                 "tasks": tasks, "audit_chain_valid": self.s.audit.verify_chain()}
+
+    def _agent_messages(self, task_id):
+        """Every inter-agent message of a task, re-verified now: the sender's ECDSA signature over the V3 envelope and the
+        runtime's countersignature over the causal handoff evidence (parents = hashes of earlier evidence)."""
+        import json
+        from backend.runtime.handoff_evidence import DOMAIN as EVIDENCE_DOMAIN
+        from backend.security.crypto import verify_object
+        from backend.security.message_v3 import MESSAGE_DOMAIN
+        registry = self.s.crypto_registry
+        if registry is None:
+            return []
+        def valid(key_id, domain, body, signature):
+            try:
+                with self.s.db.transaction() as conn:
+                    key = registry._key(key_id, conn)
+                verify_object(key["public_key"], domain, body, signature)
+                return True
+            except Rejected:
+                return False
+        out, previous = [], []
+        for row in self.s.db.rows("SELECT body FROM agent_handoff_evidence WHERE task_id=? ORDER BY rowid", (task_id,)):
+            stored = json.loads(row["body"])
+            evidence = stored["evidence"]
+            message = evidence["message"]
+            out.append({"step_id": message["step_id"], "sender": message["sender_agent"], "receiver": message["receiver_agent"],
+                        "type": message["message_type"], "sender_identity": message["sender_identity"], "key_id": message["sender_key_id"],
+                        "payload_hash": message["payload_hash"], "capability_snapshot_hash": message["capability_snapshot_hash"],
+                        "issued_at": message["issued_at"], "nonce": message["nonce"],
+                        "message_signature_valid": valid(message["sender_key_id"], MESSAGE_DOMAIN,
+                                                         {k: v for k, v in message.items() if k != "signature"}, message["signature"]),
+                        "evidence_signature_valid": valid(evidence["signer_key_id"], EVIDENCE_DOMAIN,
+                                                          {k: v for k, v in evidence.items() if k != "signature"}, evidence["signature"]),
+                        "causal_parents_known": all(p in previous for p in evidence["parents"])})
+            previous.append(digest(stored))  # the runtime links each handoff to the hash of earlier stored evidence
+        return out
+
+    def evidence_bundle(self, session_id, owner, task_id):
+        """Offline-verifiable bundle (scripts/verify_handoff_evidence.py) + the public registry to pin out of band."""
+        body = self.store.get(session_id, owner)
+        linked = {step["node"].get("task_id") for turn in body["turns"].values() for step in (turn.get("trace") or {}).get("steps", [])}
+        if task_id not in linked:
+            raise Rejected("TRACE_NOT_FOUND")
+        return {"bundle": self.s.handoffs.export(task_id, owner), "public_registry": self.s.crypto_registry.snapshot(),
+                "verify_with": "python -m scripts.verify_handoff_evidence bundle.json --trusted-registry registry.json"}
 
     def send_sms(self, session_id, owner, action_id):
         """Simulated SMS second factor for a RED card. The code is bound to that card's authorization only."""

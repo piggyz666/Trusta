@@ -190,7 +190,7 @@ class ToolCallValidator:
         account = a.get("account_id", self.account_id)
         if account not in {x["id"] for x in self.catalog.get("accounts", [])}:
             account = self.account_id
-        return [{"op": "BALANCE", "account_id": account}]
+        return [{"normalized": {"task_type": "BALANCE_QUERY", "source_account_id": account, "needs_clarification": False}}]
 
     def _analyze_spending(self, a):
         if "year" in a:
@@ -213,11 +213,11 @@ class ToolCallValidator:
             if _norm(a["merchant"]["text"]) not in _norm(a["merchant"]["span"]):
                 raise Clarify("MERCHANT_NOT_GROUNDED", "other", "是哪个商户？")
             merchant = a["merchant"]["text"].strip()
-        return [{"op": "SPENDING_QUERY", "months": months, "category": a.get("category"), "merchant": merchant,
-                 "compare": a.get("compare", True)}]
+        return [{"normalized": {"task_type": "SPENDING_QUERY", "months": months, "category": a.get("category"), "merchant": merchant,
+                                "compare": a.get("compare", True), "needs_clarification": False}}]
 
     def _get_portfolio(self, a):
-        return [{"op": "PORTFOLIO", "account_id": self.account_id}]
+        return [{"normalized": {"task_type": "PORTFOLIO_QUERY", "needs_clarification": False}}]
 
     def _recommend_products(self, a):
         return [{"normalized": {"task_type": "WEALTH_RECOMMENDATION", "needs_clarification": False}}]
@@ -239,7 +239,7 @@ class ToolCallValidator:
         return [{"normalized": {"task_type": "CARD_MANAGEMENT", "operation": "LIST", "needs_clarification": False}}]
 
     def _renewal_reminders(self, a):
-        return [{"op": "REMINDERS", "account_id": self.account_id}]
+        return [{"normalized": {"task_type": "RENEWAL_QUERY", "needs_clarification": False}}]
 
     # ---- proposal tools ----------------------------------------------------------------------
     def _propose_transfer(self, a):

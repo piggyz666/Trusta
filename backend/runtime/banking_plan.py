@@ -3,11 +3,15 @@ from backend.domain import Rejected
 
 TASKS = {"CARD_MANAGEMENT", "SUBSCRIPTION_MANAGEMENT", "DIRECT_DEBIT_MANAGEMENT", "PRODUCT_COMPARE",
          "INVESTMENT_PURCHASE", "INVESTMENT_REDEEM", "CROSS_SCENARIO", "SCHEDULED_TRANSFER", "SPLIT_REQUEST",
-         "WISH_FUND_MANAGEMENT", "RISK_ASSESSMENT", "PAYEE_MANAGEMENT"}
+         "WISH_FUND_MANAGEMENT", "RISK_ASSESSMENT", "PAYEE_MANAGEMENT",
+         # Read-only chat answers also run as signed agent tasks (no action branch is ever added).
+         "BALANCE_QUERY", "SPENDING_QUERY", "PORTFOLIO_QUERY", "RENEWAL_QUERY"}
 OWNERS = {"CARD_MANAGEMENT":"service", "SUBSCRIPTION_MANAGEMENT":"service", "DIRECT_DEBIT_MANAGEMENT":"service",
           "PRODUCT_COMPARE":"wealth", "INVESTMENT_PURCHASE":"wealth", "INVESTMENT_REDEEM":"wealth",
           "CROSS_SCENARIO":"finance", "SCHEDULED_TRANSFER":"transaction", "SPLIT_REQUEST":"transaction",
-          "WISH_FUND_MANAGEMENT":"service", "RISK_ASSESSMENT":"wealth", "PAYEE_MANAGEMENT":"transaction"}
+          "WISH_FUND_MANAGEMENT":"service", "RISK_ASSESSMENT":"wealth", "PAYEE_MANAGEMENT":"transaction",
+          "BALANCE_QUERY":"transaction", "SPENDING_QUERY":"finance", "PORTFOLIO_QUERY":"wealth", "RENEWAL_QUERY":"service"}
+READ_ONLY_TASKS = {"BALANCE_QUERY", "SPENDING_QUERY", "PORTFOLIO_QUERY", "RENEWAL_QUERY"}
 
 
 def initial_plan(kind):

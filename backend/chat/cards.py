@@ -253,6 +253,13 @@ class CardRenderer:
     def report_card(self, task):
         kind, result = task.get("task_type"), task["result"]
         card = {"type": "report", "card_id": "c_" + uid()[:8]}
+        signed = {"BALANCE_QUERY": lambda: self.balance_card(result["balance"], self._lookup("accounts", result["balance"]["id"])),
+                  "SPENDING_QUERY": lambda: self.spending_query_card(result),
+                  "PORTFOLIO_QUERY": lambda: self.portfolio_card(result["positions"]),
+                  "RENEWAL_QUERY": lambda: self.reminders_card(result)}
+        if kind in signed:
+            produced, text = signed[kind]()
+            return produced | {"_text": text, "task_id": task["task_id"]}
         if kind == "BILL_ANALYSIS":
             summary = result["summary"]
             period = result.get("month") or f"{result.get('year')}年"

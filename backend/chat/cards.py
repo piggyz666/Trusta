@@ -46,6 +46,28 @@ RISK_LABELS = {1: "保守型", 2: "稳健型", 3: "平衡型", 4: "成长型", 5
 TERMINAL_OK = {"COMPLETED", "SUCCEEDED", "SETTLED"}
 
 
+REPORT_BASIS = {
+    "BALANCE": [("核心账务实时余额", "BANK_DATA")],
+    "SPENDING_SUMMARY": [("账户已入账交易流水（不含待入账）", "BANK_DATA"), ("商户类别分类规则", "RULE")],
+    "ANNUAL_REPORT": [("全年已入账交易流水", "BANK_DATA"), ("商户类别分类规则", "RULE")],
+    "SPENDING_QUERY": [("账户已入账交易流水（不含待入账）", "BANK_DATA"), ("商户类别分类规则", "RULE")],
+    "PORTFOLIO": [("理财持仓登记（按申购本金，不含收益）", "BANK_DATA")],
+    "PRODUCT_LIST": [("产品风险等级 ≤ 你的风险测评等级（适当性规则）", "RULE"), ("理财产品目录", "BANK_DATA")],
+    "PRODUCT_COMPARE": [("理财产品目录（不预测收益）", "BANK_DATA")],
+    "SUBSCRIPTIONS": [("订阅/代扣签约登记与周期扣款流水", "BANK_DATA")],
+    "RENEWAL_REMINDERS": [("订阅/代扣下次扣费日", "BANK_DATA")],
+    "WISH_FUNDS": [("心愿金子账户", "BANK_DATA")],
+    "CARDS": [("银行卡状态、限额与交易开关", "BANK_DATA")],
+}
+
+
+def report_sources(report_type, task_id):
+    """“依据”: where every number on a report card came from. All bank data here is read by an Agent through a signed,
+    audited request; the evidence bundle for task_id lets anyone re-verify it offline."""
+    basis = [{"label": label, "kind": kind} for label, kind in REPORT_BASIS.get(report_type, [("银行系统查询结果", "BANK_DATA")])]
+    return basis + [{"label": "签名证据包（可离线验证）", "kind": "EVIDENCE", "ref": task_id}]
+
+
 def error_text(codes):
     codes = [c for c in codes or [] if c]
     if not codes:
@@ -201,6 +223,7 @@ class CardRenderer:
         if task.get("result") and (status == "COMPLETED" or task.get("task_type") == "CROSS_SCENARIO"):
             report = self.report_card(task)
             if report:
+                report["sources"] = report_sources(report.get("report_type"), task["task_id"])
                 cards.append(report)
                 texts.append(report.pop("_text"))
         return cards, texts

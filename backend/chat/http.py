@@ -20,6 +20,9 @@ def handle_get(handler, chat, path, user_id):
     if parts == ["api", "chat", "permissions"]:
         from backend.security.permission_matrix import public_matrix
         return handler.reply(200, public_matrix())
+    if parts == ["api", "chat", "llm-usage"]:
+        usage = chat.store.llm_usage(user_id)
+        return handler.reply(200, usage | {"daily_call_limit": chat.LLM_DAILY_CALLS})
     if len(parts) == 4 and parts[:3] == ["api", "chat", "sessions"]:
         return handler.reply(200, chat.get(parts[3], user_id))
     if len(parts) == 6 and parts[:3] == ["api", "chat", "sessions"] and parts[4] == "evidence":
@@ -93,6 +96,8 @@ def _stream(handler, chat, args):
             handler.send_header("Cache-Control", "no-store")
             handler.send_header("X-Content-Type-Options", "nosniff")
             handler.send_header("Connection", "close")
+            from backend.security.http_headers import security_headers
+            security_headers(handler)
             handler.end_headers()
             started["value"] = True
         payload = canonical(data) if not isinstance(data, str) else json.dumps(data, ensure_ascii=False)

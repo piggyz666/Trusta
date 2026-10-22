@@ -116,13 +116,16 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(steps[0]["normalized"]["target_id"], "card-demo")
 
     def test_schedule_requires_explicit_time(self):
+        from datetime import datetime, timedelta
+        from backend.business import CHINA
+        iso = (datetime.now(CHINA) + timedelta(days=7)).replace(hour=9, minute=0, second=0, microsecond=0).isoformat()
         with self.assertRaises(Clarify) as caught:
             self.v("下周五给张三转100").validate("propose_transfer", {"payee": {"value": "张三", "span": "张三"}, "amount": {"value": "100", "span": "100"},
-                                                                     "when": {"iso": "2026-10-30T09:00:00+08:00", "span": "下周五"}})
+                                                                     "when": {"iso": iso, "span": "下周五"}})
         self.assertEqual(caught.exception.code, "TIME_OF_DAY_MISSING")
         step = self.v("下周五上午9点给张三转100").validate("propose_transfer", {
             "payee": {"value": "张三", "span": "张三"}, "amount": {"value": "100", "span": "100"},
-            "when": {"iso": "2026-10-30T09:00:00+08:00", "span": "下周五上午9点"}})[0]
+            "when": {"iso": iso, "span": "下周五上午9点"}})[0]
         self.assertEqual(step["normalized"]["task_type"], "SCHEDULED_TRANSFER")
 
     def test_controls_merge_current_state(self):

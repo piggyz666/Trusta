@@ -206,6 +206,21 @@ def wealth_calls(text):
     return []
 
 
+KNOWLEDGE_RULES = [
+    (r"(限额|额度).{0,6}(多少|是什么|怎么算|规则)|(转账|每天|单日|当日).{0,6}(最多|上限)", "TRANSFER_LIMITS"),
+    (r"(权限|风险).{0,2}(分级|等级划分)|绿色.{0,4}黄色|红色.{0,4}操作", "PERMISSION_TIERS"),
+    (r"(验证码|动态码|认证器|TOTP).{0,8}(怎么|是什么|有效|多久|几次)", "VERIFICATION"),
+    (r"确认卡.{0,6}(多久|有效|过期)", "CONFIRMATION_EXPIRY"),
+    (r"(哪些|什么).{0,6}(能|可以)(撤销|撤回|回退)", "UNDO_POLICY"),
+    (r"(什么是|啥是)心愿金|心愿金是(什么|啥)", "WISH_FUND"),
+    (r"冻结.{0,4}挂失.{0,6}(区别|不同|差别)|挂失.{0,4}冻结.{0,6}(区别|不同|差别)", "CARD_LOSS"),
+    (r"(能|会)看到我.{0,6}(什么|哪些)|(你|AI).{0,4}(知道|获取|看到|看得到)我的(余额|数据|信息|流水)", "DATA_PRIVACY"),
+    (r"(怎么|如何)(防|识别).{0,2}诈骗|安全账户是(什么|真的)", "ANTI_FRAUD"),
+]
+PAGE_WORDS = {"转账": "transfer", "收款人": "payees", "账单": "bills", "理财": "wealth", "银行卡": "cards", "卡片": "cards",
+              "订阅": "subscriptions", "代扣": "subscriptions", "心愿金": "wish_funds", "安全设置": "security", "操作记录": "audit"}
+
+
 def rule_calls(text, catalog, pending_payee=None):
     """Return tool calls or [] when nothing is recognised."""
     text = text.strip()
@@ -215,6 +230,12 @@ def rule_calls(text, catalog, pending_payee=None):
         return [_call("smalltalk", kind="THANKS")]
     if re.search(r"你能做什么|你会什么|有什么功能", text):
         return [_call("smalltalk", kind="CAPABILITIES")]
+    for pattern, topic in KNOWLEDGE_RULES:
+        if re.search(pattern, text):
+            return [_call("knowledge", topic=topic)]
+    page = re.search(r"(?:打开|进入|带我去|跳转到?)(转账|收款人|账单|理财|银行卡|卡片|订阅|代扣|心愿金|安全设置|操作记录)(?:页面?|页|界面)?$", text)
+    if page:
+        return [_call("navigate", page=PAGE_WORDS[page.group(1)])]
     calls = []
     for clause in re.split(r"[，,；;。]?\s*(?:然后|再|顺便|并且|接着)\s*|[；;]", text):
         if not clause:

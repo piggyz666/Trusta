@@ -4,15 +4,17 @@ This layer owns dialogue state only. Every proposal is created by the existing
 runtime and every decision goes through the existing per-action authorization
 (hash-bound, TTL, strong auth, replay rules unchanged).
 """
+import os
 import re
+import threading
 import time
 from backend.chat import guard
 from backend.chat.cards import CardRenderer, OPERATIONS
-from backend.chat.llm import DeepSeekToolClient, LLMUnavailable, build_system_prompt
+from backend.chat.llm import DeepSeekToolClient, LLMUnavailable, build_system_prompt, redact_for_model
 from backend.chat.store import ChatStore
 from backend.chat.tools import TOOLS
 from backend.chat.validator import Clarify, InjectionDetected, ToolCallValidator
-from backend.domain import Rejected, digest
+from backend.domain import Rejected, digest, uid
 
 CONFIRM_WORDS = re.compile(r"^(确认|确定|好的?|可以|没问题|是的?|对的?|ok|okay|yes|执行吧?|转吧|同意)[。.!！~～]*$", re.I)
 CANCEL_WORDS = re.compile(r"^(算了|不要了|不用了|取消(吧|刚才的)?|不转了|先不(了|转了)?|别转了|停)[。.!！~～]*$")
@@ -38,6 +40,7 @@ class ChatService:
         self.s = service
         self.store = ChatStore(service.db, service.audit)
         self.llm = llm_client if llm_client is not None else DeepSeekToolClient()
+        self._llm_gate = threading.BoundedSemaphore(max(1, int(os.environ.get("TRUSTA_CHAT_LLM_CONCURRENCY", "4"))))
 
     # ---- catalogue ---------------------------------------------------------------------------
     def catalog(self, owner):
@@ -362,12 +365,24 @@ class ChatService:
                 clarifications.append(Clarify("MODEL_ASKED", args["slot"], args["question"], args.get("options")))
             elif name == "smalltalk":
                 texts.append(SMALLTALK[args["kind"]])
+            elif name == "knowledge":
+                from backend.chat import knowledge
+                answer, sources = knowledge.answer(args["topic"], self.s.config, [OPERATIONS.get(k, k) for k in self.IRREVERSIBLE])
+                cards.append({"type": "knowledge", "card_id": "c_kb_" + uid()[:8], "topic": args["topic"],
+                              "title": knowledge.TITLES[args["topic"]], "text": answer, "sources": sources})
+                texts.append(answer)
+            elif name == "navigate":
+                from backend.chat import knowledge
+                cards.append(knowledge.navigate_card(args["page"], "c_nav_" + uid()[:8]))
+                texts.append(f"已为你找到“{knowledge.PAGES[args['page']]}”入口，点击下方按钮打开。没有发起任何交易")
             elif name == "out_of_scope":
                 texts.append("这个我暂时帮不上忙。" + SMALLTALK["CAPABILITIES"])
         # 5. execute reads, register proposals
         renderer = CardRenderer(self.s, owner, catalog)
         goal = text
         plan, last_lock, nodes = None, None, []
+        balance_gate, queued_now = None, []
+        superseded = []
         for index, step in enumerate([s for s in steps if s["kind"] in {"read", "propose", "plan"}]):
             emit("tool.started", {"tool": step["tool"]})
             node = {"id": f"n{len(nodes) + 1}", "title": self._step_title(step), "kind": "WRITE" if step["kind"] != "read" else "READ",
@@ -403,12 +418,22 @@ class ChatService:
                     texts.append("请完成下面 5 道题，我会根据结果更新你的风险等级（需要你确认）。")
                     emit("tool.finished", {"tool": step["tool"], "status": "OK"})
                     continue
-                if step["kind"] == "propose":
-                    self._supersede(body, owner, step["normalized"])
                 origin = {"channel": body["channel"], "session_id": body["session_id"], "message_id": body["messages"][-1]["message_id"],
                           "utterance_hash": trace["text_hash"], "understanding": mode,
                           "model": getattr(self.llm, "model", None) if mode == "deepseek" else None,
                           "tool_calls_hash": digest(trace["calls"])}
+                if (step["kind"] == "propose" and self._moves_balance(step["normalized"]) and balance_gate is not None
+                        and not step.get("has_plan")):
+                    # Sequential dependency: this step's preconditions (balance) are only meaningful after the previous
+                    # money movement has executed. Its proposal -- and its authorization clock -- start then.
+                    node["status"], node["after"] = "QUEUED", balance_gate
+                    body.setdefault("queued", []).append({"after": balance_gate if not queued_now else None, "node_id": node["id"],
+                                                          "step": step, "goal": goal, "account": account, "origin": origin})
+                    queued_now.append(node["title"])
+                    emit("tool.finished", {"tool": step["tool"], "status": "QUEUED"})
+                    continue
+                if step["kind"] == "propose":
+                    superseded.extend(self._supersede(body, owner, step["normalized"]))
                 task = self._run(goal, owner, account, step["normalized"], origin)
                 node["task_id"] = task["task_id"]
                 new_cards, new_texts = renderer.task_cards(task, step)
@@ -424,6 +449,11 @@ class ChatService:
                         node["status"] = "AWAITING_CONFIRMATION"
                         if step["normalized"].get("operation") == "FUND_LOCK":
                             last_lock = entry
+                        if self._moves_balance(step["normalized"]):
+                            balance_gate = card["action_id"]
+                        for item in body.get("queued", []):
+                            if item["after"] in superseded:
+                                item["after"] = card["action_id"]  # "改成800": the follow-up now waits for the new card
                 if task.get("status") in {"BLOCKED", "FAILED"} and not node["action_ids"]:
                     node["status"] = "FAILED"
                 elif task.get("status") == "WAITING_USER" and not node["action_ids"]:
@@ -435,6 +465,9 @@ class ChatService:
                 label = (OPERATIONS.get(step["normalized"]["task_type"], "这项操作") if step.get("normalized")
                          else "计划" if step["kind"] == "plan" else "查询")
                 texts.append(f"{label}没有完成：" + self._error(exc.code))
+        if queued_now:
+            texts.append("“" + "”、“".join(queued_now) + "”要用到上一步执行后的余额，会在上一步完成后再生成确认卡；"
+                         "上一步被拒绝或失败时自动取消")
         if plan is None and len(nodes) >= 2:
             # Multi-intent turn: show it as an ordered plan; each write node is still decided card by card.
             plan = {"plan_id": "p_" + digest([body["session_id"], body["messages"][-1]["message_id"]])[:10], "goal": text[:60], "nodes": nodes}
@@ -482,15 +515,17 @@ class ChatService:
         """A changed proposal for the same target replaces the old undecided one (new hash, new card)."""
         key, kind = self._key(normalized), normalized["task_type"]
         kinds = {kind} | ({"TRANSFER", "SCHEDULED_TRANSFER"} if kind in {"TRANSFER", "SCHEDULED_TRANSFER"} else set())
-        keep = []
+        keep, replaced = [], []
         for entry in body["pending"]:
             if entry["task_type"] in kinds and entry["key"] == key:
+                replaced.append(entry["action_id"])
                 self._cancel_task(entry["task_id"], owner, entry.get("linked_events"))
                 self.s.audit.append(entry["task_id"], entry["action_id"], "CHAT_PROPOSAL_SUPERSEDED", "chat",
                                     {"session_id": body["session_id"]})
             else:
                 keep.append(entry)
         body["pending"] = keep
+        return replaced
 
     def _cancel_task(self, task_id, owner, linked_events=()):
         try:
@@ -512,7 +547,66 @@ class ChatService:
             self._cancel_task(task_id, owner, [e for p in body["pending"] if p["task_id"] == task_id for e in p.get("linked_events", [])])
             count += sum(1 for e in body["pending"] if e["task_id"] == task_id)
         body["pending"] = []
+        count += self._drop_queue(body, None, everything=True)
         return count
+
+    BALANCE_OPERATIONS = {"TRANSFER", "INVESTMENT_PURCHASE", "INVESTMENT_REDEEM", "FUND_LOCK", "FUND_RELEASE"}
+
+    @classmethod
+    def _moves_balance(cls, normalized):
+        return (normalized.get("operation") or normalized.get("task_type")) in cls.BALANCE_OPERATIONS \
+            or normalized.get("task_type") == "TRANSFER"
+
+    @staticmethod
+    def _drop_queue(body, after, everything=False):
+        """Cancel queued follow-ups that wait on `after` (and the ones chained behind them)."""
+        queue, keep, dropped, chained = body.get("queued", []), [], [], False
+        for item in queue:
+            if everything or item["after"] == after or (chained and item["after"] is None):
+                dropped.append(item)
+                chained = True
+            else:
+                keep.append(item)
+                chained = False
+        body["queued"] = keep
+        ids = {item["node_id"] for item in dropped}
+        for node in (body.get("plan") or {}).get("nodes", []):
+            if node["id"] in ids and node["status"] == "QUEUED":
+                node["status"] = "SKIPPED"
+        return len(dropped)
+
+    def _release_queue(self, body, owner, action_id):
+        """The gating action succeeded: propose the next queued step against the post-execution state."""
+        queue = body.get("queued", [])
+        index = next((i for i, item in enumerate(queue) if item["after"] == action_id), None)
+        if index is None:
+            return [], []
+        item = queue.pop(index)
+        node = next((n for n in (body.get("plan") or {}).get("nodes", []) if n["id"] == item["node_id"]), {})
+        follower = queue[index] if index < len(queue) and queue[index]["after"] is None else None
+        step = item["step"]
+        try:
+            self._supersede(body, owner, step["normalized"])
+            task = self._run(item["goal"], owner, item["account"], step["normalized"], item["origin"] | {"released_after": action_id})
+        except Rejected as exc:
+            task, cards, texts = None, [], [f"后续步骤“{node.get('title', '操作')}”没有生成：" + self._error(exc.code)]
+        else:
+            cards, texts = CardRenderer(self.s, owner, self.catalog(owner)).task_cards(task, step)
+            node["task_id"] = task["task_id"]
+            texts = ["下一步：" + (texts[0] if texts else "请确认。")] + texts[1:]
+        confirm = [c for c in cards if c["type"] == "confirm"]
+        for card in confirm:
+            body["pending"].append({"task_id": task["task_id"], "action_id": card["action_id"], "card": card, "memo": step.get("memo"),
+                                    "task_type": step["normalized"]["task_type"], "key": self._key(step["normalized"])})
+            node.setdefault("action_ids", []).append(card["action_id"])
+        node["status"] = "AWAITING_CONFIRMATION" if confirm else "FAILED"
+        if follower is not None:
+            follower["after"] = confirm[-1]["action_id"] if confirm else "__dropped__"
+            if not confirm:
+                self._drop_queue(body, "__dropped__")
+        self.s.audit.append(task and task["task_id"], None, "CHAT_QUEUED_STEP_RELEASED", "chat",
+                            {"session_id": body["session_id"], "after_action": action_id, "proposed": bool(confirm)})
+        return cards, texts
 
     def _risk(self, body, owner, hit, tools, mode="guard"):
         event = self.s.audit.append(None, None, "CHAT_RISK_FLAGGED", "chat",
@@ -535,6 +629,8 @@ class ChatService:
 
     # ---- understanding -----------------------------------------------------------------------
     BREAKER_FAILURES, BREAKER_WINDOW, BREAKER_OPEN_SECONDS = 3, 60, 120
+    LLM_GATE_WAIT = 2.0
+    LLM_DAILY_CALLS = int(os.environ.get("TRUSTA_CHAT_LLM_DAILY_CALLS", "300"))
 
     def _understand(self, body, owner, text, catalog):
         if not getattr(self.llm, "available", False):
@@ -542,15 +638,25 @@ class ChatService:
         now = time.time()
         if now < getattr(self, "_breaker_open_until", 0):
             raise LLMUnavailable("LLM_CIRCUIT_OPEN")  # model kept failing: serve from rules, retry after cool-down
+        # Concurrency gate: a slow upstream must not pin every server thread; overflow is served by the rules engine.
+        if not self._llm_gate.acquire(timeout=self.LLM_GATE_WAIT):
+            raise LLMUnavailable("LLM_BUSY")
         try:
+            # Per-owner daily call budget (persisted): bounds cost and abuse; the bank keeps working on rules.
+            if not self.store.reserve_llm_call(owner, self.LLM_DAILY_CALLS):
+                raise LLMUnavailable("LLM_BUDGET_EXHAUSTED")
             return self._understand_once(body, owner, text, catalog)
         except LLMUnavailable as exc:
+            if exc.code in {"LLM_BUDGET_EXHAUSTED"}:
+                raise
             failures = [t for t in getattr(self, "_llm_failures", []) if now - t < self.BREAKER_WINDOW] + [now]
             self._llm_failures = failures
             if len(failures) >= self.BREAKER_FAILURES:
                 self._breaker_open_until, self._llm_failures = now + self.BREAKER_OPEN_SECONDS, []
                 self.s.audit.append(None, None, "CHAT_LLM_CIRCUIT_OPEN", "chat", {"reason": exc.code, "seconds": self.BREAKER_OPEN_SECONDS})
             raise
+        finally:
+            self._llm_gate.release()
 
     def _understand_once(self, body, owner, text, catalog):
         history = []
@@ -560,11 +666,13 @@ class ChatService:
                 if message is not body["messages"][-1] and guard.inspect(content):
                     # Earlier blocked attempts (or bank data echoed in a reply) are not replayed to the model.
                     content = "[已拦截的消息]" if message["role"] == "user" else "[系统回复，内容已省略]"
-                history.append({"role": message["role"], "content": content})
+                history.append({"role": message["role"], "content": redact_for_model(content)})
         pending = "；".join(p["card"]["title"] + "（" + "，".join(f["value"] for f in p["card"]["fields"][:2]) + "）"
                            for p in body["pending"])
         prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog)
         result = self.llm.complete(prompt, history)
+        usage = result.get("usage") or {}
+        self.store.record_llm_tokens(owner, usage.get("total_tokens"))
         calls = [c for c in result["calls"] if isinstance(c, dict) and isinstance(c.get("name"), str)]
         if not calls:
             # Plain model text is shown only when it carries no numbers it could have invented.
@@ -659,6 +767,13 @@ class ChatService:
             if cards and cards[0]["status"] == "SUCCEEDED" and entry["card"]["action_type"] == "CARD_PIN_RESET":
                 cards[0]["message"] = "已向你的预留手机号发送设置新密码的安全链接（15 分钟内有效）。新密码只在银行页面输入，不会经过我。"
             text = cards[0]["message"] if cards else "已处理。"
+            body["pending"] = [p for p in body["pending"] if p["action_id"] != action_id]
+            if cards and cards[0]["status"] == "SUCCEEDED":
+                more_cards, more_texts = self._release_queue(body, owner, action_id)
+                cards += more_cards
+                text += "".join(t if t.endswith(("。", "？", "！")) else t + "。" for t in more_texts)
+            elif self._drop_queue(body, action_id):
+                text += "依赖这一步的后续操作也已取消。"
         body["pending"] = [p for p in body["pending"] if p["action_id"] != action_id or p["action_id"] in still]
         message_id = "decision-" + action_id[:12] + "-" + str(body["revision"])
         body["messages"].append({"role": "assistant", "message_id": message_id, "text": text, "cards": cards, "at": time.time()})

@@ -443,7 +443,7 @@ else:
         stamp=datetime.fromtimestamp(time.time()+400,CHINA).strftime('%Y-%m-%d %H:%M:%S')
         task=self.s.create_task(f'在{stamp}给张三转100元',source_account_id='acct-savings')
         self.assertEqual(task['action_records'][0]['action']['source_account_id'],'acct-savings')
-        incomplete=self.task('在2026-12-31给张三转100元')
+        incomplete=self.task('在2099-12-31给张三转100元')
         self.assertEqual(incomplete['task_type'],'SCHEDULED_TRANSFER')
         self.assertEqual(incomplete['status'],'WAITING_USER')
         self.assertEqual(incomplete['proposed_actions'],[])

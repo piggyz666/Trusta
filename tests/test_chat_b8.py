@@ -112,8 +112,14 @@ class B8ChatTests(ChatHarness):
         self.assertEqual(self.s.events.list("demo"), [])
 
     def test_recurring_transfer_creates_proposals_each_period(self):
+        # Relative to "now": a hard-coded date would silently turn into a past date and break the suite later.
+        from datetime import datetime
+        from backend.business import CHINA
+        today = datetime.now(CHINA)
+        first = today.replace(year=today.year + today.month // 12, month=today.month % 12 + 1, day=1, hour=9, minute=0, second=0, microsecond=0)
+        second_month = "%02d" % (first.month % 12 + 1)
         calls = [call("propose_transfer", payee={"value": "房东", "span": "房东"}, amount={"value": "3000", "span": "3000"},
-                      when={"iso": "2026-11-01T09:00:00+08:00", "span": "每月1号上午9点"},
+                      when={"iso": first.isoformat(), "span": "每月1号上午9点"},
                       recurrence={"frequency": "MONTHLY", "count": 12, "span": "每月"})]
         turn = self.say("每月1号上午9点给房东转3000", calls)
         plan = self.cards(turn, "report")[0]
@@ -124,7 +130,7 @@ class B8ChatTests(ChatHarness):
         self.assertEqual((card["action_type"], card["fields"][0]["value"]), ("TRANSFER", "张三"))
         nxt = self.pending_event("RECURRING_TRANSFER")
         self.assertEqual(nxt["intent"]["parameters"]["remaining"], 11)
-        self.assertEqual(time.strftime("%m-%d", time.localtime(nxt["execute_at"])) [:2], "12")
+        self.assertEqual(datetime.fromtimestamp(nxt["execute_at"], CHINA).strftime("%m"), second_month)
         self.decide(card)
         self.assertEqual(self.balance(), 700000)
 

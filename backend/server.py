@@ -10,6 +10,7 @@ from backend.config import Config
 from backend.domain import Rejected, canonical
 from backend.llm.contracts import InferenceError
 from backend.service import TrustaService
+from backend.security.http_headers import security_headers
 
 
 FRONTEND = Path(__file__).resolve().parents[1] / "frontend"
@@ -97,7 +98,8 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
-            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+            security_headers(self)
             self.end_headers()
             self.wfile.write(data)
 

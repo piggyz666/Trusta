@@ -20,6 +20,33 @@ class ChatStore:
                          "revision INTEGER NOT NULL, body TEXT NOT NULL)")
             conn.execute("CREATE TABLE IF NOT EXISTS chat_handoffs(id TEXT PRIMARY KEY, owner TEXT NOT NULL, session_id TEXT NOT NULL, "
                          "status TEXT NOT NULL, created_at REAL NOT NULL, body TEXT NOT NULL)")
+            conn.execute("CREATE TABLE IF NOT EXISTS chat_llm_budget(day TEXT NOT NULL, owner TEXT NOT NULL, used INTEGER NOT NULL, "
+                         "tokens INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(day, owner))")
+
+    @staticmethod
+    def _day():
+        from datetime import datetime
+        from backend.business import CHINA
+        return datetime.fromtimestamp(time.time(), CHINA).date().isoformat()
+
+    def reserve_llm_call(self, owner, limit):
+        """Atomically reserve one model call for today (Asia/Shanghai). A failed call still consumes its slot,
+        so a broken upstream cannot be retried into an unbounded bill."""
+        day = self._day()
+        with self.db.transaction() as conn:
+            conn.execute("INSERT OR IGNORE INTO chat_llm_budget(day, owner, used, tokens) VALUES(?,?,0,0)", (day, owner))
+            return conn.execute("UPDATE chat_llm_budget SET used=used+1 WHERE day=? AND owner=? AND used<?",
+                                (day, owner, limit)).rowcount == 1
+
+    def record_llm_tokens(self, owner, tokens):
+        if type(tokens) is int and tokens > 0:
+            with self.db.transaction() as conn:
+                conn.execute("UPDATE chat_llm_budget SET tokens=tokens+? WHERE day=? AND owner=?", (tokens, self._day(), owner))
+
+    def llm_usage(self, owner):
+        with self.db.transaction() as conn:
+            row = conn.execute("SELECT used, tokens FROM chat_llm_budget WHERE day=? AND owner=?", (self._day(), owner)).fetchone()
+        return {"calls": row["used"], "tokens": row["tokens"]} if row else {"calls": 0, "tokens": 0}
 
     def create(self, owner, channel, account_id, accounts):
         if channel not in {"app", "web", "feishu", "test"}:

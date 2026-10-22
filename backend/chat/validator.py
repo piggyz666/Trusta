@@ -427,7 +427,7 @@ class ToolCallValidator:
         lock = {"normalized": {"task_type": "WISH_FUND_MANAGEMENT", "operation": "FUND_LOCK", "target_id": fund_id,
                                "parameters": {"amount": cents, "currency": "CNY", "name": name, "release_at": release_at},
                                "needs_clarification": False},
-                "spans": {"amount": a["lock_amount"]["span"]}}
+                "spans": {"amount": a["lock_amount"]["span"]}, "has_plan": True}
         plan = {"kind": "plan", "events": events, "link_to_previous": True,
                 "plan": {"goal": f"{label}：锁定 {format_cents(cents)}" + (f"，{day.month}月{day.day}日前下单" if items else ""),
                          "nodes": [{"id": "n1", "title": f"锁定心愿金 {format_cents(cents)}（{name}）", "kind": "WRITE",

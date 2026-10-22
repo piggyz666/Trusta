@@ -58,6 +58,7 @@ REPORT_BASIS = {
     "RENEWAL_REMINDERS": [("订阅/代扣下次扣费日", "BANK_DATA")],
     "WISH_FUNDS": [("心愿金子账户", "BANK_DATA")],
     "CARDS": [("银行卡状态、限额与交易开关", "BANK_DATA")],
+    "SPLIT_REQUEST": [("收款人名册", "BANK_DATA"), ("整数分摊：余数按顺序分配，总额精确不变", "RULE")],
 }
 
 
@@ -353,6 +354,14 @@ class CardRenderer:
                                                                  "amount_minor": r["candidate"]["amount"], "status": "ACTIVE"} for r in resolved]}
             card["_text"] = (f"我识别出 {len(result['resolutions'])} 个周期扣款，其中 {len(resolved)} 个可以在线取消。"
                              "是否取消由你逐项决定，不需要的直接拒绝即可。")
+        elif kind == "SPLIT_REQUEST" and "split_requests" in result:
+            items = [{"payee": self._payee(r["payee_id"]), "amount_minor": r["amount"], "status": r["status"]} for r in result["split_requests"]]
+            card |= {"report_type": "SPLIT_REQUEST", "total_minor": result["total"], "self_share_minor": result.get("self_share", 0),
+                     "items": items, "financial_write": False}
+            mine = f"你自己承担 {format_cents(result['self_share'])}，" if result.get("self_share") else ""
+            card["_text"] = (f"AA 总额 {format_cents(result['total'])}，{mine}需要向 "
+                             + "、".join(f"{i['payee']} 收 {format_cents(i['amount_minor'])}" for i in items)
+                             + "。这只是收款请求，不会从任何人的账户扣款，对方付款后才到账。")
         else:
             return None
         return card

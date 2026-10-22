@@ -36,7 +36,7 @@ CASES = [
     ("transfer", ["给张三转2000", "算了不转了"], {"none_confirm": True}),
     ("transfer", ["下周五给张三转1000"], {"clarify": True, "none_confirm": True}),
     ("transfer", ["给王五转100"], {"clarify": True, "none_confirm": True}),
-    ("transfer", ["和张三、李四AA 300块"], {"report": None, "none_confirm": True}),
+    ("transfer", ["和张三、李四AA 300块"], {"report": "SPLIT_REQUEST", "none_confirm": True}),
     # --- 账单分析 ---
     ("bills", ["我这个月花了多少钱"], {"report": "SPENDING_SUMMARY"}),
     ("bills", ["上个月钱都花哪了"], {"report": "SPENDING_SUMMARY"}),

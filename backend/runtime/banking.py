@@ -108,9 +108,14 @@ class BankingRuntime:
                         payees = [s.transaction.recipient(user_id,name) for name in normalized["participants"]]
                         if len({payee["id"] for payee in payees}) != len(payees):
                             raise Rejected("DUPLICATE_SPLIT_RECIPIENT")
-                        base,remainder = divmod(normalized["amount"],len(payees))
-                        return {"actions":[],"report":{"split_requests":[{"payee_id":payee["id"],"amount":base+int(i<remainder),
-                            "currency":"CNY","status":"REQUEST_ONLY"} for i,payee in enumerate(payees)],"total":normalized["amount"],"financial_write":False}}
+                        # The organiser pays the bill; "include_self" means they also carry one share. Integer remainder
+                        # goes to the first shares in order, so the shares always add up to the exact total.
+                        include_self = normalized.get("include_self",False) is True
+                        base,remainder = divmod(normalized["amount"],len(payees)+include_self)
+                        shares = [base+int(i<remainder) for i in range(len(payees)+include_self)]
+                        return {"actions":[],"report":{"split_requests":[{"payee_id":payee["id"],"amount":shares[i+include_self],
+                            "currency":"CNY","status":"REQUEST_ONLY"} for i,payee in enumerate(payees)],"total":normalized["amount"],
+                            "self_share":shares[0] if include_self else 0,"financial_write":False}}
                     if kind == "SCHEDULED_TRANSFER":
                         recipient = s.transaction.recipient(user_id,normalized["recipient_name"])
                         balance = s.transaction.balance(user_id,account_id)

@@ -298,10 +298,13 @@ class ToolCallValidator:
         names = [self.payee(p)[0] for p in a["participants"]]
         if len(set(names)) != len(names):
             raise Clarify("DUPLICATE_PARTICIPANT", "payee", "参与人有重复，请再确认一下有哪些人？")
-        if cents < len(names):
+        include_self = a.get("include_me", True)
+        if len(names) + include_self < 2:
+            raise Clarify("SPLIT_NEEDS_PEOPLE", "payee", "AA 至少需要两个人，还有谁一起分摊？")
+        if cents < len(names) + include_self:
             raise Clarify("SPLIT_TOO_SMALL", "amount", "总金额太小，无法分摊，请确认金额。")
         return [{"normalized": {"task_type": "SPLIT_REQUEST", "amount": cents, "participants": names, "currency": "CNY",
-                                "needs_clarification": False},
+                                "include_self": include_self, "needs_clarification": False},
                  "spans": {"amount": a["total"]["span"]}, "display": {"amount": format_cents(cents), "participants": names}}]
 
     def _propose_investment(self, a):

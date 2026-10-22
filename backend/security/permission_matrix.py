@@ -32,7 +32,7 @@ MATRIX = [
     # ---- YELLOW ----
     ("TRANSFER", "YELLOW", "人民币转账，当日累计 ≤ ¥1,000 且单笔 < 大额阈值"),
     ("SCHEDULED_TRANSFER", "YELLOW", "定时转账，规则同上；到期前授权失效会重新确认"),
-    ("SPLIT_REQUEST", "YELLOW", "AA 收款请求（不替他人付款）"),
+    ("SPLIT_REQUEST", "GREEN", "AA 分摊计算与收款请求（不发生任何资金变动，不替他人付款）"),
     ("SUBSCRIPTION_CANCEL", "YELLOW", "取消订阅"),
     ("DIRECT_DEBIT_DISABLE", "YELLOW", "关闭代扣"),
     ("CARD_APPLY", "YELLOW", "虚拟卡申请"),

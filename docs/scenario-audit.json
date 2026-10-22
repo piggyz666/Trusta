@@ -1,0 +1,253 @@
+{
+ "generated_at": "2026-10-22T18:15:51+0800",
+ "passed": 41,
+ "total": 41,
+ "rows": [
+  {
+   "scenario": "1 智能转账",
+   "capability": "按姓名转账",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "按手机号转账",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "按称呼（房东）转账",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "定时转账",
+   "result": "PASS",
+   "evidence": "YELLOW 授权后按时执行（SCHEDULED）"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "周期转账（每月）",
+   "result": "PASS",
+   "evidence": "每期到时生成提案→确认执行"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "带备注转账",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "AA收款",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "新增收款人",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "1 智能转账",
+   "capability": "当日累计超限升级",
+   "result": "PASS",
+   "evidence": "超当日累计¥1000→RED 强验证"
+  },
+  {
+   "scenario": "2 账单分析",
+   "capability": "月度账单分类",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "2 账单分析",
+   "capability": "年度账单",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "2 账单分析",
+   "capability": "多月/分类/商户/环比查询",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "2 账单分析",
+   "capability": "余额查询",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "2 账单分析",
+   "capability": "异常交易识别",
+   "result": "PASS",
+   "evidence": "异常字段 anomalies=3条"
+  },
+  {
+   "scenario": "3 理财操作",
+   "capability": "按风险等级推荐",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "3 理财操作",
+   "capability": "产品对比",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "3 理财操作",
+   "capability": "申购",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "3 理财操作",
+   "capability": "赎回",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "3 理财操作",
+   "capability": "持仓查询",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "3 理财操作",
+   "capability": "风险测评",
+   "result": "PASS",
+   "evidence": "问卷→提交→RISK_PROFILE_UPDATE 确认（见 test_risk_questionnaire）"
+  },
+  {
+   "scenario": "3 理财操作",
+   "capability": "适当性拦截（买超风险产品）",
+   "result": "PASS",
+   "evidence": "超出风险等级→拒绝：这项操作没有通过校验：产品风险等级高于你的风险承受能力。"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "冻结",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "挂失",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "调整限额",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "交易开关",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "申请虚拟卡",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "重置密码",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "解冻",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "解除挂失",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "4 卡片管理",
+   "capability": "撤销（回退）",
+   "result": "PASS",
+   "evidence": "RED 确认→执行→回执"
+  },
+  {
+   "scenario": "5 订阅/代扣",
+   "capability": "订阅列表+识别",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "5 订阅/代扣",
+   "capability": "代扣列表",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "5 订阅/代扣",
+   "capability": "取消订阅",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "5 订阅/代扣",
+   "capability": "关闭代扣",
+   "result": "PASS",
+   "evidence": "YELLOW 确认→执行→回执"
+  },
+  {
+   "scenario": "5 订阅/代扣",
+   "capability": "续费提醒",
+   "result": "PASS",
+   "evidence": "GREEN 直接返回·附依据"
+  },
+  {
+   "scenario": "5 订阅/代扣",
+   "capability": "账单识别→批量取消（联动）",
+   "result": "PASS",
+   "evidence": "账单→识别→2张取消卡逐项确认"
+  },
+  {
+   "scenario": "6 跨场景联动",
+   "capability": "心愿金生日计划（题目示例）",
+   "result": "PASS",
+   "evidence": "锁定→到期下单→释放，三步各自确认，总额守恒"
+  },
+  {
+   "scenario": "6 跨场景联动",
+   "capability": "多意图 DAG",
+   "result": "PASS",
+   "evidence": "一句多意图→DAG 两节点"
+  },
+  {
+   "scenario": "6 跨场景联动",
+   "capability": "有依赖的资金步骤串行",
+   "result": "PASS",
+   "evidence": "依赖步骤：前一步执行后才生成下一步"
+  },
+  {
+   "scenario": "6 跨场景联动",
+   "capability": "人工接管",
+   "result": "PASS",
+   "evidence": "人工接管"
+  },
+  {
+   "scenario": "6 跨场景联动",
+   "capability": "中断",
+   "result": "PASS",
+   "evidence": "中断→取消未执行"
+  }
+ ]
+}

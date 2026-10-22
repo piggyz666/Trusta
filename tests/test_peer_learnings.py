@@ -127,3 +127,23 @@ class HeaderTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SplitTests(Harness):
+    def test_split_includes_organiser_by_default(self):
+        turn = self.say("和张三、李四AA 300块", [call("propose_split", total={"value": "300", "span": "300块"},
+                                                       participants=[{"value": "张三", "span": "张三"}, {"value": "李四", "span": "李四"}])])
+        card = self.cards(turn, "report")[0]
+        self.assertEqual((card["report_type"], card["self_share_minor"]), ("SPLIT_REQUEST", 10000))
+        self.assertEqual([i["amount_minor"] for i in card["items"]], [10000, 10000])
+        self.assertFalse(self.cards(turn, "confirm"))
+        self.assertIn("不会从任何人的账户扣款", turn["reply"]["text"])
+
+    def test_split_without_organiser_keeps_exact_total(self):
+        turn = self.say("让张三李四平摊301", [call("propose_split", total={"value": "301", "span": "301"}, include_me=False,
+                                                    participants=[{"value": "张三", "span": "张三"}, {"value": "李四", "span": "李四"}])])
+        self.assertEqual(sum(i["amount_minor"] for i in self.cards(turn, "report")[0]["items"]), 30100)
+
+    def test_rules_understand_colloquial_split(self):
+        self.assertTrue(rule_calls("我跟张三AA了120", {})[0]["arguments"]["include_me"])
+        self.assertFalse(rule_calls("让张三、李四平摊300元", {})[0]["arguments"]["include_me"])

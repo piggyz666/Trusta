@@ -79,7 +79,11 @@ TOOLS = {
                           "required": ["name", "phone"]},
     "propose_split": {"kind": "propose", "description": "发起 AA 收款请求（只向他人发请求，不替他人付款）",
                       "parameters": {"total": AMOUNT,
-                                     "participants": {"type": "array", "minItems": 2, "maxItems": 20, "items": PAYEE}},
+                                     "participants": {"type": "array", "minItems": 1, "maxItems": 20, "items": PAYEE,
+                                                      "description": "除用户本人以外的参与人"},
+                                     "include_me": {"type": "boolean",
+                                                    "description": "用户本人是否也分摊一份。“我和张三李四AA”“我们三个AA”“和张三AA”为 true；"
+                                                                   "“让张三李四平摊”“张三李四各付一半”为 false"}},
                       "required": ["total", "participants"]},
     "propose_investment": {"kind": "propose", "description": "申购或赎回理财产品",
                            "parameters": {"op": {"type": "string", "enum": ["PURCHASE", "REDEEM"]},

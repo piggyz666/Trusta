@@ -102,6 +102,19 @@ def transfer_calls(text, pending_payee=None):
     return []
 
 
+def split_calls(text):
+    """“和张三、李四AA 300块” (organiser shares) / “让张三李四平摊300” (organiser does not)."""
+    match = re.search(r"(?:我)?(?:和|跟|与)?((?:" + NAME + r"[、,，和跟及]?){1,6}?)(?:一起|三个人|几个人)?\s*(?:AA|aa|平摊|分摊|均摊)(?:一下)?\s*(?:了)?\s*(" + NUM + ")", text)
+    if not match or _amount_value(match.group(2)) is None:
+        return []
+    names = [n for n in re.split(r"[、,，和跟及]", re.sub(r"^(?:让|叫|我们|我)", "", match.group(1))) if n and n not in {"我", "我们"}]
+    if not names:
+        return []
+    include_me = not re.match(r"让|叫", text) and "各付" not in text
+    return [_call("propose_split", total={"value": _amount_value(match.group(2)), "span": match.group(2)},
+                  participants=[{"value": n, "span": n} for n in names], include_me=include_me)]
+
+
 def spending_calls(text):
     if not re.search(r"花了|花费|消费|支出|账单|开销|花在|钱都花|异常|可疑交易", text):
         return []
@@ -245,6 +258,9 @@ def rule_calls(text, catalog, pending_payee=None):
             continue
         if "心愿金" in clause:
             calls.append(_call("list_wish_funds"))
+            continue
+        if re.search(r"AA|aa|平摊|分摊|均摊", clause):
+            calls.extend(split_calls(clause))
             continue
         for producer in (lambda c: transfer_calls(c, pending_payee) if (re.search(VERB, c) or re.search(r"改成|改为|换成", c))
                          and not re.search(r"代扣|订阅", c) else [],

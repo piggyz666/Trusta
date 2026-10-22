@@ -18,7 +18,7 @@ RISK_REASONS = {
     "NEW_PAYEE_STRONG_AUTH": "向 24 小时内新添加的收款人转账 ≥ ¥500.00，需要额外验证", "INVESTMENT_STRONG_AUTH": "理财申购 / 赎回需要强验证",
 }
 ERRORS = {
-    "INSUFFICIENT_BALANCE": "余额不足", "UNKNOWN_PAYEE": "收款人不在你的收款人列表中", "FROZEN_SOURCE": "付款账户已冻结",
+    "INSUFFICIENT_BALANCE": "余额不足", "UNKNOWN_PAYEE": "收款人不在你的收款人列表中", "FROZEN_SOURCE": "付款账户已冻结", "ACCOUNT_PROTECTION_ACTIVE": "账户处于反诈保护期，对外转账已暂停（只能由银行安全人员核实后提前解除）",
     "STALE_PRECONDITION": "账户状态已变化，请重新发起", "BANKING_SECURITY_LOCKED": "账户已因安全原因锁定，请联系客服解锁",
     "RECIPIENT_AMBIGUOUS": "收款人没有唯一匹配，请提供全名或手机号", "POLICY_BLOCKED": "未通过安全规则校验",
     "BANKING_READ_UNCERTAIN": "银行数据读取异常，本次未执行任何操作", "CARD_NOT_ACTIVE": "卡片当前状态不支持该操作",

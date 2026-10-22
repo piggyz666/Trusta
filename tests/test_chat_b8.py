@@ -277,7 +277,8 @@ class TakeoverUndoPlanTests(ChatHarness):
         turn = self.say("查余额，冻结卡，再给张三转100", [
             call("get_balance"), call("propose_card_operation", op="FREEZE"),
             call("propose_transfer", payee={"value": "张三", "span": "张三"}, amount={"value": "100", "span": "100"})])
-        self.assertEqual([n["status"] for n in turn["plan"]["nodes"]], ["SUCCEEDED", "AWAITING_CONFIRMATION", "AWAITING_CONFIRMATION"])
+        # Writes in a money-moving turn run one after another (each is proposed on the state the previous one left).
+        self.assertEqual([n["status"] for n in turn["plan"]["nodes"]], ["SUCCEEDED", "AWAITING_CONFIRMATION", "QUEUED"])
         self.assertEqual(turn["plan"]["nodes"][2]["depends_on"], ["n2"])
         freeze = self.cards(turn, "confirm")[0]
         after = self.decide(freeze)

@@ -37,6 +37,32 @@ PROBING = [
     r"(我的)?(密码|支付密码|取款密码)(是多少|是什么|告诉我)",
     r"(数据库|sql|SQL|select|SELECT|drop table|DROP TABLE)",
 ]
+# 情绪施压 / 被操控的转账: no single phrase is fraud, but pressure + secrecy + "everything" + a stranger's account is
+# the classic pattern of a victim being coached on the phone. Scored, so "快帮我给张三转500" alone never trips it.
+PRESSURE = [
+    (r"(立刻|马上|立即|赶紧|赶快|快点|十万火急|来不及)", 1),
+    (r"(别问|不要问|别管|没时间解释|来不及解释|不要告诉|别告诉|保密|不能告诉)", 2),
+    (r"(全部|所有|全都|一次性).{0,6}(赎回|转出|取出|转走|打过去|钱)", 1),
+    (r"(陌生|新的?|对方给的|他给的|这个)(账户|账号|卡号|银行卡)|卡号[0-9]{4,}|[0-9]{12,19}", 1),
+    (r"(不然|否则|要不然).{0,10}(坐牢|冻结|逮捕|出事|来不及|完了|违法)", 2),
+]
+PRESSURE_THRESHOLD = 3
+MONEY_VERB = r"转|汇|打款|打钱|赎回|付款"
+
+
+def pressure(text):
+    """Score of pressure markers in a money request; returns (score, evidence)."""
+    if not re.search(MONEY_VERB, text):
+        return 0, ""
+    score, evidence = 0, []
+    for pattern, weight in PRESSURE:
+        found = re.search(pattern, text)
+        if found:
+            score += weight
+            evidence.append(found.group(0))
+    return score, "、".join(evidence)
+
+
 MESSAGES = {
     "PROMPT_INJECTION": "这条请求试图改变我的安全规则或冒用授权，我不能执行。所有资金操作都需要你本人在确认卡上逐笔确认，大额还需要验证。",
     "FRAUD_SUSPECTED": "注意：你的描述符合“{pattern}”的常见诈骗特征。银行、公安和正规平台都不会要求你这样转账。"
@@ -67,6 +93,10 @@ def inspect(text):
         if found:
             return {"category": "FRAUD_SUSPECTED", "severity": "HIGH", "blocking": True,
                     "message": MESSAGES["FRAUD_SUSPECTED"].format(pattern=label), "evidence": found.group(0)}
+    score, evidence = pressure(compact)
+    if score >= PRESSURE_THRESHOLD:
+        return {"category": "FRAUD_SUSPECTED", "severity": "HIGH", "blocking": True,
+                "message": MESSAGES["FRAUD_SUSPECTED"].format(pattern="催促、要求保密并转出大额资金"), "evidence": evidence}
     for pattern in PROBING:
         found = re.search(pattern, compact, re.I)
         if found:

@@ -51,6 +51,10 @@ SYSTEM_PROMPT = """你是 TRUSTA 银行的 AI 助手中的“理解与规划”�
 10. 用户说“算了 / 不要了 / 取消刚才的”时调用 cancel_pending。
 11. 与银行业务无关的请求调用 out_of_scope；问候、感谢、问你能做什么调用 smalltalk。
 12. 用户问规则或概念（限额多少、怎么验证、能不能撤销、心愿金是什么、冻结和挂失区别、你能看到我什么数据）调用 knowledge，不要自己解释规则；只想打开某个页面时调用 navigate。
+13. “当……就……”“每次……就……”“超过……就……”这类以后才执行的条件，调用 propose_automation（不要立刻转账）；同一句里有两个阈值（如超过800提醒、超过1000关线上支付）就调用两次。
+    只有用户明确说“自动冻结 / 自动关掉”时才设 auto_tighten=true。触发金额、动作金额的 span 必须是用户原话。
+14. 用户说要出国 / 出境旅行并给出日期和预算时调用 propose_trip_plan；不要自己计算余额或汇率。
+15. 用户表示担心被骗、要求暂时锁住账户时调用 enable_protection。
 
 ## 当前信息
 - 现在时间：{now}（Asia/Shanghai，星期{weekday}）
@@ -111,12 +115,12 @@ class DeepSeekToolClient:
     def available(self):
         return bool(self.api_key) and not any(c in self.api_key for c in "\r\n")
 
-    def complete(self, system_prompt, history):
+    def complete(self, system_prompt, history, tools=None):
         """history: [{'role':'user'|'assistant','content':str}] -> {'calls':[{name,arguments}], 'text':str|None}"""
         if not self.available:
             raise LLMUnavailable("LLM_NOT_CONFIGURED")
         body = {"model": self.model, "messages": [{"role": "system", "content": system_prompt}] + history,
-                "tools": openai_tools(), "tool_choice": "auto", "temperature": 0, "max_tokens": 1024,
+                "tools": tools if tools is not None else openai_tools(), "tool_choice": "auto", "temperature": 0, "max_tokens": 1024,
                 "stream": False, "thinking": {"type": "disabled"}}
         request = Request(self.endpoint, data=json.dumps(body, ensure_ascii=False).encode(), method="POST",
                           headers={"Content-Type": "application/json", "Accept": "application/json",
@@ -174,8 +178,9 @@ class ScriptedToolClient:
 
     available = True
 
-    def complete(self, system_prompt, history):
+    def complete(self, system_prompt, history, tools=None):
         self.prompts.append((system_prompt, history))
+        self.tools = tools
         latest = history[-1]["content"]
         if latest not in self.script:
             raise LLMUnavailable("LLM_SCRIPT_MISS")

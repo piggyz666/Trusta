@@ -152,6 +152,10 @@ class TrustaService:
                 self.finance_transport=FinanceTransport(self)
             from backend.runtime.event_plans import EventPlans
             self.events = EventPlans(self,recover=recover_workflows)
+            from backend.banking.sandbox_feed import SandboxFeed
+            self.feed = SandboxFeed(self) if self.gateway._adapter.provider.manifest.provider=='virtual' else None
+            from backend.automation.engine import AutomationEngine
+            self.automation = AutomationEngine(self)
             if recover_workflows:
                 self.banking.recover()
 

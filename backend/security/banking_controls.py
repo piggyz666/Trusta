@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS banking_sms_otps(id TEXT PRIMARY KEY, owner TEXT NOT 
  created_at REAL NOT NULL, body TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS sms_otp_auth ON banking_sms_otps(authorization_id);
 CREATE INDEX IF NOT EXISTS sms_otp_owner ON banking_sms_otps(owner,created_at);
+CREATE TABLE IF NOT EXISTS account_protection(owner TEXT PRIMARY KEY, body TEXT NOT NULL);
+CREATE TRIGGER IF NOT EXISTS account_protection_no_delete BEFORE DELETE ON account_protection BEGIN SELECT RAISE(ABORT,'protection cannot be deleted'); END;
 CREATE TRIGGER IF NOT EXISTS safety_profile_no_delete BEFORE DELETE ON banking_safety_profile BEGIN SELECT RAISE(ABORT,'security profile cannot be deleted'); END;
 CREATE TRIGGER IF NOT EXISTS security_user_no_delete BEFORE DELETE ON banking_security_users BEGIN SELECT RAISE(ABORT,'security state cannot be deleted'); END;
 CREATE TRIGGER IF NOT EXISTS totp_no_delete BEFORE DELETE ON banking_totp BEGIN SELECT RAISE(ABORT,'MFA cannot be reset by deleting enrollment'); END;
@@ -355,7 +357,60 @@ class BankingControls:
                 "day":day,"currency":action["currency"],"prior_amount_minor":total,
                 "projected_amount_minor":total+action["amount"],"scope":"TRUSTA_INITIATED"}
 
+    # ---- 反诈冷静期 (account protection) -------------------------------------------------------
+    # Turned on by the customer in one tap (it only *tightens*), active in every safety profile. During the window every
+    # outbound money movement is blocked at Policy time AND again right before execution. It cannot be lifted from the chat
+    # or by the customer under pressure -- only by a security operator after verification -- so a scammer coaching the
+    # victim gains nothing by asking them to "turn it off".
+    PROTECTED_ACTIONS = frozenset({"TRANSFER", "ADD_PAYEE", "WISH_ORDER", "INVESTMENT_PURCHASE"})
+    PROTECTION_MAX_HOURS = 72
+
+    def protection(self, owner, conn=None):
+        if conn is None:
+            with self.db.transaction() as current:
+                return self.protection(owner, current)
+        row = conn.execute("SELECT body FROM account_protection WHERE owner=?", (owner,)).fetchone()
+        if not row:
+            return None
+        body = self._load(row["body"])
+        return body if body["status"] == "ACTIVE" and body["until"] > time.time() else None
+
+    def enable_protection(self, owner, hours, reason, source):
+        if type(hours) is not int or not 1 <= hours <= self.PROTECTION_MAX_HOURS or reason not in {"FRAUD_SUSPECTED", "USER_REQUEST"}:
+            raise Rejected("INVALID_PROTECTION")
+        now = time.time()
+        with self.db.transaction() as conn:
+            current = self.protection(owner, conn)
+            until = max(now + hours * 3600, current["until"] if current else 0)  # can only be extended, never shortened here
+            body = {"owner": owner, "status": "ACTIVE", "since": current["since"] if current else now, "until": until,
+                    "reason": reason, "source": source, "updated_at": now}
+            conn.execute("INSERT INTO account_protection VALUES(?,?) ON CONFLICT(owner) DO UPDATE SET body=excluded.body",
+                         (owner, self._pack(body)))
+            self.audit.append_in(conn, None, None, "ACCOUNT_PROTECTION_ENABLED", "security",
+                                 {"owner": owner, "until": until, "reason": reason, "source": source})
+        return body
+
+    def lift_protection(self, owner, operator_token, reason):
+        if (not self.config.security_operator_token or not isinstance(operator_token, str)
+                or not hmac.compare_digest(operator_token.encode(), self.config.security_operator_token.encode())):
+            raise Rejected("SECURITY_OPERATOR_REQUIRED")
+        if not isinstance(reason, str) or not 5 <= len(reason.strip()) <= 500:
+            raise Rejected("REVIEW_REASON_REQUIRED")
+        with self.db.transaction() as conn:
+            current = self.protection(owner, conn)
+            if not current:
+                raise Rejected("PROTECTION_NOT_ACTIVE")
+            body = current | {"status": "LIFTED", "lifted_at": time.time(), "lift_reason_hash": digest(reason)}
+            conn.execute("UPDATE account_protection SET body=? WHERE owner=?", (self._pack(body), owner))
+            self.audit.append_in(conn, None, None, "ACCOUNT_PROTECTION_LIFTED", "security", {"owner": owner, "reason_hash": digest(reason)})
+        return body
+
+    def assert_not_protected(self, action, conn=None):
+        if action.get("action_type") in self.PROTECTED_ACTIONS and self.protection(action["customer_id"], conn):
+            raise Rejected("ACCOUNT_PROTECTION_ACTIVE")
+
     def before_execution(self, action, auth):
+        self.assert_not_protected(action)
         if not self.enabled:
             return
         with self.db.transaction() as conn:

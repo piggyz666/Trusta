@@ -12,8 +12,15 @@ def run_once(service):
     triggered=0
     for row in service.db.rows("SELECT DISTINCT owner FROM event_plans WHERE status='PENDING' AND execute_at<=?",(time.time(),)):
         triggered+=service.events.tick(row['owner'])['processed']
+    # 联动规则: evaluate rules and run standing-consent tightening actions promptly (money actions wait for the customer).
+    acted=0
+    if getattr(service,'automation',None) is not None:
+        from backend.chat.service import ChatService
+        chat=getattr(service,'chat',None) or ChatService(service)
+        for row in service.db.rows("SELECT DISTINCT owner FROM automation_rules WHERE status='ACTIVE'"):
+            acted+=chat.run_automations(row['owner'])
     # No event parameters, financial facts or authentication material in worker output.
-    return {'scheduled':scheduled,'events_processed':triggered}
+    return {'scheduled':scheduled,'events_processed':triggered,'automation_firings':acted}
 
 
 def main():

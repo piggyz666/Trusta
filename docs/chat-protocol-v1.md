@@ -586,3 +586,36 @@ TRUSTA_APP_URL=http://127.0.0.1:8000/  # 红色操作卡片上“去 APP 验证�
 python -m scripts.chat_cli                # 另开窗口，连接正在运行的服务（真实数据库）
 python -m scripts.chat_cli --sandbox      # 或：进程内启动 + 临时数据库，不影响 data/
 ```
+
+## 17. 部署能力注册表、联动规则、出行管家、外部文本隔离、反诈冷静期（2026-10-22）
+
+### 17.1 部署能力（先配置，再亮起功能）
+- `python -m scripts.setup`：交互式配置（模型 → 银行 → 渠道 → 安全/演示），写入本地 `.env`；`--status` 只看功能表，`--probe` 实测模型 / 银行 / 飞书连通性。
+- `GET /api/chat/capabilities` → `{snapshot_hash, llm, bank, channels, safety_profile, features:[{id,title,group,status,reason,how_to_enable,tools}], summary}`；
+  `status ∈ AVAILABLE | DEGRADED | UNAVAILABLE`。`POST /api/chat/capabilities/probe {targets?:["llm","bank","feishu"]}`。
+- 不可用功能的工具不会出现在发给模型的工具列表里；若仍被调用（规则引擎、旧客户端），校验层拒绝并说明原因；银行网关对未声明的能力再拒绝一次。
+- 运营方可用 `TRUSTA_DISABLED_FEATURES=wealth,trip` 在本部署关闭功能。
+- 快照哈希变化写入审计（`CAPABILITY_SNAPSHOT`），并随每个任务的 `origin.capability_snapshot` 进入 Supervisor 签名的 REQUEST。
+
+### 17.2 联动规则（第 6 场景通用化）
+- 工具 `propose_automation`：触发 `SCHEDULE | INCOME | BALANCE_BELOW | SPEND_OVER | LARGE_TRANSACTION`，动作 `NOTIFY | HANDOFF | TRANSFER | WISH_LOCK | INVEST | CARD_FREEZE | CARD_CONTROL`。
+- 新卡片 `automation_confirm`：`{bundle_id, bundle_hash, rules:[{rule_id,name,trigger,actions[]}], notes[], risk_level:"YELLOW", expires_at}`。
+  决定：`POST /api/chat/sessions/{sid}/automations/{bundle_id}/decision {bundle_hash, approve}`。草稿 15 分钟有效；规则体 HMAC 封存。
+- 触发后：资金动作生成普通确认卡（逐笔确认，红色要验证码，多步串行）；只有“只收紧”的卡片动作在用户预先同意时自动执行，执行前复核“确为收紧 + 黄色”，审计 `AUTOMATION_STANDING_CONSENT_USED`。
+- 计划任务 worker 每 5 秒评估规则并执行收紧动作（无需打开 APP）；资金提案在用户下次打开会话时出现。
+- `list_automations`（报告 `AUTOMATIONS`）、`cancel_automation`。
+- 演示（`TRUSTA_DEMO_MODE=true`）：`POST …/demo/income {amount_minor,payer,memo}`、`…/demo/purchase {merchant,category,amount_minor}`、`…/demo/fire-rule {rule_id}`。
+
+### 17.3 出行管家 `propose_trip_plan`
+核对余额 →（不足时）提议赎回 T+0 理财 → 提议开通境外交易 → 规则包：返程后自动关闭境外交易、行程期间消费达 80% / 100% 预算提醒。以 `plan` 返回 DAG（READ / WRITE / QUEUED）。金额全部来自银行数据，不由模型计算。
+
+### 17.4 外部文本隔离
+入账的付款人 / 备注、商户名由他人填写，入库时用同一套确定性规则分类；可疑内容存档但标记、审计（`UNTRUSTED_TEXT_QUARANTINED`），对用户只显示“[可疑内容已隔离]”。模型从不接收交易明细。`list_income` → 报告 `INCOME {items, quarantined_count}`。
+
+### 17.5 反诈冷静期
+- 输入规则新增“情绪施压”评分（催促 + 要求保密 + 全部转出 + 陌生卡号 …），达到阈值按 `FRAUD_SUSPECTED` 处理；`risk_alert` 卡带 `offer:{type:"ENABLE_PROTECTION",hours:24}`。
+- `POST /api/chat/sessions/{sid}/protection {hours?}` 或工具 `enable_protection`：开启后转账 / 新增收款人 / 心愿金下单 / 理财申购在策略层与执行前各拦截一次（`ACCOUNT_PROTECTION_ACTIVE`）。
+- 只能由安全人员提前解除：`POST /api/chat/operator/protection/lift {owner, reason}`（`X-TRUSTA-Operator` = `TRUSTA_SECURITY_OPERATOR_TOKEN`）。
+
+### 17.6 串行规则（修正）
+所有银行动作的前置条件都包含账户快照。因此一轮（或一次规则触发）里只要有资金变动，所有写操作都串行：后一步在前一步执行后按最新状态生成（节点状态 `QUEUED`），前一步被拒绝 / 失败则后续 `SKIPPED`。

@@ -204,7 +204,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                         return self.reply(200, {"valid": service.audit.verify_chain()})
                 self.reply(404, {"error": "NOT_FOUND"})
             except (Rejected, InferenceError) as exc:
-                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_")):
+                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_","AUTOMATION_","PROTECTION_")):
                     return self.reply(chat_http.status_for(exc.code), {"error": exc.code, "message": str(exc)})
                 self.reply(403 if exc.code in {"TX_ACCESS_DENIED", "UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED", "AUDIT_ACCESS_DENIED"} else 400,
                            {"error": exc.code, "message": str(exc)})
@@ -384,7 +384,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             except (ValueError, TypeError, KeyError):
                 self.reply(400, {"error": "INVALID_INPUT"})
             except (Rejected, InferenceError) as exc:
-                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_")):
+                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_","AUTOMATION_","PROTECTION_")):
                     return self.reply(chat_http.status_for(exc.code), {"error": exc.code, "message": str(exc)})
                 self.reply(403 if exc.code in {"UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED"} else 400,
                            {"error": exc.code, "message": str(exc)})

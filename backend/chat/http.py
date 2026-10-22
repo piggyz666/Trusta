@@ -8,7 +8,7 @@ import json
 from backend.domain import Rejected, canonical
 
 STATUS = {"CHAT_RATE_LIMITED": 429, "TRACE_NOT_FOUND": 404, "FEISHU_UNVERIFIED": 401, "FEISHU_DISABLED": 404, "SECURITY_OPERATOR_REQUIRED": 403, "HANDOFF_NOT_OPEN": 409, "SMS_RATE_LIMITED": 429, "DEMO_MODE_DISABLED": 403, "CHAT_ACCESS_DENIED": 403, "CHAT_NOT_FOUND": 404, "CHAT_BUSY": 409, "ACCOUNT_ACCESS_DENIED": 403,
-          "BANKING_SECURITY_LOCKED": 423}
+          "BANKING_SECURITY_LOCKED": 423, "AUTOMATION_NOT_FOUND": 404, "PROTECTION_NOT_ACTIVE": 409, "ACCOUNT_PROTECTION_ACTIVE": 423}
 
 
 def status_for(code):
@@ -20,6 +20,8 @@ def handle_get(handler, chat, path, user_id):
     if parts == ["api", "chat", "permissions"]:
         from backend.security.permission_matrix import public_matrix
         return handler.reply(200, public_matrix())
+    if parts == ["api", "chat", "capabilities"]:
+        return handler.reply(200, chat.capabilities.public())
     if parts == ["api", "chat", "llm-usage"]:
         usage = chat.store.llm_usage(user_id)
         return handler.reply(200, usage | {"daily_call_limit": chat.LLM_DAILY_CALLS})
@@ -43,6 +45,19 @@ def handle_post(handler, chat, path, body, user_id):
         if set(body) - {"text", "close"} or type(body.get("close", False)) is not bool:
             raise Rejected("INVALID_INPUT")
         return handler.reply(200, chat.operator_reply(operator, parts[4], body.get("text"), body.get("close", False)))
+    if parts == ["api", "chat", "capabilities", "probe"]:
+        if set(body) - {"targets"}:
+            raise Rejected("INVALID_INPUT")
+        targets = body.get("targets") or ["llm", "bank", "feishu"]
+        if not isinstance(targets, list) or set(targets) - {"llm", "bank", "feishu"}:
+            raise Rejected("INVALID_INPUT")
+        results = {t: getattr(chat.capabilities, "probe_" + t)() for t in targets}
+        return handler.reply(200, {"probes": {k: {x: y for x, y in v.items() if x != "detail"} for k, v in results.items()},
+                                   "capabilities": chat.capabilities.public()})
+    if parts == ["api", "chat", "operator", "protection", "lift"]:
+        if set(body) != {"owner", "reason"} or not isinstance(body["owner"], str):
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.s.safety.lift_protection(body["owner"], operator, body["reason"]))
     if parts == ["api", "chat", "sessions"]:
         if set(body) - {"channel", "default_account_id"}:
             raise Rejected("INVALID_INPUT")
@@ -78,6 +93,26 @@ def handle_post(handler, chat, path, body, user_id):
         if set(body) != {"event_id"} or not isinstance(body["event_id"], str):
             raise Rejected("INVALID_INPUT")
         return handler.reply(200, chat.demo_advance(session_id, user_id, body["event_id"]))
+    if len(parts) == 7 and operation == "automations" and parts[6] == "decision":
+        if set(body) != {"bundle_hash", "approve"} or type(body["approve"]) is not bool:
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.decide_rule(session_id, user_id, parts[5], body["bundle_hash"], body["approve"]))
+    if len(parts) == 5 and operation == "protection":
+        if set(body) - {"hours"} or type(body.get("hours", 24)) is not int:
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.protect(session_id, user_id, body.get("hours", 24)))
+    if len(parts) == 6 and operation == "demo" and parts[5] == "income":
+        if set(body) - {"amount_minor", "payer", "memo"} or type(body.get("amount_minor")) is not int:
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.demo_income(session_id, user_id, body["amount_minor"], body.get("payer", "演示公司"), body.get("memo", "")))
+    if len(parts) == 6 and operation == "demo" and parts[5] == "purchase":
+        if set(body) != {"merchant", "category", "amount_minor"} or type(body["amount_minor"]) is not int:
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.demo_purchase(session_id, user_id, body["merchant"], body["category"], body["amount_minor"]))
+    if len(parts) == 6 and operation == "demo" and parts[5] == "fire-rule":
+        if set(body) != {"rule_id"} or not isinstance(body["rule_id"], str):
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.demo_fire_rule(session_id, user_id, body["rule_id"]))
     if len(parts) == 5 and operation == "close":
         if body:
             raise Rejected("INVALID_INPUT")

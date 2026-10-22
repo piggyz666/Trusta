@@ -68,7 +68,15 @@ def _catalog_match(items, text):
 TIME_WORDS = re.compile(r"明天|后天|下周|下个?月|每月|每周|每天|星期|周[一二三四五六日天]|[0-9一二三四五六七八九十]+[号日]|[0-9一二三四五六七八九十]+点|月底|月初|定时|以后")
 
 
+CONDITION_WORDS = re.compile(r"每次|每当|一旦|如果|要是|的话|(超过|低于|少于|到账|入账|收到).{0,10}就")
+
+
 def transfer_calls(text, pending_payee=None):
+    if CONDITION_WORDS.search(text):
+        # "当……就转" is a rule for later, never a transfer now.
+        return [_call("ask_user", slot="other",
+                      question="听起来你想设置“满足条件时再转账”的联动规则，这需要智能理解模块；现在我不会立即转账。"
+                               "如果是要马上转，请直接说“给房东转3000元”。")]
     if TIME_WORDS.search(text):
         # Dates and recurrence need real understanding. Never turn a scheduled request into an immediate one.
         return [_call("ask_user", slot="when",
@@ -113,6 +121,34 @@ def split_calls(text):
     include_me = not re.match(r"让|叫", text) and "各付" not in text
     return [_call("propose_split", total={"value": _amount_value(match.group(2)), "span": match.group(2)},
                   participants=[{"value": n, "span": n} for n in names], include_me=include_me)]
+
+
+def _auto(**arguments):
+    return {"name": "propose_automation", "arguments": arguments}
+
+
+def automation_calls(text):
+    """Colloquial "当……就……" rules without a model: balance floor, category budget, large purchase guard."""
+    amount = lambda span: {"value": _amount_value(span), "span": span}
+    m = re.search(r"余额(?:低于|少于|不足|不到)(" + NUM + r").{0,8}(?:提醒|通知|告诉)", text)
+    if m and _amount_value(m.group(1)):
+        return [_auto(name="余额提醒", trigger={"type": "BALANCE_BELOW", "span": m.group(0), "amount": amount(m.group(1))},
+                      actions=[{"type": "NOTIFY"}])]
+    m = re.search(r"(?:超过|大于|高于)(" + NUM + r")的?(?:消费|交易|支出).{0,8}(?:冻结|锁)", text)
+    if m and _amount_value(m.group(1)):
+        actions = [{"type": "CARD_FREEZE"}] + ([{"type": "HANDOFF"}] if re.search(r"人工|客服", text) else [])
+        return [_auto(name="大额消费守护", trigger={"type": "LARGE_TRANSACTION", "span": m.group(0), "amount": amount(m.group(1))},
+                      actions=actions, auto_tighten=True)]
+    m = re.search(r"(?:超过|超出|达到|满)(" + NUM + r").{0,8}(提醒|通知|告诉|关掉|关闭|停掉)(线上支付|网上支付|网购|境外交易|境外)?", text)
+    if m and _amount_value(m.group(1)) and re.search(r"每月|这个月|当月|一个月|本月|预算", text):
+        category = next((code for words, code in CATEGORY_WORDS if re.search(words, text[:m.start()] or text)), None)
+        trigger = {"type": "SPEND_OVER", "span": m.group(0), "amount": amount(m.group(1))} | ({"category": category} if category else {})
+        if m.group(3):
+            key = "international" if "境外" in m.group(3) else "online"
+            return [_auto(name="消费预算守护", trigger=trigger,
+                          actions=[{"type": "CARD_CONTROL", "controls": {key: False}}], auto_tighten=True)]
+        return [_auto(name="消费预算提醒", trigger=trigger, actions=[{"type": "NOTIFY"}])]
+    return []
 
 
 def spending_calls(text):
@@ -229,6 +265,8 @@ KNOWLEDGE_RULES = [
     (r"冻结.{0,4}挂失.{0,6}(区别|不同|差别)|挂失.{0,4}冻结.{0,6}(区别|不同|差别)", "CARD_LOSS"),
     (r"(能|会)看到我.{0,6}(什么|哪些)|(你|AI).{0,4}(知道|获取|看到|看得到)我的(余额|数据|信息|流水)", "DATA_PRIVACY"),
     (r"(怎么|如何)(防|识别).{0,2}诈骗|安全账户是(什么|真的)", "ANTI_FRAUD"),
+    (r"联动规则.{0,4}(怎么|如何|是什么)|(怎么|如何).{0,4}设置.{0,4}(规则|自动)", "AUTOMATION"),
+    (r"(转账保护|冷静期).{0,4}(是什么|怎么|多久)", "PROTECTION"),
 ]
 PAGE_WORDS = {"转账": "transfer", "收款人": "payees", "账单": "bills", "理财": "wealth", "银行卡": "cards", "卡片": "cards",
               "订阅": "subscriptions", "代扣": "subscriptions", "心愿金": "wish_funds", "安全设置": "security", "操作记录": "audit"}
@@ -243,6 +281,12 @@ def rule_calls(text, catalog, pending_payee=None):
         return [_call("smalltalk", kind="THANKS")]
     if re.search(r"你能做什么|你会什么|有什么功能", text):
         return [_call("smalltalk", kind="CAPABILITIES")]
+    if re.search(r"(开启|打开|开通).{0,4}(转账保护|冷静期)|锁住(我的)?账户|(把)?转账(先)?锁住|锁住转账|先暂停(所有)?转账", text):
+        return [_call("enable_protection", hours=24)]
+    if re.search(r"(我的|有哪些|查看|看看).{0,2}(联动)?规则", text) and not re.search(r"怎么|如何", text):
+        return [_call("list_automations")]
+    if re.search(r"入账|到账记录|谁给我转", text) and not re.search(r"就|时|超过", text):
+        return [_call("list_income")]
     for pattern, topic in KNOWLEDGE_RULES:
         if re.search(pattern, text):
             return [_call("knowledge", topic=topic)]
@@ -252,6 +296,10 @@ def rule_calls(text, catalog, pending_payee=None):
     calls = []
     for clause in re.split(r"[，,；;。]?\s*(?:然后|再|顺便|并且|接着)\s*|[；;]", text):
         if not clause:
+            continue
+        found = automation_calls(clause) if re.search(r"就|时|的话|提醒|通知|自动", clause) else []
+        if found:
+            calls.extend(found)
             continue
         if re.search(r"余额|还有多少钱|剩多少钱|账上有多少", clause):
             calls.append(_call("get_balance"))

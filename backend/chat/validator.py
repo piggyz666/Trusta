@@ -9,7 +9,7 @@ Rules (see docs/chat-protocol-v1.md section 6.5):
 A failed check never guesses a value: it becomes a clarification question.
 """
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from backend.business import CHINA
 from backend.chat.amounts import format_cents, parse_amount_span, parse_amount_value
 from backend.chat.tools import TOOLS
@@ -436,6 +436,97 @@ class ToolCallValidator:
                          "nodes": [{"id": "n1", "title": f"锁定心愿金 {format_cents(cents)}（{name}）", "kind": "WRITE",
                                     "status": "AWAITING_CONFIRMATION"}] + nodes}}
         return [lock, plan]
+
+    # ---- 联动规则 / 出行管家 ----------------------------------------------------------------------
+    def date(self, value, label="日期"):
+        """A calendar day the user said (no time of day needed). Returns the Asia/Shanghai date."""
+        self.span(value["span"], "when", label)
+        try:
+            day = datetime.fromisoformat(value["iso"][:10]).date()
+        except ValueError:
+            raise Clarify("DATE_INVALID", "when", f"{label}是哪一天？") from None
+        today = datetime.fromtimestamp(self.now, CHINA).date()
+        if not today <= day <= today + timedelta(days=366):
+            raise Clarify("DATE_OUT_OF_RANGE", "when", f"{label}需要在未来一年内，是哪一天？")
+        return day
+
+    def _automation_action(self, item, trigger_type):
+        kind = item["type"]
+        action = {"type": kind}
+        if kind in {"TRANSFER", "WISH_LOCK", "INVEST"}:
+            sources = [k for k in ("amount", "percent", "from_subscriptions") if k in item]
+            if len(sources) != 1:
+                raise Clarify("AUTOMATION_AMOUNT", "amount", "触发时要动用多少钱？请说一个金额。")
+            if "amount" in item:
+                action["amount"] = self.amount(item["amount"])
+            elif "percent" in item:
+                if trigger_type != "INCOME":
+                    raise Clarify("AUTOMATION_PERCENT", "amount", "按比例只能用于“入账时”的规则，请说一个具体金额。")
+                self.span(item["percent"]["span"], "amount", "比例")
+                action["percent"] = item["percent"]["value"]
+            else:
+                action["from_subscriptions"] = [self.ref(x, "subscription", "订阅")["id"] for x in item["from_subscriptions"]]
+        if kind == "TRANSFER":
+            if "payee" not in item:
+                raise Clarify("AUTOMATION_PAYEE", "payee", "要转给谁？")
+            action["payee_name"] = self.payee(item["payee"])[0]
+        if kind == "INVEST":
+            if "product" not in item:
+                raise Clarify("AUTOMATION_PRODUCT", "product", "要定投哪个产品？",
+                              [p["display"] for p in self.catalog.get("products", [])][:6])
+            action["product_id"] = self.ref(item["product"], "product", "理财产品")["id"]
+        if kind == "WISH_LOCK":
+            action["fund_name"] = (item.get("fund_name") or "储蓄").strip()[:20] or "储蓄"
+        if kind in {"CARD_FREEZE", "CARD_CONTROL"}:
+            action["card_id"] = (self.ref(item["card"], "card", "银行卡") if "card" in item else self._single_card())["id"]
+        if kind == "CARD_CONTROL":
+            if not item.get("controls"):
+                raise Clarify("CONTROLS_MISSING", "operation", "触发时要关闭哪项交易：线上支付、境外交易还是非接触支付？")
+            action["controls"] = dict(item["controls"])
+        return action
+
+    def _propose_automation(self, a):
+        t = a["trigger"]
+        self.span(t["span"], "other", "触发条件")
+        trigger = {"type": t["type"]}
+        if t["type"] == "SCHEDULE":
+            if "first_at" not in t:
+                raise Clarify("AUTOMATION_WHEN", "when", "从什么时候开始？请说具体日期和时间，例如“每月1号上午9点”。")
+            trigger["first_at"], _ = self.when(t["first_at"])
+            trigger["frequency"] = t.get("frequency", "ONCE")
+        else:
+            if "amount" not in t:
+                raise Clarify("AUTOMATION_THRESHOLD", "amount", "触发的金额是多少？")
+            trigger["amount"] = self.amount(t["amount"], "amount", "触发金额")
+            if t["type"] == "SPEND_OVER" and "category" in t:
+                trigger["category"] = t["category"]
+        actions = [self._automation_action(item, t["type"]) for item in a["actions"]]
+        spec = {"name": a.get("name") or "联动规则", "trigger": trigger, "actions": actions}
+        if "max_runs" in a:
+            spec["max_runs"] = a["max_runs"]
+        return [{"kind": "automation", "specs": [spec], "auto_tighten": a.get("auto_tighten", False)}]
+
+    def _cancel_automation(self, a):
+        return [{"kind": "control", "tool": "cancel_automation", "args": {"rule_id": self.ref(a["rule"], "automation", "联动规则")["id"]}}]
+
+    def _list_automations(self, a):
+        return [{"kind": "read", "tool": "list_automations", "local": "AUTOMATIONS"}]
+
+    def _list_income(self, a):
+        return [{"kind": "read", "tool": "list_income", "local": "INCOME"}]
+
+    def _propose_trip_plan(self, a):
+        start, end = self.date(a["start"], "出发日期"), self.date(a["end"], "返回日期")
+        if end < start or (end - start).days > 60:
+            raise Clarify("TRIP_DATES", "when", "返回日期需要在出发之后（60 天以内），请再确认一下日期。")
+        budget = self.amount(a["budget"], "amount", "预算")
+        if "destination" in a:
+            self.span(a["destination"]["span"], "other", "目的地")
+        card = self._single_card()
+        midnight = lambda d, h=0, m=0: datetime(d.year, d.month, d.day, h, m, tzinfo=CHINA).timestamp()
+        return [{"kind": "trip", "budget": budget, "start": midnight(start), "end": midnight(end, 23, 59),
+                 "destination": (a.get("destination") or {}).get("text", "")[:20], "card_id": card["id"],
+                 "international": a.get("international", True)}]
 
     def _flag_risk(self, a):
         # The model may raise risk, never lower it. Evidence must be the user's words.

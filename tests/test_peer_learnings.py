@@ -41,8 +41,17 @@ class SequentialPlanTests(Harness):
         self.assertEqual(self.chat.get(self.sid, "demo")["pending"], [])
 
     def test_independent_steps_are_not_queued(self):
-        turn = self.say("冻结卡，再给张三转100", [call("propose_card_operation", op="FREEZE"), transfer("张三", "100", "100")])
+        turn = self.say("冻结卡，再取消视频会员", [call("propose_card_operation", op="FREEZE"),
+                                               call("propose_subscription_cancel", subscriptions=[{"id": "sub-stream", "span": "视频会员"}])])
         self.assertEqual(len(self.cards(turn, "confirm")), 2)
+
+    def test_any_write_after_money_waits(self):
+        # Card actions snapshot the account too, so after a transfer they are proposed on the new state.
+        turn = self.say("给张三转100，再冻结卡", [transfer("张三", "100", "100"), call("propose_card_operation", op="FREEZE")])
+        self.assertEqual([c["action_type"] for c in self.cards(turn, "confirm")], ["TRANSFER"])
+        done = self.decide(self.cards(turn, "confirm")[0])
+        nxt = [c for c in done["reply"]["cards"] if c["type"] == "confirm"][0]
+        self.assertEqual(self.decide(nxt, verification=self.secret())["reply"]["cards"][0]["status"], "SUCCEEDED")
 
     def test_interrupt_drops_queue(self):
         self.say("给张三转100再买200低风险", [transfer("张三", "100", "100"), buy("200")])

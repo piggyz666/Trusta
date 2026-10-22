@@ -10,12 +10,16 @@ class PolicyEngine:
     def evaluate(self, action):
         if self.safety:
             self.safety.assert_unlocked(action["customer_id"])
+        protected = bool(self.safety and action["action_type"] in self.safety.PROTECTED_ACTIONS
+                         and self.safety.protection(action["customer_id"]))
         if action["action_type"] != "TRANSFER":
             from backend.banking.actions import snapshot_from_gateway, domain_errors
             current = snapshot_from_gateway(self.gateway, "policy", action["customer_id"], action["source_account_id"], action["action_type"], action["target"]["id"])
             rules = domain_errors(action["action_type"], current, action["parameters"])
             if digest(current) != digest(action["preconditions"]):
                 rules.append("STALE_PRECONDITION")
+            if protected:
+                rules.append("ACCOUNT_PROTECTION_ACTIVE")
             decision = "BLOCK" if rules else "CONFIRM"
             if not rules:
                 rules = ["CONFIRM_EACH_ACTION"]
@@ -43,6 +47,9 @@ class PolicyEngine:
             decision = "BLOCK"
         if account["frozen"]:
             rules.append("FROZEN_SOURCE")
+            decision = "BLOCK"
+        if protected:
+            rules.append("ACCOUNT_PROTECTION_ACTIVE")
             decision = "BLOCK"
         if account["balance"] < action["amount"]:
             rules.append("INSUFFICIENT_BALANCE")

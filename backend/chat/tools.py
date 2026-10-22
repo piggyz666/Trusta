@@ -128,6 +128,55 @@ TOOLS = {
                           "required": ["name", "lock_amount"]},
     "propose_fund_release": {"kind": "propose", "description": "把心愿金剩余资金释放回活期",
                              "parameters": {"fund": ref("心愿金")}, "required": ["fund"]},
+    # ---- 联动规则 (generalised cross-scenario automation) -----------------------------------------
+    "propose_automation": {
+        "kind": "propose",
+        "description": "创建“当……时，就……”的联动规则（一句话里有多条阈值时拆成多次调用）。例："
+                       "“每次工资到账就转2000给房东、再定投1000”=INCOME；“外卖每月超过800提醒我”=SPEND_OVER+NOTIFY；"
+                       "“超过1000就关掉线上支付”=SPEND_OVER+CARD_CONTROL；“余额低于1000提醒我”=BALANCE_BELOW；"
+                       "“有大额消费就冻结卡并转人工”=LARGE_TRANSACTION；“每月1号定投500”=SCHEDULE；"
+                       "“把取消订阅省下的钱每月定投”=SCHEDULE+INVEST(from_subscriptions)。"
+                       "规则需用户确认后才生效；触发时资金操作仍逐笔确认",
+        "parameters": {
+            "name": {"type": "string", "minLength": 1, "maxLength": 30},
+            "trigger": {"type": "object", "additionalProperties": False, "required": ["type", "span"], "properties": {
+                "type": {"type": "string", "enum": ["SCHEDULE", "INCOME", "BALANCE_BELOW", "SPEND_OVER", "LARGE_TRANSACTION"]},
+                "span": SPAN,
+                "amount": AMOUNT,
+                "category": {"type": "string", "enum": ["FOOD", "GROCERIES", "TRANSPORT", "SHOPPING", "OTHER"]},
+                "frequency": {"type": "string", "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY"]},
+                "first_at": WHEN}},
+            "actions": {"type": "array", "minItems": 1, "maxItems": 5, "items": {
+                "type": "object", "additionalProperties": False, "required": ["type"], "properties": {
+                    "type": {"type": "string", "enum": ["NOTIFY", "HANDOFF", "TRANSFER", "WISH_LOCK", "INVEST", "CARD_FREEZE", "CARD_CONTROL"]},
+                    "amount": AMOUNT,
+                    "percent": {"type": "object", "additionalProperties": False, "required": ["value", "span"],
+                                "properties": {"value": {"type": "integer", "minimum": 1, "maximum": 100}, "span": SPAN}},
+                    "from_subscriptions": {"type": "array", "minItems": 1, "maxItems": 10, "items": ref("订阅")},
+                    "payee": PAYEE, "product": ref("理财产品"), "card": ref("银行卡"),
+                    "fund_name": {"type": "string", "maxLength": 20},
+                    "controls": {"type": "object", "additionalProperties": False,
+                                 "properties": {"online": {"type": "boolean"}, "international": {"type": "boolean"},
+                                                "contactless": {"type": "boolean"}}}}}},
+            "auto_tighten": {"type": "boolean", "description": "用户是否同意触发时自动执行冻结卡/关闭交易开关这类只收紧的操作"},
+            "max_runs": {"type": "integer", "minimum": 1, "maximum": 60}},
+        "required": ["trigger", "actions"]},
+    "list_automations": {"kind": "read", "description": "查看我设置的联动规则", "parameters": {}},
+    "cancel_automation": {"kind": "control", "description": "停用 / 删除某条联动规则",
+                          "parameters": {"rule": ref("联动规则")}, "required": ["rule"]},
+    "propose_trip_plan": {
+        "kind": "propose",
+        "description": "出行管家：用户说要出国 / 出境旅行（有出发、返回日期和预算）。系统会核对余额，不够时提议赎回活期理财，"
+                       "提议开通境外交易，并设置返程后自动关闭境外交易、行程消费到 80% / 100% 预算时提醒",
+        "parameters": {"destination": {"type": "object", "additionalProperties": False, "required": ["text", "span"],
+                                       "properties": {"text": {"type": "string", "maxLength": 20}, "span": SPAN}},
+                       "start": WHEN, "end": WHEN, "budget": AMOUNT,
+                       "international": {"type": "boolean", "description": "是否出境（需要开通境外交易）"}},
+        "required": ["start", "end", "budget"]},
+    "list_income": {"kind": "read", "description": "查看最近的入账（工资、他人转入），可疑备注会被隔离显示", "parameters": {}},
+    "enable_protection": {"kind": "control",
+                          "description": "用户担心被骗 / 要求暂时锁住账户、开启转账保护。开启后 24 小时内对外转账暂停，只能由银行人员核实后提前解除",
+                          "parameters": {"hours": {"type": "integer", "minimum": 1, "maximum": 72}}},
     # ---- control ------------------------------------------------------------------------------
     "ask_user": {"kind": "control", "description": "关键信息缺失或有歧义时向用户追问；不要猜测",
                  "parameters": {"slot": {"type": "string", "enum": ["payee", "amount", "when", "product", "card",
@@ -151,12 +200,12 @@ TOOLS = {
                   "required": ["kind"]},
     "knowledge": {"kind": "control",
                   "description": "用户询问银行规则或功能说明（不是要办理业务）：权限分级、转账限额、验证方式、确认卡有效期、"
-                                 "哪些操作能撤销、心愿金是什么、冻结和挂失区别、理财适当性、AI 能看到什么数据、防诈骗、人工服务。"
+                                 "哪些操作能撤销、心愿金是什么、冻结和挂失区别、理财适当性、AI 能看到什么数据、防诈骗、人工服务、联动规则怎么用、转账保护。"
                                  "答案由系统按真实规则生成，你只选主题",
                   "parameters": {"topic": {"type": "string", "enum": ["PERMISSION_TIERS", "TRANSFER_LIMITS", "VERIFICATION",
                                                                       "CONFIRMATION_EXPIRY", "UNDO_POLICY", "WISH_FUND", "CARD_LOSS",
                                                                       "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD",
-                                                                      "HUMAN_SUPPORT"]}},
+                                                                      "HUMAN_SUPPORT", "AUTOMATION", "PROTECTION"]}},
                   "required": ["topic"]},
     "navigate": {"kind": "control",
                  "description": "用户只想打开某个功能页面（“打开转账页面”“带我去理财”），不办理具体业务时使用",
@@ -168,9 +217,11 @@ TOOLS = {
 }
 
 
-def openai_tools():
+def openai_tools(exclude=()):
     result = []
     for name, spec in TOOLS.items():
+        if name in exclude:
+            continue
         result.append({"type": "function", "function": {
             "name": name, "description": spec["description"],
             "parameters": {"type": "object", "additionalProperties": False, "properties": spec["parameters"],

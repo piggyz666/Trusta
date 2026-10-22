@@ -9,10 +9,11 @@ import re
 import threading
 import time
 from backend.chat import guard
+from backend.chat.automation_chat import AutomationMixin
 from backend.chat.cards import CardRenderer, OPERATIONS
 from backend.chat.llm import DeepSeekToolClient, LLMUnavailable, build_system_prompt, redact_for_model
 from backend.chat.store import ChatStore
-from backend.chat.tools import TOOLS
+from backend.chat.tools import TOOLS, openai_tools
 from backend.chat.validator import Clarify, InjectionDetected, ToolCallValidator
 from backend.domain import Rejected, digest, uid
 
@@ -33,13 +34,15 @@ UNDO_WORDS = re.compile(r"撤销|撤回|回退|恢复刚才|改回去|弄错了.
 STATE_LABELS = {"HANDED_OFF": "已转人工", "IDLE": "空闲", "CLARIFYING": "等待用户补充信息", "AWAITING_CONFIRMATION": "等待用户在确认卡上决定", "LOCKED": "已锁定"}
 
 
-class ChatService:
+class ChatService(AutomationMixin):
     def __init__(self, service, llm_client=None):
         if not service.banking:
             raise Rejected("CHAT_REQUIRES_BANKING_V5")
         self.s = service
         self.store = ChatStore(service.db, service.audit)
         self.llm = llm_client if llm_client is not None else DeepSeekToolClient()
+        from backend.capabilities import CapabilityRegistry
+        self.capabilities = service.deployment_capabilities = CapabilityRegistry(service, self)
         self._llm_gate = threading.BoundedSemaphore(max(1, int(os.environ.get("TRUSTA_CHAT_LLM_CONCURRENCY", "4"))))
 
     # ---- catalogue ---------------------------------------------------------------------------
@@ -71,8 +74,11 @@ class ChatService:
         payees = [{"id": r["id"], "display": r["name"] + (f"（{r['alias']}）" if r["alias"] else "")}
                   for r in s.db.rows("SELECT p.id, p.name, c.alias FROM payees p LEFT JOIN payee_contacts c ON c.payee_id=p.id "
                                      "WHERE p.customer_id=? AND (c.status IS NULL OR c.status='ACTIVE') ORDER BY p.id", (owner,))]
+        engine = getattr(s, "automation", None)
+        automations = [{"id": r["id"], "display": f"{r['name']}（{engine.describe_trigger(r['trigger'])}）"}
+                       for r in engine.rules(owner)] if engine else []
         return {"accounts": accounts, "cards": cards, "subscriptions": subs, "direct_debits": debits, "products": products,
-                "life_events": events, "merchants": merchants, "wish_funds": funds, "payees": payees}
+                "life_events": events, "merchants": merchants, "wish_funds": funds, "payees": payees, "automations": automations}
 
     # ---- sessions ----------------------------------------------------------------------------
     def create_session(self, owner, channel="app", default_account_id="acct-demo"):
@@ -91,7 +97,7 @@ class ChatService:
                 "channel": body["channel"], "default_account_id": body["default_account_id"],
                 "accounts": body["accounts"], "llm_mode": "deepseek" if getattr(self.llm, "available", False) else "rules",
                 "messages": [{k: m[k] for k in ("role", "text", "at", "message_id", "cards") if k in m} for m in body["messages"]],
-                "pending": [p["card"] for p in body["pending"]]}
+                "pending": [p["card"] for p in body["pending"]] + [p["card"] for p in body.get("pending_rules", [])]}
 
     def get(self, session_id, owner):
         body = self.store.get(session_id, owner)
@@ -125,6 +131,7 @@ class ChatService:
             added.append({"role": "assistant", "message_id": "event-" + event["id"][:12], "at": time.time(), "cards": new_cards,
                           "text": f"提醒：{label}到时间了，请确认后执行。" if any(c["type"] == "confirm" for c in new_cards)
                           else f"提醒：{label}到时间了，但这次没能生成待确认的操作。"})
+        added += self._deliver_firings(body, owner)
         added += self._proactive(body, owner, surfaced)
         if not added:
             return False
@@ -330,6 +337,11 @@ class ChatService:
                 tools.append(call["name"])
                 record = {"name": call["name"], "arguments": call["arguments"], "verdict": "ACCEPTED"}
                 trace["calls"].append(record)
+                enabled, feature = self.capabilities.tool_enabled(call["name"])
+                if not enabled:  # fail closed: a feature the deployment does not support is never attempted
+                    record["verdict"] = "UNAVAILABLE:" + feature["id"]
+                    texts.append(f"“{feature['title']}”在当前配置下不可用（{feature['reason']}）")
+                    continue
                 try:
                     steps.extend(validator.validate(call["name"], call["arguments"]))
                 except InjectionDetected as exc:
@@ -365,6 +377,22 @@ class ChatService:
                 clarifications.append(Clarify("MODEL_ASKED", args["slot"], args["question"], args.get("options")))
             elif name == "smalltalk":
                 texts.append(SMALLTALK[args["kind"]])
+                if args["kind"] == "CAPABILITIES":
+                    off = [f["title"].split("（")[0] for f in self.capabilities.features() if f["status"] == "UNAVAILABLE"]
+                    if off:
+                        texts.append("当前部署未开通：" + "、".join(off))
+            elif name == "cancel_automation":
+                try:
+                    count = self.s.automation.cancel(owner, args["rule_id"])
+                    texts.append(f"已停用 {count} 条联动规则")
+                except Rejected as exc:
+                    texts.append("没有找到这条联动规则")
+            elif name == "enable_protection":
+                state = self.s.safety.enable_protection(owner, args.get("hours", 24), "USER_REQUEST", "chat:" + body["session_id"])
+                cancelled = self._cancel_pending(body, owner)
+                texts.append(f"已开启转账保护，到 {time.strftime('%m-%d %H:%M', time.localtime(state['until']))} 前对外转账、新增收款人都会暂停"
+                             + (f"，并取消了 {cancelled} 项待确认的操作" if cancelled else "")
+                             + "。保护期内只能由银行安全人员核实后提前解除")
             elif name == "knowledge":
                 from backend.chat import knowledge
                 answer, sources = knowledge.answer(args["topic"], self.s.config, [OPERATIONS.get(k, k) for k in self.IRREVERSIBLE])
@@ -382,8 +410,12 @@ class ChatService:
         goal = text
         plan, last_lock, nodes = None, None, []
         balance_gate, queued_now = None, []
+        # Every bank action's preconditions include the account snapshot, so once a turn moves money, its writes must run
+        # one after another: each later card is proposed on the state the previous one left behind.
+        writes = [s for s in steps if s["kind"] == "propose" and s.get("normalized")]
+        serial = len(writes) >= 2 and any(self._moves_balance(s["normalized"]) for s in writes)
         superseded = []
-        for index, step in enumerate([s for s in steps if s["kind"] in {"read", "propose", "plan"}]):
+        for index, step in enumerate([s for s in steps if s["kind"] in {"read", "propose", "plan", "automation", "trip"}]):
             emit("tool.started", {"tool": step["tool"]})
             node = {"id": f"n{len(nodes) + 1}", "title": self._step_title(step), "kind": "WRITE" if step["kind"] != "read" else "READ",
                     "status": "SUCCEEDED", "action_ids": [], "depends_on": [nodes[-1]["id"]] if nodes else []}
@@ -412,6 +444,26 @@ class ChatService:
                                      "每次到期我会提醒你，确认后才会转出。")
                     emit("tool.finished", {"tool": step["tool"], "status": "OK"})
                     continue
+                if step.get("local"):
+                    card, text_ = self._local_read(owner, step["local"])
+                    cards.append(card), texts.append(text_)
+                    emit("tool.finished", {"tool": step["tool"], "status": "OK"})
+                    continue
+                if step["kind"] == "automation":
+                    card, text_ = self._draft_automation(body, owner, account, step["specs"], step.get("auto_tighten"), catalog)
+                    cards.append(card), texts.append(text_)
+                    node.update(status="AWAITING_CONFIRMATION", bundle_id=card["bundle_id"])
+                    emit("tool.finished", {"tool": step["tool"], "status": "OK"})
+                    continue
+                if step["kind"] == "trip":
+                    trip_origin = {"channel": body["channel"], "session_id": body["session_id"],
+                                   "message_id": body["messages"][-1]["message_id"], "utterance_hash": trace["text_hash"],
+                                   "understanding": mode, "tool_calls_hash": digest(trace["calls"])}
+                    new_cards, new_texts, plan = self._trip(body, owner, account, step, catalog, renderer, trip_origin)
+                    cards.extend(new_cards), texts.extend(new_texts)
+                    nodes.remove(node)  # the trip carries its own DAG
+                    emit("tool.finished", {"tool": step["tool"], "status": "OK"})
+                    continue
                 if step.get("op") == "RISK_QUESTIONNAIRE":
                     from backend.chat import risk
                     cards.append(risk.card() | {"card_id": "c_risk_" + str(body["revision"])})
@@ -422,8 +474,7 @@ class ChatService:
                           "utterance_hash": trace["text_hash"], "understanding": mode,
                           "model": getattr(self.llm, "model", None) if mode == "deepseek" else None,
                           "tool_calls_hash": digest(trace["calls"])}
-                if (step["kind"] == "propose" and self._moves_balance(step["normalized"]) and balance_gate is not None
-                        and not step.get("has_plan")):
+                if step["kind"] == "propose" and serial and balance_gate is not None and not step.get("has_plan"):
                     # Sequential dependency: this step's preconditions (balance) are only meaningful after the previous
                     # money movement has executed. Its proposal -- and its authorization clock -- start then.
                     node["status"], node["after"] = "QUEUED", balance_gate
@@ -449,7 +500,7 @@ class ChatService:
                         node["status"] = "AWAITING_CONFIRMATION"
                         if step["normalized"].get("operation") == "FUND_LOCK":
                             last_lock = entry
-                        if self._moves_balance(step["normalized"]):
+                        if serial:
                             balance_gate = card["action_id"]
                         for item in body.get("queued", []):
                             if item["after"] in superseded:
@@ -466,7 +517,7 @@ class ChatService:
                          else "计划" if step["kind"] == "plan" else "查询")
                 texts.append(f"{label}没有完成：" + self._error(exc.code))
         if queued_now:
-            texts.append("“" + "”、“".join(queued_now) + "”要用到上一步执行后的余额，会在上一步完成后再生成确认卡；"
+            texts.append("“" + "”、“".join(queued_now) + "”要基于上一步执行后的账户状态，会在上一步完成后再生成确认卡；"
                          "上一步被拒绝或失败时自动取消")
         if plan is None and len(nodes) >= 2:
             # Multi-intent turn: show it as an ordered plan; each write node is still decided card by card.
@@ -502,7 +553,8 @@ class ChatService:
         normalized intent, so the Supervisor's signed REQUEST message attests where the request came from."""
         from backend.runtime.banking_plan import TASKS
         if origin:
-            normalized = normalized | {"origin": origin}
+            # The deployment capability snapshot in force is bound into the signed request as well.
+            normalized = normalized | {"origin": origin | {"capability_snapshot": self.capabilities.snapshot()[0]}}
         if normalized["task_type"] in TASKS:
             return self.s.banking.create(goal, owner, account, normalized)
         return self.s._create_task(goal, owner, account, normalized)
@@ -548,6 +600,7 @@ class ChatService:
             count += sum(1 for e in body["pending"] if e["task_id"] == task_id)
         body["pending"] = []
         count += self._drop_queue(body, None, everything=True)
+        count += self._cancel_rule_drafts(body, owner)
         return count
 
     BALANCE_OPERATIONS = {"TRANSFER", "INVESTMENT_PURCHASE", "INVESTMENT_REDEEM", "FUND_LOCK", "FUND_RELEASE"}
@@ -624,7 +677,10 @@ class ChatService:
                 self.s.audit.append(None, None, "CHAT_SESSION_LOCKED", "chat", {"session_id": body["session_id"]})
         if hit["category"] == "FRAUD_SUSPECTED":
             self._cancel_pending(body, owner)
+            text += "如果你担心自己正被人诱导转账，可以点“开启 24 小时转账保护”：保护期内对外转账暂停，只能由银行人员核实后解除。"
         card = CardRenderer.risk_card(hit, event)
+        if hit["category"] == "FRAUD_SUSPECTED":
+            card["offer"] = {"type": "ENABLE_PROTECTION", "hours": 24, "label": "开启 24 小时转账保护"}
         return {"text": text, "cards": [card], "mode": mode, "tools": tools, "risk": hit["category"]}
 
     # ---- understanding -----------------------------------------------------------------------
@@ -670,7 +726,8 @@ class ChatService:
         pending = "；".join(p["card"]["title"] + "（" + "，".join(f["value"] for f in p["card"]["fields"][:2]) + "）"
                            for p in body["pending"])
         prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog)
-        result = self.llm.complete(prompt, history)
+        disabled = set(self.capabilities.disabled_tools())
+        result = self.llm.complete(prompt, history, tools=openai_tools(disabled)) if disabled else self.llm.complete(prompt, history)
         usage = result.get("usage") or {}
         self.store.record_llm_tokens(owner, usage.get("total_tokens"))
         calls = [c for c in result["calls"] if isinstance(c, dict) and isinstance(c.get("name"), str)]
@@ -691,7 +748,7 @@ class ChatService:
     def _rule_control(text):
         if CANCEL_WORDS.match(text):
             return [{"kind": "control", "tool": "cancel_pending", "args": {}}]
-        if HUMAN_WORDS.search(text):
+        if HUMAN_WORDS.search(text) and not re.search(r"就|的话|触发|自动", text):  # "…就冻结卡并转人工" is a rule, not a request now
             return [{"kind": "control", "tool": "request_human", "args": {}}]
         if UNDO_WORDS.search(text):
             return [{"kind": "control", "tool": "undo_last", "args": {}}]
@@ -785,7 +842,9 @@ class ChatService:
     TOOL_TITLES = {"get_balance": "查询余额", "analyze_spending": "账单分析", "query_spending": "消费查询", "get_portfolio": "理财持仓", "recommend_products": "理财推荐", "compare_products": "产品对比",
                    "list_subscriptions": "查询订阅", "list_direct_debits": "查询代扣", "list_cards": "查询银行卡",
                    "renewal_reminders": "续费提醒", "start_risk_assessment": "风险测评", "list_wish_funds": "查询心愿金",
-                   "review_subscriptions": "识别可取消的订阅"}
+                   "review_subscriptions": "识别可取消的订阅", "list_automations": "查询联动规则", "list_income": "查询入账",
+                   "propose_automation": "创建联动规则", "propose_trip_plan": "出行管家",
+                   "trip:redeem": "赎回理财补足预算", "trip:international_on": "开通境外交易"}
 
     def _step_title(self, step):
         normalized = step.get("normalized") or {}

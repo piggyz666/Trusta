@@ -9,12 +9,13 @@ from backend.security.banking_controls import BankingControls
 from backend.security.permission_matrix import MATRIX, TIERS
 
 TOPICS = ["PERMISSION_TIERS", "TRANSFER_LIMITS", "VERIFICATION", "CONFIRMATION_EXPIRY", "UNDO_POLICY",
-          "WISH_FUND", "CARD_LOSS", "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD", "HUMAN_SUPPORT"]
+          "WISH_FUND", "CARD_LOSS", "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD", "HUMAN_SUPPORT", "AUTOMATION", "PROTECTION"]
 
 TITLES = {"PERMISSION_TIERS": "操作权限分级", "TRANSFER_LIMITS": "转账限额与风控", "VERIFICATION": "验证方式",
           "CONFIRMATION_EXPIRY": "确认卡有效期", "UNDO_POLICY": "哪些操作可以撤销", "WISH_FUND": "心愿金是什么",
           "CARD_LOSS": "冻结和挂失的区别", "INVESTMENT_SUITABILITY": "理财适当性规则", "DATA_PRIVACY": "AI 能看到哪些数据",
-          "ANTI_FRAUD": "防诈骗提示", "HUMAN_SUPPORT": "人工服务"}
+          "ANTI_FRAUD": "防诈骗提示", "HUMAN_SUPPORT": "人工服务",
+          "AUTOMATION": "联动规则怎么用", "PROTECTION": "转账保护（冷静期）"}
 
 REVERSIBLE = ["冻结 ↔ 解冻", "挂失 ↔ 解除挂失", "限额调整（改回原值）", "交易开关（恢复原设置）", "心愿金锁定（释放）", "理财申购 ↔ 赎回"]
 
@@ -74,6 +75,15 @@ def answer(topic, config, irreversible=()):
         text = ("银行不会要求你把钱转到“安全账户”，也不会索要验证码或密码；刷单返利、先交费再放款、冒充客服或公检法都是常见诈骗。"
                 "遇到这类要求请停止转账，可以说“转人工”联系我们核实。")
         return text, [_src("反诈识别规则", "backend/chat/guard.py")]
+    if topic == "AUTOMATION":
+        text = ("可以用一句话设置“当……就……”的规则：触发条件有到点、入账、余额低于、某类消费超预算、出现大额消费；"
+                "动作有提醒、转账、存心愿金、申购理财、冻结卡、关闭交易开关、转人工。规则要你确认后才生效；触发时涉及资金的操作仍会逐笔请你确认，"
+                "只有冻结卡、关闭交易开关这类只收紧风险的操作可以在你预先同意后自动执行。")
+        return text, [_src("联动规则引擎", "backend/automation/engine.py"), _src("权限分级矩阵", "backend/security/permission_matrix.py")]
+    if topic == "PROTECTION":
+        text = ("开启转账保护后，保护期内对外转账、新增收款人、心愿金下单和理财申购都会被暂停，银行在审批和执行前各拦截一次。"
+                "保护期内只能由银行安全人员核实身份后提前解除，任何人让你“先解除再转账”都是诈骗。")
+        return text, [_src("反诈冷静期", "backend/security/banking_controls.py#protection")]
     text = "随时说“转人工”即可转接人工客服，人工接入期间 AI 不会执行任何操作；说“回到智能助手”可以切回。"
     return text, [_src("人工接管", "backend/chat/service.py#_open_handoff")]
 

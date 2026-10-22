@@ -1,0 +1,145 @@
+"""TRUSTA 配置向导：先选环境，再看哪些功能可用（OpenClaw 风格）。
+
+    python -m scripts.setup            交互式配置（模型 → 银行 → 渠道 → 安全），写入 .env
+    python -m scripts.setup --status   只看当前配置下的功能表（不发网络请求）
+    python -m scripts.setup --probe    实际探测模型 / 银行 / 飞书是否连得通，再给出功能表
+
+Secrets are typed without echo and stored only in the local .env (git-ignored, permissions tightened). Existing lines
+that the wizard does not manage are kept verbatim.
+"""
+import argparse
+import getpass
+import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+ENV = ROOT / ".env"
+STATUS_ZH = {"AVAILABLE": "可用", "DEGRADED": "降级", "UNAVAILABLE": "不可用"}
+MARK = {"AVAILABLE": "✔", "DEGRADED": "△", "UNAVAILABLE": "✘"}
+
+
+def read_env():
+    values, lines = {}, []
+    if ENV.exists():
+        lines = ENV.read_text(encoding="utf-8").splitlines()
+        for line in lines:
+            if line.strip() and not line.lstrip().startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                values[key.strip()] = value.strip()
+    return values, lines
+
+
+def write_env(updates):
+    values, lines = read_env()
+    out, seen = [], set()
+    for line in lines:
+        key = line.split("=", 1)[0].strip() if "=" in line and not line.lstrip().startswith("#") else None
+        if key in updates:
+            seen.add(key)
+            if updates[key] is not None:
+                out.append(f"{key}={updates[key]}")
+            continue
+        out.append(line)
+    for key, value in updates.items():
+        if key not in seen and value is not None:
+            out.append(f"{key}={value}")
+    ENV.write_text("\n".join(out) + "\n", encoding="utf-8")
+    try:
+        from backend.security.local_files import protect_secret
+        protect_secret(ENV)
+    except Exception:
+        pass
+
+
+def ask(prompt, default="", secret=False, choices=None):
+    while True:
+        suffix = f" [{default}]" if default and not secret else (" [已设置，回车保留]" if default else "")
+        raw = (getpass.getpass if secret else input)(f"{prompt}{suffix}: ").strip()
+        value = raw or default
+        if choices is None or value in choices:
+            return value
+        print("  请输入：" + " / ".join(choices))
+
+
+def wizard():
+    current, _ = read_env()
+    updates = {}
+    print("== 1/4 大模型 ==")
+    print("  1) DeepSeek（推荐）  2) 其他兼容 OpenAI 接口的模型  3) 不接入（规则引擎，只识别标准说法）")
+    choice = ask("选择", "1" if current.get("DEEPSEEK_API_KEY") else "3", choices={"1", "2", "3"})
+    if choice == "3":
+        updates["DEEPSEEK_API_KEY"] = None
+    else:
+        updates["DEEPSEEK_API_KEY"] = ask("API Key", current.get("DEEPSEEK_API_KEY", ""), secret=True) or None
+        if choice == "2":
+            updates["TRUSTA_CHAT_LLM_ENDPOINT"] = ask("接口地址（https://…/chat/completions）", current.get("TRUSTA_CHAT_LLM_ENDPOINT", ""))
+            updates["TRUSTA_CHAT_LLM_MODEL"] = ask("模型名", current.get("TRUSTA_CHAT_LLM_MODEL", ""))
+        else:
+            updates["TRUSTA_CHAT_LLM_ENDPOINT"] = None
+            updates["TRUSTA_CHAT_LLM_MODEL"] = ask("模型名", current.get("TRUSTA_CHAT_LLM_MODEL", "deepseek-flash"))
+        updates["TRUSTA_CHAT_LLM_PROXY"] = ask("HTTPS 代理（没有就回车）", current.get("TRUSTA_CHAT_LLM_PROXY", "")) or None
+    print("== 2/4 银行 ==")
+    print("  1) 本地沙箱银行（六大场景全部可用，含入账推送，演示推荐）  2) 外部银行沙箱（Revolut / Starling，需要配置文件）")
+    bank = ask("选择", "2" if current.get("TRUSTA_BANK_CONFIG") else "1", choices={"1", "2"})
+    updates["TRUSTA_BANK_CONFIG"] = ask("银行配置文件路径（config/bank.*.local.toml）", current.get("TRUSTA_BANK_CONFIG", "")) if bank == "2" else None
+    print("== 3/4 渠道 ==  APP / 网页始终可用")
+    if ask("接入飞书机器人？(y/n)", "y" if current.get("FEISHU_APP_ID") else "n", choices={"y", "n"}) == "y":
+        updates["FEISHU_APP_ID"] = ask("App ID", current.get("FEISHU_APP_ID", ""))
+        updates["FEISHU_APP_SECRET"] = ask("App Secret", current.get("FEISHU_APP_SECRET", ""), secret=True)
+        updates["FEISHU_VERIFICATION_TOKEN"] = ask("Verification Token", current.get("FEISHU_VERIFICATION_TOKEN", ""), secret=True)
+        updates["FEISHU_ENCRYPT_KEY"] = ask("Encrypt Key（没有就回车）", current.get("FEISHU_ENCRYPT_KEY", ""), secret=True) or None
+        updates["FEISHU_USER_BINDINGS"] = ask("用户绑定 open_id:customer（逗号分隔）", current.get("FEISHU_USER_BINDINGS", ""))
+    else:
+        for key in ("FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_VERIFICATION_TOKEN", "FEISHU_ENCRYPT_KEY", "FEISHU_USER_BINDINGS"):
+            updates[key] = None
+    print("== 4/4 安全与演示 ==")
+    updates["TRUSTA_SAFETY_PROFILE"] = ask("安全档位 competition（强验证）/ legacy", current.get("TRUSTA_SAFETY_PROFILE", "competition"),
+                                           choices={"competition", "legacy"})
+    updates["TRUSTA_DEMO_MODE"] = ask("演示模式（短信验证码回显、可快进计划）true/false", current.get("TRUSTA_DEMO_MODE", "true"),
+                                      choices={"true", "false"})
+    write_env(updates)
+    print(f"已写入 {ENV}（不会提交到 git）。")
+
+
+def report(probe):
+    for key, value in read_env()[0].items():
+        os.environ.setdefault(key, value)
+    from backend.chat.service import ChatService
+    from backend.config import Config
+    from backend.service import TrustaService
+    service = TrustaService(Config.local(), recover_workflows=False)
+    chat = getattr(service, "chat", None) or ChatService(service)
+    if probe:
+        for name in ("llm", "bank", "feishu"):
+            result = getattr(chat.capabilities, "probe_" + name)()
+            extra = result.get("code") or (f"{result['latency_ms']} ms" if "latency_ms" in result else "")
+            print(f"探测 {name:<7} {result['status']:<15} {extra}")
+    data = chat.capabilities.public()
+    print(f"\n模型：{data['llm']['model'] or '未接入'}（{data['llm']['state']}）  银行：{data['bank']['provider']}/{data['bank']['environment']}"
+          f"  安全档位：{data['safety_profile']}  快照：{data['snapshot_hash'][:12]}")
+    group = None
+    for f in data["features"]:
+        if f["group"] != group:
+            group = f["group"]
+            print(f"\n【{group}】")
+        print(f"  {MARK[f['status']]} {STATUS_ZH[f['status']]:<3} {f['title']}" + (f"  —— {f['reason']}" if f["reason"] else ""))
+        for tip in f["how_to_enable"]:
+            print(f"        开通方法：{tip}")
+    s = data["summary"]
+    print(f"\n合计：可用 {s['AVAILABLE']}，降级 {s['DEGRADED']}，不可用 {s['UNAVAILABLE']}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="TRUSTA 配置向导")
+    parser.add_argument("--status", action="store_true", help="只显示功能表")
+    parser.add_argument("--probe", action="store_true", help="探测连通性后显示功能表（会调用一次模型）")
+    args = parser.parse_args()
+    if not args.status and not args.probe:
+        wizard()
+        args.probe = ask("现在探测连通性并显示功能表？(y/n)", "y", choices={"y", "n"}) == "y"
+        args.status = True
+    report(args.probe)
+
+
+if __name__ == "__main__":
+    main()

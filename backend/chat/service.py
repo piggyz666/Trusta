@@ -96,6 +96,8 @@ class ChatService(AutomationMixin):
 
     def view(self, body):
         return {"session_id": body["session_id"], "revision": body["revision"], "state": self._state(body),
+                "title": body.get("title") or "新对话", "active": not body["closed"] and body["expires_at"] > time.time(),
+                "plan": body.get("plan"),
                 "channel": body["channel"], "default_account_id": body["default_account_id"],
                 "accounts": body["accounts"], "llm_mode": "deepseek" if getattr(self.llm, "available", False) else "rules",
                 "messages": [{k: m[k] for k in ("role", "text", "at", "message_id", "cards") if k in m} for m in body["messages"]],
@@ -211,6 +213,15 @@ class ChatService(AutomationMixin):
         self._cancel_pending(body, owner)
         body["closed"] = True
         return self.view(self.store.save(body))
+
+    def hide(self, session_id, owner):
+        """Delete from the history list. Pending proposals are cancelled; the audit trail and bank records stay."""
+        body = self.store.get(session_id, owner)
+        self._cancel_pending(body, owner)
+        body["closed"] = body["hidden"] = True
+        self.store.save(body)
+        self.s.audit.append(None, None, "CHAT_SESSION_HIDDEN", "chat", {"session_id": session_id})
+        return {"session_id": session_id, "hidden": True}
 
     @staticmethod
     def _state(body):
@@ -339,7 +350,7 @@ class ChatService(AutomationMixin):
                 tools.append(call["name"])
                 record = {"name": call["name"], "arguments": call["arguments"], "verdict": "ACCEPTED"}
                 trace["calls"].append(record)
-                enabled, feature = self.capabilities.tool_enabled(call["name"])
+                enabled, feature = self.capabilities.tool_enabled(call["name"], owner)
                 if not enabled:  # fail closed: a feature the deployment does not support is never attempted
                     record["verdict"] = "UNAVAILABLE:" + feature["id"]
                     texts.append(f"“{feature['title']}”在当前配置下不可用（{feature['reason']}）")
@@ -380,7 +391,7 @@ class ChatService(AutomationMixin):
             elif name == "smalltalk":
                 texts.append(SMALLTALK[args["kind"]])
                 if args["kind"] == "CAPABILITIES":
-                    off = [f["title"].split("（")[0] for f in self.capabilities.features() if f["status"] == "UNAVAILABLE"]
+                    off = [f["title"].split("（")[0] for f in self.capabilities.features(owner=owner) if f["status"] in {"UNAVAILABLE", "OFF"}]
                     if off:
                         texts.append("当前部署未开通：" + "、".join(off))
             elif name == "cancel_automation":
@@ -728,7 +739,7 @@ class ChatService(AutomationMixin):
         pending = "；".join(p["card"]["title"] + "（" + "，".join(f["value"] for f in p["card"]["fields"][:2]) + "）"
                            for p in body["pending"])
         prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog)
-        disabled = set(self.capabilities.disabled_tools())
+        disabled = set(self.capabilities.disabled_tools(owner))
         result = self.llm.complete(prompt, history, tools=openai_tools(disabled)) if disabled else self.llm.complete(prompt, history)
         usage = result.get("usage") or {}
         self.store.record_llm_tokens(owner, usage.get("total_tokens"))

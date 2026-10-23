@@ -15,7 +15,7 @@ which features were switched on when an action happened.
 """
 import os
 import time
-from backend.domain import canonical, digest
+from backend.domain import Rejected, canonical, digest
 
 # requirement id -> (label, how to enable)
 REQUIREMENTS = {
@@ -79,6 +79,13 @@ FEATURES = [
 ]
 # nlu degrades to the rule grammar instead of disappearing
 SOFT = {"nlu"}
+# Safety baseline: a customer cannot switch these off (they protect the customer against coercion and fraud).
+LOCKED = {"strong_auth": "红色操作的强验证是安全底线，不能关闭",
+          "protection": "反诈冷静期是安全底线：被诱导时需要随时可用",
+          "income": "外部文本隔离保护你不被带毒备注攻击，不能关闭",
+          "knowledge": "规则问答只读、无风险，始终开启"}
+PREFS_SCHEMA = "CREATE TABLE IF NOT EXISTS feature_prefs(owner TEXT NOT NULL, feature TEXT NOT NULL, enabled INTEGER NOT NULL, " \
+               "updated_at REAL NOT NULL, PRIMARY KEY(owner, feature))"
 
 
 class CapabilityRegistry:
@@ -86,6 +93,8 @@ class CapabilityRegistry:
         self.s, self.chat = service, chat
         self._probe = {}
         self._last_hash = None
+        with service.db.transaction() as conn:
+            conn.execute(PREFS_SCHEMA)
 
     # ---- facts ---------------------------------------------------------------------------------
     def _bank_tools(self):
@@ -125,7 +134,39 @@ class CapabilityRegistry:
                 "safety_profile": "competition" if safety and safety.enabled else "legacy"}
 
     # ---- features ------------------------------------------------------------------------------
-    def features(self, facts=None):
+    def prefs(self, owner):
+        if not owner:
+            return {}
+        return {r["feature"]: bool(r["enabled"]) for r in self.s.db.rows("SELECT feature, enabled FROM feature_prefs WHERE owner=?", (owner,))}
+
+    def set_pref(self, owner, feature, enabled):
+        """A customer's own switch. Switching on only works when the deployment supports the feature."""
+        if type(enabled) is not bool or feature not in {f[0] for f in FEATURES}:
+            raise Rejected("INVALID_INPUT")
+        if feature in LOCKED and not enabled:
+            raise Rejected("FEATURE_LOCKED", LOCKED[feature])
+        current = next(f for f in self.features(owner=owner) if f["id"] == feature)
+        if enabled and current["status"] == "UNAVAILABLE":
+            raise Rejected("FEATURE_UNAVAILABLE", current["reason"] or "当前配置不支持")
+        with self.s.db.transaction() as conn:
+            conn.execute("INSERT INTO feature_prefs VALUES(?,?,?,?) ON CONFLICT(owner, feature) DO UPDATE SET enabled=excluded.enabled, "
+                         "updated_at=excluded.updated_at", (owner, feature, int(enabled), time.time()))
+            self.s.audit.append_in(conn, None, None, "FEATURE_PREFERENCE_CHANGED", "deployment",
+                                   {"owner": owner, "feature": feature, "enabled": enabled})
+        return next(f for f in self.features(owner=owner) if f["id"] == feature)
+
+    def features(self, facts=None, owner=None):
+        prefs = self.prefs(owner)
+        result = self._features(facts)
+        for f in result:
+            f["locked"] = f["id"] in LOCKED
+            f["lock_reason"] = LOCKED.get(f["id"])
+            f["enabled"] = f["status"] != "UNAVAILABLE" and (f["locked"] or prefs.get(f["id"], True))
+            if f["status"] != "UNAVAILABLE" and not f["enabled"]:
+                f["status"], f["reason"] = "OFF", "你已在功能页关闭"
+        return result
+
+    def _features(self, facts=None):
         facts = facts or self.facts()
         have, result = facts["have"], []
         # Operator switch: a bank can turn features off for this deployment (e.g. TRUSTA_DISABLED_FEATURES=wealth,trip).
@@ -150,11 +191,11 @@ class CapabilityRegistry:
                            "how_to_enable": [REQUIREMENTS[r][1] for r in gaps]})
         return result
 
-    def disabled_tools(self):
-        return {tool: f for f in self.features() if f["status"] == "UNAVAILABLE" for tool in f["tools"]}
+    def disabled_tools(self, owner=None):
+        return {tool: f for f in self.features(owner=owner) if f["status"] in {"UNAVAILABLE", "OFF"} for tool in f["tools"]}
 
-    def tool_enabled(self, name):
-        feature = self.disabled_tools().get(name)
+    def tool_enabled(self, name, owner=None):
+        feature = self.disabled_tools(owner).get(name)
         return (feature is None), feature
 
     # ---- snapshot ------------------------------------------------------------------------------
@@ -170,11 +211,12 @@ class CapabilityRegistry:
             self.s.audit.append(None, None, "CAPABILITY_SNAPSHOT", "deployment", {"snapshot_hash": value, "snapshot": body})
         return value, body, features, facts
 
-    def public(self):
-        value, body, features, facts = self.snapshot()
+    def public(self, owner=None):
+        value, body, _, facts = self.snapshot()
+        features = self.features(facts, owner)
         return {"snapshot_hash": value, "generated_at": time.time(), "llm": facts["llm"], "bank": facts["bank"],
                 "channels": facts["channels"], "safety_profile": facts["safety_profile"], "features": features,
-                "summary": {s: sum(f["status"] == s for f in features) for s in ("AVAILABLE", "DEGRADED", "UNAVAILABLE")}}
+                "summary": {s: sum(f["status"] == s for f in features) for s in ("AVAILABLE", "DEGRADED", "UNAVAILABLE", "OFF")}}
 
     # ---- probes (explicit, never on the request path) --------------------------------------------
     def probe_llm(self):

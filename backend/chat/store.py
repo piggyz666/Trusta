@@ -105,8 +105,35 @@ class ChatStore:
             body["busy"] = {"message_id": message_id, "deadline": now + TURN_DEADLINE}
             body["turns"][message_id] = {"fingerprint": fingerprint, "response": None, "at": now}
             body["messages"].append({"role": "user", "message_id": message_id, "text": text, "at": now})
+            if not body.get("title"):
+                body["title"] = " ".join(text.split())[:24]
             self._write(conn, body, bump=False)
             return body, None
+
+    def list(self, owner, limit=100):
+        """Conversation history for the sidebar: newest first, hidden ones left out. Titles come from the first message."""
+        now, result = time.time(), []
+        for row in self.db.rows("SELECT body FROM chat_sessions WHERE owner=?", (owner,)):
+            body = json.loads(row["body"])
+            if body.get("hidden"):
+                continue
+            first = next((m["text"] for m in body["messages"] if m["role"] == "user"), "")
+            result.append({"session_id": body["session_id"], "title": body.get("title") or " ".join(first.split())[:24] or "新对话",
+                           "channel": body["channel"], "created_at": body["created_at"], "updated_at": body["updated_at"],
+                           "messages": sum(1 for m in body["messages"] if m["role"] == "user"),
+                           "pending": len(body["pending"]) + len(body.get("pending_rules", [])),
+                           "active": not body["closed"] and body["expires_at"] > now})
+        result.sort(key=lambda s: s["updated_at"], reverse=True)
+        return [s for s in result if s["messages"] or s["pending"]][:limit]
+
+    def rename(self, session_id, owner, title):
+        if not isinstance(title, str) or not 1 <= len(title.strip()) <= 40:
+            raise Rejected("INVALID_INPUT")
+        with self.db.transaction() as conn:
+            body = self._row(conn, session_id, owner)
+            body["title"] = " ".join(title.split())
+            self._write(conn, body, bump=True)
+        return {"session_id": session_id, "title": body["title"]}
 
     def save(self, body, bump=True):
         with self.db.transaction() as conn:

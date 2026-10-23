@@ -14,6 +14,31 @@ from backend.security.http_headers import security_headers
 
 
 FRONTEND = Path(__file__).resolve().parents[1] / "frontend"
+DIST = FRONTEND / "dist"
+TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
+         ".svg": "image/svg+xml", ".woff2": "font/woff2", ".woff": "font/woff", ".png": "image/png", ".ico": "image/x-icon",
+         ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json"}
+SPA_ROUTES = {"/", "/overview", "/features", "/settings"}
+
+
+def serve_static(path):
+    """The web / H5 app (frontend/dist, built from frontend-app) and the legacy single-page console at /legacy.
+    Only files that exist under the two folders are served; anything else falls through to the API (and its auth)."""
+    legacy = {"/legacy": "index.html", "/legacy/": "index.html", "/app.js": "app.js", "/styles.css": "styles.css"}
+    if path in legacy:
+        file = FRONTEND / legacy[path]
+        return file.read_bytes(), TYPES[file.suffix]
+    index = DIST / "index.html"
+    if not index.exists():
+        return ((FRONTEND / "index.html").read_bytes(), TYPES[".html"]) if path == "/" else None
+    if path.rstrip("/") in SPA_ROUTES or path == "/":
+        return index.read_bytes(), TYPES[".html"]
+    if path.startswith("/api/") or ".." in path:
+        return None
+    file = (DIST / path.lstrip("/")).resolve()
+    if file.is_file() and DIST.resolve() in file.parents and file.suffix in TYPES:
+        return file.read_bytes(), TYPES[file.suffix]
+    return None
 
 
 class BoundedHTTPServer(ThreadingHTTPServer):
@@ -103,7 +128,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
-            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
             security_headers(self)
             self.end_headers()
             self.wfile.write(data)
@@ -151,12 +176,9 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                 if path == "/api/access/info":
                     self.check_origin()  # public on purpose: tells a phone which address / mode it is talking to
                     return self.reply(200, {"mode": access.mode, "local_request": self.is_local()})
-                files = {"/": ("index.html", "text/html; charset=utf-8"),
-                         "/app.js": ("app.js", "text/javascript; charset=utf-8"),
-                         "/styles.css": ("styles.css", "text/css; charset=utf-8")}
-                if path in files:
-                    file, content_type = files[path]
-                    return self.reply(200, (FRONTEND / file).read_bytes(), content_type)
+                static = serve_static(path)
+                if static:
+                    return self.reply(200, *static)
                 user_id = self.identity()
                 if path == "/api/access":
                     return self.reply(200, {"mode": access.mode, "urls": access.urls(self.server.server_port),
@@ -230,7 +252,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                         return self.reply(200, {"valid": service.audit.verify_chain()})
                 self.reply(404, {"error": "NOT_FOUND"})
             except (Rejected, InferenceError) as exc:
-                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_","AUTOMATION_","PROTECTION_")):
+                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_","AUTOMATION_","PROTECTION_","FEATURE_","SETTINGS_","INVALID_INPUT")):
                     return self.reply(chat_http.status_for(exc.code), {"error": exc.code, "message": str(exc)})
                 self.reply(403 if exc.code in {"TX_ACCESS_DENIED", "UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED", "AUDIT_ACCESS_DENIED"} else 400,
                            {"error": exc.code, "message": str(exc)})
@@ -425,7 +447,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             except (ValueError, TypeError, KeyError):
                 self.reply(400, {"error": "INVALID_INPUT"})
             except (Rejected, InferenceError) as exc:
-                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_","AUTOMATION_","PROTECTION_")):
+                if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_","AUTOMATION_","PROTECTION_","FEATURE_","SETTINGS_","INVALID_INPUT")):
                     return self.reply(chat_http.status_for(exc.code), {"error": exc.code, "message": str(exc)})
                 self.reply(429 if exc.code=="PAIRING_RATE_LIMITED" else 403 if exc.code in {"UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED", "PAIRING_LOCAL_ONLY", "PAIRING_INVALID"} else 400,
                            {"error": exc.code, "message": str(exc)})

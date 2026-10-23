@@ -13,42 +13,9 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ENV = ROOT / ".env"
+from backend.envfile import ENV, read_env, write_env  # noqa: E402
 STATUS_ZH = {"AVAILABLE": "可用", "DEGRADED": "降级", "UNAVAILABLE": "不可用"}
 MARK = {"AVAILABLE": "✔", "DEGRADED": "△", "UNAVAILABLE": "✘"}
-
-
-def read_env():
-    values, lines = {}, []
-    if ENV.exists():
-        lines = ENV.read_text(encoding="utf-8").splitlines()
-        for line in lines:
-            if line.strip() and not line.lstrip().startswith("#") and "=" in line:
-                key, value = line.split("=", 1)
-                values[key.strip()] = value.strip()
-    return values, lines
-
-
-def write_env(updates):
-    values, lines = read_env()
-    out, seen = [], set()
-    for line in lines:
-        key = line.split("=", 1)[0].strip() if "=" in line and not line.lstrip().startswith("#") else None
-        if key in updates:
-            seen.add(key)
-            if updates[key] is not None:
-                out.append(f"{key}={updates[key]}")
-            continue
-        out.append(line)
-    for key, value in updates.items():
-        if key not in seen and value is not None:
-            out.append(f"{key}={value}")
-    ENV.write_text("\n".join(out) + "\n", encoding="utf-8")
-    try:
-        from backend.security.local_files import protect_secret
-        protect_secret(ENV)
-    except Exception:
-        pass
 
 
 def ask(prompt, default="", secret=False, choices=None, check=None, hint=""):

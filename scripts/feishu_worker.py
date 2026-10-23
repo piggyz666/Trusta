@@ -40,10 +40,11 @@ def build(service=None):
     from backend.chat.service import ChatService
     from backend.config import Config
     from backend.service import TrustaService
+    local = Config.local()  # loads .env first, so FEISHU_* settings are visible below
     config = FeishuConfig.from_env()
     if config.mode != "longconn" or not config.enabled:
         raise SystemExit("飞书长连接未配置：需要 FEISHU_APP_ID 和 FEISHU_APP_SECRET（且 FEISHU_MODE 不是 webhook）。可运行 python -m scripts.setup")
-    service = service or TrustaService(Config.local(), recover_workflows=False)
+    service = service or TrustaService(local, recover_workflows=False)
     chat = getattr(service, "chat", None) or ChatService(service)
     return FeishuChannel(chat, config), config
 

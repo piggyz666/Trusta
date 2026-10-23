@@ -138,7 +138,7 @@ TOOLS = {
                        "“把取消订阅省下的钱每月定投”=SCHEDULE+INVEST(from_subscriptions)。"
                        "规则需用户确认后才生效；触发时资金操作仍逐笔确认",
         "parameters": {
-            "name": {"type": "string", "minLength": 1, "maxLength": 30},
+            "name": {"type": "string", "minLength": 1, "maxLength": 60, "description": "简短的规则名，例如“工资分配”"},
             "trigger": {"type": "object", "additionalProperties": False, "required": ["type", "span"], "properties": {
                 "type": {"type": "string", "enum": ["SCHEDULE", "INCOME", "BALANCE_BELOW", "SPEND_OVER", "LARGE_TRANSACTION"]},
                 "span": SPAN,
@@ -149,6 +149,7 @@ TOOLS = {
             "actions": {"type": "array", "minItems": 1, "maxItems": 5, "items": {
                 "type": "object", "additionalProperties": False, "required": ["type"], "properties": {
                     "type": {"type": "string", "enum": ["NOTIFY", "HANDOFF", "TRANSFER", "WISH_LOCK", "INVEST", "CARD_FREEZE", "CARD_CONTROL"]},
+                    "span": SPAN,
                     "amount": AMOUNT,
                     "percent": {"type": "object", "additionalProperties": False, "required": ["value", "span"],
                                 "properties": {"value": {"type": "integer", "minimum": 1, "maximum": 100}, "span": SPAN}},
@@ -159,7 +160,7 @@ TOOLS = {
                                  "properties": {"online": {"type": "boolean"}, "international": {"type": "boolean"},
                                                 "contactless": {"type": "boolean"}}}}}},
             "auto_tighten": {"type": "boolean", "description": "用户是否同意触发时自动执行冻结卡/关闭交易开关这类只收紧的操作"},
-            "max_runs": {"type": "integer", "minimum": 1, "maximum": 60}},
+            "max_runs": {"type": "integer", "minimum": 1, "maximum": 1000, "description": "最多触发次数（系统上限 60）"}},
         "required": ["trigger", "actions"]},
     "list_automations": {"kind": "read", "description": "查看我设置的联动规则", "parameters": {}},
     "cancel_automation": {"kind": "control", "description": "停用 / 删除某条联动规则",

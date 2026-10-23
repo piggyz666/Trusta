@@ -19,6 +19,8 @@ FORBIDDEN_KEYS = {"approve", "approved", "approval", "authorization", "authorize
                   "confirm", "policy", "user_id", "customer_id", "action_hash", "force"}
 RELATIONS = {"妈妈": ("妈", "母亲", "老娘"), "爸爸": ("爸", "父亲", "老爹"), "老婆": ("老婆", "媳妇", "妻子", "爱人"),
              "老公": ("老公", "丈夫", "爱人"), "房东": ("房东",), "同事": ("同事",)}
+AMOUNT_PIECE = re.compile(r"[0-9０-９]+(?:\.[0-9]+)?\s*(?:万|千|k|K|w|W)?[0-9一二两三四五六七八九]?(?:块钱|块|元|圆)?"
+                          r"|[零〇一二两三四五六七八九十百千万]+(?:块钱|块|元|圆)")
 TIME_MARKERS = re.compile(r"[0-9０-９]{1,2}\s*[:：点时]|[一二两三四五六七八九十]+点|早上|上午|中午|下午|晚上|傍晚|凌晨|半夜|整点")
 MAX_SCHEDULE_SECONDS = 366 * 86400
 
@@ -75,6 +77,29 @@ def _check_schema(value, schema, path="$"):
             raise ValueError(path)
 
 
+def _normalize(value, schema):
+    """Forgive harmless shape slips before the strict check (run *after* the forbidden-field scan):
+    null optional fields are treated as absent, "true"/"false" strings become booleans, and integers sent as
+    strings become integers. Nothing else is coerced; anything still off fails the strict schema."""
+    kind = schema.get("type")
+    if (kind == "object" and isinstance(value, (str, int, float)) and not isinstance(value, bool)
+            and set(schema.get("required", [])) == {"value", "span"}):
+        # "payee": "房东" / "amount": "3000" → {value, span}; the span is still checked against the user's words.
+        return {"value": str(value), "span": str(value)}
+    if kind == "object" and isinstance(value, dict):
+        props, required = schema.get("properties", {}), set(schema.get("required", []))
+        return {k: _normalize(v, props.get(k, {})) for k, v in value.items() if not (v is None and k not in required)}
+    if kind == "array" and isinstance(value, list):
+        return [_normalize(v, schema.get("items", {})) for v in value]
+    if kind == "boolean" and value in ("true", "false"):
+        return value == "true"
+    if kind == "integer" and isinstance(value, str) and re.fullmatch(r"[0-9]{1,6}", value):
+        return int(value)
+    if kind == "string" and isinstance(value, (int, float)) and not isinstance(value, bool) and "enum" not in schema:
+        return str(value)
+    return value
+
+
 def _scan_forbidden(value):
     if isinstance(value, dict):
         for key, item in value.items():
@@ -113,6 +138,11 @@ class ToolCallValidator:
             raise Clarify("AMOUNT_NOT_GROUNDED", slot, f"请确认{label}是多少元？")
         expected = parse_amount_value(value["value"])
         parsed = parse_amount_span(value["span"])
+        if parsed is None and expected is not None:
+            # Models often quote a little context ("超过2000", "2000的消费"). Accept it only when exactly one amount-like
+            # piece inside the quoted span parses to the stated value.
+            pieces = {parse_amount_span(m.group(0)) for m in AMOUNT_PIECE.finditer(value["span"])} - {None}
+            parsed = expected if pieces == {expected} else None
         if expected is None or parsed is None or parsed != expected:
             raise Clarify("AMOUNT_NOT_GROUNDED", slot, f"请确认{label}是多少元？")
         return expected
@@ -173,11 +203,13 @@ class ToolCallValidator:
             raise Clarify("ARGUMENTS_INVALID", "other", "我没理解清楚，能换个说法再说一次吗？")
         _scan_forbidden(arguments)
         spec = TOOLS[name]
+        schema = {"type": "object", "additionalProperties": False, "properties": spec["parameters"], "required": spec.get("required", [])}
+        arguments = _normalize(arguments, schema)
         try:
-            _check_schema(arguments, {"type": "object", "additionalProperties": False,
-                                      "properties": spec["parameters"], "required": spec.get("required", [])})
-        except ValueError:
-            raise Clarify("ARGUMENTS_INVALID", "other", "我没理解清楚，能换个说法再说一次吗？") from None
+            _check_schema(arguments, schema)
+        except ValueError as exc:
+            # The schema path goes into the decision trace so a failing model call can be diagnosed.
+            raise Clarify("ARGUMENTS_INVALID:" + str(exc)[:80], "other", "我没理解清楚，能换个说法再说一次吗？") from None
         handler = getattr(self, "_" + name, None)
         steps = handler(arguments) if handler else [{"kind": spec["kind"], "tool": name, "args": arguments}]
         for step in steps:
@@ -451,7 +483,7 @@ class ToolCallValidator:
         return day
 
     def _automation_action(self, item, trigger_type):
-        kind = item["type"]
+        kind = item["type"]  # an action-level "span" is descriptive only; amounts / payees carry their own grounded spans
         action = {"type": kind}
         if kind in {"TRANSFER", "WISH_LOCK", "INVEST"}:
             sources = [k for k in ("amount", "percent", "from_subscriptions") if k in item]
@@ -503,7 +535,7 @@ class ToolCallValidator:
         actions = [self._automation_action(item, t["type"]) for item in a["actions"]]
         spec = {"name": a.get("name") or "联动规则", "trigger": trigger, "actions": actions}
         if "max_runs" in a:
-            spec["max_runs"] = a["max_runs"]
+            spec["max_runs"] = min(a["max_runs"], 60)
         return [{"kind": "automation", "specs": [spec], "auto_tighten": a.get("auto_tighten", False)}]
 
     def _cancel_automation(self, a):

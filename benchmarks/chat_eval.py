@@ -162,6 +162,7 @@ def main():
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--rules", action="store_true", help="baseline: rule grammar only, no model call")
     parser.add_argument("--probe", action="store_true", help="one model call; print HTTP/network diagnosis and exit")
+    parser.add_argument("--category", default="", help="only run cases of this category (e.g. automation)")
     args = parser.parse_args()
     if not args.live and not args.rules:
         raise SystemExit("Refusing to call a paid API without --live (or use --rules for the offline baseline)")
@@ -200,7 +201,8 @@ def main():
         except LLMUnavailable as exc:
             raise SystemExit(f"Model unreachable before evaluation: {exc.code} {exc.detail}")
     results, latencies = [], []
-    cases = CASES[: args.limit] if args.limit else CASES
+    cases = [c for c in CASES if not args.category or c[0] == args.category]
+    cases = cases[: args.limit] if args.limit else cases
     for index, (category, turns, expect) in enumerate(cases):
         with tempfile.TemporaryDirectory() as tmp:
             service = TrustaService(Config(db_path=str(Path(tmp) / "eval.db"), signing_key=b"chat-eval", communication_version=3,
@@ -218,11 +220,16 @@ def main():
             elapsed = (time.monotonic() - started) / len(turns)
             latencies.append(elapsed)
             problems = evaluate(turn, expect)
-            results.append({"category": category, "turns": turns, "passed": not problems, "problems": problems,
+            calls = None
+            if problems:  # keep what the model actually produced and how the validator judged it, for diagnosis
+                calls = chat.trace(session["session_id"], "demo", turn["message_id"])["trace"].get("calls")
+            results.append({"calls": calls, "category": category, "turns": turns, "passed": not problems, "problems": problems,
                             "understanding": modes, "fallback_reasons": reasons, "tools": turn.get("tools"), "reply": turn["reply"]["text"][:160],
                             "seconds_per_turn": round(elapsed, 2), "bank_writes": 0})
             mark = "PASS" if not problems else "FAIL " + "; ".join(problems)
             print(f"[{index + 1:02d}/{len(cases)}] {category:<13} {' / '.join(turns)[:40]:<40} {mark}")
+            for item in calls or []:
+                print("      model call:", item.get("name"), item.get("verdict"), json.dumps(item.get("arguments"), ensure_ascii=False)[:400])
     by_category = {}
     for row in results:
         bucket = by_category.setdefault(row["category"], [0, 0])

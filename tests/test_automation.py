@@ -361,3 +361,24 @@ class AutomationHTTPTests(unittest.TestCase):
         self.assertEqual(status, 403)
         status, _ = self.request("/api/chat/operator/protection/lift", {"owner": "demo", "reason": "核实为本人"}, {"X-TRUSTA-Operator": "op"})
         self.assertEqual(status, 200)
+
+
+class ModelShapeToleranceTests(Harness):
+    """Live-eval findings: harmless shape slips from the model are normalised; grounding is never relaxed."""
+    def test_context_in_amount_span_and_loose_shapes(self):
+        turn = self.say("有超过2000的消费就自动冻结卡并转人工", [call("propose_automation", name="大额消费自动冻结卡并转人工的安全守护规则", trigger={
+            "type": "LARGE_TRANSACTION", "span": "超过2000的消费", "amount": {"value": "2000", "span": "超过2000的消费"}},
+            actions=[{"type": "CARD_FREEZE", "span": "自动冻结卡"}, {"type": "HANDOFF", "span": "转人工"}], auto_tighten="true", max_runs=999)])
+        self.assertTrue(self.cards(turn, "automation_confirm"))
+        turn = self.say("每次工资到账超过5000，就给房东转3000", [call("propose_automation", trigger={"type": "INCOME", "span": "工资到账超过5000", "amount": "5000"},
+                                                                   actions=[{"type": "TRANSFER", "payee": "房东", "amount": 3000}])])
+        self.assertTrue(self.cards(turn, "automation_confirm"))
+
+    def test_grounding_still_strict(self):
+        turn = self.say("工资到账超过5000就提醒我", [call("propose_automation", trigger={"type": "INCOME", "span": "工资到账超过5000",
+                                                                                     "amount": {"value": "6000", "span": "超过5000"}}, actions=[{"type": "NOTIFY"}])])
+        self.assertFalse(self.cards(turn, "automation_confirm"))
+        turn = self.say("给张三转2000和李四3000", [call("propose_transfer", payee=S("张三"), amount={"value": "2000", "span": "转2000和李四3000"})])
+        self.assertFalse(self.cards(turn, "confirm"))
+        trace = self.chat.trace(self.sid, "demo", f"m{self.n}")
+        self.assertTrue(trace["trace"]["calls"][0]["verdict"].startswith("CLARIFY:"))

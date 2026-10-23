@@ -56,7 +56,7 @@ def main():
     except ImportError:
         raise SystemExit("缺少飞书官方 SDK：pip install lark-oapi")
     print("飞书长连接已启动（无需公网地址）。在飞书里私聊机器人发送“绑定 123456”完成账户绑定。Ctrl+C 停止。", flush=True)
-    client = Client(config.app_id, config.app_secret, event_handler=RawEventHandler(channel), log_level=lark.LogLevel.WARNING,
+    client = Client(config.app_id, config.app_secret, event_handler=RawEventHandler(channel), log_level=lark.LogLevel.INFO,
                     auto_reconnect=True)
     try:
         client.start()  # blocks; reconnects automatically

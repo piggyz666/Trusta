@@ -159,6 +159,8 @@ def report(probe):
             result = getattr(chat.capabilities, "probe_" + name)()
             extra = result.get("code") or (f"{result['latency_ms']} ms" if "latency_ms" in result else "")
             print(f"探测 {name:<7} {result['status']:<15} {extra}")
+            if result.get("detail"):
+                print(f"        详情：{result['detail']}")
     data = chat.capabilities.public()
     print(f"\n模型：{data['llm']['model'] or '未接入'}（{data['llm']['state']}）  银行：{data['bank']['provider']}/{data['bank']['environment']}"
           f"  安全档位：{data['safety_profile']}  快照：{data['snapshot_hash'][:12]}")

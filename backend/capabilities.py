@@ -201,8 +201,9 @@ class CapabilityRegistry:
         try:
             FeishuSender(FeishuConfig.from_env()).token()
             self._probe["feishu"] = {"status": "VERIFIED", "at": time.time()}
-        except Exception as exc:  # network / credentials; only the class name is kept
-            self._probe["feishu"] = {"status": "FAILED", "code": type(exc).__name__, "at": time.time()}
+        except Exception as exc:  # network / credentials; the platform's own error text (never the secret) is kept for diagnosis
+            self._probe["feishu"] = {"status": "FAILED", "code": getattr(exc, "code", type(exc).__name__),
+                                     "detail": str(exc)[:160], "at": time.time()}
         return self._probe["feishu"]
 
     def probe_bank(self):

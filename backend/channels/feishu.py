@@ -77,7 +77,7 @@ class FeishuSender:
                 return self._token
             result = self._post("/auth/v3/tenant_access_token/internal", {"app_id": self.config.app_id, "app_secret": self.config.app_secret})
             if result.get("code") != 0:
-                raise Rejected("FEISHU_AUTH_FAILED")
+                raise Rejected("FEISHU_AUTH_FAILED", f"飞书返回 {result.get('code')}：{str(result.get('msg', ''))[:120]}")
             self._token, self._token_expiry = result["tenant_access_token"], time.time() + int(result.get("expire", 3600))
             return self._token
 

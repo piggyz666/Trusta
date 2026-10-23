@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, explain } from "../api.js";
 import { Card, PlanCard } from "../cards/Cards.jsx";
-import Fog from "../components/Fog.jsx";
 import { Icon, useToast } from "../components/ui.jsx";
 import { uid } from "../format.js";
 
@@ -71,7 +70,6 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
       const messageId = "w" + uid();
       await api.send(id, { message_id: messageId, revision, text }, (name, data) => {
         if (STAGES[name]) setStages((list) => list.includes(STAGES[name]) ? list : [...list, STAGES[name]]);
-        if (name === "turn.completed") openTrace?.(id, messageId, true);
       });
     } catch (error) {
       toast(explain(error), "error");
@@ -102,9 +100,9 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
   if (empty) {
     return (
       <div className="hero-wrap">
-        <section className={`hero ${entered ? "enter" : ""}`} onAnimationEnd={() => setEntered(false)}>
-          <Fog />
+        <section className={`hero ${entered ? "enter" : ""}`} onAnimationEnd={(e) => e.target === e.currentTarget.querySelector(".chips") && setEntered(false)}>
           <div className="hero-inner">
+            <img className="hero-mark" src="/mark.png" alt="" width="64" height="64" />
             <h2>今天想办点什么？</h2>
             <p>一句话转账、查账单、管卡片、安排理财。资金操作都会先给你一张确认卡，由你决定。</p>
             <Composer value={input} setValue={setInput} onSend={send} busy={busy} autoFocus />
@@ -128,18 +126,18 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
             <div key={"u" + i + m.message_id} className="msg-user">{m.text}</div>
           ) : (
             <div key={"a" + i + m.message_id} className="msg-ai">
-              <span className="avatar">T</span>
+              <img className="avatar" src="/mark.png" alt="" width="28" height="28" />
               <div className="body">
                 {m.text && <div className="text">{m.text}</div>}
                 {(m.cards || []).map((card) => <Card key={card.card_id || card.action_id} card={card} ctx={ctx} />)}
-                <MessageMeta message={m} messages={messages} sessionId={view.session_id} openTrace={openTrace} />
+                {openTrace && <MessageMeta message={m} messages={messages} sessionId={view.session_id} openTrace={openTrace} />}
               </div>
             </div>
           ))}
           {optimistic && (
             <>
               <div className="msg-user">{optimistic}</div>
-              <div className="msg-ai"><span className="avatar">T</span>
+              <div className="msg-ai"><img className="avatar" src="/mark.png" alt="" width="28" height="28" />
                 <div className="body"><div className="pipeline" aria-live="polite">
                   {(stages.length ? stages : ["收到"]).map((s, i, all) => <span key={s} className={i === all.length - 1 ? "live" : "done"}>{s}</span>)}
                 </div></div></div>

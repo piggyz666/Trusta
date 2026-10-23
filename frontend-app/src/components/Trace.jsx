@@ -14,7 +14,7 @@ const VERDICT = (v) => v === "ACCEPTED" ? ["ok", "通过校验"] : v === "RULES"
 
 // 决策过程: what happened to one sentence — input guard, model tool calls and how the validator judged them, the
 // six-agent tasks with their permission tier, authorization, bank verification, signed inter-agent messages and audit.
-export function TracePanel({ target, onClose }) {
+export function TraceDrawer({ target, onClose }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   useEffect(() => {
@@ -24,16 +24,11 @@ export function TracePanel({ target, onClose }) {
   }, [target?.sessionId, target?.messageId, target?.nonce]);
 
   return (
-    <aside className="trace" aria-label="决策过程">
-      <header><Icon name="panel" style={{ width: 18, height: 18 }} /><h2>决策过程</h2>
-        <button className="icon-btn" onClick={onClose} aria-label="关闭"><Icon name="close" /></button></header>
-      <div className="content">
-        {!target && <div className="muted">在对话里点“查看决策过程”，这里会显示这句话经过了哪些检查、调用了什么、由谁授权、银行怎么核验。</div>}
-        {target && !data && !error && <div className="muted">读取中…</div>}
-        {error && <div className="muted">{error}</div>}
-        {data && <TraceBody data={data} />}
-      </div>
-    </aside>
+    <Drawer title="决策过程（开发者模式）" onClose={onClose}>
+      {!data && !error && <div className="muted">读取中…</div>}
+      {error && <div className="muted">{error}</div>}
+      {data && <div className="trace-body"><TraceBody data={data} /></div>}
+    </Drawer>
   );
 }
 

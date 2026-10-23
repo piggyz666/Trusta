@@ -144,3 +144,29 @@ class StaticServingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MediaRangeTests(unittest.TestCase):
+    def test_video_supports_range_requests(self):
+        root = Path(tempfile.mkdtemp())
+        (root / "dist" / "bg").mkdir(parents=True)
+        (root / "dist" / "index.html").write_text("x", encoding="utf-8")
+        (root / "dist" / "bg" / "v.mp4").write_bytes(bytes(range(256)) * 4)
+        with mock.patch.object(server_module, "FRONTEND", root), mock.patch.object(server_module, "DIST", root / "dist"):
+            tmp = tempfile.TemporaryDirectory()
+            self.addCleanup(tmp.cleanup)
+            s = TrustaService(Config(db_path=str(Path(tmp.name) / "m.db"), signing_key=b"m", communication_version=3, banking_version=5))
+            srv = create_server(s, "master", 0)
+            thread = threading.Thread(target=srv.serve_forever, daemon=True)
+            thread.start()
+            try:
+                port = srv.server_port
+                req = Request(f"http://127.0.0.1:{port}/bg/v.mp4", headers={"Range": "bytes=10-19", "Host": f"127.0.0.1:{port}"})
+                with urlopen(req) as r:
+                    self.assertEqual((r.status, r.headers["Content-Range"], r.read()), (206, "bytes 10-19/1024", bytes(range(10, 20))))
+                req = Request(f"http://127.0.0.1:{port}/bg/v.mp4", headers={"Range": "bytes=5000-", "Host": f"127.0.0.1:{port}"})
+                with self.assertRaises(HTTPError) as caught:
+                    urlopen(req)
+                self.assertEqual(caught.exception.code, 416)
+            finally:
+                srv.shutdown(); thread.join(5); srv.server_close()

@@ -3,11 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#030509" />
+    <meta name="theme-color" content="#030912" />
     <title>TRUSTA 银行助手</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   </head>
   <body>
+    <svg class="svg-defs" width="0" height="0" aria-hidden="true">
+      <filter id="liquid-lens" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feImage href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABOklEQVR42u3dyW0DMRBE0bKhvB317At1EDhQBg2Y76MTmHrgeX5a+5uSKZmTpd+abP325Oh3JmdyJXe/lrSM2+fznzWuPtGz2P615Pq18Nw3f2WKCgNQDjAboRZgMQIAAKoDWI1QC7AZAQAA1QHsRqgFOIwAAIDqAE4jABga4DJCLcBtBAAAVAfQjABg4H5NAACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAQAAACAEAAAAgAAAEAIAAAAAgAAAEAIAAABACAAAAQAAACAEAAAAjAf84/5QGMDnAbAQAA1QFcRqgFOI0AYGiAwwgAAKgOYDdCLcBmBAAAVAewGqEWYDECAACqA5iNUAswGcELGLg3SYNZ1w5RlnIAAAAASUVORK5CYII=" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" />
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="38" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

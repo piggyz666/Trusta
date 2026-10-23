@@ -17,7 +17,8 @@ FRONTEND = Path(__file__).resolve().parents[1] / "frontend"
 DIST = FRONTEND / "dist"
 TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
          ".svg": "image/svg+xml", ".woff2": "font/woff2", ".woff": "font/woff", ".png": "image/png", ".ico": "image/x-icon",
-         ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json"}
+         ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json",
+         ".mp4": "video/mp4", ".webm": "video/webm", ".jpg": "image/jpeg", ".webp": "image/webp"}
 SPA_ROUTES = {"/", "/overview", "/features", "/settings"}
 
 
@@ -133,6 +134,43 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             self.end_headers()
             self.wfile.write(data)
 
+        def reply_static(self, path, data, content_type):
+            """App files: hashed bundles are cached for good, media supports Range (Safari will not play video without it)."""
+            status, total, start, end = 200, len(data), 0, len(data) - 1
+            spec = self.headers.get("Range", "")
+            if spec.startswith("bytes=") and content_type.startswith("video/"):
+                first, _, last = spec[6:].split(",")[0].partition("-")
+                try:
+                    if first:
+                        start, end = int(first), min(int(last) if last else total - 1, total - 1)
+                    else:
+                        start, end = max(0, total - int(last)), total - 1
+                except ValueError:
+                    start, end = 0, total - 1
+                if start > end or start >= total:
+                    self.send_response(416)
+                    self.send_header("Content-Range", f"bytes */{total}")
+                    self.send_header("Content-Length", "0")
+                    security_headers(self)
+                    self.end_headers()
+                    return
+                status = 206
+            body = data[start:end + 1]
+            self.send_response(status)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(body)))
+            if status == 206:
+                self.send_header("Content-Range", f"bytes {start}-{end}/{total}")
+            if content_type.startswith("video/"):
+                self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Cache-Control", "public, max-age=31536000, immutable" if path.startswith("/assets/")
+                             else "public, max-age=86400" if path.startswith(("/bg/", "/icon", "/apple-touch")) else "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+            security_headers(self)
+            self.end_headers()
+            self.wfile.write(body)
+
         def check_origin(self):
             """Host / Origin allow-list (DNS-rebinding defence). Which hosts are allowed depends on the access mode."""
             if any(len(self.headers.get_all(k,[]))>1 for k in ('Host','Origin','Authorization','X-TRUSTA-Operator')):
@@ -178,7 +216,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                     return self.reply(200, {"mode": access.mode, "local_request": self.is_local()})
                 static = serve_static(path)
                 if static:
-                    return self.reply(200, *static)
+                    return self.reply_static(path, *static)
                 user_id = self.identity()
                 if path == "/api/access":
                     return self.reply(200, {"mode": access.mode, "urls": access.urls(self.server.server_port),

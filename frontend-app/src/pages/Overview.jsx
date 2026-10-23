@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, explain } from "../api.js";
 import { Donut } from "../components/Charts.jsx";
-import Fog from "../components/Fog.jsx";
 import { Drawer, Icon, Tag } from "../components/ui.jsx";
 import { TIER, dateOnly, dateTime, dayBucket, yuan } from "../format.js";
 
@@ -52,7 +51,6 @@ export default function Overview({ openSession, ask, openProof }) {
 
         <div className="balance-hero">
           <div className="balance-total">
-            <Fog />
             <div>
               <div className="stat-label">总资产（账户 + 理财 + 心愿金）</div>
               <div className="stat-value num">{yuan(data.total_minor + data.portfolio_minor + data.wish_funds.reduce((s, f) => s + f.balance_minor, 0))}</div>

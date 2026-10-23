@@ -19,7 +19,7 @@ function useQr(text) {
 }
 const LocalOnly = () => <small className="faint" style={{ display: "block", marginTop: 4 }}>为安全起见，只能在运行 TRUSTA 的电脑上修改</small>;
 
-export default function Settings({ capabilities, refresh, tab, setTab, onSignOut }) {
+export default function Settings({ capabilities, refresh, tab, setTab, onSignOut, devMode, setDevMode }) {
   const toast = useToast();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -47,7 +47,7 @@ export default function Settings({ capabilities, refresh, tab, setTab, onSignOut
             {current === "security" && <Security {...props} />}
             {current === "rules" && <Rules {...props} />}
             {current === "privacy" && <Privacy {...props} />}
-            {current === "appearance" && <Appearance />}
+            {current === "appearance" && <Appearance devMode={devMode} setDevMode={setDevMode} />}
             {current === "about" && <About {...props} />}
           </div>
         </div>
@@ -271,7 +271,7 @@ function Privacy({ data }) {
   );
 }
 
-function Appearance() {
+function Appearance({ devMode, setDevMode }) {
   const read = () => { try { return localStorage.getItem("trusta-theme") || "system"; } catch { return "system"; } };
   const [theme, setTheme] = useState(read);
   function apply(value) {
@@ -279,12 +279,27 @@ function Appearance() {
     try { value === "system" ? localStorage.removeItem("trusta-theme") : localStorage.setItem("trusta-theme", value); } catch { /* ignore */ }
     if (value === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = value;
   }
+  const [motion, setMotion] = useState(() => { try { return localStorage.getItem("trusta-motion") !== "off"; } catch { return true; } });
+  function flipMotion() {
+    const next = !motion; setMotion(next);
+    try { localStorage.setItem("trusta-motion", next ? "on" : "off"); } catch { /* ignore */ }
+    window.dispatchEvent(new Event("trusta-motion"));
+  }
+  function flipDev() {
+    const next = !devMode; setDevMode(next);
+    try { localStorage.setItem("trusta-dev", next ? "1" : "0"); } catch { /* ignore */ }
+  }
   return (
-    <Row label="主题" hint="深色为默认">
-      <div className="segmented">
-        {[["dark", "深色"], ["light", "浅色"], ["system", "跟随系统"]].map(([k, l]) => <button key={k} aria-pressed={theme === k} onClick={() => apply(k)}>{l}</button>)}
-      </div>
-    </Row>
+    <>
+      <Row label="主题" hint="深色为默认">
+        <div className="segmented">
+          {[["dark", "深色"], ["light", "浅色"], ["system", "跟随系统"]].map(([k, l]) => <button key={k} aria-pressed={theme === k} onClick={() => apply(k)}>{l}</button>)}
+        </div>
+      </Row>
+      <Row label="动态背景" hint="关闭后显示静态画面，更省电"><button role="switch" aria-checked={motion} aria-label="动态背景" className="switch" onClick={flipMotion} /></Row>
+      <Row label="开发者模式" hint="在每条回复下显示“查看决策过程”：安全检查、Agent 间签名消息、授权与审计。演示和排查问题时使用">
+        <button role="switch" aria-checked={!!devMode} aria-label="开发者模式" className="switch" onClick={flipDev} /></Row>
+    </>
   );
 }
 

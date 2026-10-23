@@ -37,7 +37,7 @@ export default function Sidebar({ open, onClose, route, sessionId, sessions, onS
     <>
       {open && <div className="rail-backdrop" onClick={onClose} />}
       <nav className={`rail ${open ? "open" : ""}`} aria-label="导航">
-        <div className="brand"><span className="brand-mark">T</span>TRUSTA<small>银行助手</small></div>
+        <div className="brand"><img className="brand-mark" src="/mark.png" alt="" width="28" height="28" />TRUSTA<small>银行助手</small></div>
         <button className="new-chat" onClick={onNew}><Icon name="plus" style={{ width: 16, height: 16 }} />新对话</button>
         <div className="history" ref={listRef}>
           {groups.length === 0 && <div className="history-empty">还没有对话。说一句话就会出现在这里。</div>}

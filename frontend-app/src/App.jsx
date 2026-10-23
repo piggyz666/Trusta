@@ -1,7 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { api, auth, bootstrapAuth, explain } from "./api.js";
 import Sidebar from "./components/Sidebar.jsx";
-import { EvidenceDrawer, ProofDrawer, TracePanel } from "./components/Trace.jsx";
+import Backdrop from "./components/Backdrop.jsx";
+import { EvidenceDrawer, ProofDrawer, TraceDrawer } from "./components/Trace.jsx";
 import { Icon, useToast } from "./components/ui.jsx";
 import Chat from "./pages/Chat.jsx";
 
@@ -56,13 +57,11 @@ export default function App() {
   function selectSession(id) { setSessionId(id); setTrace(null); navigate("chat"); }
   function newChat() { setSessionId(null); setTrace(null); navigate("chat"); }
   function ask(text) { setSessionId(null); navigate("chat"); setPrefill(text); }
-  function openTrace(sid, messageId, auto) {
-    // Opened automatically after a turn only if the panel is already showing; never pops over the conversation on a phone.
-    if (auto && !trace) return;
-    setTrace({ sessionId: sid, messageId, nonce: Math.random() });
-  }
+  // Customers see results, not reasoning: the decision trace is only reachable with developer mode on (Settings → 外观).
+  const [devMode, setDevMode] = useState(() => { try { return localStorage.getItem("trusta-dev") === "1"; } catch { return false; } });
+  function openTrace(sid, messageId) { setTrace({ sessionId: sid, messageId, nonce: Math.random() }); }
 
-  if (!authed) return <Connect pairCode={boot.pairCode} onConnected={() => setAuthed(true)} />;
+  if (!authed) return <><Backdrop /><Connect pairCode={boot.pairCode} onConnected={() => setAuthed(true)} /></>;
 
   const llm = capabilities?.llm;
   const status = !capabilities ? { text: "连接中…" }
@@ -72,7 +71,9 @@ export default function App() {
   const title = route === "chat" ? (current?.title || "") : TITLES[route];
 
   return (
-    <div className={`shell ${trace ? "with-trace" : ""}`}>
+    <>
+    <Backdrop dim={!(route === "chat" && !sessionId)} />
+    <div className="shell">
       <Sidebar open={railOpen} onClose={() => setRailOpen(false)} route={route} sessionId={sessionId} sessions={sessions}
         onSelect={selectSession} onNew={newChat} onNavigate={navigate} onChanged={refreshSessions} status={status} />
       <main className="main">
@@ -81,30 +82,27 @@ export default function App() {
           <h1>{title}</h1>
           <span className="spacer" />
           {route === "chat" && sessionId && (
-            <button className="icon-btn" onClick={() => trace ? setTrace(null) : setTrace({ sessionId, messageId: null })} aria-label="决策过程" title="决策过程">
-              <Icon name="panel" /></button>
-          )}
-          {route === "chat" && sessionId && (
             <button className="icon-btn" onClick={newChat} aria-label="新对话" title="新对话"><Icon name="plus" /></button>
           )}
         </div>
         {route === "chat" && (
           <Chat sessionId={sessionId} onSessionCreated={(id) => { setSessionId(id); refreshSessions(); }} onChanged={refreshSessions}
-            navigate={navigate} openTrace={openTrace} capabilities={capabilities}
+            navigate={navigate} openTrace={devMode ? openTrace : null} capabilities={capabilities}
             openEvidence={(sid, taskId) => setEvidence({ sessionId: sid, taskId })} openProof={(url) => setProof(url)}
             prefill={prefill} clearPrefill={() => setPrefill(null)} />
         )}
         <Suspense fallback={<div className="page"><div className="inner muted">读取中…</div></div>}>
           {route === "overview" && <Overview openSession={selectSession} ask={ask} openProof={(url) => setProof(url)} />}
           {route === "features" && <Features capabilities={capabilities} refresh={refreshCapabilities} ask={ask} navigate={navigate} />}
-          {route === "settings" && <Settings capabilities={capabilities} refresh={refreshCapabilities} tab={settingsTab} setTab={setSettingsTab}
+          {route === "settings" && <Settings capabilities={capabilities} refresh={refreshCapabilities} tab={settingsTab} setTab={setSettingsTab} devMode={devMode} setDevMode={setDevMode}
             onSignOut={() => { auth.clear(); setAuthed(false); }} />}
         </Suspense>
       </main>
-      {trace && <TracePanel target={trace.messageId ? trace : null} onClose={() => setTrace(null)} />}
+      {trace && <TraceDrawer target={trace} onClose={() => setTrace(null)} />}
       {evidence && <EvidenceDrawer target={evidence} onClose={() => setEvidence(null)} />}
       {proof && <ProofDrawer url={proof} onClose={() => setProof(null)} />}
     </div>
+    </>
   );
 }
 
@@ -130,7 +128,7 @@ function Connect({ pairCode, onConnected }) {
   return (
     <div className="connect">
       <div className="panel">
-        <div className="brand" style={{ padding: 0 }}><span className="brand-mark">T</span>TRUSTA<small>银行助手</small></div>
+        <div className="brand" style={{ padding: 0 }}><img className="brand-mark" src="/mark.png" alt="" width="28" height="28" />TRUSTA<small>银行助手</small></div>
         <h2 style={{ margin: 0, fontSize: 20 }}>连接到你的 TRUSTA</h2>
         <span className="muted">TRUSTA 运行在你自己的电脑上。在电脑上打开“设置 → 访问与设备”，扫码或输入屏幕上的 6 位配对码。</span>
         <form onSubmit={(e) => { e.preventDefault(); claim(); }} style={{ display: "grid", gap: 10 }}>

@@ -252,6 +252,18 @@ class FeishuChannel:
         for card in turn["reply"]["cards"]:
             if card["type"] == "confirm":
                 self.sender.send(chat_id, "interactive", self.confirm_card(session_id, card))
+            elif card["type"] == "automation_confirm":
+                self.sender.send(chat_id, "interactive", self.rule_card(session_id, card))
+
+    def rule_card(self, session_id, card):
+        lines = "\n".join(f"**{r['name']}**：{r['trigger']}，" + "、".join(r["actions"]) for r in card["rules"])
+        lines += "\n\n" + "；".join(card["notes"])
+        value = {"session_id": session_id, "bundle_id": card["bundle_id"], "bundle_hash": card["bundle_hash"]}
+        return {"config": {"wide_screen_mode": True},
+                "header": {"template": "blue", "title": {"tag": "plain_text", "content": card["title"]}},
+                "elements": [{"tag": "markdown", "content": lines}, {"tag": "action", "actions": [
+                    {"tag": "button", "type": "primary", "text": {"tag": "plain_text", "content": "启用规则"}, "value": value | {"approve": True}},
+                    {"tag": "button", "type": "default", "text": {"tag": "plain_text", "content": "不用了"}, "value": value | {"approve": False}}]}]}
 
     def confirm_card(self, session_id, card):
         red = card["risk_level"] == "RED"
@@ -273,10 +285,25 @@ class FeishuChannel:
                 "elements": elements}
 
     # ---- card buttons ------------------------------------------------------------------------
+    def _on_rule_action(self, owner, value):
+        row = self.s.db.one("SELECT owner FROM channel_sessions WHERE channel='feishu' AND session_id=?", (value["session_id"],))
+        if not row or row["owner"] != owner:
+            return {"toast": {"type": "error", "content": "无权操作"}}
+        try:
+            result = self.chat.decide_rule(value["session_id"], owner, value["bundle_id"], value["bundle_hash"], value["approve"])
+        except Rejected as exc:
+            return {"toast": {"type": "info", "content": "这条规则已经处理过或已过期" if exc.code in {"ACTION_NOT_PENDING", "AUTOMATION_NOT_PENDING",
+                                                                                    "AUTOMATION_DRAFT_EXPIRED"} else "处理失败：" + exc.code}}
+        message = result["reply"]["text"]
+        return {"toast": {"type": "success" if value["approve"] else "info", "content": message[:60]},
+                "card": {"type": "raw", "data": _rule_result("联动规则", message, value["approve"])}}
+
     def _on_card_action(self, event):
         open_id = ((event.get("operator") or {}).get("open_id"))
         value = ((event.get("action") or {}).get("value")) or {}
         owner = self._owner(open_id)
+        if owner and set(value) == {"session_id", "bundle_id", "bundle_hash", "approve"} and type(value["approve"]) is bool:
+            return self._on_rule_action(owner, value)
         if not owner or set(value) != {"session_id", "action_id", "action_hash", "approve"} or type(value["approve"]) is not bool:
             return {"toast": {"type": "error", "content": "无权操作"}}
         row = self.s.db.one("SELECT owner FROM channel_sessions WHERE channel='feishu' AND session_id=?", (value["session_id"],))
@@ -295,6 +322,12 @@ class FeishuChannel:
                          "header": {"template": "green" if value["approve"] else "grey",
                                     "title": {"tag": "plain_text", "content": entry["card"]["title"]}},
                          "elements": [{"tag": "markdown", "content": message}]}}}
+
+
+def _rule_result(title, message, approved):
+    return {"config": {"wide_screen_mode": True},
+            "header": {"template": "green" if approved else "grey", "title": {"tag": "plain_text", "content": title}},
+            "elements": [{"tag": "markdown", "content": message}]}
 
 
 def channel_status(channel):

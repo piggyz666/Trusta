@@ -187,3 +187,38 @@ class FeishuLongConnectionTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FeishuRuleCardTests(FeishuLongConnectionTests):
+    def test_rule_card_buttons_activate_rule(self):
+        self.chat.llm.script["余额低于1000提醒我"] = [call("propose_automation", trigger={"type": "BALANCE_BELOW", "span": "余额低于1000",
+                                                                                     "amount": {"value": "1000", "span": "1000"}}, actions=[{"type": "NOTIFY"}])]
+        self.handler._do_without_validation(self.message(f"绑定 {self.access.start_pairing('demo', 'feishu')['code']}"))
+        self.handler._do_without_validation(self.message("余额低于1000提醒我"))
+        card = self.sender.sent[-1][2]
+        self.assertEqual(card["header"]["title"]["content"], "确认联动规则")
+        value = card["elements"][-1]["actions"][0]["value"]
+        self.n += 1
+        result = self.handler._do_without_validation(json.dumps({"schema": "2.0", "header": {
+            "event_id": f"cb{self.n}", "event_type": "card.action.trigger", "app_id": "cli_app"},
+            "event": {"operator": {"open_id": "ou_bob"}, "action": {"value": value}}}).encode())
+        self.assertEqual(result["toast"]["type"], "success")
+        self.assertEqual(len(self.s.automation.rules("demo")), 1)
+
+
+class ProseOfferTests(Base):
+    """Live finding: the model answered “需要我帮你挂失吗？” in prose instead of calling the tool."""
+    mode = "local"
+
+    def test_actionable_prose_becomes_card_and_offers_are_never_shown(self):
+        class Prose(ScriptedToolClient):
+            def complete(self, prompt, history, tools=None):
+                return {"calls": [], "usage": None, "text": {
+                    "我的卡丢了怎么办": "卡片丢失后建议先挂失。需要我现在帮你挂失这张借记卡吗？",
+                    "信息呢": "抱歉，刚才没有展示待确认的信息。现在为你准备挂失操作，确认后即执行挂失。"}[history[-1]["content"]]}
+        chat = ChatService(self.s, Prose({}))
+        session = chat.create_session("demo", "test")
+        turn = chat.send(session["session_id"], "demo", "p1", session["revision"], "我的卡丢了怎么办")
+        self.assertEqual([c["action_type"] for c in turn["reply"]["cards"] if c["type"] == "confirm"], ["CARD_REPORT_LOST"])
+        turn = chat.send(session["session_id"], "demo", "p2", turn["revision"], "信息呢")
+        self.assertNotIn("准备挂失", turn["reply"]["text"])

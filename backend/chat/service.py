@@ -28,6 +28,8 @@ SMALLTALK = {
                     "③ 理财推荐、对比、申购赎回；④ 卡片冻结、挂失、限额和交易开关；⑤ 订阅和代扣的识别与取消。"
                     "所有资金操作都需要你逐笔确认。",
 }
+OFFER_TEXT = re.compile(r"需要我.{0,16}吗|要不要我|是否需要我|我(来|帮你|为你|可以帮你).{0,8}(办理|提交|执行|挂失|转账|冻结|申购|赎回|取消|关闭)"
+                        r"|(已|已经)(为你|帮你)?.{0,4}(提交|执行|办理|转账|挂失|冻结)|确认后.{0,4}(执行|提交)|准备.{0,6}操作|待确认的信息")
 HUMAN_WORDS = re.compile(r"转人工|人工客服|真人客服|找客服|投诉|要人工")
 BACK_TO_AGENT = re.compile(r"取消转人工|不用人工|回到智能助手|继续用智能助手")
 UNDO_WORDS = re.compile(r"撤销|撤回|回退|恢复刚才|改回去|弄错了.*恢复")
@@ -732,10 +734,20 @@ class ChatService(AutomationMixin):
         self.store.record_llm_tokens(owner, usage.get("total_tokens"))
         calls = [c for c in result["calls"] if isinstance(c, dict) and isinstance(c.get("name"), str)]
         if not calls:
-            # Plain model text is shown only when it carries no numbers it could have invented.
             content = (result.get("text") or "").strip()
-            if content and not re.search(r"[0-9０-９]", content) and len(content) <= 200:
+            # The model answered in prose although the request is actionable ("我的卡丢了怎么办" → "需要我帮你挂失吗？").
+            # Prose never authorises or prepares anything, so prefer the deterministic grammar when it recognises an action.
+            from backend.chat.rules import rule_calls
+            actionable = [c for c in rule_calls(text, catalog) if c["name"] not in {"smalltalk", "ask_user", "knowledge", "navigate"}]
+            if actionable:
+                return actionable
+            # Plain model text is shown only when it carries no numbers it could have invented and does not
+            # describe / offer an operation in words (the confirmation card is the only place an operation is offered).
+            if content and not re.search(r"[0-9０-９]", content) and len(content) <= 200 and not OFFER_TEXT.search(content):
                 return self._plain(content)
+            if content and OFFER_TEXT.search(content):
+                return [{"name": "ask_user", "arguments": {"slot": "operation",
+                                                           "question": "请直接告诉我要办理的操作，例如“挂失我的卡”“冻结卡片”，我会生成确认卡给你核对。"}}]
             return [{"name": "out_of_scope", "arguments": {}}]
         return calls
 

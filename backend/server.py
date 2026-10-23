@@ -457,6 +457,8 @@ def main():
         print("对话理解：" + mode)
     print(f"打开 http://127.0.0.1:8000/#token={token}")
     access = service.access
+    if access.warning:
+        print("注意：" + access.warning)
     if access.mode == "lan":
         print(f"局域网模式：手机连同一 Wi-Fi / 热点后访问 {access.urls(8000)['lan']}")
         print("  手机首次使用需配对：在电脑页面点“连接手机”扫码，或另开窗口运行 python -m scripts.pair")

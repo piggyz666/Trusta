@@ -51,14 +51,35 @@ def write_env(updates):
         pass
 
 
-def ask(prompt, default="", secret=False, choices=None):
+def ask(prompt, default="", secret=False, choices=None, check=None, hint=""):
+    """check(value) -> bool rejects malformed input (e.g. a pasted ^V instead of a key) and asks again."""
     while True:
-        suffix = f" [{default}]" if default and not secret else (" [已设置，回车保留]" if default else "")
-        raw = (getpass.getpass if secret else input)(f"{prompt}{suffix}: ").strip()
+        if secret:
+            suffix = f" [已设置 {mask(default)}，回车保留]" if default and (check is None or check(default)) else ""
+        else:
+            suffix = f" [{default}]" if default else ""
+        raw = (getpass.getpass if secret else input)(f"{prompt}{suffix}: ")
+        raw = "".join(ch for ch in raw if ch.isprintable()).strip()  # drop control characters such as a literal Ctrl+V
         value = raw or default
-        if choices is None or value in choices:
-            return value
-        print("  请输入：" + " / ".join(choices))
+        if choices is not None and value not in choices:
+            print("  请输入：" + " / ".join(choices))
+            continue
+        if check is not None and value and not check(value):
+            print("  格式不对" + (f"（{hint}）" if hint else "") + "。Windows 窗口里粘贴请用鼠标右键，或在 Windows Terminal 里用 Ctrl+Shift+V。")
+            continue
+        if secret and raw:
+            print(f"  已收到 {mask(value)}")
+        return value
+
+
+def mask(value):
+    return f"{value[:4]}…{value[-2:]}（{len(value)} 位）" if value and len(value) > 8 else "（过短）"
+
+
+DEEPSEEK_KEY = lambda v: v.startswith("sk-") and len(v) >= 20
+FEISHU_ID = lambda v: v.startswith("cli_") and len(v) >= 10
+FEISHU_SECRET = lambda v: len(v) >= 20 and " " not in v
+HOSTNAME = lambda v: "://" not in v and "/" not in v and "." in v and " " not in v
 
 
 def wizard():
@@ -70,7 +91,8 @@ def wizard():
     if choice == "3":
         updates["DEEPSEEK_API_KEY"] = None
     else:
-        updates["DEEPSEEK_API_KEY"] = ask("API Key", current.get("DEEPSEEK_API_KEY", ""), secret=True) or None
+        updates["DEEPSEEK_API_KEY"] = ask("API Key（输入时不显示）", current.get("DEEPSEEK_API_KEY", ""), secret=True,
+                                          check=DEEPSEEK_KEY if choice == "1" else (lambda v: len(v) >= 16), hint="DeepSeek 的 Key 以 sk- 开头") or None
         if choice == "2":
             updates["TRUSTA_CHAT_LLM_ENDPOINT"] = ask("接口地址（https://…/chat/completions）", current.get("TRUSTA_CHAT_LLM_ENDPOINT", ""))
             updates["TRUSTA_CHAT_LLM_MODEL"] = ask("模型名", current.get("TRUSTA_CHAT_LLM_MODEL", ""))
@@ -89,12 +111,20 @@ def wizard():
     current_mode = {v: k for k, v in modes.items()}.get(current.get("TRUSTA_ACCESS_MODE", "local"), "1")
     access = modes[ask("选择", current_mode, choices=set(modes))]
     updates["TRUSTA_ACCESS_MODE"] = access
-    updates["TRUSTA_PUBLIC_HOST"] = ask("隧道的公网域名（如 xxx.trycloudflare.com，不带 https://）", current.get("TRUSTA_PUBLIC_HOST", "")) \
-        if access == "tunnel" else None
+    updates["TRUSTA_PUBLIC_HOST"] = None
+    if access == "tunnel":
+        host = ask("隧道的公网域名（如 xxx.trycloudflare.com，不带 https://；还没有就直接回车改用局域网）",
+                   current.get("TRUSTA_PUBLIC_HOST", ""), check=HOSTNAME, hint="只填域名")
+        if host:
+            updates["TRUSTA_PUBLIC_HOST"] = host
+        else:
+            updates["TRUSTA_ACCESS_MODE"] = "lan"
+            print("  没有隧道域名，已改为局域网模式。")
     if ask("接入飞书机器人？(y/n)", "y" if current.get("FEISHU_APP_ID") else "n", choices={"y", "n"}) == "y":
         print("  飞书开放平台：创建应用 → 开启机器人 → 事件与回调选“使用长连接接收事件” → 添加 im.message.receive_v1 和卡片回调 → 发布版本")
-        updates["FEISHU_APP_ID"] = ask("App ID", current.get("FEISHU_APP_ID", ""))
-        updates["FEISHU_APP_SECRET"] = ask("App Secret", current.get("FEISHU_APP_SECRET", ""), secret=True)
+        updates["FEISHU_APP_ID"] = ask("App ID", current.get("FEISHU_APP_ID", ""), check=FEISHU_ID, hint="以 cli_ 开头")
+        updates["FEISHU_APP_SECRET"] = ask("App Secret（输入时不显示）", current.get("FEISHU_APP_SECRET", ""), secret=True,
+                                           check=FEISHU_SECRET, hint="开发者后台“凭证与基础信息”里的 App Secret")
         mode = ask("连接方式 longconn（长连接，推荐，无需公网）/ webhook（需要公网地址）",
                    current.get("FEISHU_MODE", "longconn"), choices={"longconn", "webhook"})
         updates["FEISHU_MODE"] = mode

@@ -57,8 +57,10 @@ class AccessControl:
         if self.mode not in {"local", "lan", "tunnel"}:
             raise Rejected("INVALID_ACCESS_MODE")
         self.public_host = (public_host if public_host is not None else os.environ.get("TRUSTA_PUBLIC_HOST", "")).strip().lower()
+        self.warning = None
         if self.mode == "tunnel" and not self.public_host:
-            raise Rejected("TUNNEL_HOST_REQUIRED")
+            # Fail safe, not closed: without a tunnel host nothing remote can be allowed, so behave as local-only.
+            self.mode, self.warning = "local", "TRUSTA_ACCESS_MODE=tunnel 但没有设置 TRUSTA_PUBLIC_HOST，已按“仅本机”运行"
         self.key = hmac.new(service.config.signing_key, b"trusta-access-v1", hashlib.sha256).digest()
         self._failures, self._lock = [], threading.Lock()
         with service.db.transaction() as conn:

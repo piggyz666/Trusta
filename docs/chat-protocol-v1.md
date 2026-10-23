@@ -619,3 +619,29 @@ python -m scripts.chat_cli --sandbox      # 或：进程内启动 + 临时数据
 
 ### 17.6 串行规则（修正）
 所有银行动作的前置条件都包含账户快照。因此一轮（或一次规则触发）里只要有资金变动，所有写操作都串行：后一步在前一步执行后按最新状态生成（节点状态 `QUEUED`），前一步被拒绝 / 失败则后续 `SKIPPED`。
+
+## 18. 访问方式、手机配对、飞书长连接（2026-10-23）
+
+### 18.1 访问方式 `TRUSTA_ACCESS_MODE`
+| 模式 | 监听 | 允许的 Host | 说明 |
+|---|---|---|---|
+| `local`（默认） | 127.0.0.1 | 127.0.0.1 / localhost | 只有本机浏览器 |
+| `lan` | 0.0.0.0 | 另加 `<局域网IP>:端口`（自动探测，或 `TRUSTA_LAN_HOST`） | 手机连同一 Wi-Fi / 热点 |
+| `tunnel` | 127.0.0.1 | 另加 `TRUSTA_PUBLIC_HOST`（如 xxx.trycloudflare.com） | 隧道转发到本机；按 Host 判定为远程请求 |
+
+- Host / Origin 白名单防 DNS 重绑定；主令牌（data/api.token）**只在本机有效**（回环地址 + 本机 Host）。
+- 手机不拿主令牌：配对后获得自己的设备令牌（30 天，可吊销，只存 HMAC）。
+
+### 18.2 配对
+- `POST /api/pairing/start {purpose:"device"|"feishu"}`：仅本机 + 主令牌。返回 `{code, expires_at, pair_url}`（device：`<lan或公网地址>#pair=<code>`，二维码内容即此 URL）或 `{code, instruction}`（feishu）。
+- `POST /api/pairing/claim {code, name}`：无需令牌（Host 白名单仍生效）→ `201 {device_id, device_token, expires_at}`。之后请求带 `Authorization: Bearer <device_token>`。
+- 规则：6 位、5 分钟、一次性；单码错 5 次作废（任何错误都会累加到所有在用码），全局 10 分钟 20 次错误后 `429 PAIRING_RATE_LIMITED`。
+- `GET /api/access` → `{mode, urls, devices[], via_device}`；`POST /api/pairing/devices/{id}/revoke`；`GET /api/access/info`（无需令牌，供手机页面判断模式）。
+- 命令行：`python -m scripts.pair`（显示配对地址 / 终端二维码 / 配对码）、`--feishu`、`--devices`、`--revoke ID`。
+
+### 18.3 飞书长连接
+- `FEISHU_MODE=longconn`（未配置 Verification Token 时的默认）：`python -m scripts.feishu_worker`（start.ps1 自动启动），官方 SDK `lark-oapi` 建立出站 WebSocket，**无需公网地址**。
+- 飞书后台：开启机器人 → 事件与回调选“使用长连接接收事件” → 订阅 `im.message.receive_v1` 与卡片回调 `card.action.trigger` → 权限 `im:message`、`im:message:send_as_bot` → 发布版本。
+- 两种传输共用 `FeishuChannel.process()`：事件去重、绑定校验、黄色按钮可确认、红色回 APP；非本应用 app_id 的事件丢弃。
+- 账户绑定：电脑上生成绑定码（`python -m scripts.pair --feishu` 或页面按钮）→ 在飞书**私聊**机器人发送“绑定 123456”；群聊里的绑定请求一律忽略。`POST /api/channels/feishu/unbind` 解绑。
+- 依赖：`pip install -r requirements-channels.txt`（lark-oapi、qrcode）。

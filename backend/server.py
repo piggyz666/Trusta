@@ -56,7 +56,8 @@ def _chat_for(service):
     return service.chat
 
 
-def create_server(service, token, port=8000, identities=None, *, max_workers=64, input_timeout=10, chat_service=None, feishu_channel=None):
+def create_server(service, token, port=8000, identities=None, *, max_workers=64, input_timeout=10, chat_service=None, feishu_channel=None,
+                  access=None):
     if type(max_workers) is not int or not 1<=max_workers<=256:
         raise Rejected('INVALID_HTTP_CAPACITY')
     if type(input_timeout) not in (int,float) or not .05<=input_timeout<=30:
@@ -64,6 +65,9 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
     identity_map = dict(identities) if identities is not None else {token:"demo"}
     if not identity_map or any(not isinstance(k,str) or not k or not isinstance(v,str) or not v for k,v in identity_map.items()):
         raise Rejected("INVALID_LOCAL_IDENTITIES")
+    from backend.access import AccessControl
+    access = access or getattr(service, "access", None) or AccessControl(service)
+    service.access = access
     from backend.tx.api import TransactionQueries
     tx_queries=TransactionQueries(service.db)
     from backend.chat import http as chat_http
@@ -71,7 +75,8 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
     if feishu_channel is None and chat is not None:
         from backend.channels.feishu import FeishuChannel, FeishuConfig
         feishu_config=FeishuConfig.from_env()
-        feishu_channel=FeishuChannel(chat,feishu_config) if feishu_config.enabled else None
+        # Long-connection mode runs in its own worker (scripts.feishu_worker); the HTTP webhook is only for webhook mode.
+        feishu_channel=FeishuChannel(chat,feishu_config) if feishu_config.enabled and feishu_config.mode=="webhook" else None
     feishu=feishu_channel
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
@@ -103,20 +108,35 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             self.end_headers()
             self.wfile.write(data)
 
-        def identity(self):
+        def check_origin(self):
+            """Host / Origin allow-list (DNS-rebinding defence). Which hosts are allowed depends on the access mode."""
             if any(len(self.headers.get_all(k,[]))>1 for k in ('Host','Origin','Authorization','X-TRUSTA-Operator')):
                 raise Rejected('UNAUTHENTICATED')
-            expected_host = f"127.0.0.1:{self.server.server_port}"
-            if self.headers.get("Host") != expected_host:
+            port = self.server.server_port
+            if self.headers.get("Host") not in access.allowed_hosts(port):
                 raise Rejected("INVALID_HOST")
             origin = self.headers.get("Origin")
-            if origin and origin != f"http://{expected_host}":
+            if origin and origin not in access.allowed_origins(port):
                 raise Rejected("INVALID_ORIGIN")
+
+        def is_local(self):
+            return access.is_local(self.headers.get("Host"), self.client_address[0], self.server.server_port)
+
+        def identity(self):
+            self.check_origin()
             actual = self.headers.get("Authorization", "")
             matches=[user for key,user in identity_map.items() if hmac.compare_digest(actual.encode(),f"Bearer {key}".encode())]
-            if len(matches)!=1:
+            if len(matches)==1:
+                # The master token never works from another device: phones pair and get their own revocable token.
+                if not self.is_local():
+                    raise Rejected("UNAUTHENTICATED")
+                self.via_device = False
+                return matches[0]  # Server-configured local identity; client cannot override it.
+            owner = access.device_owner(actual[7:]) if actual.startswith("Bearer ") else None
+            if owner is None:
                 raise Rejected("UNAUTHENTICATED")
-            return matches[0]  # Server-configured local identity; client cannot override it.
+            self.via_device = True
+            return owner
 
         def do_GET(self):
             self._input_timer.cancel()
@@ -128,6 +148,9 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                             "bank":service.gateway._adapter.provider.manifest.provider}
                     if worker:health['checkpoint_worker']=dict(worker)
                     return self.reply(200,health)
+                if path == "/api/access/info":
+                    self.check_origin()  # public on purpose: tells a phone which address / mode it is talking to
+                    return self.reply(200, {"mode": access.mode, "local_request": self.is_local()})
                 files = {"/": ("index.html", "text/html; charset=utf-8"),
                          "/app.js": ("app.js", "text/javascript; charset=utf-8"),
                          "/styles.css": ("styles.css", "text/css; charset=utf-8")}
@@ -135,6 +158,9 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                     file, content_type = files[path]
                     return self.reply(200, (FRONTEND / file).read_bytes(), content_type)
                 user_id = self.identity()
+                if path == "/api/access":
+                    return self.reply(200, {"mode": access.mode, "urls": access.urls(self.server.server_port),
+                                            "devices": access.devices(user_id), "via_device": self.via_device})
                 if path.startswith('/api/chat/') and chat is not None:
                     return chat_http.handle_get(self, chat, path, user_id)
                 if path.startswith('/api/v1/tx/') and len(path.split('/'))==5:
@@ -231,10 +257,25 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                 # IM platform callbacks carry platform signatures, not the local bearer token.
                 if urlparse(self.path).path == "/api/channels/feishu/webhook" and feishu is not None:
                     return self.reply(200, feishu.handle(self.headers, raw))
+                if urlparse(self.path).path == "/api/pairing/claim":
+                    # A phone exchanges a one-time code (from the QR / typed) for its own device token.
+                    self.check_origin()
+                    if set(body) - {"code", "name"}:
+                        raise Rejected("INVALID_INPUT")
+                    return self.reply(201, access.pair_device(body.get("code"), body.get("name", "手机")))
                 # Consume bounded input before rejecting identity, avoiding TCP resets
                 # from unread POST bytes when returning a 403 on Windows.
                 user_id = self.identity()
                 path = urlparse(self.path).path
+                if path == "/api/pairing/start":
+                    # Only someone sitting at this computer can mint a pairing code (QR shown on the desktop page).
+                    if self.via_device or not self.is_local() or set(body) - {"purpose"}:
+                        raise Rejected("PAIRING_LOCAL_ONLY" if set(body) <= {"purpose"} else "INVALID_INPUT")
+                    return self.reply(201, access.start_pairing(user_id, body.get("purpose", "device"), self.server.server_port))
+                if path.startswith("/api/pairing/devices/") and path.endswith("/revoke") and not body:
+                    return self.reply(200, access.revoke(user_id, path.split("/")[4]))
+                if path == "/api/channels/feishu/unbind" and not body:
+                    return self.reply(200, access.unbind_channel("feishu", user_id))
                 if path.startswith("/api/chat/") and chat is not None:
                     return chat_http.handle_post(self, chat, path, body, user_id)
                 if path == "/api/tasks":
@@ -386,12 +427,12 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             except (Rejected, InferenceError) as exc:
                 if urlparse(self.path).path.startswith(("/api/chat/","/api/channels/")) and exc.code.startswith(("CHAT_","ACCOUNT_","ACTION_","DEMO_","SMS_","HANDOFF_","SECURITY_OPERATOR","FEISHU_","TRACE_","AUTOMATION_","PROTECTION_")):
                     return self.reply(chat_http.status_for(exc.code), {"error": exc.code, "message": str(exc)})
-                self.reply(403 if exc.code in {"UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED"} else 400,
+                self.reply(429 if exc.code=="PAIRING_RATE_LIMITED" else 403 if exc.code in {"UNAUTHENTICATED", "INVALID_ORIGIN", "INVALID_HOST", "TASK_ACCESS_DENIED", "CONVERSATION_ACCESS_DENIED", "LLM_CALL_ACCESS_DENIED", "MEMORY_ACCESS_DENIED", "PAIRING_LOCAL_ONLY", "PAIRING_INVALID"} else 400,
                            {"error": exc.code, "message": str(exc)})
             except Exception:
                 self.reply(500, {"error": "INTERNAL_ERROR", "message": "状态未确认，请刷新任务；不要重复提交转账。"})
 
-    server = BoundedHTTPServer(("127.0.0.1", port), Handler,max_workers)
+    server = BoundedHTTPServer((access.bind_host(), port), Handler,max_workers)
     server.daemon_threads = True
     return server
 
@@ -415,6 +456,15 @@ def main():
         mode = "DeepSeek（" + chat.llm.model + "）" if getattr(chat.llm, "available", False) else "规则兜底（未配置 DEEPSEEK_API_KEY）"
         print("对话理解：" + mode)
     print(f"打开 http://127.0.0.1:8000/#token={token}")
+    access = service.access
+    if access.mode == "lan":
+        print(f"局域网模式：手机连同一 Wi-Fi / 热点后访问 {access.urls(8000)['lan']}")
+        print("  手机首次使用需配对：在电脑页面点“连接手机”扫码，或另开窗口运行 python -m scripts.pair")
+    elif access.mode == "tunnel":
+        print(f"隧道模式：公网地址 https://{access.public_host}/ （由隧道工具转发到本机 8000 端口）")
+        print("  手机首次使用需配对：python -m scripts.pair")
+    else:
+        print("仅本机访问（如需手机访问：python -m scripts.setup 把“访问方式”改为局域网）")
     print("Ctrl+C 停止；任务和银行状态将保留。")
     try:
         server.serve_forever()

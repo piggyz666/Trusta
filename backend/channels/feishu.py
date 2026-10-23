@@ -1,9 +1,15 @@
-"""Feishu (Lark) bot channel: the same ChatService as the APP, behind a platform-verified webhook.
+"""Feishu (Lark) bot channel: the same ChatService as the APP.
+
+Two transports, same event handling:
+* longconn (default): an outbound WebSocket opened with the app's own credentials (scripts/feishu_worker.py, official
+  SDK). No public URL, no tunnel, no server -- like OpenClaw. Events arrive already authenticated by that connection.
+* webhook: Feishu POSTs to /api/channels/feishu/webhook (needs a public URL, e.g. a tunnel).
 
 Security model
-* Every callback is verified (verification token, and X-Lark-Signature when an encrypt key is set);
+* Every webhook callback is verified (verification token, and X-Lark-Signature when an encrypt key is set);
   encrypted payloads are decrypted with AES-256-CBC as specified by the open platform.
-* A Feishu user acts as a TRUSTA customer only through an explicit binding (FEISHU_USER_BINDINGS).
+* A Feishu user acts as a TRUSTA customer only through an explicit binding: a one-time 6-digit code generated on the
+  customer's computer and sent to the bot as “绑定 123456” (or the FEISHU_USER_BINDINGS list for operators).
 * YELLOW actions can be confirmed with card buttons by the bound user. RED actions are never completed
   in IM: the card points to the APP for TOTP / SMS verification (an IM account alone is not a second factor).
 * Event ids are de-duplicated (Feishu retries), and replies are sent asynchronously so the webhook
@@ -14,6 +20,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import threading
 import time
 from urllib.request import Request, build_opener, ProxyHandler
@@ -23,8 +30,9 @@ API = "https://open.feishu.cn/open-apis"
 
 
 class FeishuConfig:
-    def __init__(self, app_id="", app_secret="", verification_token="", encrypt_key="", bindings=None, app_url=""):
+    def __init__(self, app_id="", app_secret="", verification_token="", encrypt_key="", bindings=None, app_url="", mode=None):
         self.app_id, self.app_secret = app_id, app_secret
+        self.mode = (mode or ("webhook" if verification_token else "longconn")).lower()
         self.verification_token, self.encrypt_key = verification_token, encrypt_key
         self.bindings = dict(bindings or {})
         self.app_url = app_url
@@ -38,10 +46,12 @@ class FeishuConfig:
                 bindings[open_id.strip()] = owner.strip()
         return cls(os.environ.get("FEISHU_APP_ID", ""), os.environ.get("FEISHU_APP_SECRET", ""),
                    os.environ.get("FEISHU_VERIFICATION_TOKEN", ""), os.environ.get("FEISHU_ENCRYPT_KEY", ""), bindings,
-                   os.environ.get("TRUSTA_APP_URL", "http://127.0.0.1:8000/"))
+                   os.environ.get("TRUSTA_APP_URL", "http://127.0.0.1:8000/"), os.environ.get("FEISHU_MODE") or None)
 
     @property
     def enabled(self):
+        if self.mode == "longconn":
+            return bool(self.app_id and self.app_secret)
         return bool(self.verification_token)
 
 
@@ -145,6 +155,10 @@ class FeishuChannel:
         payload = self.verify(headers, raw)
         if payload.get("type") == "url_verification":
             return {"challenge": payload.get("challenge", "")}
+        return self.process(payload)
+
+    def process(self, payload):
+        """Shared by both transports once the payload is authenticated (webhook signature / long-connection session)."""
         header = payload.get("header") or {}
         event_type, event_id = header.get("event_type"), header.get("event_id")
         if not isinstance(event_id, str) or not event_id:
@@ -174,8 +188,15 @@ class FeishuChannel:
             self.s.audit.append(None, None, "FEISHU_DISPATCH_FAILED", "channel", {"code": getattr(exc, "code", "ERROR")})
 
     # ---- messages ----------------------------------------------------------------------------
+    def _access(self):
+        from backend.access import AccessControl
+        access = getattr(self.s, "access", None)
+        if access is None:
+            access = self.s.access = AccessControl(self.s, mode="local")
+        return access
+
     def _owner(self, open_id):
-        return self.config.bindings.get(open_id)
+        return self.config.bindings.get(open_id) or (self._access().channel_owner("feishu", open_id) if open_id else None)
 
     def _session(self, chat_id, owner):
         row = self.s.db.one("SELECT owner, session_id FROM channel_sessions WHERE channel='feishu' AND external_id=?", (chat_id,))
@@ -198,16 +219,27 @@ class FeishuChannel:
         if not chat_id:
             return
         owner = self._owner(open_id)
+        text = ""
+        if message.get("message_type") == "text":
+            try:
+                text = json.loads(message.get("content") or "{}").get("text", "")
+            except ValueError:
+                text = ""
+        bind = re.fullmatch(r"\s*绑定\s*([0-9]{6})\s*", " ".join(p for p in text.split() if not p.startswith("@_user")))
+        if bind and open_id and message.get("chat_type", "p2p") == "p2p":
+            try:
+                self._access().bind_channel("feishu", open_id, bind.group(1))
+                self.sender.send(chat_id, "text", {"text": "绑定成功，现在可以直接在这里和我对话了。转账等操作仍需确认，高风险操作请回到 APP 验证。"})
+            except Rejected:
+                self.sender.send(chat_id, "text", {"text": "绑定码无效或已过期，请在电脑上重新生成（5 分钟内有效）。"})
+            return
         if not owner:
-            self.sender.send(chat_id, "text", {"text": "你还没有绑定 TRUSTA 账户，请先在 APP 的“安全设置”中绑定飞书。"})
+            self.sender.send(chat_id, "text", {"text": "你还没有绑定 TRUSTA 账户：请在电脑上的 TRUSTA 页面点“绑定飞书”（或运行 python -m scripts.pair --feishu）"
+                                                       "获取 6 位绑定码，然后在这里私聊发送“绑定 123456”。"})
             return
         if message.get("message_type") != "text":
             self.sender.send(chat_id, "text", {"text": "目前只支持文字消息。"})
             return
-        try:
-            text = json.loads(message.get("content") or "{}").get("text", "")
-        except ValueError:
-            text = ""
         text = " ".join(part for part in text.split() if not part.startswith("@_user"))[:500].strip()
         if not text:
             return
@@ -266,5 +298,6 @@ class FeishuChannel:
 
 
 def channel_status(channel):
-    return {"enabled": channel.config.enabled, "bound_users": len(channel.config.bindings), "encrypted": bool(channel.config.encrypt_key)}
+    return {"enabled": channel.config.enabled, "mode": channel.config.mode, "bound_users": len(channel.config.bindings),
+            "encrypted": bool(channel.config.encrypt_key)}
 

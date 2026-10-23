@@ -1,0 +1,3 @@
+# Optional: Feishu long-connection mode (python -m scripts.feishu_worker) and terminal QR codes (python -m scripts.pair)
+lark-oapi==1.7.5
+qrcode==8.2

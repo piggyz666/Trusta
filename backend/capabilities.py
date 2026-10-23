@@ -32,7 +32,8 @@ REQUIREMENTS = {
     "bank.subscriptions": ("银行接口：订阅与代扣", "银行适配器需支持订阅 / 代扣查询与取消"),
     "bank.savings": ("银行接口：心愿金子账户", "银行适配器需支持储蓄目标（锁定 / 释放 / 支付）"),
     "bank.feed": ("银行入账推送", "当前仅本地沙箱银行提供入账推送；真实银行需接入其 webhook"),
-    "channel.feishu": ("飞书机器人", "在 .env 配置 FEISHU_APP_ID / FEISHU_APP_SECRET / FEISHU_VERIFICATION_TOKEN（可选 FEISHU_ENCRYPT_KEY）"),
+    "channel.feishu": ("飞书机器人", "运行 python -m scripts.setup 填写 FEISHU_APP_ID / FEISHU_APP_SECRET（默认长连接，无需公网），"
+                                    "pip install lark-oapi，再用 python -m scripts.pair --feishu 绑定账户"),
     "security.strong_auth": ("强验证（TOTP / 短信）", "TRUSTA_SAFETY_PROFILE=competition，或设置 TRUSTA_STRONG_AUTH_SECRET"),
 }
 BANK_TOOLS = {
@@ -102,7 +103,10 @@ class CapabilityRegistry:
             llm_state = self._probe.get("llm", {}).get("status", "CONFIGURED")
             if time.time() < getattr(self.chat, "_breaker_open_until", 0):
                 llm_state = "CIRCUIT_OPEN"
-        feishu = bool(os.environ.get("FEISHU_VERIFICATION_TOKEN")) and bool(os.environ.get("FEISHU_APP_ID"))
+        from backend.channels.feishu import FeishuConfig
+        feishu_config = FeishuConfig.from_env()
+        import importlib.util
+        feishu = feishu_config.enabled and (feishu_config.mode != "longconn" or importlib.util.find_spec("lark_oapi") is not None)
         safety = getattr(self.s, "safety", None)
         have = {req: tools >= needed for req, needed in BANK_TOOLS.items()}
         have.update({"llm.tools": llm_state in {"CONFIGURED", "VERIFIED"},
@@ -115,7 +119,9 @@ class CapabilityRegistry:
                         "probe": {k: v for k, v in self._probe.get("llm", {}).items() if k != "detail"}},
                 "bank": {"provider": manifest.provider if manifest else None, "environment": manifest.environment if manifest else None,
                          "tools": sorted(tools)},
-                "channels": {"app": True, "web": True, "feishu": have["channel.feishu"]},
+                "channels": {"app": True, "web": True, "feishu": have["channel.feishu"],
+                             "feishu_mode": feishu_config.mode if feishu_config.enabled else None,
+                             "access_mode": getattr(getattr(self.s, "access", None), "mode", "local")},
                 "safety_profile": "competition" if safety and safety.enabled else "legacy"}
 
     # ---- features ------------------------------------------------------------------------------

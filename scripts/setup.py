@@ -82,15 +82,30 @@ def wizard():
     print("  1) 本地沙箱银行（六大场景全部可用，含入账推送，演示推荐）  2) 外部银行沙箱（Revolut / Starling，需要配置文件）")
     bank = ask("选择", "2" if current.get("TRUSTA_BANK_CONFIG") else "1", choices={"1", "2"})
     updates["TRUSTA_BANK_CONFIG"] = ask("银行配置文件路径（config/bank.*.local.toml）", current.get("TRUSTA_BANK_CONFIG", "")) if bank == "2" else None
-    print("== 3/4 渠道 ==  APP / 网页始终可用")
+    print("== 3/4 访问方式与渠道 ==")
+    print("  网页 / 手机 H5 是同一套页面，按屏幕自动适配。")
+    print("  1) 仅本机（默认，最安全）  2) 局域网：手机连同一 Wi-Fi / 热点，扫码配对一次  3) 隧道：已有 Cloudflare Tunnel 等公网地址")
+    modes = {"1": "local", "2": "lan", "3": "tunnel"}
+    current_mode = {v: k for k, v in modes.items()}.get(current.get("TRUSTA_ACCESS_MODE", "local"), "1")
+    access = modes[ask("选择", current_mode, choices=set(modes))]
+    updates["TRUSTA_ACCESS_MODE"] = access
+    updates["TRUSTA_PUBLIC_HOST"] = ask("隧道的公网域名（如 xxx.trycloudflare.com，不带 https://）", current.get("TRUSTA_PUBLIC_HOST", "")) \
+        if access == "tunnel" else None
     if ask("接入飞书机器人？(y/n)", "y" if current.get("FEISHU_APP_ID") else "n", choices={"y", "n"}) == "y":
+        print("  飞书开放平台：创建应用 → 开启机器人 → 事件与回调选“使用长连接接收事件” → 添加 im.message.receive_v1 和卡片回调 → 发布版本")
         updates["FEISHU_APP_ID"] = ask("App ID", current.get("FEISHU_APP_ID", ""))
         updates["FEISHU_APP_SECRET"] = ask("App Secret", current.get("FEISHU_APP_SECRET", ""), secret=True)
-        updates["FEISHU_VERIFICATION_TOKEN"] = ask("Verification Token", current.get("FEISHU_VERIFICATION_TOKEN", ""), secret=True)
-        updates["FEISHU_ENCRYPT_KEY"] = ask("Encrypt Key（没有就回车）", current.get("FEISHU_ENCRYPT_KEY", ""), secret=True) or None
-        updates["FEISHU_USER_BINDINGS"] = ask("用户绑定 open_id:customer（逗号分隔）", current.get("FEISHU_USER_BINDINGS", ""))
+        mode = ask("连接方式 longconn（长连接，推荐，无需公网）/ webhook（需要公网地址）",
+                   current.get("FEISHU_MODE", "longconn"), choices={"longconn", "webhook"})
+        updates["FEISHU_MODE"] = mode
+        if mode == "webhook":
+            updates["FEISHU_VERIFICATION_TOKEN"] = ask("Verification Token", current.get("FEISHU_VERIFICATION_TOKEN", ""), secret=True)
+            updates["FEISHU_ENCRYPT_KEY"] = ask("Encrypt Key（没有就回车）", current.get("FEISHU_ENCRYPT_KEY", ""), secret=True) or None
+        else:
+            updates["FEISHU_VERIFICATION_TOKEN"] = updates["FEISHU_ENCRYPT_KEY"] = None
+        print("  账户绑定：启动后运行 python -m scripts.pair --feishu，把“绑定 123456”私聊发给机器人。")
     else:
-        for key in ("FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_VERIFICATION_TOKEN", "FEISHU_ENCRYPT_KEY", "FEISHU_USER_BINDINGS"):
+        for key in ("FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_VERIFICATION_TOKEN", "FEISHU_ENCRYPT_KEY", "FEISHU_MODE"):
             updates[key] = None
     print("== 4/4 安全与演示 ==")
     updates["TRUSTA_SAFETY_PROFILE"] = ask("安全档位 competition（强验证）/ legacy", current.get("TRUSTA_SAFETY_PROFILE", "competition"),

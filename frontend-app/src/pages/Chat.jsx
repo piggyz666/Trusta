@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, explain } from "../api.js";
 import { Card, PlanCard } from "../cards/Cards.jsx";
+import { stirInk } from "../components/Backdrop.jsx";
 import { Icon, useToast } from "../components/ui.jsx";
 import { uid } from "../format.js";
 
@@ -9,6 +10,14 @@ const STAGES = { "turn.started": "收到", "guard.result": "安全检查", "inte
 
 function Composer({ value, setValue, onSend, busy, onStop, autoFocus, placeholder }) {
   const ref = useRef(null);
+  const formRef = useRef(null);
+  const lastWisp = useRef(0);
+  const submit = (text) => { stirInk("send", formRef.current); onSend(text); };
+  const change = (next) => {
+    const now = performance.now();
+    if (next.length > value.length && now - lastWisp.current > 70) { lastWisp.current = now; stirInk("type", formRef.current); }
+    setValue(next);
+  };
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -17,11 +26,11 @@ function Composer({ value, setValue, onSend, busy, onStop, autoFocus, placeholde
   }, [value]);
   useEffect(() => { if (autoFocus) ref.current?.focus(); }, [autoFocus]);
   return (
-    <form className="composer" onSubmit={(e) => { e.preventDefault(); if (value.trim() && !busy) onSend(value.trim()); }}>
+    <form ref={formRef} className="composer" onSubmit={(e) => { e.preventDefault(); if (value.trim() && !busy) submit(value.trim()); }}>
       <label className="visually-hidden" htmlFor="composer">输入要办理的事</label>
       <textarea id="composer" ref={ref} rows={1} value={value} maxLength={500} placeholder={placeholder || "例如：给张三转500元"}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); if (value.trim() && !busy) onSend(value.trim()); } }} />
+        onChange={(e) => change(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); if (value.trim() && !busy) submit(value.trim()); } }} />
       {busy && onStop
         ? <button type="button" className="icon-btn stop" onClick={onStop} aria-label="中断"><Icon name="stop" /></button>
         : <button className="btn primary send" disabled={!value.trim() || busy}>发送</button>}

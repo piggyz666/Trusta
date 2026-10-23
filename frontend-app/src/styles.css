@@ -105,7 +105,7 @@ a { color: var(--glacier); }
 /* ---------- rail (sidebar) ---------- */
 .rail { background: var(--rail); border-right: 1px solid var(--line); display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .brand { display: flex; align-items: center; gap: 10px; padding: 18px 18px 10px; font-weight: 650; letter-spacing: 0.02em; }
-.brand-mark { width: 28px; height: 28px; border-radius: 8px; flex: none; box-shadow: 0 4px 14px -4px rgba(124,131,255,.6); }
+.brand-mark { width: 30px; height: 30px; flex: none; filter: drop-shadow(0 3px 8px rgba(0,0,0,.5)); }
 .brand small { color: var(--faint); font-weight: 500; font-size: 12px; margin-left: auto; }
 .new-chat { margin: 8px 14px 6px; display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: var(--radius-control);
   border: 1px solid var(--line-strong); background: transparent; text-align: left; }
@@ -159,8 +159,13 @@ a { color: var(--glacier); }
 /* ---------- hero (empty conversation) ---------- */
 .hero-wrap { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 8px 24px 24px; }
 .hero { position: relative; flex: 1; min-height: 420px; display: grid; place-items: center; }
+/* a soft pool of darkness behind the headline keeps it readable whatever the ink does */
+.hero::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(820px, 96%); height: 420px; transform: translate(-50%, -56%);
+  background: radial-gradient(closest-side, rgba(2,3,10,.62), rgba(2,3,10,.32) 60%, transparent); pointer-events: none; }
+:root[data-theme="light"] .hero::before { background: radial-gradient(closest-side, rgba(238,241,248,.75), transparent); }
+.hero-inner { position: relative; }
 .hero-inner { width: min(640px, 100% - 32px); text-align: center; color: #eef2fb; }
-.hero-mark { display: block; margin: 0 auto 22px; width: 64px; height: 64px; border-radius: 16px; filter: drop-shadow(0 14px 30px rgba(110,116,255,.55)); }
+.hero-mark { display: block; margin: 0 auto 18px; width: 104px; height: 104px; filter: drop-shadow(0 18px 34px rgba(0,0,0,.55)); pointer-events: none; }
 .hero h2 { font-size: clamp(30px, 3.6vw, 46px); line-height: 1.12; letter-spacing: -0.025em; font-weight: 650; margin: 0 0 12px; text-shadow: 0 2px 30px rgba(0,0,0,.45); }
 .hero p { color: rgba(232, 238, 250, .78); margin: 0 auto 30px; max-width: 30em; text-shadow: 0 1px 18px rgba(0,0,0,.5); }
 :root[data-theme="light"] .hero-inner { color: var(--text); }
@@ -414,7 +419,9 @@ a { color: var(--glacier); }
    ================================================================================================= */
 body { background: var(--bg); }
 .backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #02030a; }
-.backdrop video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.backdrop canvas { width: 100%; height: 100%; display: block; touch-action: auto; }
+.backdrop.still { background: #02030a url(/bg/flow-poster.jpg) center / cover no-repeat; }
+:root[data-theme="light"] .backdrop.still { background: #eef1f8; }
 .backdrop::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 90% at 20% 10%, rgba(2,3,10,.55), transparent 60%); transition: background .6s ease; }
 .backdrop.dim::after { background: var(--scrim); }
 :root[data-theme="light"] .backdrop::after { background: rgba(238,241,248,.55); }
@@ -494,6 +501,7 @@ html.liquid .hero .chip, html.liquid .btn.small:not(.primary) { -webkit-backdrop
   .rail, .card, .panel, .composer, .drawer, .menu, .toast { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--glass-fill-strong); }
 }
 .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
-.msg-ai .avatar { background: none; box-shadow: 0 4px 12px -4px rgba(0,0,0,.6); object-fit: cover; }
+.msg-ai .avatar { background: none; border-radius: 0; filter: drop-shadow(0 3px 6px rgba(0,0,0,.5)); object-fit: contain; }
 .hero-foot { justify-self: center; align-self: center; margin: 0 auto 6px; padding: 8px 16px; border-radius: 999px; color: var(--muted);
   background: var(--glass-sheen), var(--glass-fill); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 1px solid var(--glass-line); }
+@media (max-width: 880px) { .hero-foot { border-radius: 18px; gap: 4px 14px; padding: 8px 14px; font-size: 12px; margin: 0 12px 8px; } }

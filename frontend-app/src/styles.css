@@ -535,3 +535,28 @@ select.input option { background: #0d1c1f; color: #e9edf6; }
 .hero-foot { justify-self: center; align-self: center; margin: 0 auto 6px; padding: 8px 16px; border-radius: 999px; color: var(--muted);
   background: var(--glass-sheen), var(--glass-fill); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 1px solid var(--glass-line); }
 @media (max-width: 880px) { .hero-foot { border-radius: 18px; gap: 4px 14px; padding: 8px 14px; font-size: 12px; margin: 0 12px 8px; } }
+
+/* ---- phone: one continuous surface with the browser chrome ---------------------------------------------------- */
+:root { --edge: #041214; }
+:root[data-theme="light"] { --edge: #dcefee; }
+html { background: var(--edge); }
+@media (max-width: 880px) {
+  .shell::before, .shell::after { content: ""; position: fixed; left: 0; right: 0; z-index: 3; pointer-events: none; }
+  .shell::before { top: 0; height: calc(env(safe-area-inset-top) + 28px); background: linear-gradient(var(--edge), rgba(0,0,0,0)); }
+  .shell::after { bottom: 0; height: calc(env(safe-area-inset-bottom) + 22px); background: linear-gradient(rgba(0,0,0,0), var(--edge)); }
+  :root[data-theme="light"] .shell::before { background: linear-gradient(var(--edge), rgba(220,239,238,0)); }
+  :root[data-theme="light"] .shell::after { background: linear-gradient(rgba(220,239,238,0), var(--edge)); }
+  .shell::before { background: linear-gradient(var(--edge), rgba(4,18,20,0)); }
+  .shell::after { background: linear-gradient(rgba(4,18,20,0), var(--edge)); }
+  .hero-wrap { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .page { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+  .topbar { background: transparent; }
+}
+/* launched from the home screen: no browser bars; the status bar floats over the page */
+@media (display-mode: standalone) {
+  .topbar { padding-top: max(10px, env(safe-area-inset-top)); }
+  .rail { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+}
+/* light theme: the mark sits on its own dark tile (the ribbon's shaded inner faces need the dark ground) */
+:root[data-theme="light"] .hero-mark { content: url(/mark-tile.png); border-radius: 24px; width: 96px; height: 96px; filter: drop-shadow(0 14px 26px rgba(20, 70, 80, .35)); }
+:root[data-theme="light"] .brand-mark, :root[data-theme="light"] .msg-ai .avatar { content: url(/mark-tile.png); border-radius: 8px; filter: none; }

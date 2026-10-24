@@ -9,7 +9,10 @@ const systemLight = window.matchMedia("(prefers-color-scheme: light)");
 function syncTheme() {
   let chosen = null;
   try { chosen = localStorage.getItem("trusta-theme"); } catch { /* storage blocked */ }
-  document.documentElement.dataset.theme = chosen === "light" || chosen === "dark" ? chosen : systemLight.matches ? "light" : "dark";
+  const theme = chosen === "light" || chosen === "dark" ? chosen : systemLight.matches ? "light" : "dark";
+  document.documentElement.dataset.theme = theme;
+  // the browser's own toolbars take this colour; the page fades into the same colour at its edges so they read as one
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#dcefee" : "#041214");
 }
 syncTheme();
 systemLight.addEventListener?.("change", syncTheme);

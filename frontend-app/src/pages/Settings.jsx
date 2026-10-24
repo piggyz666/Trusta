@@ -19,12 +19,14 @@ function useQr(text) {
 }
 const LocalOnly = () => <small className="faint" style={{ display: "block", marginTop: 4 }}>为安全起见，只能在运行 TRUSTA 的电脑上修改</small>;
 
+const settingsCache = { data: null };
+
 export default function Settings({ capabilities, refresh, tab, setTab, onSignOut, devMode, setDevMode }) {
   const toast = useToast();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(settingsCache.data);
   const [error, setError] = useState(null);
   const current = tab || "account";
-  const load = () => api.settings().then(setData).catch((e) => setError(explain(e)));
+  const load = () => api.settings().then((d) => { settingsCache.data = d; setData(d); }).catch((e) => setError(explain(e)));
   useEffect(() => { load(); }, []);
 
   if (!data) return <div className="page"><div className="inner">{error ? <div className="empty">{error}</div> : <span className="muted">读取中…</span>}</div></div>;

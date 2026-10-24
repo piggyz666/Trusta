@@ -419,7 +419,7 @@ a { color: var(--glacier); }
    ================================================================================================= */
 :root {
   --glass-fill: rgba(14, 26, 30, .26);
-  --glass-fill-text: rgba(10, 20, 24, .40);
+  --glass-fill-text: rgba(10, 20, 24, .46);
   --glass-fill-strong: rgba(8, 16, 20, .62);
   --glass-sheen: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 28%, rgba(255,255,255,0) 55%),
                  radial-gradient(140% 90% at 100% 100%, rgba(255,255,255,.07), transparent 45%);
@@ -449,21 +449,25 @@ body { background: var(--bg); }
 .backdrop canvas { width: 100%; height: 100%; display: block; }
 .backdrop.still { background: radial-gradient(70% 60% at 50% 46%, #0f3b38, #03100f 70%); }
 :root[data-theme="light"] .backdrop.still { background: radial-gradient(70% 60% at 50% 46%, #e6faf7, #bfe2df 80%); }
-.backdrop::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: transparent; transition: background .5s ease; }
+.backdrop::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: transparent; }
 .backdrop.dim::after { background: var(--scrim); }
 #root { position: relative; z-index: 1; }
 .shell, .connect { position: relative; z-index: 1; }
 
-/* the glass material */
+/* the glass material. Performance: only the few floating "chrome" panes (rail, composer, overlays) blur live; content
+   cards sit on a background the water shader already frosts behind pages, so they need no backdrop-filter and
+   scrolling stays at full frame rate. */
 .rail, .card, .panel, .composer, .drawer, .menu, .toast, .readonly-bar, .msg-user, .btn, .chip, .segmented, .balance-total, .hero-foot, .new-chat {
   background: var(--glass-sheen), var(--glass-fill);
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
   border: 1px solid rgba(255,255,255,.10);
   box-shadow: var(--glass-edges), var(--glass-drop);
 }
 :root[data-theme="light"] :is(.rail, .card, .panel, .composer, .drawer, .menu, .toast, .readonly-bar, .msg-user, .btn, .chip, .segmented, .balance-total, .hero-foot, .new-chat) { border-color: rgba(255,255,255,.55); }
 .card, .panel, .readonly-bar, .balance-total { background: var(--glass-sheen), var(--glass-fill-text); }
 .drawer, .menu, .toast { background: var(--glass-sheen), var(--glass-fill-strong); -webkit-backdrop-filter: var(--blur-strong); backdrop-filter: var(--blur-strong); }
+.rail, .composer { -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
+/* the hero sits on crisp water: its few small controls get a light live blur */
+.hero :is(.chip, .hero-foot) { -webkit-backdrop-filter: blur(6px) saturate(170%); backdrop-filter: blur(6px) saturate(170%); }
 .rail { border-width: 0 1px 0 0; background: var(--glass-sheen), var(--glass-fill-text); box-shadow: var(--glass-edges); }
 .btn, .chip, .segmented, .new-chat { box-shadow: var(--glass-edges), 0 6px 16px -10px rgba(0,0,0,.45); }
 
@@ -518,11 +522,6 @@ select.input option { background: #0d1c1f; color: #e9edf6; }
 .hero h2, .hero p, .page-head h1, .page-head p { text-shadow: 0 1px 18px rgba(0,0,0,.45); }
 :root[data-theme="light"] :is(.hero h2, .hero p, .page-head h1, .page-head p) { text-shadow: 0 1px 14px rgba(255,255,255,.7); }
 .verify { background: rgba(255,107,107,.08); }
-
-/* Chromium: real refraction at the rims of the composer and small controls */
-html.liquid .composer { -webkit-backdrop-filter: url(#liquid-lens) blur(5px) saturate(200%) brightness(1.1); backdrop-filter: url(#liquid-lens) blur(5px) saturate(200%) brightness(1.1); }
-html.liquid :is(.hero .chip, .btn.small:not(.primary), .nav button[aria-current="page"]) {
-  -webkit-backdrop-filter: url(#liquid-lens) blur(3px) saturate(190%); backdrop-filter: url(#liquid-lens) blur(3px) saturate(190%); }
 
 @media (max-width: 880px) {
   .rail { background: var(--glass-sheen), var(--glass-fill-strong); -webkit-backdrop-filter: var(--blur-strong); backdrop-filter: var(--blur-strong); }

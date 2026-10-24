@@ -10,15 +10,18 @@ const GLYPH = { transfer: "transfer", card: "card", wish: "wish", wealth: "wealt
   automation: "automation", payee: "payee", other: "spark" };
 const CARD_STATUS = { ACTIVE: ["green", "正常"], FROZEN: ["amber", "已冻结"], LOST: ["red", "已挂失"], CANCELLED: ["neutral", "已注销"] };
 
+// last result kept for the session: revisiting the page shows it instantly and refreshes in the background
+const cache = { overview: null, items: {} };
+
 export default function Overview({ openSession, ask, openProof }) {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(cache.overview);
   const [error, setError] = useState(null);
   const [kind, setKind] = useState("");
-  const [items, setItems] = useState(null);
+  const [items, setItems] = useState(cache.items[""] || null);
   const [detail, setDetail] = useState(null);
 
-  useEffect(() => { api.overview().then(setData).catch((e) => setError(explain(e))); }, []);
-  useEffect(() => { setItems(null); api.activity(kind).then((r) => setItems(r.items)).catch((e) => setError(explain(e))); }, [kind]);
+  useEffect(() => { api.overview().then((d) => { cache.overview = d; setData(d); }).catch((e) => setError(explain(e))); }, []);
+  useEffect(() => { setItems(cache.items[kind] || null); api.activity(kind).then((r) => { cache.items[kind] = r.items; setItems(r.items); }).catch((e) => setError(explain(e))); }, [kind]);
 
   const groups = useMemo(() => {
     const out = [];

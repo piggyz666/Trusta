@@ -20,6 +20,9 @@ export const isLightTheme = () => {
 
 export default function Backdrop({ dim = false }) {
   const canvasRef = useRef(null);
+  const frostTarget = useRef(dim ? 1 : 0);
+  const kick = useRef(() => {});
+  useEffect(() => { frostTarget.current = dim ? 1 : 0; kick.current(); }, [dim]);
   const [moving, setMoving] = useState(motionAllowed);
   const [failed, setFailed] = useState(false);
 
@@ -37,24 +40,34 @@ export default function Backdrop({ dim = false }) {
     try { water = createWater(canvas, { mobile }); } catch { water = null; }
     if (!water) { setFailed(true); return undefined; }
     water.setTheme(isLightTheme());
+    let frost = frostTarget.current;
+    water.setFrost(frost);
+    let sized = true;
+    const observer = new ResizeObserver(() => { sized = false; });
+    observer.observe(canvas);
 
-    let raf = 0, lastInput = performance.now(), running = false, lastDrop = 0;
+    let raf = 0, lastInput = performance.now(), running = false, lastDrop = 0, lastFrame = performance.now();
     const queue = [];
     const pointer = { x: 0, y: 0, has: false };
 
     function frame(now) {
-      if (water.resize()) water.setTheme(isLightTheme());
+      const dt = Math.min(0.05, (now - lastFrame) / 1000); lastFrame = now;
+      if (!sized) { sized = true; if (water.resize()) water.setTheme(isLightTheme()); }
+      const target = frostTarget.current;
+      if (frost !== target) { frost += Math.sign(target - frost) * Math.min(Math.abs(target - frost), dt * 3.2); water.setFrost(frost); }
       while (queue.length) queue.shift()();
-      water.step(2);
+      if (moving) water.step(2);
       water.render(now / 1000);
-      if (now - lastInput > 7000 || document.hidden) { running = false; return; } // calm again: stop until the next touch
+      const calm = !moving || now - lastInput > 7000;
+      if ((calm && frost === target) || document.hidden) { running = false; return; } // nothing changing: stop
       raf = requestAnimationFrame(frame);
     }
-    function wake() {
-      lastInput = performance.now();
-      if (!moving) { queue.length = 0; water.render(0); return; }
-      if (!running && !document.hidden) { running = true; raf = requestAnimationFrame(frame); }
+    function wake(input = true) {
+      if (input) lastInput = performance.now();
+      if (!moving) queue.length = 0;
+      if (!running && !document.hidden) { running = true; lastFrame = performance.now(); raf = requestAnimationFrame(frame); }
     }
+    kick.current = () => wake(false);
     const toUv = (cx, cy) => [cx / canvas.clientWidth, 1 - cy / canvas.clientHeight];
 
     function wakeTrail(cx, cy) {
@@ -114,6 +127,8 @@ export default function Backdrop({ dim = false }) {
       clearTimeout(intro);
       cancelAnimationFrame(raf);
       themeObserver.disconnect();
+      observer.disconnect();
+      kick.current = () => {};
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       document.removeEventListener("pointerleave", onLeave);
@@ -126,7 +141,7 @@ export default function Backdrop({ dim = false }) {
   }, [moving]);
 
   return (
-    <div className={`backdrop ${dim ? "dim" : ""} ${failed ? "still" : ""}`} aria-hidden="true">
+    <div className={`backdrop ${failed && dim ? "dim" : ""} ${failed ? "still" : ""}`} aria-hidden="true">
       {!failed && <canvas ref={canvasRef} key={moving ? "m" : "s"} />}
     </div>
   );

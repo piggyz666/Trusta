@@ -6,9 +6,12 @@ import { EvidenceDrawer, ProofDrawer, TraceDrawer } from "./components/Trace.jsx
 import { Icon, useToast } from "./components/ui.jsx";
 import Chat from "./pages/Chat.jsx";
 
-const Overview = lazy(() => import("./pages/Overview.jsx"));
-const Features = lazy(() => import("./pages/Features.jsx"));
-const Settings = lazy(() => import("./pages/Settings.jsx"));
+const loaders = [() => import("./pages/Overview.jsx"), () => import("./pages/Features.jsx"), () => import("./pages/Settings.jsx")];
+const Overview = lazy(loaders[0]);
+const Features = lazy(loaders[1]);
+const Settings = lazy(loaders[2]);
+// fetch the other pages' code while idle so switching never waits on a download
+(window.requestIdleCallback || ((f) => setTimeout(f, 1200)))(() => loaders.forEach((l) => l()));
 
 const boot = bootstrapAuth();
 const TITLES = { overview: "资金总览", features: "功能", settings: "设置" };

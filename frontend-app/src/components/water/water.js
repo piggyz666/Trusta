@@ -84,14 +84,15 @@ void main () {
 const DISPLAY_FS = `
 precision highp float;
 varying vec2 vUv;
-uniform sampler2D uState, uFloor; uniform vec2 texel; uniform float light, time;
+uniform sampler2D uState, uFloor; uniform vec2 texel; uniform float light, time, frost;
 void main () {
   float h = texture2D(uState, vUv).r;
   float hx = texture2D(uState, vUv + vec2(texel.x, 0.)).r - texture2D(uState, vUv - vec2(texel.x, 0.)).r;
   float hy = texture2D(uState, vUv + vec2(0., texel.y)).r - texture2D(uState, vUv - vec2(0., texel.y)).r;
   vec3 n = normalize(vec3(-hx, -hy, .06));
   // refraction of the floor
-  vec3 col = texture2D(uFloor, vUv + n.xy * .016).rgb;
+  // behind content pages the floor is frosted here, once, instead of every glass card blurring it itself
+  vec3 col = texture2D(uFloor, vUv + n.xy * .016 * (1. - frost * .5), frost * 5.).rgb;
   // caustics: light gathers where the surface curves inward
   float lap = texture2D(uState, vUv + vec2(texel.x, 0.)).r + texture2D(uState, vUv - vec2(texel.x, 0.)).r
             + texture2D(uState, vUv + vec2(0., texel.y)).r + texture2D(uState, vUv - vec2(0., texel.y)).r - 4. * h;
@@ -103,7 +104,9 @@ void main () {
   col *= 1. + diffuse * (light > .5 ? .7 : 1.3);
   vec3 H = normalize(L + vec3(0., 0., 1.));
   float spec = pow(max(dot(n, H), 0.), 220.) * smoothstep(.002, .02, length(vec2(hx, hy)));
-  col += spec * (light > .5 ? .55 : .9);
+  col += spec * (light > .5 ? .55 : .9) * (1. - frost * .7);
+  vec3 scrim = light > .5 ? vec3(.93, .975, .975) : vec3(.012, .035, .04);
+  col = mix(col, scrim, frost * (light > .5 ? .38 : .48));
   gl_FragColor = vec4(col, 1.);
 }`;
 
@@ -166,7 +169,7 @@ export function createWater(canvas, options = {}) {
   }
   const bind = (unit, tex) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex); return unit; };
 
-  let a, b, floor, sw, sh, light = 0;
+  let a, b, floor, sw, sh, light = 0, frost = 0;
   const seed = Math.random() * 100;
   const pictures = {};
   function loadPicture(name) {
@@ -185,7 +188,14 @@ export function createWater(canvas, options = {}) {
     gl.bindTexture(gl.TEXTURE_2D, floor.tex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c2);
+    mip();
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  }
+  function mip() {
+    if (!isWebGL2) return;
+    gl.bindTexture(gl.TEXTURE_2D, floor.tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.generateMipmap(gl.TEXTURE_2D);
   }
   function paintFloor() {
     const name = light ? "floor-light" : "floor-dark";
@@ -196,9 +206,10 @@ export function createWater(canvas, options = {}) {
     gl.uniform1f(P.floor.u.light, light);
     gl.uniform1f(P.floor.u.seed, seed);
     draw(floor);
+    mip();
   }
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1);
     const w = Math.max(2, Math.floor(canvas.clientWidth * dpr)), h = Math.max(2, Math.floor(canvas.clientHeight * dpr));
     if (canvas.width === w && canvas.height === h && a) return false;
     canvas.width = w; canvas.height = h;
@@ -234,11 +245,13 @@ export function createWater(canvas, options = {}) {
     gl.uniform2f(P.display.u.texel, 1 / sw, 1 / sh);
     gl.uniform1f(P.display.u.light, light);
     gl.uniform1f(P.display.u.time, time % 100);
+    gl.uniform1f(P.display.u.frost, frost);
     draw(null);
   }
   return {
     resize, step, drop, render,
     setTheme(isLight) { light = isLight ? 1 : 0; paintFloor(); },
+    setFrost(value) { frost = value; },
     destroy() { const ext = gl.getExtension("WEBGL_lose_context"); ext && ext.loseContext(); },
   };
 }

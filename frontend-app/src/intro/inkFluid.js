@@ -206,7 +206,7 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
   layout();
 
   // ---------- simulation ----------
-  const P = { curl: 3, velDiss: 2.2, dyeDiss: 0.9, relax: 0.75, iters: 14, radius: 0.0075, force: 1500, warp: 0.6, matWarp: 0 };
+  const P = { curl: 3, velDiss: 3.0, dyeDiss: 1.6, relax: 2.2, iters: 14, radius: 0.0034, force: 1500, warp: 0.6, matWarp: 0 };
   const slotMat = [0, 1, 2, 3];
   let slot = 3, lastMat = -1, lastInput = -1e9;
 
@@ -230,11 +230,11 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
   })();
   function clearSlot(mask) { run(maskProg, dye.write, { uTexture: dye.read, mask }); dye.swap(); }
 
-  let aim = null, brush = null, fresh = false;
+  let aim = null, brush = null, fresh = false, dir = null, travel = 0;
   function input(clientX, clientY, now) {
     const r = canvas.getBoundingClientRect();
     const x = (clientX - r.left) / r.width, y = 1 - (clientY - r.top) / r.height;
-    if (now - lastInput > 0.45 || !aim) { newStroke(); brush = null; fresh = true; }
+    if (now - lastInput > 0.45 || !aim) { newStroke(); brush = null; fresh = true; dir = null; travel = 0; }
     aim = [x, y]; lastInput = now;
   }
   function leave() { aim = null; }
@@ -245,9 +245,17 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
     const nb = [brush[0] + (aim[0] - brush[0]) * k, brush[1] + (aim[1] - brush[1]) * k];
     const dx = nb[0] - brush[0], dy = nb[1] - brush[1];
     const moved = Math.hypot(dx * canvas.width, dy * canvas.height);
+    if (moved > 0.25) {
+      // swiping back the other way starts a new colour, like the reference
+      const len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+      if (dir && travel > canvas.height * 0.06 && ux * dir[0] + uy * dir[1] < -0.35) { newStroke(); fresh = true; dir = null; travel = 0; }
+      dir = dir ? [dir[0] * 0.8 + ux * 0.2, dir[1] * 0.8 + uy * 0.2] : [ux, uy];
+      const dl = Math.hypot(dir[0], dir[1]) || 1; dir = [dir[0] / dl, dir[1] / dl];
+      travel += moved;
+    }
     if (fresh || moved > 0.25) {
       // ink scales with distance travelled this frame, so fast and slow strokes leave the same body of ink
-      const amt = fresh ? 1.1 : Math.min(0.9, 0.08 + moved / (canvas.height * 0.03) * 0.3);
+      const amt = fresh ? 1.2 : Math.min(1.0, 0.12 + moved / (canvas.height * 0.03) * 0.35);
       splat(brush, nb, dx * 1.6 * P.force, dy * 1.6 * P.force, amt);
       fresh = false;
     }

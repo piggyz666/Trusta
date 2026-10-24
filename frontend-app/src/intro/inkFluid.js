@@ -206,7 +206,7 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
   layout();
 
   // ---------- simulation ----------
-  const P = { curl: 3, velDiss: 3.0, dyeDiss: 1.6, relax: 2.2, iters: 14, radius: 0.0034, force: 1500, warp: 0.6, matWarp: 0 };
+  const P = { curl: 3, velDiss: 4.0, dyeDiss: 2.8, relax: 4.0, iters: 14, radius: 0.0034, force: 1500, warp: 0.6, matWarp: 0 };
   const slotMat = [0, 1, 2, 3];
   let slot = 3, lastMat = -1, lastInput = -1e9;
 

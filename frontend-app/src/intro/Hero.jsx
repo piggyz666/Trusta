@@ -18,7 +18,7 @@ export default function Hero({ github }) {
       const t = ms / 1000, dt = Math.min(1 / 30, Math.max(1 / 240, t - last)); last = t;
       ink.step(dt); ink.draw();
       // keep simulating until the ink has dissolved and the type has settled back
-      if (ink.idleFor(t) < 7) raf = requestAnimationFrame(frame); else running = false;
+      if (ink.idleFor(t) < 4) raf = requestAnimationFrame(frame); else running = false;
     }
     const debug = location.hash === "#debug-ink";   // tests drive the simulation by hand
     function wake() { if (debug) return; if (!running && ink) { running = true; last = now(); raf = requestAnimationFrame(frame); } }

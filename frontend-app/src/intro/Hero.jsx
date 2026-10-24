@@ -1,87 +1,65 @@
 import { useEffect, useRef, useState } from "react";
-import { createBalloonHero } from "./balloon.js";
+import { createHoverInk } from "./hoverInk.js";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const HERO = "/hero/";
+const MATERIALS = ["gold", "teal", "pearl", "silver", "candy"].map((n) => `${HERO}${n}.webp`);
 
 export default function Hero({ github }) {
   const ref = useRef(null);
-  const [fallback, setFallback] = useState(false);
+  const [state, setState] = useState("loading");   // loading | ready | failed
 
   useEffect(() => {
     const canvas = ref.current;
-    let hero, raf = 0, running = false, last = performance.now(), lastMove = 0, material = -1;
-    let pointer = null, prev = null, alive = true;
-    const HOLD = 1.1, HEAL = 0.32;            // seconds the opening stays, then how fast it closes (per second)
-    const ages = { lastPaint: -1e9 };
-
-    (async () => {
-      try { await document.fonts.load('900 100px "Inter Variable"'); } catch { /* use fallback face */ }
-      if (!alive) return;
-      try { hero = createBalloonHero(canvas); } catch (e) { console.warn(e); hero = null; }
-      if (!hero) { setFallback(true); return; }
-      hero.render(0);
-      if (!reduced()) setTimeout(intro, 700);
-    })();
-
-    const uv = (x, y) => { const r = canvas.getBoundingClientRect(); return [(x - r.left) / r.width, 1 - (y - r.top) / r.height]; };
-    // brush ≈ 45% of the letter height, so a stroke opens part of a word, not all of it
-    const radius = () => { const L = hero.layout; return Math.max(18, (L.capTop - L.capBottom) * canvas.height * 0.45); };
+    let ink = null, raf = 0, running = false, last = 0, alive = true;
 
     function frame(now) {
-      const dt = Math.min(0.05, (now - last) / 1000); last = now;
-      if (hero.resize()) { /* re-laid out */ }
-      const t = now / 1000;
-      const decay = t - ages.lastPaint > HOLD ? HEAL * dt : 0;
-      if (pointer) {
-        hero.brush(pointer, prev || pointer, radius(), material, decay, true);
-        prev = pointer; pointer = null;
-      } else {
-        hero.brush([0, 0], [0, 0], 1, material, decay, false);
-      }
-      hero.render(t);
-      if (t - ages.lastPaint > HOLD + 1 / HEAL + 0.5) { running = false; return; }   // fully healed: stop
-      raf = requestAnimationFrame(frame);
+      const t = now / 1000, dt = Math.min(0.05, t - last); last = t;
+      ink.step(dt, t); ink.draw();
+      if (ink.busy()) raf = requestAnimationFrame(frame); else running = false;
     }
-    function wake() { if (!running && hero) { running = true; last = performance.now(); raf = requestAnimationFrame(frame); } }
-    function paint(p) {
-      const now = performance.now() / 1000;
-      if (now - lastMove > 0.45) { material = (material + 1) % hero.materials; prev = null; }   // a new stroke, a new material
-      lastMove = now; ages.lastPaint = now;
-      pointer = p;
-      wake();
-    }
-    // opening: one stroke sweeps through the middle of the word
+    function wake() { if (!running && ink) { running = true; last = performance.now() / 1000; raf = requestAnimationFrame(frame); } }
+
+    // opening gesture: one unhurried sweep through the word, so first-time visitors see what it does
     function intro() {
-      if (!hero || !alive) return;
-      const L = hero.layout; const yMid = (L.capTop + L.capBottom) / 2;
-      let i = 0; const n = 46;
-      const step = () => {
+      if (!alive || !ink) return;
+      const r = canvas.getBoundingClientRect(), R = ink.rect, d = ink.dpr;
+      const t0 = performance.now();
+      const tick = () => {
         if (!alive) return;
-        const x = 0.12 + (i / n) * 0.7, y = yMid + Math.sin(i / n * Math.PI * 1.6) * 0.06;
-        paint([x, y]); i += 1;
-        if (i <= n) setTimeout(step, 22);
+        const u = Math.min(1, (performance.now() - t0) / 1500);
+        const e = u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2;
+        const px = R.x + R.w * (0.04 + 0.92 * e), py = R.y + R.h * (0.5 + Math.sin(e * Math.PI * 2) * 0.16);
+        ink.touch(r.left + px / d, r.top + py / d, performance.now() / 1000); wake();
+        if (u < 1) setTimeout(tick, 16); else ink.release();
       };
-      step();
+      tick();
     }
-    const onMove = (e) => { if (hero) paint(uv(e.clientX, e.clientY)); };
-    const onLeave = () => { prev = null; };
-    const onResize = () => { if (hero) { hero.resize(); hero.render(performance.now() / 1000); } };
+
+    createHoverInk(canvas, { ink: `${HERO}ink.webp`, materials: MATERIALS }).then((h) => {
+      if (!alive) return;
+      ink = h; ink.draw(); setState("ready");
+      if (!reduced()) setTimeout(intro, 600);
+    }).catch((e) => { console.warn(e); if (alive) setState("failed"); });
+
+    const onMove = (e) => { if (ink) { ink.touch(e.clientX, e.clientY, performance.now() / 1000); wake(); } };
+    const onLeave = () => ink?.release();
+    const onResize = () => { if (ink && ink.layout()) { ink.draw(); wake(); } };
     canvas.addEventListener("pointermove", onMove);
     canvas.addEventListener("pointerdown", onMove);
     canvas.addEventListener("pointerleave", onLeave);
-    window.addEventListener("resize", onResize);
+    const ro = new ResizeObserver(onResize); ro.observe(canvas);
     return () => {
-      alive = false; cancelAnimationFrame(raf);
+      alive = false; cancelAnimationFrame(raf); ro.disconnect();
       canvas.removeEventListener("pointermove", onMove); canvas.removeEventListener("pointerdown", onMove);
-      canvas.removeEventListener("pointerleave", onLeave); window.removeEventListener("resize", onResize);
-      hero?.destroy();
+      canvas.removeEventListener("pointerleave", onLeave);
     };
   }, []);
 
   return (
-    <section className="hero" aria-label="TRUSTA">
+    <section className="hero" aria-label="TRUSTA" data-state={state}>
       <canvas ref={ref} className="hero-canvas" aria-hidden="true" />
-      {fallback && <div className="hero-word" aria-hidden="true">TRUSTA</div>}
+      {state === "failed" && <div className="hero-word" aria-hidden="true">TRUSTA</div>}
       <h1 className="visually-hidden">TRUSTA 银行助手</h1>
       <div className="corner tl">
         <p>AI 提议，你授权。<br />运行在你自己电脑上的银行助手。</p>

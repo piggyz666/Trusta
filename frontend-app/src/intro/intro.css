@@ -13,7 +13,8 @@ a { color: inherit; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 .hero { position: relative; height: 100svh; min-height: 520px; overflow: hidden; background: var(--paper); }
-.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: pan-y; }
+.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; opacity: 0; transition: opacity .7s ease; }
+.hero[data-state="ready"] .hero-canvas { opacity: 1; }
 .hero-word { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 22vw; letter-spacing: -.035em; }
 
 .corner { position: absolute; z-index: 2; font-size: 14px; line-height: 1.45; }

@@ -164,7 +164,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             if content_type.startswith("video/"):
                 self.send_header("Accept-Ranges", "bytes")
             self.send_header("Cache-Control", "public, max-age=31536000, immutable" if path.startswith("/assets/")
-                             else "public, max-age=86400" if path.startswith(("/bg/", "/hero/", "/icon", "/apple-touch")) else "no-store")
+                             else "public, max-age=86400" if path.startswith(("/bg/", "/hero/", "/figs/", "/icon", "/apple-touch")) else "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
             security_headers(self)
@@ -217,7 +217,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                 static = serve_static(path)
                 if static:
                     return self.reply_static(path, *static)
-                if path.startswith(("/bg/", "/hero/", "/assets/")):
+                if path.startswith(("/bg/", "/hero/", "/figs/", "/assets/")):
                     return self.reply(404, {"error": "NOT_FOUND"})  # optional media (e.g. a custom pool floor) — no auth needed to say "absent"
                 user_id = self.identity()
                 if path == "/api/access":

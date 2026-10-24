@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createInkFluid } from "./inkFluid.js";
+import { DOCS, GITHUB } from "../site/links.js";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HERO = "/hero/";
 const MATERIALS = ["gold", "teal", "pearl", "silver", "candy"].map((n) => `${HERO}${n}.webp`);
 
-export default function Hero({ github }) {
+export default function Hero({ c }) {
   const ref = useRef(null);
   const [state, setState] = useState("loading");   // loading | ready | failed
 
@@ -59,21 +60,21 @@ export default function Hero({ github }) {
     };
   }, []);
 
+  const h = c.hero;
   return (
-    <section className="hero" aria-label="TRUSTA" data-state={state}>
+    <section className="hero" id="top" aria-label="TRUSTA" data-state={state}>
       <canvas ref={ref} className="hero-canvas" aria-hidden="true" />
       {state === "failed" && <div className="hero-word" aria-hidden="true">TRUSTA</div>}
-      <h1 className="visually-hidden">TRUSTA 银行助手</h1>
-      <div className="corner tl">
-        <p>AI 提议，你授权。<br />运行在你自己电脑上的银行助手。</p>
-        <a className="pill" href="/">打开 TRUSTA</a>
+      <h1 className="visually-hidden">TRUSTA</h1>
+      <div className="hero-foot">
+        <p className="hero-tags">{h.tags.map((tag, i) => <span key={tag}>{i > 0 && <i aria-hidden="true">·</i>}{tag}</span>)}</p>
+        <div className="hero-ctas">
+          <a className="btn solid" href="#install">{h.start}</a>
+          <a className="btn" href={DOCS}>{h.docs}</a>
+          <a className="btn" href={GITHUB}>{h.github}</a>
+        </div>
       </div>
-      <nav className="corner tr" aria-label="页面导航">
-        <a href="#scenes">能做什么</a><a href="#trust">为什么可信</a><a href="#install">安装</a>
-      </nav>
-      <div className="corner bl">金融科技大赛参赛作品</div>
-      <div className="corner br"><a href={github}>GitHub</a><span>/</span><a href="#install">安装</a></div>
-      <div className="hint" aria-hidden="true">移动鼠标，划过这个词</div>
+      <div className="hint" aria-hidden="true">{h.hint}</div>
     </section>
   );
 }

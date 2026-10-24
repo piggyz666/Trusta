@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Intro from "./Intro.jsx";
+import Hero from "./Hero.jsx";
 import "./intro.css";
 
-document.documentElement.dataset.theme = "dark";
-createRoot(document.getElementById("root")).render(<StrictMode><Intro /></StrictMode>);
+const GITHUB = "https://github.com/piggyz666/Trusta";
+createRoot(document.getElementById("root")).render(<StrictMode><Hero github={GITHUB} /></StrictMode>);

@@ -1,0 +1,40 @@
+@import "@fontsource-variable/inter";
+
+:root {
+  --paper: #edece8;
+  --ink: #0b0b0b;
+  --mute: #55524c;
+  --sans: "Inter Variable", "PingFang SC", "Microsoft YaHei UI", "Noto Sans SC", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.hero { position: relative; height: 100svh; min-height: 520px; overflow: hidden; background: var(--paper); }
+.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: pan-y; }
+.hero-word { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 22vw; letter-spacing: -.035em; }
+
+.corner { position: absolute; z-index: 2; font-size: 14px; line-height: 1.45; }
+.corner.tl { top: 28px; left: 32px; display: grid; gap: 16px; justify-items: start; }
+.corner.tl p { margin: 0; font-size: 15px; font-weight: 560; }
+.corner.tr { top: 30px; right: 32px; display: flex; gap: 22px; font-size: 13.5px; font-weight: 520; }
+.corner.tr a, .corner.br a { text-decoration: none; }
+.corner.tr a:hover, .corner.br a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.corner.bl { bottom: 26px; left: 32px; font-size: 12.5px; color: var(--mute); }
+.corner.br { bottom: 26px; right: 32px; display: flex; gap: 8px; font-size: 12.5px; font-weight: 600; }
+.corner.br span { color: var(--mute); }
+.pill { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: #f4f3ef; border-radius: 999px; padding: 9px 18px;
+  font-size: 13px; font-weight: 600; text-decoration: none; letter-spacing: .01em; }
+.pill:hover { background: #2a2a2a; }
+.pill:focus-visible, .corner a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.hint { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); font-size: 12.5px; color: var(--mute); pointer-events: none; }
+
+@media (max-width: 720px) {
+  .corner.tl { top: 20px; left: 18px; }
+  .corner.tr { display: none; }
+  .corner.bl { left: 18px; bottom: 18px; }
+  .corner.br { right: 18px; bottom: 18px; }
+  .hint { display: none; }
+}

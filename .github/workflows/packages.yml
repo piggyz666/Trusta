@@ -1,0 +1,69 @@
+name: Packages
+
+# Builds the Windows portable package (bundled Python, unzip and double-click TRUSTA.cmd),
+# smoke-tests it on a real Windows runner, and attaches it to the GitHub Release when a v* tag is pushed.
+# Run by hand from the Actions tab ("Run workflow") to get the zip as a build artifact.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  PYTHON_EMBED: "3.12.10"
+
+jobs:
+  windows-portable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download embeddable Python
+        run: curl -fsSL -o embed.zip "https://www.python.org/ftp/python/${PYTHON_EMBED}/python-${PYTHON_EMBED}-embed-amd64.zip"
+      - name: Build
+        run: python -m scripts.build_portable --python-embed embed.zip --out dist --python-version 3.12
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TRUSTA-windows-x64
+          path: dist/TRUSTA-windows-x64.zip
+
+  windows-smoke:
+    needs: windows-portable
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: TRUSTA-windows-x64
+      - name: Start the packaged server and check /health
+        shell: pwsh
+        run: |
+          Expand-Archive TRUSTA-windows-x64.zip -DestinationPath pkg
+          $py = Resolve-Path pkg/TRUSTA/runtime/python/python.exe
+          Push-Location pkg/TRUSTA
+          & $py -c "import backend.server, scripts.setup, scripts.pair, scripts.feishu_worker; print('imports ok')"
+          $server = Start-Process -FilePath $py -ArgumentList @('-m', 'backend.server') -PassThru -NoNewWindow
+          $ok = $false
+          foreach ($i in 1..30) {
+            Start-Sleep -Seconds 1
+            try { $r = Invoke-RestMethod http://127.0.0.1:8000/health; if ($r.status -eq 'ok') { $ok = $true; break } } catch { }
+          }
+          Stop-Process -Id $server.Id -Force
+          Pop-Location
+          if (-not $ok) { throw 'packaged server did not become healthy' }
+          Write-Host 'health ok'
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: TRUSTA-windows-x64
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: TRUSTA-windows-x64.zip

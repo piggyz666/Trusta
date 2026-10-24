@@ -1,1 +1,6 @@
 cryptography==50.0.0
+# Runtime imports on the server path (LLM schema validation, signed audit ingress)
+PyYAML==6.0.3
+jsonschema==4.26.0
+hexbytes==2.0.0
+eth-account==0.13.7

@@ -34,52 +34,50 @@ void main () {
   gl_FragColor = s;
 }`;
 
-// The pool floor is painted once (flat-shaded stones / leaves, a lighter shallow centre, a few champagne flakes).
+// The pool floor is painted once: a deep-to-shallow gradient with the net of sunlight caustics you see on the bottom
+// of a pool. It never moves by itself — only the ripples bend it.
 const FLOOR_FS = `
 precision highp float;
 varying vec2 vUv;
 uniform vec2 res; uniform float light, seed;
-vec2 hash2 (vec2 p) { p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p + seed) * 43758.5453); }
+float caustic (vec2 uv, float t) {
+  vec2 p = mod(uv * 6.28318, 6.28318) - 250.;
+  vec2 i = p; float c = 1.; float inten = .005;
+  for (int n = 0; n < 5; n++) {
+    float tt = t * (1. - (3.5 / float(n + 1)));
+    i = p + vec2(cos(tt - i.x) + sin(tt + i.y), sin(tt - i.y) + cos(tt + i.x));
+    c += 1. / length(vec2(p.x / (sin(i.x + tt) / inten), p.y / (cos(i.y + tt) / inten)));
+  }
+  c /= 5.; c = 1.17 - pow(c, 1.4);
+  return clamp(pow(abs(c), 8.), 0., 1.);
+}
 float hash (vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1)) + seed) * 43758.5453); }
 float noise (vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
-float fbm (vec2 p) { float a = .5, s = 0.; for (int i = 0; i < 5; i++) { s += a * noise(p); p *= 2.03; a *= .5; } return s; }
-// voronoi: distance to nearest cell + its id
-vec3 voronoi (vec2 p) {
-  vec2 n = floor(p), f = fract(p); float md = 8.; vec2 mid = vec2(0.); float md2 = 8.;
-  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
-    vec2 g = vec2(float(i), float(j)); vec2 o = hash2(n + g); vec2 r = g + o - f; float d = dot(r, r);
-    if (d < md) { md2 = md; md = d; mid = n + g; } else if (d < md2) { md2 = d; }
-  }
-  return vec3(sqrt(md2) - sqrt(md), mid);
-}
 void main () {
-  vec2 p = vUv * vec2(res.x / res.y, 1.);
-  vec2 c = vUv - vec2(.5, .5); c.x *= res.x / res.y;
-  float centre = exp(-dot(c, c) * 2.2);                        // shallow, sunlit middle
-  vec2 warp = vec2(fbm(p * 2.5), fbm(p * 2.5 + 7.3)) * .5;
-  float mottle = fbm(p * 4. + warp * 2.);                         // painterly unevenness of the water body
-  vec3 deep, mid, shallow, sand, light2, dark;
+  float aspect = res.x / res.y;
+  vec2 p = vUv * vec2(aspect, 1.);
+  vec2 c = vUv - vec2(.5, .56); c.x *= aspect;
+  float pool = exp(-dot(c, c) * 1.6);                 // light falls into the middle of the pool
+  float soft = noise(p * 2.2) * .5 + noise(p * 5.) * .25;
+  // two layers of caustics: a fine sharp net and a broad soft one for depth
+  float fine = caustic(p * 1.7 + seed, seed * 3.7);
+  float broad = caustic(p * .75 + seed * .3, seed * 1.3 + 2.);
+  vec3 col;
   if (light > .5) {
-    deep = vec3(.60, .82, .82); mid = vec3(.74, .91, .90); shallow = vec3(.90, .98, .97);
-    sand = vec3(.96, .90, .78); light2 = vec3(.82, .95, .93); dark = vec3(.50, .74, .76);
+    vec3 edge = vec3(.70, .86, .89), centre = vec3(.90, .975, .975);
+    col = mix(edge, centre, smoothstep(.0, 1., pool + (soft - .4) * .2));
+    col += vec3(1.) * fine * (.28 + .32 * pool);
+    col += vec3(.9, 1., 1.) * broad * .10;
+    col -= vec3(.06, .03, .02) * (1. - pool) * soft;
   } else {
-    deep = vec3(.006, .035, .042); mid = vec3(.025, .14, .145); shallow = vec3(.09, .36, .34);
-    sand = vec3(.80, .68, .48); light2 = vec3(.06, .27, .26); dark = vec3(.003, .02, .026);
+    vec3 edge = vec3(.008, .028, .038), mid = vec3(.02, .10, .12), centre = vec3(.05, .22, .24);
+    col = mix(edge, mid, smoothstep(.0, .55, pool + (soft - .4) * .25));
+    col = mix(col, centre, smoothstep(.45, 1., pool) * .9);
+    col += vec3(.35, .75, .78) * fine * (.10 + .32 * pool);
+    col += vec3(.25, .55, .6) * broad * .07 * pool;
   }
-  vec3 col = mix(deep, mid, smoothstep(.0, .6, centre + (mottle - .5) * .35));
-  col = mix(col, shallow, smoothstep(.5, 1., centre + (mottle - .5) * .25) * .8);
-  // flat painted patches, like leaves and pebbles on the floor (only some cells are painted)
-  vec3 v = voronoi((p + warp) * 5.5);
-  float id = hash(v.yz), soft = smoothstep(.01, .05, v.x);
-  float rim = 1. - centre;
-  col = mix(col, light2 * mix(.85, 1.15, mottle), step(.78, id) * soft * (.35 + .45 * centre));
-  col = mix(col, dark, step(.9 - rim * .12, hash(v.yz + 4.2)) * soft * .65);
-  // small champagne flakes drifting near the rim
-  vec3 f = voronoi((p + warp * 1.4) * 13.);
-  float flake = step(.94 - rim * .05, hash(f.yz + 2.7)) * smoothstep(.02, .07, f.x) * smoothstep(.15, .6, rim);
-  col = mix(col, sand * mix(.85, 1.05, mottle), flake * (light > .5 ? .6 : .9));
-  vec2 q = vUv - .5; col *= 1. - (light > .5 ? .10 : .5) * dot(q, q) * 2.2;
+  vec2 q = vUv - .5; col *= 1. - (light > .5 ? .08 : .35) * dot(q, q) * 2.2;
   gl_FragColor = vec4(col, 1.);
 }`;
 
@@ -170,7 +168,29 @@ export function createWater(canvas, options = {}) {
 
   let a, b, floor, sw, sh, light = 0;
   const seed = Math.random() * 100;
+  const pictures = {};
+  function loadPicture(name) {
+    if (name in pictures) return;
+    pictures[name] = null;
+    const img = new Image();
+    img.onload = () => { pictures[name] = img; paintFloor(); render(0); };
+    img.src = `/bg/${name}.jpg`;
+  }
+  function uploadCover(img) {
+    // draw the picture "object-fit: cover" into the floor texture
+    const c2 = document.createElement("canvas"); c2.width = floor.w; c2.height = floor.h;
+    const g = c2.getContext("2d");
+    const k = Math.max(floor.w / img.width, floor.h / img.height), w = img.width * k, h = img.height * k;
+    g.drawImage(img, (floor.w - w) / 2, (floor.h - h) / 2, w, h);
+    gl.bindTexture(gl.TEXTURE_2D, floor.tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c2);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  }
   function paintFloor() {
+    const name = light ? "floor-light" : "floor-dark";
+    if (pictures[name]) { uploadCover(pictures[name]); return; }
+    loadPicture(name);
     P.floor.use();
     gl.uniform2f(P.floor.u.res, canvas.width, canvas.height);
     gl.uniform1f(P.floor.u.light, light);

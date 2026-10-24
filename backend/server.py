@@ -217,6 +217,8 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                 static = serve_static(path)
                 if static:
                     return self.reply_static(path, *static)
+                if path.startswith(("/bg/", "/assets/")):
+                    return self.reply(404, {"error": "NOT_FOUND"})  # optional media (e.g. a custom pool floor) — no auth needed to say "absent"
                 user_id = self.identity()
                 if path == "/api/access":
                     return self.reply(200, {"mode": access.mode, "urls": access.urls(self.server.server_port),

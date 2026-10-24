@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { createHoverInk } from "./hoverInk.js";
+import { createInkFluid } from "./inkFluid.js";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HERO = "/hero/";
@@ -12,39 +12,42 @@ export default function Hero({ github }) {
   useEffect(() => {
     const canvas = ref.current;
     let ink = null, raf = 0, running = false, last = 0, alive = true;
+    const now = () => performance.now() / 1000;
 
-    function frame(now) {
-      const t = now / 1000, dt = Math.min(0.05, t - last); last = t;
-      ink.step(dt, t); ink.draw();
-      if (ink.busy()) raf = requestAnimationFrame(frame); else running = false;
+    function frame(ms) {
+      const t = ms / 1000, dt = Math.min(1 / 30, Math.max(1 / 240, t - last)); last = t;
+      ink.step(dt); ink.draw();
+      // keep simulating until the ink has dissolved and the type has settled back
+      if (ink.idleFor(t) < 7) raf = requestAnimationFrame(frame); else running = false;
     }
-    function wake() { if (!running && ink) { running = true; last = performance.now() / 1000; raf = requestAnimationFrame(frame); } }
+    const debug = location.hash === "#debug-ink";   // tests drive the simulation by hand
+    function wake() { if (debug) return; if (!running && ink) { running = true; last = now(); raf = requestAnimationFrame(frame); } }
 
-    // opening gesture: one unhurried sweep through the word, so first-time visitors see what it does
+    // opening gesture: one unhurried pass through the word, so first-time visitors see what it does
     function intro() {
       if (!alive || !ink) return;
-      const r = canvas.getBoundingClientRect(), R = ink.rect, d = ink.dpr;
-      const t0 = performance.now();
+      const r = canvas.getBoundingClientRect(), B = ink.wordBox, d = B.dpr, t0 = performance.now();
       const tick = () => {
         if (!alive) return;
-        const u = Math.min(1, (performance.now() - t0) / 1500);
+        const u = Math.min(1, (performance.now() - t0) / 1300);
         const e = u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2;
-        const px = R.x + R.w * (0.04 + 0.92 * e), py = R.y + R.h * (0.5 + Math.sin(e * Math.PI * 2) * 0.16);
-        ink.touch(r.left + px / d, r.top + py / d, performance.now() / 1000); wake();
-        if (u < 1) setTimeout(tick, 16); else ink.release();
+        const px = B.x + B.w * (0.06 + 0.55 * e), py = B.y + B.h * (0.55 - Math.sin(e * Math.PI * 1.5) * 0.35);
+        ink.input(r.left + px / d, r.top + py / d, now()); wake();
+        if (u < 1) setTimeout(tick, 16); else ink.leave();
       };
       tick();
     }
 
-    createHoverInk(canvas, { ink: `${HERO}ink.webp`, materials: MATERIALS }).then((h) => {
+    createInkFluid(canvas, { materials: MATERIALS }).then((h) => {
       if (!alive) return;
       ink = h; ink.draw(); setState("ready");
-      if (!reduced()) setTimeout(intro, 600);
+      if (debug) { window.__ink = ink; return; }
+      if (!reduced()) setTimeout(intro, 700);
     }).catch((e) => { console.warn(e); if (alive) setState("failed"); });
 
-    const onMove = (e) => { if (ink) { ink.touch(e.clientX, e.clientY, performance.now() / 1000); wake(); } };
-    const onLeave = () => ink?.release();
-    const onResize = () => { if (ink && ink.layout()) { ink.draw(); wake(); } };
+    const onMove = (e) => { if (ink) { ink.input(e.clientX, e.clientY, now()); wake(); } };
+    const onLeave = () => ink?.leave();
+    const onResize = () => { if (ink && ink.layout()) { ink.draw(); } };
     canvas.addEventListener("pointermove", onMove);
     canvas.addEventListener("pointerdown", onMove);
     canvas.addEventListener("pointerleave", onLeave);

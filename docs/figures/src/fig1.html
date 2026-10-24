@@ -1,0 +1,125 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#fff}</style></head>
+<body><div id="fig"></div><script src="fig-common.js"></script><script>
+start(1400, 1010);
+
+// ---------------- a: end-to-end flow ----------------
+panel(20, 26, "a", "一句话到一笔交易：AI 只提议，每次交接都签名");
+const lane = (y, h, label, color) => {
+  el("rect", { x: 20, y, width: 1360, height: h, fill: color, opacity: 0.35, rx: 4 });
+  text(34, y + h / 2, label, { size: 12.5, weight: 700, color: C.sub });
+};
+lane(52, 98, "理解", "#F3F6FA"); lane(160, 222, "协作", "#F1F7F6"); lane(392, 98, "执行", "#FBF6F0");
+
+box(120, 68, 160, 66, { title: "用户原话", sub: "“给张三转500元”", fill: "#fff", stroke: C.blue });
+box(330, 68, 200, 66, { title: "大模型 LLM", sub: "只能提议工具调用", fill: C.blueF, stroke: C.blue });
+box(580, 64, 250, 74, { title: "校验器 Validator", sub: ["每个参数须在原话中找到出处", "否则追问；疑似注入整轮作废"], fill: C.blueF, stroke: C.blue });
+box(880, 64, 250, 74, { title: "意图来源证明 origin", sub: ["原话哈希 · 理解方式 · 模型名", "工具调用记录哈希"], fill: C.purpleF, stroke: C.purple, dash: "4 3" });
+arrow([[280, 101], [328, 101]], { marker: "arrBlue", color: C.blue });
+arrow([[530, 101], [578, 101]], { marker: "arrBlue", color: C.blue, label: "候选调用", dy: -10 });
+arrow([[830, 101], [878, 101]], { marker: "arrPurple", color: C.purple, dash: "4 3" });
+text(1145, 94, "写入总控签名的", { size: 11, color: C.purple }); text(1145, 110, "REQUEST 负载", { size: 11, color: C.purple });
+
+// agents
+box(120, 196, 160, 76, { title: "总控 Supervisor", sub: ["接收意图", "汇总结果"], fill: C.tealF, stroke: C.teal });
+box(370, 196, 160, 76, { title: "规划 Planner", sub: ["生成任务图", "限定通信边"], fill: C.tealF, stroke: C.teal });
+el("rect", { x: 610, y: 172, width: 420, height: 140, rx: 8, fill: "none", stroke: C.teal, "stroke-dasharray": "4 3" });
+text(620, 184, "业务 Agent（只能提案，不能执行）", { size: 11, color: C.teal, weight: 600 });
+box(625, 196, 190, 48, { title: "交易 Transaction", fill: "#fff", stroke: C.teal });
+box(825, 196, 190, 48, { title: "财务 Finance", fill: "#fff", stroke: C.teal });
+box(625, 254, 190, 48, { title: "理财 Wealth", fill: "#fff", stroke: C.teal });
+box(825, 254, 190, 48, { title: "客服 Service", fill: "#fff", stroke: C.teal });
+arrow([[700, 138], [700, 150], [200, 150], [200, 194]], { marker: "arrBlue", color: C.blue, label: "结构化意图 + origin", at: 1, dy: 10, dx: -180, lc: C.blue });
+arrow([[280, 234], [368, 234]], { marker: "arrTeal", color: C.teal, label: "REQUEST", mono: true, lc: C.teal, dy: -12 });
+sig(324, 250);
+arrow([[530, 234], [608, 234]], { marker: "arrTeal", color: C.teal, label: "PLAN", mono: true, lc: C.teal, dy: -12 });
+sig(569, 250);
+arrow([[760, 312], [760, 330], [250, 330], [250, 274]], { marker: "arrTeal", color: C.teal, label: "ACTION_PROPOSED / READ_ONLY_REPORT", mono: true, at: 1, dy: -9, lc: C.teal });
+sig(505, 344);
+// runtime verification strip
+el("rect", { x: 300, y: 352, width: 730, height: 24, rx: 12, fill: C.tealF, stroke: C.teal });
+text(665, 364, "运行时逐条验签：签名 · 身份与密钥状态 · 能力快照 · 计划内通信边 · 有效期 · 一次性 nonce → 通过才签发交接证据", { anchor: "middle", size: 11.3, color: C.teal, weight: 600 });
+
+// execution lane
+const ex = [["BankActionIR", "结构化动作"], ["策略 Policy", null], ["用户授权", "确认卡 / OTP"], ["执行合约", "HMAC 封印"], ["银行网关", "能力白名单"], ["核验", "HardVerifier"], ["回执", "前后状态哈希"]];
+ex.forEach(([t, s], i) => {
+  const x = 120 + i * 132;
+  if (s) box(x, 410, 118, 62, { title: t, sub: s, fill: C.orangeF, stroke: C.orange, ts: 12.5 });
+  else { box(x, 410, 118, 62, { fill: C.orangeF, stroke: C.orange }); text(x + 59, 428, t, { anchor: "middle", weight: 600, size: 12.5 }); }
+  if (i) arrow([[x - 14, 441], [x - 2, 441]], { marker: "arrOrange", color: C.orange });
+});
+let cx = 252 + 10; [["绿", C.green], ["黄", C.amber], ["红", C.red]].forEach(([s, c], i) => chip(265 + i * 30, 452, s, c, { w: 26 }));
+arrow([[200, 272], [200, 408]], { marker: "arrOrange", color: C.orange, label: "提案 → 动作", dx: -34, dy: 40, lc: C.orange });
+
+// audit column
+el("rect", { x: 1060, y: 172, width: 318, height: 300, rx: 8, fill: C.purpleF, stroke: C.purple });
+text(1219, 192, "签名证据与可验证审计", { anchor: "middle", size: 13.5, weight: 700, color: C.purple });
+["交接证据：运行时再签名，引用前一条", "只追加审计哈希链", "签名 Merkle 检查点（独立 worker）", "单条记录包含证明", "公开证据包 · 离线验证"].forEach((s, i) => {
+  box(1078, 208 + i * 50, 282, 36, { title: s, fill: "#fff", stroke: C.purple, ts: 12 });
+  if (i) arrow([[1219, 208 + i * 50 - 14], [1219, 208 + i * 50 - 2]], { marker: "arrPurple", color: C.purple });
+});
+arrow([[1030, 364], [1058, 364]], { marker: "arrPurple", color: C.purple });
+arrow([[1036, 441], [1058, 441]], { marker: "arrPurple", color: C.purple });
+
+// ---------------- b: V3 envelope ----------------
+panel(20, 530, "b", "V3 签名消息信封与接收检查");
+el("rect", { x: 30, y: 556, width: 344, height: 420, rx: 8, fill: "#FBFCFD", stroke: C.slate });
+el("rect", { x: 30, y: 556, width: 344, height: 32, rx: 8, fill: C.slate });
+el("rect", { x: 30, y: 576, width: 344, height: 12, fill: C.slate });
+text(202, 572, "TRUSTA-V3 · ECDSA-P256-SHA256", { anchor: "middle", size: 12.5, color: "#fff", weight: 700, mono: true });
+const env = [["sender", "agent:transaction"], ["identity", "did:key / did:weid"], ["key_id", "msg-key · epoch 3"], ["receiver", "agent:supervisor"],
+  ["type", "ACTION_PROPOSED"], ["task", "7d1e… · step 3 · rev 4"], ["payload", "sha256 9f3c…a1"], ["cap_snap", "sha256 c41a…07"],
+  ["nonce", "128-bit · 一次性"], ["expires", "issued + 300 s"]];
+env.forEach(([k, v], i) => {
+  const y = 610 + i * 30;
+  text(46, y, k, { size: 12, color: C.sub, mono: true }); text(140, y, v, { size: 12, mono: true });
+  if (i) el("line", { x1: 44, x2: 360, y1: y - 15, y2: y - 15, stroke: "#eaeef2" });
+});
+el("rect", { x: 44, y: 908, width: 316, height: 54, rx: 6, fill: C.tealF, stroke: C.teal });
+text(56, 925, "signature", { size: 12, color: C.teal, mono: true, weight: 700 });
+text(56, 945, "ECDSA(域分隔 · 规范化 JSON)", { size: 11.5, color: C.teal });
+
+const checks = [["签名 · 算法固定", "伪造 · 算法降级"], ["身份与密钥状态", "吊销 / 宽限期外旧密钥"], ["负载哈希", "篡改"], ["接收方 · 任务版本", "错发 · 过期版本"],
+  ["能力快照", "越权 · 权限被放大"], ["计划内通信边", "如财务 Agent 发转账提案"], ["有效期", "过期消息"], ["持久化 nonce", "重放"]];
+text(400, 570, "接收方逐项检查", { size: 12.5, weight: 700 }); text(560, 570, "拦住的攻击", { size: 12.5, weight: 700, color: C.sub });
+checks.forEach(([a, b], i) => {
+  const y = 600 + i * 38;
+  el("circle", { cx: 408, cy: y, r: 8, fill: C.green });
+  text(408, y + 0.5, "✓", { anchor: "middle", size: 10.5, color: "#fff", weight: 700 });
+  text(424, y, a, { size: 12.5 });
+  text(560, y, b, { size: 12, color: C.sub });
+});
+box(394, 908, 270, 54, { title: "全部通过才接受", sub: "消费 nonce + 写审计（同一事务）", fill: "#fff", stroke: C.green, ts: 12.5 });
+
+// ---------------- c: evidence chain ----------------
+panel(700, 530, "c", "交接证据因果链 → 审计哈希链 → Merkle 检查点");
+[["E₁ · REQUEST", "prev = ∅"], ["E₂ · PLAN", "prev = H(E₁)"], ["E₃ · ACTION_PROPOSED", "prev = H(E₂)"]].forEach(([t, p], i) => {
+  const x = 712 + i * 226;
+  box(x, 562, 200, 66, { title: t, sub: ["运行时审计身份签名", p], fill: C.tealF, stroke: C.teal, ts: 12.5 });
+  if (i) arrow([[x - 24, 595], [x - 2, 595]], { marker: "arrTeal", color: C.teal });
+});
+text(712, 650, "每条交接证据绑定消息签名与负载哈希；顺序被调换或删去一条，因果链即断开", { size: 11.5, color: C.sub });
+// hash chain
+const hb = ["…", "hᵢ₋₁", "hᵢ", "hᵢ₊₁", "…"];
+hb.forEach((s, i) => {
+  const x = 712 + i * 134;
+  box(x, 676, 108, 40, { title: s, fill: i === 2 ? C.purpleF : "#fff", stroke: C.purple, ts: 13 });
+  if (i) arrow([[x - 26, 696], [x - 2, 696]], { marker: "arrPurple", color: C.purple });
+});
+text(712, 736, "hᵢ = H(hᵢ₋₁ ‖ eventᵢ)：只追加，改动任何历史事件都会让之后的哈希全部失配", { size: 11.5, color: C.sub, mono: false });
+// merkle tree
+const N = (x, y, s, hi) => { el("circle", { cx: x, cy: y, r: 15, fill: hi ? C.purple : "#fff", stroke: C.purple, "stroke-width": 1.3 }); text(x, y + 0.5, s, { anchor: "middle", size: 10.5, color: hi ? "#fff" : C.purple, weight: 700 }); };
+const L = (a, b, hi) => el("line", { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: hi ? C.purple : C.faint, "stroke-width": hi ? 2.2 : 1.3 });
+const R = [860, 790], A = [790, 860], B = [930, 860], l = [[755, 930], [825, 930], [895, 930], [965, 930]];
+L(R, A, false); L(R, B, true); L(A, l[0]); L(A, l[1]); L(B, l[2], true); L(B, l[3], false);
+N(...R, "root", true); N(...A, "", false); N(...B, "", true); l.forEach((p, i) => N(...p, "e" + (i + 1), i === 2));
+el("rect", { x: 822, y: 758, width: 76, height: 14, rx: 3, fill: "#fff" });
+text(860, 765, "签名检查点", { anchor: "middle", size: 10.5, color: C.purple, weight: 700 });
+text(712, 965, "加粗路径 = e₃ 的包含证明（只需 log₂N 个哈希）", { size: 11.5, color: C.sub });
+box(1040, 790, 330, 132, { fill: "#fff", stroke: C.green });
+text(1056, 810, "离线验证器", { size: 13, weight: 700 });
+text(1150, 810, "verify_handoff_evidence", { size: 11, mono: true, color: C.sub });
+lines(1056, 838, ["✓ 消息签名 · 证据签名 · 因果父节点", "✓ 包含证明 → 检查点签名", "✓ 只需公开密钥登记表，不必信任服务器"], { size: 12, lh: 22 });
+text(1056, 906, "改动证据包任意 1 个字节 → ✗ 验证失败", { size: 12, color: C.red, weight: 600 });
+arrow([[878, 790], [1038, 830]], { marker: "arrPurple", color: C.purple });
+text(1040, 950, "可选：检查点根锚定到 FISCO BCOS 联盟链（见图 2）", { size: 11.5, color: C.slate });
+</script></body></html>

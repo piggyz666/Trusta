@@ -1,0 +1,104 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#fff}</style></head>
+<body><div id="fig"></div><script src="fig-common.js"></script><script>
+start(1400, 840);
+
+// ---------------- a: cross-institution trust layer ----------------
+panel(20, 26, "a", "跨机构协作信任层：WeID 链上身份 · 零知识能力准入 · 链上决策承诺");
+
+// identities
+text(30, 70, "Agent 链上身份 WeID（登记在下方联盟链）", { size: 12.5, weight: 700, color: C.slate });
+[["财务 Finance", "0xa968…c3d3"], ["理财 Wealth", "0xa8fa…f7de"], ["交易 Transaction", "0xf9fb…8c31"]].forEach(([n, d], i) => {
+  const y = 86 + i * 104;
+  box(30, y, 222, 88, { fill: "#fff", stroke: C.slate });
+  text(42, y + 18, n, { size: 13, weight: 700 });
+  text(42, y + 40, "did:weid:101:" + d, { size: 10.5, mono: true, color: C.slate });
+  text(42, y + 64, "P-256 消息密钥 ⇄ WeID 绑定", { size: 11, color: C.sub });
+});
+
+// stages
+const st = [
+  ["M1", "能力准入", "零知识证明 Groth16", C.purple, C.purpleF, ["固定评测集上的", "TP/FP/FN 达到阈值", "不公开评测明细", "绑定 Policy · Epoch", "与模型承诺", "可撤销 · 到期失效"]],
+  ["M2", "轮次消息", "V3 签名 + 链上身份", C.teal, C.tealF, ["发送方 WeID", "+ 消息密钥签名", "准入凭证 · 轮次", "Epoch · 成员快照", "跨轮重放、错模型", "→ 拒收"]],
+  ["OTC", "全窗口收集", "k-of-n · 截止时间 T", C.orange, C.orangeF, ["达到 k 只标记可行", "到 T 才冻结证据", "不足 k → 作废", "迟到消息只进遥测"]],
+  ["M3", "链上承诺", "合约上链 · 双节点读回", C.blue, C.blueF, ["决策 Merkle 根", "+ 成员快照上链", "两个 RPC 节点", "分别读回核对", "响应丢失按原哈希", "恢复，绝不重发"]],
+];
+st.forEach(([k, t, s, col, fill, ls], i) => {
+  const x = 286 + i * 154;
+  el("rect", { x, y: 86, width: 140, height: 236, rx: 8, fill, stroke: col });
+  el("rect", { x, y: 86, width: 140, height: 30, rx: 8, fill: col });
+  el("rect", { x, y: 104, width: 140, height: 12, fill: col });
+  text(x + 70, 101, k + " · " + t, { anchor: "middle", size: 13, weight: 700, color: "#fff" });
+  text(x + 70, 136, s, { anchor: "middle", size: 11, weight: 600, color: col });
+  el("line", { x1: x + 12, x2: x + 128, y1: 152, y2: 152, stroke: col, opacity: 0.35 });
+  lines(x + 12, 172, ls, { size: 11, color: C.ink, lh: 23 });
+  if (i) arrow([[x - 12, 236], [x - 2, 236]], { marker: "arrInk", color: C.ink, sw: 1.4 });
+});
+arrow([[252, 236], [284, 236]], { marker: "arrInk", color: C.ink, sw: 1.4 });
+// tie to fig 1 runtime
+box(286, 342, 520, 52, { fill: "#F6F8FA", stroke: C.faint, title: "复用图 1 的六 Agent 运行时、V3 验签、交接证据与审计链", sub: "链上身份与签名都不授予银行写入权限：资金仍须用户在确认卡上授权", ts: 12, ss: 11 });
+
+// chain band
+el("rect", { x: 30, y: 430, width: 856, height: 200, rx: 10, fill: C.slateF, stroke: C.slate });
+text(46, 452, "FISCO BCOS 联盟链（测试网 · Chain 101 · Group 1）", { size: 13, weight: 700, color: C.slate });
+// node ring
+const cx0 = 150, cy0 = 540, rr = 58;
+for (let i = 0; i < 8; i++) {
+  const a = (i / 8) * Math.PI * 2 - Math.PI / 2, a2 = ((i + 1) / 8) * Math.PI * 2 - Math.PI / 2;
+  el("line", { x1: cx0 + rr * Math.cos(a), y1: cy0 + rr * Math.sin(a), x2: cx0 + rr * Math.cos(a2), y2: cy0 + rr * Math.sin(a2), stroke: C.slate, opacity: -70.4 });
+}
+for (let i = 0; i < 8; i++) {
+  const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+  el("circle", { cx: cx0 + rr * Math.cos(a), cy: cy0 + rr * Math.sin(a), r: 9, fill: i < 2 ? C.slate : "#fff", stroke: C.slate, "stroke-width": 1.4 });
+}
+text(cx0, cy0 - 6, "8 个", { anchor: "middle", size: 12, weight: 700, color: C.slate });
+text(cx0, cy0 + 12, "共识节点", { anchor: "middle", size: 11, color: C.slate });
+text(cx0, 618, "实心 = 两个用于读回核对的 RPC 节点", { anchor: "middle", size: 10.5, color: C.sub });
+box(276, 472, 250, 62, { title: "WeID 合约", sub: "Agent DID 登记 · 解析 · 生命周期", fill: "#fff", stroke: C.slate, ts: 12.5 });
+box(276, 552, 250, 62, { title: "CollaborationAnchor 合约", sub: "轮次决策根 · 成员快照 · 事件", fill: "#fff", stroke: C.slate, ts: 12.5 });
+box(560, 472, 310, 142, { fill: "#fff", stroke: C.green });
+text(576, 492, "公开证据包 → 第三方独立复验", { size: 12.5, weight: 700 });
+lines(576, 520, ["✓ 链上 DID · 合约代码 · 发布者", "✓ M1 证明（只需公开验证密钥）", "✓ M2 签名 · 轮次 · 成员快照", "✓ M3 合约事件与根读回 · 业务因果链"], { size: 11.5, lh: 22 });
+// links
+arrow([[846, 322], [846, 414], [543, 414], [543, 598], [528, 598]], { marker: "arrBlue", color: C.blue, label: "写入决策根", at: 0, dx: 36, dy: 10, lc: C.blue });
+text(30, 660, "注：联盟链为单机 8 节点测试网，非跨机构独立治理；Groth16 为单机开发用可信设置，非生产 MPC；以上能力在验收报告中逐项实测。", { size: 10.5, color: C.sub });
+text(30, 678, "详见 docs/ANCHOR_Integration_Final_Acceptance.md", { size: 10.5, color: C.sub, mono: true });
+
+// ---------------- b: attack benchmark ----------------
+panel(930, 26, "b", "攻击实测：18 类 × 5 次");
+const rows = [
+  ["伪造 Agent 身份", 0], ["无效签名", 0], ["负载篡改", 0], ["重放", 0], ["过期消息", 0], ["已吊销密钥", 0], ["宽限期外旧密钥", 0], ["签名算法降级", 0],
+  ["越权调用能力", 1], ["能力快照篡改", 1], ["未授权工具调用", 1], ["授权与动作哈希不符", 1], ["重复执行同一笔", 1],
+  ["审计事件篡改", 2], ["Merkle 叶子篡改", 2], ["无效包含证明", 2], ["检查点篡改", 2], ["锚定根不符", 2]];
+const groups = [["身份与消息", C.teal], ["权限与执行", C.orange], ["审计与证明", C.purple]];
+const y0 = 92, rh = 27, xl = 1000, xd = 1176;
+text(xd + 48, 70, "第 1–5 次", { anchor: "middle", size: 11, color: C.sub });
+text(1350, 70, "意外交易", { anchor: "middle", size: 11, color: C.sub });
+rows.forEach(([n, g], i) => {
+  const y = y0 + i * rh + (g * 8);
+  if (i % 2 === 0) el("rect", { x: 990, y: y - 12, width: 390, height: rh - 2, fill: "#F6F8FA", rx: 3 });
+  text(xl, y, n, { size: 11.8 });
+  for (let k = 0; k < 5; k++) el("circle", { cx: xd + k * 24, cy: y, r: 7.5, fill: groups[g][1] });
+  text(1350, y, "0", { anchor: "middle", size: 12, weight: 700, mono: true });
+});
+// group brackets
+let first = 0;
+[8, 5, 5].forEach((n, g) => {
+  const ya = y0 + first * rh + g * 8 - 10, yb = y0 + (first + n - 1) * rh + g * 8 + 10;
+  el("line", { x1: 984, x2: 984, y1: ya, y2: yb, stroke: groups[g][1], "stroke-width": 3 });
+  const t = text(972, (ya + yb) / 2, groups[g][0], { anchor: "middle", size: 11, weight: 700, color: groups[g][1] });
+  t.setAttribute("transform", `rotate(-90 972 ${(ya + yb) / 2})`);
+  first += n;
+});
+const yb = y0 + 18 * rh + 16 + 14;
+text(xl, yb + 4, "● = 检测并拦截", { size: 11, color: C.sub });
+text(1380, yb + 4, "90 / 90 拦截 · 0 笔意外交易", { anchor: "end", size: 12, weight: 700, color: C.green });
+// stats
+const stats = [["0 / 135", "正常消息误拒"], ["5.5 ms", "验签 p50（p95 9.0）"], ["15.1 ms", "签名 p50"], ["16.7 ms", "Merkle 检查点 p50"]];
+stats.forEach(([v, l], i) => {
+  const x = 990 + (i % 2) * 196, y = yb + 30 + Math.floor(i / 2) * 74;
+  box(x, y, 186, 64, { fill: "#fff", stroke: C.faint });
+  text(x + 14, y + 24, v, { size: 20, weight: 700, color: C.ink });
+  text(x + 14, y + 48, l, { size: 11, color: C.sub });
+});
+text(990, yb + 196, "python -m benchmarks.security_benchmark --banking-version 5", { size: 10, mono: true, color: C.sub });
+</script></body></html>

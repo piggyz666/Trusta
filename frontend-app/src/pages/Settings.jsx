@@ -277,7 +277,7 @@ function Appearance({ devMode, setDevMode }) {
   function apply(value) {
     setTheme(value);
     try { value === "system" ? localStorage.removeItem("trusta-theme") : localStorage.setItem("trusta-theme", value); } catch { /* ignore */ }
-    if (value === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = value;
+    window.__trustaSyncTheme?.();
   }
   const [motion, setMotion] = useState(() => { try { return localStorage.getItem("trusta-motion") !== "off"; } catch { return true; } });
   function flipMotion() {

@@ -14,8 +14,10 @@ in vec2 vUv; in vec2 vL; in vec2 vR; in vec2 vT; in vec2 vB; out vec4 o;`;
 
 const FS = {
   splat: `${HEAD}
-    uniform sampler2D uTarget; uniform float aspect; uniform vec4 color; uniform vec2 point; uniform float radius; uniform float cap;
-    void main(){ vec2 p=vUv-point; p.x*=aspect; vec4 b=texture(uTarget,vUv); o=min(b+exp(-dot(p,p)/radius)*color, vec4(cap)); }`,
+    uniform sampler2D uTarget; uniform float aspect; uniform vec4 color; uniform vec2 pa; uniform vec2 pb; uniform float radius; uniform float cap;
+    void main(){ vec2 p=vUv, a=pa, b=pb; p.x*=aspect; a.x*=aspect; b.x*=aspect;
+      vec2 ap=p-a, ab=b-a; float h=clamp(dot(ap,ab)/max(dot(ab,ab),1e-9),0.,1.); vec2 d=ap-ab*h;
+      o=min(texture(uTarget,vUv)+exp(-dot(d,d)/radius)*color, vec4(cap)); }`,
   advect: `${HEAD}
     uniform sampler2D uVelocity; uniform sampler2D uSource; uniform vec2 simTexel; uniform float dt; uniform float dissipation;
     void main(){ vec2 c=vUv-dt*texture(uVelocity,vUv).xy*simTexel; o=texture(uSource,c)/(1.+dissipation*dt); }`,
@@ -68,7 +70,7 @@ const FS = {
       float ink=smoothstep(.42-aa,.42+aa,total);
       if(total>.05){
         // balloons drift a little further than the type, which makes them read as liquid
-        vec2 qm=vUv+raw*uMatWarp;
+        vec2 qm=vUv;
         vec4 m=(mat(uM0,qm)*d.x+mat(uM1,qm)*d.y+mat(uM2,qm)*d.z+mat(uM3,qm)*d.w)/max(total,1e-4);
         vec3 inside=m.rgb+vec3(.02)*(1.-m.a);           // premultiplied balloon over ink-black
         // thin wet highlight just inside the edge
@@ -168,8 +170,8 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
     if (W === canvas.width && H === canvas.height && vel) return false;
     canvas.width = W; canvas.height = H;
     for (const f of [vel, dye, warp, div, curl, pres]) f?.del();
-    const [sw, sh] = res(Math.min(192, Math.round(H / 5)));
-    const [dw, dh] = res(Math.min(720, Math.round(H / 1.4)));
+    const [sw, sh] = res(Math.min(128, Math.round(H / 6)));
+    const [dw, dh] = res(Math.min(560, Math.round(H / 1.6)));
     vel = pair(sw, sh, gl.RG16F, gl.RG); pres = pair(sw, sh, gl.R16F, gl.RED);
     div = target(sw, sh, gl.R16F, gl.RED); curl = target(sw, sh, gl.R16F, gl.RED);
     dye = pair(dw, dh, gl.RGBA16F, gl.RGBA); warp = pair(dw, dh, gl.RG16F, gl.RG);
@@ -204,15 +206,15 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
   layout();
 
   // ---------- simulation ----------
-  const P = { curl: 3, velDiss: 2.2, dyeDiss: 0.9, relax: 0.75, iters: 20, radius: 0.0075, force: 1500, warp: 0.6, matWarp: 0.22 };
+  const P = { curl: 3, velDiss: 2.2, dyeDiss: 0.9, relax: 0.75, iters: 14, radius: 0.0075, force: 1500, warp: 0.6, matWarp: 0 };
   const slotMat = [0, 1, 2, 3];
-  let slot = 3, lastMat = -1, pointer = null, lastInput = -1e9;
+  let slot = 3, lastMat = -1, lastInput = -1e9;
 
-  function splat(x, y, dx, dy, amount) {
+  function splat(a, b, vx, vy, amount) {
     const aspect = canvas.width / canvas.height;
-    run(progs.splat, vel.write, { uTarget: vel.read, aspect, point: [x, y], radius: P.radius, color: [dx * P.force, dy * P.force, 0, 0], cap: 1e4 }); vel.swap();
+    run(progs.splat, vel.write, { uTarget: vel.read, aspect, pa: a, pb: b, radius: P.radius, color: [vx, vy, 0, 0], cap: 1e4 }); vel.swap();
     const col = [0, 0, 0, 0]; col[slot] = amount;
-    run(progs.splat, dye.write, { uTarget: dye.read, aspect, point: [x, y], radius: P.radius * 1.15, color: col, cap: 1.6 }); dye.swap();
+    run(progs.splat, dye.write, { uTarget: dye.read, aspect, pa: a, pb: b, radius: P.radius * 1.15, color: col, cap: 1.6 }); dye.swap();
   }
   function newStroke() {
     let m; do { m = Math.floor(Math.random() * mats.length); } while (mats.length > 1 && m === lastMat);
@@ -228,20 +230,32 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
   })();
   function clearSlot(mask) { run(maskProg, dye.write, { uTexture: dye.read, mask }); dye.swap(); }
 
+  let aim = null, brush = null, fresh = false;
   function input(clientX, clientY, now) {
     const r = canvas.getBoundingClientRect();
     const x = (clientX - r.left) / r.width, y = 1 - (clientY - r.top) / r.height;
-    if (now - lastInput > 0.45 || !pointer) { newStroke(); pointer = null; }
-    if (pointer) {
-      const dx = x - pointer[0], dy = y - pointer[1];
-      const n = Math.max(1, Math.ceil(Math.hypot(dx * canvas.width, dy * canvas.height) / (canvas.height * 0.025)));
-      for (let i = 1; i <= n; i++) splat(pointer[0] + dx * i / n, pointer[1] + dy * i / n, dx / n * 1.6, dy / n * 1.6, 0.9 / Math.sqrt(n));
-    } else splat(x, y, 0, 0, 1.1);
-    pointer = [x, y]; lastInput = now;
+    if (now - lastInput > 0.45 || !aim) { newStroke(); brush = null; fresh = true; }
+    aim = [x, y]; lastInput = now;
   }
-  function leave() { pointer = null; }
+  function leave() { aim = null; }
+  function paint(dt) {
+    if (!aim) return;
+    if (!brush) { brush = aim.slice(); }
+    const k = 1 - Math.exp(-dt * 22);                     // the brush glides after the pointer
+    const nb = [brush[0] + (aim[0] - brush[0]) * k, brush[1] + (aim[1] - brush[1]) * k];
+    const dx = nb[0] - brush[0], dy = nb[1] - brush[1];
+    const moved = Math.hypot(dx * canvas.width, dy * canvas.height);
+    if (fresh || moved > 0.25) {
+      // ink scales with distance travelled this frame, so fast and slow strokes leave the same body of ink
+      const amt = fresh ? 1.1 : Math.min(0.9, 0.08 + moved / (canvas.height * 0.03) * 0.3);
+      splat(brush, nb, dx * 1.6 * P.force, dy * 1.6 * P.force, amt);
+      fresh = false;
+    }
+    brush = nb;
+  }
 
   function step(dt) {
+    paint(dt);
     const st = vel.tx;
     run(progs.curl, curl, { uVelocity: vel.read });
     run(progs.vorticity, vel.write, { uVelocity: vel.read, uCurl: curl, curl: P.curl, dt }); vel.swap();

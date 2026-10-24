@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { NAV, PAGES } from "./nav.js";
 import { useLang } from "../site/lang.js";
 import { GITHUB, BRANCH } from "../site/links.js";
+import { useTheme } from "../site/theme.js";
 
 const RAW = import.meta.glob("./content/*/*.md", { query: "?raw", import: "default", eager: true });
 const source = (lang, slug) => RAW[`./content/${lang}/${slug}.md`] ?? RAW[`./content/zh/${slug}.md`] ?? "";
@@ -21,10 +22,7 @@ function currentSlug() {
 }
 
 // ---------------------------------------------------------------- theme
-function initialTheme() {
-  try { const t = localStorage.getItem("trusta-docs-theme"); if (t === "light" || t === "dark") return t; } catch { /* blocked */ }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
+
 
 // ---------------------------------------------------------------- search index: one entry per section
 function plain(md) {
@@ -98,7 +96,7 @@ export default function Docs() {
   const [lang, setLang] = useLang();
   const ui = UI[lang];
   const [slug, setSlug] = useState(currentSlug);
-  const [theme, setTheme] = useState(initialTheme);
+  const [theme, toggleTheme] = useTheme({ light: "#edece8", dark: "#111110" });
   const [toc, setToc] = useState([]);
   const [active, setActive] = useState(null);
   const [searching, setSearching] = useState(false);
@@ -116,10 +114,6 @@ export default function Docs() {
     window.addEventListener("hashchange", on);
     return () => window.removeEventListener("hashchange", on);
   }, []);
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#111110" : "#edece8");
-  }, [theme]);
   useEffect(() => { document.title = `${page[lang]} · TRUSTA ${ui.docs}`; }, [page, lang, ui.docs]);
   useEffect(() => {
     const on = (e) => {
@@ -175,10 +169,6 @@ export default function Docs() {
     pendingSection.current = n || null;
     if (s === slug) { if (n) document.getElementById(`s-${n}`)?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
     location.hash = `#/${s}`;
-  };
-  const toggleTheme = () => {
-    const t = theme === "dark" ? "light" : "dark"; setTheme(t);
-    try { localStorage.setItem("trusta-docs-theme", t); } catch { /* blocked */ }
   };
   const editUrl = `${GITHUB}/edit/${BRANCH}/frontend-app/src/docs/content/${lang}/${slug}.md`;
 

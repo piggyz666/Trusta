@@ -50,7 +50,7 @@ const FS = {
   display: `${HEAD}
     uniform sampler2D uText; uniform sampler2D uDye; uniform sampler2D uWarp;
     uniform sampler2D uM0; uniform sampler2D uM1; uniform sampler2D uM2; uniform sampler2D uM3;
-    uniform vec4 matRect; uniform vec3 paper; uniform vec2 px; uniform float uWarpGain; uniform float uMatWarp;
+    uniform vec4 matRect; uniform vec3 paper; uniform vec3 textCol; uniform vec3 inkCol; uniform vec2 px; uniform float uWarpGain; uniform float uMatWarp;
     vec4 mat(sampler2D s, vec2 q){ vec2 u=(q-matRect.xy)/matRect.zw; if(any(lessThan(u,vec2(0.)))||any(greaterThan(u,vec2(1.)))) return vec4(0.); return texture(s,u); }
     float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
     float vnoise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
@@ -63,7 +63,7 @@ const FS = {
       vec2 fib=vec2(vnoise(aspectP*vec2(28.,70.))-.5, vnoise(aspectP*vec2(70.,28.)+7.)-.5)+.5*vec2(vnoise(aspectP*vec2(80.,160.)+3.)-.5, vnoise(aspectP*vec2(160.,80.)+11.)-.5);
       vec2 q=vUv+w+fib*min(drag,.06)*.42;
       float t=texture(uText,q).a;
-      vec3 col=mix(paper, vec3(.035), t);
+      vec3 col=mix(paper, textCol, t);
       vec4 d=max(texture(uDye,vUv),0.); float total=d.x+d.y+d.z+d.w;
       // crisp, slightly anti-aliased ink edge
       float aa=fwidth(total)*1.2+.004;
@@ -72,7 +72,7 @@ const FS = {
         // balloons drift a little further than the type, which makes them read as liquid
         vec2 qm=vUv;
         vec4 m=(mat(uM0,qm)*d.x+mat(uM1,qm)*d.y+mat(uM2,qm)*d.z+mat(uM3,qm)*d.w)/max(total,1e-4);
-        vec3 inside=m.rgb+vec3(.02)*(1.-m.a);           // premultiplied balloon over ink-black
+        vec3 inside=m.rgb+inkCol*(1.-m.a);           // premultiplied balloon over ink-black
         // thin wet highlight just inside the edge
         float rim=smoothstep(.42-aa,.42+aa,total)-smoothstep(.42+aa,.42+aa*4.,total);
         inside=mix(inside,vec3(.92),rim*.55);
@@ -206,6 +206,11 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
   layout();
 
   // ---------- simulation ----------
+  const PALETTES = {
+    light: { paper: [0xed / 255, 0xec / 255, 0xe8 / 255], textCol: [0.035, 0.035, 0.035], inkCol: [0.02, 0.02, 0.02] },
+    dark: { paper: [0x0f / 255, 0x0f / 255, 0x0e / 255], textCol: [0.925, 0.914, 0.886], inkCol: [0, 0, 0] },
+  };
+  let colors = PALETTES.light;
   const P = { curl: 3, velDiss: 4.0, dyeDiss: 2.8, relax: 4.0, iters: 14, radius: 0.0034, force: 1500, warp: 0.6, matWarp: 0 };
   const slotMat = [0, 1, 2, 3];
   let slot = 3, lastMat = -1, lastInput = -1e9;
@@ -276,7 +281,7 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
     run(progs.advect, dye.write, { uVelocity: vel.read, uSource: dye.read, simTexel: st, dt, dissipation: P.dyeDiss }); dye.swap();
   }
   function draw() {
-    const u = { uText: textTex, uDye: dye.read, uWarp: warp.read, matRect, uWarpGain: P.warp, uMatWarp: P.matWarp, px: [1 / canvas.width, 1 / canvas.height], paper: [0xed / 255, 0xec / 255, 0xe8 / 255] };
+    const u = { uText: textTex, uDye: dye.read, uWarp: warp.read, matRect, uWarpGain: P.warp, uMatWarp: P.matWarp, px: [1 / canvas.width, 1 / canvas.height], ...colors };
     for (let i = 0; i < 4; i++) u[`uM${i}`] = matTex[slotMat[i]];
     run(progs.display, null, u);
   }
@@ -284,6 +289,7 @@ export async function createInkFluid(canvas, { materials, word = "TRUSTA", font 
 
   return {
     layout, step, draw, input, leave,
+    setTheme(t) { colors = PALETTES[t] || PALETTES.light; },
     idleFor: (now) => now - busySince(),
     get wordBox() { return { ...wordBox, dpr }; },
   };

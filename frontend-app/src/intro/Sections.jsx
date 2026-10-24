@@ -48,7 +48,7 @@ export function Cmd({ children, t, prompt = "$" }) {
 }
 
 // ---------------------------------------------------------------- nav ----
-export function Nav({ c, lang, setLang }) {
+export function Nav({ c, lang, setLang, theme, toggleTheme }) {
   const [solid, setSolid] = useState(false);
   useEffect(() => {
     const on = () => setSolid(window.scrollY > window.innerHeight * 0.6);
@@ -63,10 +63,16 @@ export function Nav({ c, lang, setLang }) {
       <nav aria-label={lang === "zh" ? "页面导航" : "Site"}>
         <a className="wide" href="#product">{c.nav.product}</a>
         <a className="wide" href="#trust">{c.nav.trust}</a>
+        <a className="wide" href="#integrations">{c.nav.integrations}</a>
         <a className="wide" href="#install">{c.nav.install}</a>
         <a href={DOCS}>{c.nav.docs}</a>
         <a className="icon" href={GITHUB} aria-label="GitHub"><GitHubIcon /></a>
         <button type="button" className="lang" onClick={() => setLang(lang === "zh" ? "en" : "zh")} aria-label={c.nav.langLabel}>{c.nav.lang}</button>
+        <button type="button" className="theme" onClick={toggleTheme} aria-label={c.nav.theme} title={c.nav.theme}>
+          {theme === "dark"
+            ? <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="10" cy="10" r="4" fill="currentColor" /><path stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" d="M10 1.5v2M10 16.5v2M1.5 10h2M16.5 10h2M4 4l1.4 1.4M14.6 14.6 16 16M4 16l1.4-1.4M14.6 5.4 16 4" /></svg>
+            : <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M16.5 12.6A7 7 0 0 1 7.4 3.5a7 7 0 1 0 9.1 9.1Z" /></svg>}
+        </button>
       </nav>
     </header>
   );
@@ -97,10 +103,14 @@ function trail(key, a, s) {
 const TIER = { transfer: "yellow", lost: "red", spend: "green" };
 
 function Demo({ d }) {
+  const keys = Object.keys(d.samples);
+  const box = useRef(null);
   const [key, setKey] = useState("transfer");
   const [run, setRun] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const [auto, setAuto] = useState(true);       // plays itself until the visitor touches it
   const [typed, setTyped] = useState("");
-  const [phase, setPhase] = useState("typing"); // typing | proposed | running | done | declined
+  const [phase, setPhase] = useState("idle");    // idle | typing | thinking | proposed | pressing | running | done | declined
   const [shown, setShown] = useState(0);
   const [hashes, setHashes] = useState([]);
   const s = d.samples[key];
@@ -109,66 +119,99 @@ function Demo({ d }) {
   const steps = [...t.before, ...t.after];
 
   useEffect(() => {
+    const el = box.current;
+    if (!el || !("IntersectionObserver" in window)) { setVisible(true); return undefined; }
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.35 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // typing → thinking → proposed (or straight to running for read-only)
+  useEffect(() => {
+    if (!visible) return undefined;
     setTyped(""); setShown(0); setPhase("typing");
     setHashes(Array.from({ length: 8 }, () => hex(8)));
-    if (reduced()) { setTyped(s.say); setPhase(read ? "done" : "proposed"); setShown(t.before.length); return undefined; }
-    let i = 0;
+    if (reduced()) { setTyped(s.say); setPhase(read ? "done" : "proposed"); setShown(read ? steps.length : t.before.length); return undefined; }
     const chars = Array.from(s.say);
-    const id = setInterval(() => {
+    let i = 0, timer;
+    const tick = () => {
       i += 1; setTyped(chars.slice(0, i).join(""));
-      if (i >= chars.length) { clearInterval(id); setTimeout(() => setPhase(read ? "running" : "proposed"), 380); }
-    }, chars.length > 20 ? 42 : 85);
-    return () => clearInterval(id);
-  }, [key, run, s.say]);
+      if (i < chars.length) timer = setTimeout(tick, (chars.length > 20 ? 34 : 70) + Math.random() * 40);
+      else timer = setTimeout(() => { setPhase("thinking"); timer = setTimeout(() => setPhase(read ? "running" : "proposed"), 650); }, 280);
+    };
+    timer = setTimeout(tick, 350);
+    return () => clearTimeout(timer);
+  }, [key, run, visible]);
 
+  // signed hand-offs appear one by one
   useEffect(() => {
-    const target = phase === "proposed" ? t.before.length : phase === "running" ? steps.length : null;
+    const target = phase === "proposed" || phase === "pressing" ? t.before.length : phase === "running" ? steps.length : null;
     if (target == null || shown >= target) {
       if (phase === "running" && shown >= steps.length) setPhase("done");
       return undefined;
     }
-    const id = setTimeout(() => setShown((n) => n + 1), reduced() ? 0 : 320);
+    const id = setTimeout(() => setShown((n) => n + 1), reduced() ? 0 : 300);
     return () => clearTimeout(id);
   }, [phase, shown]);
 
+  // autoplay: press confirm by itself, then move on to the next sentence
+  useEffect(() => {
+    if (!auto || !visible || reduced()) return undefined;
+    let id;
+    if (phase === "proposed" && shown >= t.before.length) id = setTimeout(() => setPhase("pressing"), 1500);
+    if (phase === "pressing") id = setTimeout(() => setPhase("running"), 420);
+    if (phase === "done") id = setTimeout(() => { setKey(keys[(keys.indexOf(key) + 1) % keys.length]); setRun((n) => n + 1); }, 3200);
+    return () => clearTimeout(id);
+  }, [phase, shown, auto, visible, key]);
+
+  const pick = (k) => { setAuto(false); setKey(k); setRun((n) => n + 1); };
+  const confirm = () => { setAuto(false); setPhase("pressing"); setTimeout(() => setPhase("running"), 260); };
+  const after = phase === "running" || phase === "done";
+
   return (
-    <div className="demo" aria-label={d.aria}>
+    <div className="demo" ref={box} aria-label={d.aria}>
       <div className="demo-tabs" role="tablist" aria-label={d.pick}>
         {Object.entries(d.samples).map(([k, v]) => (
-          <button type="button" key={k} role="tab" aria-selected={k === key} onClick={() => { setKey(k); setRun((n) => n + 1); }}>{v.say}</button>
+          <button type="button" key={k} role="tab" aria-selected={k === key} onClick={() => pick(k)}>{v.say}</button>
         ))}
+        {auto && visible && <span className="autoplay" aria-hidden="true"><i />{d.auto}</span>}
       </div>
       <div className="demo-grid">
-        <div className="demo-body">
-          <div className="bubble-user">{typed}<span className={`caret ${phase === "typing" ? "on" : ""}`} /></div>
-          {phase !== "typing" && (
-            <>
+        <div className="demo-body" key={`${key}-${run}`}>
+          <div className="bubble-user">{typed || "\u00a0"}<span className={`caret ${phase === "typing" ? "on" : ""}`} /></div>
+          {phase === "thinking" && <div className="thinking" aria-label={d.querying}><i /><i /><i /></div>}
+          {!["idle", "typing", "thinking"].includes(phase) && (
+            <div className="answer">
               <p className="demo-reply">{read && phase !== "done" ? d.querying : s.reply}</p>
               {!read && (
-                <div className={`proposal tier-${TIER[key]}`}>
+                <div className={`proposal tier-${TIER[key]} ${after ? "authorised" : ""}`}>
                   <div className="proposal-head"><b>{s.card.title}</b><span className={`tier tier-${TIER[key]}`}>{s.tierLabel}</span></div>
                   {s.card.amount && <div className="proposal-amount">{s.card.amount}</div>}
                   <dl>{s.card.fields.map(([a, b]) => <div key={a}><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
-                  {key === "lost" && phase === "proposed" && <div className="otp">{d.otp} <span>4 8 2 0 1 7</span></div>}
-                  {phase === "proposed" && (
-                    <div className="proposal-actions">
-                      <button type="button" className="go" onClick={() => setPhase("running")}>{s.action}</button>
-                      <button type="button" className="no" onClick={() => setPhase("declined")}>{d.reject}</button>
-                    </div>
-                  )}
-                  {phase === "declined" && <p className="proposal-note">{d.declined}</p>}
-                  {(phase === "running" || phase === "done") && <p className="proposal-note ok">{phase === "done" ? s.done : d.running}</p>}
+                  {key === "lost" && !after && phase !== "declined" && <div className="otp">{d.otp} <span>4 8 2 0 1 7</span></div>}
+                  <div className="proposal-swap">
+                    {(phase === "proposed" || phase === "pressing") && (
+                      <div className="proposal-actions">
+                        <button type="button" className={`go ${phase === "pressing" ? "pressed" : ""}`} onClick={confirm}>{s.action}</button>
+                        <button type="button" className="no" onClick={() => { setAuto(false); setPhase("declined"); }}>{d.reject}</button>
+                      </div>
+                    )}
+                    {phase === "declined" && <p className="proposal-note">{d.declined}</p>}
+                    {after && <p className="proposal-note ok">{phase === "done" ? <>✓ {s.done}</> : <><span className="spin" />{d.running}</>}</p>}
+                  </div>
+                  {after && <span className="stamp" aria-hidden="true">{d.authorised}</span>}
                 </div>
               )}
               {read && phase === "done" && (
                 <div className="mini-chart" aria-hidden="true"><i style={{ "--w": "95%" }} /><i style={{ "--w": "3%" }} /><i style={{ "--w": "2%" }} /></div>
               )}
-            </>
+            </div>
           )}
         </div>
         <ol className="handoffs" aria-label={d.handoffs}>
+          <li className="hhead" aria-hidden="true">{d.handoffs}</li>
           {steps.slice(0, shown).map(([from, to, kind], i) => (
-            <li key={`${run}-${i}`} className={i >= t.before.length ? "exec" : ""}>
+            <li key={`${key}-${run}-${i}`} className={i >= t.before.length ? "exec" : ""}>
               <span className="who">{from}<i>→</i>{to}</span>
               <span className="kind">{kind}</span>
               <span className="sig">{d.signed} <code>{hashes[i]}</code></span>
@@ -177,10 +220,10 @@ function Demo({ d }) {
         </ol>
       </div>
       <div className="demo-foot">
-        <span>
-          {phase === "proposed" && d.footProposed}
+        <span className="foot-msg" key={phase}>
+          {(phase === "proposed" || phase === "pressing") && d.footProposed}
           {phase === "done" && (read ? d.footDoneRead : d.footDone)}
-          {(phase === "done" || phase === "declined") && <button type="button" className="link" onClick={() => setRun((n) => n + 1)}>{d.replay}</button>}
+          {(phase === "done" || phase === "declined") && <button type="button" className="link" onClick={() => { setAuto(false); setRun((n) => n + 1); }}>{d.replay}</button>}
         </span>
         <span className="muted">{d.note}</span>
       </div>
@@ -234,7 +277,7 @@ export function Trust({ c }) {
           </Reveal>
           {l.fig && (
             <Reveal className="figure" delay={100}>
-              <img src={l.fig} alt={l.figAlt} loading="lazy" decoding="async" />
+              <a href={l.fig} target="_blank" rel="noopener noreferrer" aria-label={l.figAlt}><img src={l.fig} alt={l.figAlt} loading="lazy" decoding="async" /></a>
             </Reveal>
           )}
         </article>
@@ -250,19 +293,72 @@ export function Trust({ c }) {
 }
 
 // ---------------------------------------------------------------- numbers ----
+function Group({ g, i, t }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Reveal className="ngroup" delay={(i % 2) * 90}>
+      <p className="nlabel">{g.label}</p>
+      <b className="nbig">{g.big}</b>
+      <span className="nunit">{g.unit}</span>
+      <p className="nplain">{g.plain}</p>
+      <div className="nstats">{g.stats.map(([v, l]) => <div key={l}><b>{v}</b><span>{l}</span></div>)}</div>
+      <p className="nhow">{g.how}</p>
+      {g.list && (
+        <>
+          <button type="button" className="nmore" aria-expanded={open} onClick={() => setOpen((o) => !o)}>{g.more} {open ? "−" : "+"}</button>
+          <div className={`nlist ${open ? "open" : ""}`} hidden={!open}>{g.list.map((x) => <span key={x}>{x}</span>)}</div>
+        </>
+      )}
+    </Reveal>
+  );
+}
+
 export function Numbers({ c }) {
   const n = c.numbers;
   return (
     <section className="numbers" aria-labelledby="numbers-title">
       <div className="wrap">
-        <Reveal as="p" className="kicker" id="numbers-title">{n.kicker}</Reveal>
-        <div className="num-grid">
-          {n.items.map(([big, small], i) => (
-            <Reveal key={small} className="num" delay={(i % 3) * 70}><b>{big}</b><span>{small}</span></Reveal>
-          ))}
-        </div>
+        <Reveal as="p" className="kicker">{n.kicker}</Reveal>
+        <Reveal as="h2" id="numbers-title" className="h2" delay={60}>{n.title}</Reveal>
+        <Reveal as="p" className="lede" delay={120}>{n.lead}</Reveal>
+        <div className="ngrid">{n.groups.map((g, i) => <Group key={g.label} g={g} i={i} />)}</div>
+        <Reveal className="rerun">
+          <span>{n.rerun}</span>
+          <Cmd t={c.install}>{"python -m benchmarks.security_benchmark --banking-version 5"}</Cmd>
+        </Reveal>
         <Reveal as="p" className="num-note">{n.note}</Reveal>
       </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------- integrations ----
+export function Integrations({ c }) {
+  const g = c.integrations;
+  const label = Object.fromEntries(g.legend);
+  return (
+    <section id="integrations" className="integrations wrap" aria-labelledby="int-title">
+      <Reveal as="p" className="kicker">{g.kicker}</Reveal>
+      <Reveal as="h2" id="int-title" className="h2" delay={60}>{g.title}</Reveal>
+      <Reveal as="p" className="lede" delay={120}>{g.lead}</Reveal>
+      <Reveal className="int-stats" delay={160}>
+        {g.stats.map(([n, l]) => <div key={l}><b>{n}</b><span>{l}</span></div>)}
+      </Reveal>
+      <div className="int-legend">{g.legend.map(([k, l]) => <span key={k} className={`st ${k}`}>{l}</span>)}</div>
+      {g.groups.map(([name, sub, items]) => (
+        <div key={name} className="int-group">
+          <Reveal className="int-head"><h3>{name}</h3><p>{sub}</p></Reveal>
+          <div className="int-grid">
+            {items.map(([mark, title, desc, st], i) => (
+              <Reveal key={title} className="int-card" delay={(i % 4) * 50}>
+                <span className="mark" aria-hidden="true">{mark}</span>
+                <div><h4>{title}</h4><p>{desc}</p><span className={`st ${st}`}>{label[st]}</span></div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      ))}
+      <Reveal as="a" className="more" href={`${DOCS}#/integrations`}>{g.more} →</Reveal>
     </section>
   );
 }

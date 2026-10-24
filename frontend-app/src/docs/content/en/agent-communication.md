@@ -2,7 +2,7 @@
 
 The worst case for a multi-agent system is an agent that gets prompt-injected or compromised, impersonates another, alters messages or proposes things beyond its role — and afterwards nobody can say what happened. TRUSTA makes every message between agents **verifiable, traceable and non-repudiable**.
 
-![Figure 1: trusted multi-agent communication](/figs/fig1.webp)
+![Figure 1: the AI can only propose; every step between agents is signed and verifiable](/figs/fig1-en.webp)
 
 ## The six agents
 

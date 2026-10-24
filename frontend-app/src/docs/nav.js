@@ -11,6 +11,7 @@ export const NAV = [
     ["authorization", "授权等级", "Authorisation tiers"],
     ["feishu", "飞书接入", "Feishu"],
     ["mobile", "手机访问", "Phone access"],
+    ["integrations", "集成", "Integrations"],
   ] },
   { zh: "可信机制", en: "Trust", pages: [
     ["agent-communication", "多 Agent 签名通信", "Signed agent messaging"],

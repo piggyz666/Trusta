@@ -4,9 +4,7 @@ import Docs from "./Docs.jsx";
 import "./docs.css";
 
 // pick the theme before the first paint so dark-mode readers never see a light flash
-try {
-  const t = localStorage.getItem("trusta-docs-theme");
-  document.documentElement.dataset.theme = t === "light" || t === "dark" ? t : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-} catch { /* storage blocked */ }
+import { applyTheme, currentTheme } from "../site/theme.js";
+applyTheme(currentTheme(), { light: "#edece8", dark: "#111110" });
 
 createRoot(document.getElementById("root")).render(<StrictMode><Docs /></StrictMode>);

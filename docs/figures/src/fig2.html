@@ -1,104 +1,171 @@
-<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#fff}</style></head>
-<body><div id="fig"></div><script src="fig-common.js"></script><script>
-start(1400, 840);
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="figure.css" />
+<style>
+  .qs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .q { border: 1px solid var(--hair); border-radius: 12px; padding: 16px 18px 14px; background: #fff; position: relative; display: grid; align-content: start; gap: 9px; }
+  .q .ask { font-size: 23px; font-weight: 800; letter-spacing: -.01em; }
+  .q .ask small { display: block; font-size: 12px; font-weight: 600; color: var(--faint); letter-spacing: 0; margin-top: 2px; }
+  .q .mech { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 750; }
+  .q .mech .tag { color: #fff; }
+  .q ul { margin: 0; padding-left: 17px; font-size: 12px; line-height: 1.55; color: var(--sub); }
+  .q .data { font-family: var(--mono); font-size: 10.5px; color: var(--sub); background: var(--soft); border-radius: 7px; padding: 7px 9px; line-height: 1.6; }
+  .q.c1 { border-top: 4px solid var(--blue); } .q.c2 { border-top: 4px solid var(--purple); } .q.c3 { border-top: 4px solid var(--teal); }
+  .zk { display: grid; grid-template-columns: 1fr 26px 1fr; align-items: center; gap: 0; }
+  .zk div { border-radius: 8px; padding: 7px 9px; font-size: 11px; line-height: 1.45; }
+  .zk .priv { background: var(--slateF); color: var(--slate); border: 1px dashed #aab4c2; }
+  .zk .pub { background: var(--purpleF); color: var(--purple); border: 1px solid #cfc6ec; }
+  .zk b { display: block; font-size: 11px; margin-bottom: 2px; }
+  .zk .arrow { text-align: center; color: var(--purple); font-weight: 800; }
+  .m2 { margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; padding: 10px 14px; border-radius: 10px; background: var(--soft); border: 1px solid var(--hair); }
+  .m2 .tag { background: var(--ink); color: #fff; }
+  .m2 i { font-style: normal; padding: 3px 9px; border-radius: 99px; background: #fff; border: 1px solid var(--line); font-size: 11.5px; font-weight: 650; }
+  .m2 em { font-style: normal; color: var(--faint); }
 
-// ---------------- a: cross-institution trust layer ----------------
-panel(20, 26, "a", "跨机构协作信任层：WeID 链上身份 · 零知识能力准入 · 链上决策承诺");
+  .row2 { display: grid; grid-template-columns: 1fr 520px; gap: 30px; margin-top: 28px; }
 
-// identities
-text(30, 70, "Agent 链上身份 WeID（登记在下方联盟链）", { size: 12.5, weight: 700, color: C.slate });
-[["财务 Finance", "0xa968…c3d3"], ["理财 Wealth", "0xa8fa…f7de"], ["交易 Transaction", "0xf9fb…8c31"]].forEach(([n, d], i) => {
-  const y = 86 + i * 104;
-  box(30, y, 222, 88, { fill: "#fff", stroke: C.slate });
-  text(42, y + 18, n, { size: 13, weight: 700 });
-  text(42, y + 40, "did:weid:101:" + d, { size: 10.5, mono: true, color: C.slate });
-  text(42, y + 64, "P-256 消息密钥 ⇄ WeID 绑定", { size: 11, color: C.sub });
-});
+  /* b — timeline */
+  .tl { position: relative; border: 1px solid var(--hair); border-radius: 12px; background: var(--soft); padding: 16px 18px 14px 120px; }
+  .tl .lane { position: relative; height: 46px; border-top: 1px solid var(--hair); }
+  .tl .lane:first-of-type { border-top: 0; }
+  .tl .lname { position: absolute; left: -104px; top: 0; height: 46px; display: flex; align-items: center; font-size: 12px; font-weight: 750; color: var(--sub); width: 96px; line-height: 1.25; }
+  .ev2 { position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 2; }
+  .pill { font-size: 10.5px; font-weight: 750; border-radius: 99px; padding: 3px 9px; white-space: nowrap; border: 1.2px solid; background: #fff; }
+  .pill.ok { color: var(--purple); border-color: #cfc6ec; background: var(--purpleF); }
+  .pill.msg { color: var(--teal); border-color: #9fd0c9; background: var(--tealF); }
+  .pill.dark { color: #fff; background: var(--ink); border-color: var(--ink); }
+  .pill.amber { color: #8a5d00; background: var(--amberF); border-color: #ecd09a; }
+  .axis { position: relative; height: 34px; margin-top: 6px; border-top: 1.5px solid var(--ink); }
+  .tick { position: absolute; top: 0; transform: translateX(-50%); font-size: 11px; color: var(--sub); padding-top: 6px; font-family: var(--mono); white-space: nowrap; }
+  .tick::before { content: ""; position: absolute; left: 50%; top: -5px; height: 9px; border-left: 1.5px solid var(--ink); }
+  .vline { position: absolute; top: 12px; bottom: 44px; border-left: 2px dashed; z-index: 1; }
+  .vline span { position: absolute; top: -2px; right: 6px; font-size: 11px; font-weight: 800; white-space: nowrap; background: rgba(246,247,249,.95); padding: 1px 5px; border-radius: 4px; }
+  .note2 { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 11.5px; color: var(--sub); line-height: 1.45; }
+  .note2 b { color: var(--ink); }
 
-// stages
-const st = [
-  ["M1", "能力准入", "零知识证明 Groth16", C.purple, C.purpleF, ["固定评测集上的", "TP/FP/FN 达到阈值", "不公开评测明细", "绑定 Policy · Epoch", "与模型承诺", "可撤销 · 到期失效"]],
-  ["M2", "轮次消息", "V3 签名 + 链上身份", C.teal, C.tealF, ["发送方 WeID", "+ 消息密钥签名", "准入凭证 · 轮次", "Epoch · 成员快照", "跨轮重放、错模型", "→ 拒收"]],
-  ["OTC", "全窗口收集", "k-of-n · 截止时间 T", C.orange, C.orangeF, ["达到 k 只标记可行", "到 T 才冻结证据", "不足 k → 作废", "迟到消息只进遥测"]],
-  ["M3", "链上承诺", "合约上链 · 双节点读回", C.blue, C.blueF, ["决策 Merkle 根", "+ 成员快照上链", "两个 RPC 节点", "分别读回核对", "响应丢失按原哈希", "恢复，绝不重发"]],
-];
-st.forEach(([k, t, s, col, fill, ls], i) => {
-  const x = 286 + i * 154;
-  el("rect", { x, y: 86, width: 140, height: 236, rx: 8, fill, stroke: col });
-  el("rect", { x, y: 86, width: 140, height: 30, rx: 8, fill: col });
-  el("rect", { x, y: 104, width: 140, height: 12, fill: col });
-  text(x + 70, 101, k + " · " + t, { anchor: "middle", size: 13, weight: 700, color: "#fff" });
-  text(x + 70, 136, s, { anchor: "middle", size: 11, weight: 600, color: col });
-  el("line", { x1: x + 12, x2: x + 128, y1: 152, y2: 152, stroke: col, opacity: 0.35 });
-  lines(x + 12, 172, ls, { size: 11, color: C.ink, lh: 23 });
-  if (i) arrow([[x - 12, 236], [x - 2, 236]], { marker: "arrInk", color: C.ink, sw: 1.4 });
-});
-arrow([[252, 236], [284, 236]], { marker: "arrInk", color: C.ink, sw: 1.4 });
-// tie to fig 1 runtime
-box(286, 342, 520, 52, { fill: "#F6F8FA", stroke: C.faint, title: "复用图 1 的六 Agent 运行时、V3 验签、交接证据与审计链", sub: "链上身份与签名都不授予银行写入权限：资金仍须用户在确认卡上授权", ts: 12, ss: 11 });
+  /* c — results */
+  .res { display: grid; gap: 8px; }
+  .r { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; padding: 9px 12px; border-radius: 10px; background: #fff; border: 1px solid var(--hair); }
+  .r .ck { width: 20px; height: 20px; border-radius: 50%; background: var(--green); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; margin-top: 1px; }
+  .r b { display: block; font-size: 13px; font-weight: 750; }
+  .r p { margin: 2px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--sub); }
+  .r code { font-family: var(--mono); font-size: 10.5px; color: var(--ink); }
+  .limits { margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1px dashed #b9c0ca; font-size: 11.5px; line-height: 1.55; color: var(--sub); }
+  .limits b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div id="fig"></div>
+<script src="figure.js"></script>
+<script>
+const fig = document.getElementById("fig");
+const X = (t) => `${(t / 34) * 100}%`;   // timeline: 0 … 34 s
 
-// chain band
-el("rect", { x: 30, y: 430, width: 856, height: 200, rx: 10, fill: C.slateF, stroke: C.slate });
-text(46, 452, "FISCO BCOS 联盟链（测试网 · Chain 101 · Group 1）", { size: 13, weight: 700, color: C.slate });
-// node ring
-const cx0 = 150, cy0 = 540, rr = 58;
-for (let i = 0; i < 8; i++) {
-  const a = (i / 8) * Math.PI * 2 - Math.PI / 2, a2 = ((i + 1) / 8) * Math.PI * 2 - Math.PI / 2;
-  el("line", { x1: cx0 + rr * Math.cos(a), y1: cy0 + rr * Math.sin(a), x2: cx0 + rr * Math.cos(a2), y2: cy0 + rr * Math.sin(a2), stroke: C.slate, opacity: -70.4 });
-}
-for (let i = 0; i < 8; i++) {
-  const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
-  el("circle", { cx: cx0 + rr * Math.cos(a), cy: cy0 + rr * Math.sin(a), r: 9, fill: i < 2 ? C.slate : "#fff", stroke: C.slate, "stroke-width": 1.4 });
-}
-text(cx0, cy0 - 6, "8 个", { anchor: "middle", size: 12, weight: 700, color: C.slate });
-text(cx0, cy0 + 12, "共识节点", { anchor: "middle", size: 11, color: C.slate });
-text(cx0, 618, "实心 = 两个用于读回核对的 RPC 节点", { anchor: "middle", size: 10.5, color: C.sub });
-box(276, 472, 250, 62, { title: "WeID 合约", sub: "Agent DID 登记 · 解析 · 生命周期", fill: "#fff", stroke: C.slate, ts: 12.5 });
-box(276, 552, 250, 62, { title: "CollaborationAnchor 合约", sub: "轮次决策根 · 成员快照 · 事件", fill: "#fff", stroke: C.slate, ts: 12.5 });
-box(560, 472, 310, 142, { fill: "#fff", stroke: C.green });
-text(576, 492, "公开证据包 → 第三方独立复验", { size: 12.5, weight: 700 });
-lines(576, 520, ["✓ 链上 DID · 合约代码 · 发布者", "✓ M1 证明（只需公开验证密钥）", "✓ M2 签名 · 轮次 · 成员快照", "✓ M3 合约事件与根读回 · 业务因果链"], { size: 11.5, lh: 22 });
-// links
-arrow([[846, 322], [846, 414], [543, 414], [543, 598], [528, 598]], { marker: "arrBlue", color: C.blue, label: "写入决策根", at: 0, dx: 36, dy: 10, lc: C.blue });
-text(30, 660, "注：联盟链为单机 8 节点测试网，非跨机构独立治理；Groth16 为单机开发用可信设置，非生产 MPC；以上能力在验收报告中逐项实测。", { size: 10.5, color: C.sub });
-text(30, 678, "详见 docs/ANCHOR_Integration_Final_Acceptance.md", { size: 10.5, color: C.sub, mono: true });
+fig.innerHTML = `
+<div class="headline">
+  <div class="fig-n">${T("图 2", "Figure 2")}</div>
+  <h1>${T("跨机构协作：身份、资格、结论都能在链上公开核验", "Cross-institution collaboration: identity, qualification and conclusion, all checkable on chain")}</h1>
+  <p>${T("多家机构的 Agent 一起做判断时，对方不必相信你的服务器：你是谁、够不够格、结论有没有被改，都能在联盟链上独立核验。链上身份不授予任何银行写权限。",
+        "When agents from several institutions decide together, nobody has to trust your server: who you are, whether you qualify and whether the result changed can all be checked independently on a consortium chain. On-chain identity grants no bank write access.")}</p>
+</div>
 
-// ---------------- b: attack benchmark ----------------
-panel(930, 26, "b", "攻击实测：18 类 × 5 次");
-const rows = [
-  ["伪造 Agent 身份", 0], ["无效签名", 0], ["负载篡改", 0], ["重放", 0], ["过期消息", 0], ["已吊销密钥", 0], ["宽限期外旧密钥", 0], ["签名算法降级", 0],
-  ["越权调用能力", 1], ["能力快照篡改", 1], ["未授权工具调用", 1], ["授权与动作哈希不符", 1], ["重复执行同一笔", 1],
-  ["审计事件篡改", 2], ["Merkle 叶子篡改", 2], ["无效包含证明", 2], ["检查点篡改", 2], ["锚定根不符", 2]];
-const groups = [["身份与消息", C.teal], ["权限与执行", C.orange], ["审计与证明", C.purple]];
-const y0 = 92, rh = 27, xl = 1000, xd = 1176;
-text(xd + 48, 70, "第 1–5 次", { anchor: "middle", size: 11, color: C.sub });
-text(1350, 70, "意外交易", { anchor: "middle", size: 11, color: C.sub });
-rows.forEach(([n, g], i) => {
-  const y = y0 + i * rh + (g * 8);
-  if (i % 2 === 0) el("rect", { x: 990, y: y - 12, width: 390, height: rh - 2, fill: "#F6F8FA", rx: 3 });
-  text(xl, y, n, { size: 11.8 });
-  for (let k = 0; k < 5; k++) el("circle", { cx: xd + k * 24, cy: y, r: 7.5, fill: groups[g][1] });
-  text(1350, y, "0", { anchor: "middle", size: 12, weight: 700, mono: true });
+<section class="panel">
+  <div class="ptitle"><b>a</b><span>${T("对方会问的三个问题，和 TRUSTA 的回答", "Three questions a partner will ask, and how TRUSTA answers")}</span></div>
+  <div class="qs">
+    <div class="q c1">
+      <div class="ask">${T("“你是谁？”", "“Who are you?”")}<small>${T("身份能不能冒充", "can identity be faked")}</small></div>
+      <div class="mech"><span class="tag" style="background:var(--blue)">WeID</span>${T("FISCO BCOS 联盟链上的身份", "Identity on a FISCO BCOS consortium chain")}</div>
+      <ul>
+        <li>${T("每个 Agent 的 P-256 消息密钥与链上 WeID 绑定", "Each agent's P-256 message key is bound to its on-chain WeID")}</li>
+        <li>${T("链不可用时直接拒绝，不退回本地自签的 did:key", "If the chain is down it refuses — no fallback to a self-signed did:key")}</li>
+        <li>${T("可注册、解析、停用、恢复；恢复必须换新 Epoch", "Register, resolve, deactivate, restore; restoring needs a new epoch")}</li>
+      </ul>
+      <div class="data">${T("财务", "Finance")}&nbsp;&nbsp;&nbsp;did:weid:101:0xa968…c3d3<br>${T("理财", "Wealth")}&nbsp;&nbsp;&nbsp;&nbsp;did:weid:101:0xa8fa…f7de<br>${T("交易", "Transaction")}&nbsp;did:weid:101:0xf9fb…8c31</div>
+    </div>
+    <div class="q c2">
+      <div class="ask">${T("“你够格吗？”", "“Are you qualified?”")}<small>${T("能力不能自己报", "ability can't be self-declared")}</small></div>
+      <div class="mech"><span class="tag" style="background:var(--purple)">M1 · Groth16</span>${T("零知识能力准入", "Zero-knowledge capability admission")}</div>
+      <div class="zk">
+        <div class="priv"><b>${T("保密（不公开）", "Kept private")}</b>${T("评测明细 TP / FP / FN<br>每条预测结果", "evaluation details TP / FP / FN<br>every prediction")}</div>
+        <div class="arrow">→</div>
+        <div class="pub"><b>${T("公开可验证", "Publicly verifiable")}</b>${T("F1 ≥ 0.80 ✓<br>绑定策略、Epoch、模型承诺", "F1 ≥ 0.80 ✓<br>bound to policy, epoch, model")}</div>
+      </div>
+      <ul>
+        <li>${T("分数由固定公式从评测记录推出，Agent 不能自报", "The score follows from the evaluation record by a fixed formula")}</li>
+        <li>${T("准入可撤销、按 Epoch 到期", "Admission can be revoked and expires per epoch")}</li>
+      </ul>
+    </div>
+    <div class="q c3">
+      <div class="ask">${T("“结论被改过吗？”", "“Was the conclusion altered?”")}<small>${T("事后能不能否认", "can it be denied later")}</small></div>
+      <div class="mech"><span class="tag" style="background:var(--teal)">M3</span>${T("链上决策承诺", "On-chain decision commitment")}</div>
+      <ul>
+        <li>${T("结论的 Merkle 根 + 成员快照写入 CollaborationAnchor 合约", "The conclusion's Merkle root + member snapshot go into the CollaborationAnchor contract")}</li>
+        <li>${T("两个节点的 RPC 分别读回，逐项核对", "Read back over two nodes' RPC endpoints and compared field by field")}</li>
+        <li>${T("提交结果未知时按原哈希查找恢复，绝不盲目重发", "If a submission's outcome is unknown, recover by the original hash — never resend blindly")}</li>
+      </ul>
+      <div class="data">root&nbsp;&nbsp;0x9429ba25…99bcc7<br>${T("区块", "block")}&nbsp;&nbsp;27 · gas 156,826</div>
+    </div>
+  </div>
+  <div class="m2"><span class="tag">M2</span>${T("把三者连起来：每条协作消息 =", "Tying them together: every collaboration message =")}
+    <i>${T("V3 签名", "V3 signature")}</i>+<i>${T("链上身份", "on-chain identity")}</i>+<i>${T("准入凭证", "admission credential")}</i>+<i>${T("轮次 / 任务", "round / task")}</i>+<i>Epoch</i>
+    <em>${T("任何一项对不上即拒收", "any mismatch → rejected")}</em></div>
+</section>
+
+<div class="row2">
+  <section class="panel">
+    <div class="ptitle"><b>b</b><span>${T("一轮协作怎么进行：k-of-n，截止才冻结", "How a round runs: k-of-n, frozen only at the deadline")}</span>
+      <em>${T("实测第 3 轮：k = 2，截止 30 秒", "measured round 3: k = 2, deadline 30 s")}</em></div>
+    <div class="tl" id="tl">
+      <div class="lane"><div class="lname">${T("成员 A", "Member A")}</div>
+        <div class="ev2" style="left:${X(1.2)}"><span class="pill ok">${T("准入 ✓", "admitted ✓")}</span></div>
+        <div class="ev2" id="m1" style="left:${X(9)}"><span class="pill msg">${T("第 1 份证据 *", "evidence #1 *")}</span></div></div>
+      <div class="lane"><div class="lname">${T("成员 B", "Member B")}</div>
+        <div class="ev2" style="left:${X(1.2)}"><span class="pill ok">${T("准入 ✓", "admitted ✓")}</span></div>
+        <div class="ev2" id="m2" style="left:${X(19.55)}"><span class="pill msg">${T("第 2 份 · 19.55 s", "#2 · 19.55 s")}</span></div></div>
+      <div class="lane"><div class="lname">${T("成员 C", "Member C")}</div>
+        <div class="ev2" style="left:${X(1.2)}"><span class="pill ok">${T("准入 ✓", "admitted ✓")}</span></div>
+        <div class="ev2" id="m3" style="left:${X(29.04)};transform:translate(-97%,-50%)"><span class="pill msg">${T("第 3 份 · 29.04 s", "#3 · 29.04 s")}</span></div></div>
+      <div class="lane"><div class="lname">${T("协调者", "Coordinator")}</div>
+        <div class="ev2" style="left:${X(3)}"><span class="pill dark">${T("开启本轮", "round opens")}</span></div>
+        <div class="ev2" id="viable" style="left:${X(19.55)}"><span class="pill amber">${T("达到 k=2：可成立，但不提前结束", "k=2 reached: viable, but not closed early")}</span></div></div>
+      <div class="lane"><div class="lname">${T("联盟链", "Chain")}</div>
+        <div class="ev2" style="left:${X(34)};transform:translate(-100%,-50%)"><span class="pill dark">${T("截止后 → Merkle 根上链", "after deadline → root on chain")}</span></div></div>
+      <div class="vline" style="left:calc(120px + (100% - 138px) * ${30 / 34}); border-color: var(--red); color: var(--red)"><span>${T("30 s 截止：冻结证据", "30 s deadline: evidence frozen")}</span></div>
+      <div class="axis">${[0, 5, 10, 15, 20, 25, 30].map((t) => `<div class="tick" style="left:${X(t)}">${t} s</div>`).join("")}</div>
+    </div>
+    <div class="note2">
+      <div><b>${T("为什么不在凑够 k 份时就结束？", "Why not stop as soon as k arrive?")}</b> ${T("先到的未必是对的。全窗口收集，防止抢跑的成员左右结论；第 3 份在 29.04 s 到达，仍被纳入。", "The first to arrive isn't necessarily right. Collecting over the full window stops a fast member from steering the result; #3 at 29.04 s still counts.")}</div>
+      <div><b>${T("截止之后呢？", "After the deadline?")}</b> ${T("迟到的消息只进入遥测，不改变结论；不足 k 份则本轮作废，不会“凑合”出一个结论。", "Late messages only go to telemetry and can't change the result; with fewer than k the round is void rather than settling for less.")}</div>
+      <div style="grid-column:1/-1;color:var(--faint)">${T("* 第 1 份证据的到达时间未单独记录，位置仅示意；19.55 s、29.04 s 和 30 s 为实测值。", "* The arrival time of evidence #1 wasn't recorded separately; its position is illustrative. 19.55 s, 29.04 s and 30 s are measured.")}</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="ptitle"><b>c</b><span>${T("实测：在真实联盟链上跑通", "Measured on a real consortium chain")}</span></div>
+    <div class="res">
+      <div class="r"><span class="ck">✓</span><div><b>${T("3 个 Agent 在链上登记 WeID", "3 agents registered as WeIDs")}</b><p>${T("FISCO BCOS 2.9.1，8 个验证节点，Chain 101；停用、恢复、轮换后旧绑定被拒绝。", "FISCO BCOS 2.9.1, 8 validator nodes, chain 101; old bindings rejected after deactivation, restore and rotation.")}</p></div></div>
+      <div class="r"><span class="ck">✓</span><div><b>${T("零知识证明真实生成并验证", "ZK proofs really generated and verified")}</b><p>${T("伪造分数承诺、错误 Epoch、错误验证密钥均被拒绝。", "Forged score commitments, wrong epochs and wrong verification keys are all rejected.")}</p></div></div>
+      <div class="r"><span class="ck">✓</span><div><b>${T("协作消息的负例全部拒收", "Every bad collaboration message rejected")}</b><p>${T("错误签名、跨轮次 / 任务 / Epoch、已撤销身份、错模型、重放。", "Bad signatures, cross-round / task / epoch, revoked identities, wrong model, replay.")}</p></div></div>
+      <div class="r"><span class="ck">✓</span><div><b>${T("验收轮：3 份有效证据，结论一致", "Acceptance round: 3 valid, consistent")}</b><p>${T("k = 2，截止 120 s 冻结；Merkle 根写入区块 27，两个节点 RPC 读回一致。", "k = 2, frozen at 120 s; Merkle root in block 27, read back identically over two RPCs.")}</p></div></div>
+      <div class="r"><span class="ck">✓</span><div><b>${T("故障恢复不重发", "Recovery without resending")}</b><p>${T("注入“提交响应丢失 + 服务重启”：恢复到同一笔交易，链高度不变，新增广播 0 次。", "Injected “lost submit response + restart”: recovered the same transaction, chain height unchanged, 0 new broadcasts.")}</p></div></div>
+    </div>
+    <div class="limits"><b>${T("边界如实说明：", "Stated limits: ")}</b>${T("单机 8 节点测试链，不代表独立机构；Groth16 为开发用可信设置，非生产 MPC；零知识电路证明受限的统计关系，不在电路中运行大模型。",
+      "single-host 8-node test chain, not independent institutions; Groth16 uses a development trusted setup, not a production MPC; the circuit proves a restricted statistical relation and doesn't run the model.")}</div>
+  </section>
+</div>
+<div class="foot">${T("数据来源：docs/ANCHOR_Integration_Final_Acceptance.md（WeID、M1、M2、OTC、M3 实测与负例）。第三方复验：python -m scripts.verify_anchor_collaboration。",
+  "Source: docs/ANCHOR_Integration_Final_Acceptance.md (WeID, M1, M2, OTC, M3 runs and negative tests). Third-party re-verification: python -m scripts.verify_anchor_collaboration.")}</div>
+`;
+
+document.fonts.ready.then(() => {
+  // keep the timeline's x positions inside the lane area (labels sit in the left padding)
+  document.querySelectorAll(".tl .lane, .tl .axis").forEach((el) => { el.style.marginRight = "0"; });
+  initWires();
+  path([port("#m2", "b"), port("#viable", "t")], { color: "amber", dash: "3 3", w: 1.3 });
+  done();
 });
-// group brackets
-let first = 0;
-[8, 5, 5].forEach((n, g) => {
-  const ya = y0 + first * rh + g * 8 - 10, yb = y0 + (first + n - 1) * rh + g * 8 + 10;
-  el("line", { x1: 984, x2: 984, y1: ya, y2: yb, stroke: groups[g][1], "stroke-width": 3 });
-  const t = text(972, (ya + yb) / 2, groups[g][0], { anchor: "middle", size: 11, weight: 700, color: groups[g][1] });
-  t.setAttribute("transform", `rotate(-90 972 ${(ya + yb) / 2})`);
-  first += n;
-});
-const yb = y0 + 18 * rh + 16 + 14;
-text(xl, yb + 4, "● = 检测并拦截", { size: 11, color: C.sub });
-text(1380, yb + 4, "90 / 90 拦截 · 0 笔意外交易", { anchor: "end", size: 12, weight: 700, color: C.green });
-// stats
-const stats = [["0 / 135", "正常消息误拒"], ["5.5 ms", "验签 p50（p95 9.0）"], ["15.1 ms", "签名 p50"], ["16.7 ms", "Merkle 检查点 p50"]];
-stats.forEach(([v, l], i) => {
-  const x = 990 + (i % 2) * 196, y = yb + 30 + Math.floor(i / 2) * 74;
-  box(x, y, 186, 64, { fill: "#fff", stroke: C.faint });
-  text(x + 14, y + 24, v, { size: 20, weight: 700, color: C.ink });
-  text(x + 14, y + 48, l, { size: 11, color: C.sub });
-});
-text(990, yb + 196, "python -m benchmarks.security_benchmark --banking-version 5", { size: 10, mono: true, color: C.sub });
-</script></body></html>
+</script>
+</body>
+</html>

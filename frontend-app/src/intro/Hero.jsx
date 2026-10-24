@@ -6,7 +6,8 @@ const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matc
 const HERO = "/hero/";
 const MATERIALS = ["gold", "teal", "pearl", "silver", "candy"].map((n) => `${HERO}${n}.webp`);
 
-export default function Hero({ c }) {
+export default function Hero({ c, theme }) {
+  const inkRef = useRef(null);
   const ref = useRef(null);
   const [state, setState] = useState("loading");   // loading | ready | failed
 
@@ -41,7 +42,7 @@ export default function Hero({ c }) {
 
     createInkFluid(canvas, { materials: MATERIALS }).then((h) => {
       if (!alive) return;
-      ink = h; ink.draw(); setState("ready");
+      ink = h; inkRef.current = h; ink.setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light"); ink.draw(); setState("ready");
       if (debug) { window.__ink = ink; return; }
       if (!reduced()) setTimeout(intro, 700);
     }).catch((e) => { console.warn(e); if (alive) setState("failed"); });
@@ -60,6 +61,7 @@ export default function Hero({ c }) {
     };
   }, []);
 
+  useEffect(() => { const ink = inkRef.current; if (ink) { ink.setTheme(theme); ink.draw(); } }, [theme]);
   const h = c.hero;
   return (
     <section className="hero" id="top" aria-label="TRUSTA" data-state={state}>

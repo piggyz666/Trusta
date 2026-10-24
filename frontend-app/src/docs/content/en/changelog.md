@@ -3,7 +3,9 @@
 ## 2026-10-25
 
 - Landing page: ink-fluid hero, product demo, trust layers, measured results and quick start; Chinese and English.
-- Documentation site.
+- Documentation site, including an Integrations page.
+- Figures 1 and 2 redrawn (Chinese and English) to tell problem → full chain → measured results.
+- Landing page: plain-language measured results, integrations section, light/dark switch; the demo now plays itself.
 - One-line installers (Windows / macOS / Linux), `start.sh`, double-click `TRUSTA.cmd`.
 - Windows portable package and automated build.
 - Fix: `requirements.txt` now lists everything the server needs at start-up, so clean installs no longer fail.

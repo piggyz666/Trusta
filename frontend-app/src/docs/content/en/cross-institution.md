@@ -2,7 +2,7 @@
 
 When agents from several institutions need to work on something together — say, banks' agents cross-checking the same risk conclusion — local signatures aren't enough. How does the other side know who you are, whether you're qualified to take part, and whether the final conclusion was altered? On top of [signed agent messaging](#/agent-communication), TRUSTA adds a trust layer that can be checked publicly on a consortium chain.
 
-![Figure 2: cross-institution trust layer and attack results](/figs/fig2.webp)
+![Figure 2: identity, qualification and conclusion, all checkable on chain](/figs/fig2-en.webp)
 
 ## The parts
 

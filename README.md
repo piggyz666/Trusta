@@ -75,15 +75,25 @@
 
 像配置开发环境一样：选择大模型、银行接口和渠道（网页 / 手机 H5 / 飞书），TRUSTA 根据实际接入且验证通过的能力决定哪些功能可用。没开通的功能，助手看不到也调用不了，功能页会告诉你需要接什么接口。
 
-## 快速开始（Windows）
+## 快速开始
 
-需要 Python 3.11+。
+**一行命令安装**（自动下载、创建独立虚拟环境、安装依赖并打开配置向导）：
+
+```powershell
+irm https://raw.githubusercontent.com/piggyz666/Trusta/main/install.ps1 | iex      # Windows PowerShell
+```
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/piggyz666/Trusta/main/install.sh | bash   # macOS / Linux
+```
+
+**从源码运行**（需要 Python 3.11+）：
 
 ```powershell
 python -m pip install -r requirements.txt
 python -m pip install -r requirements-channels.txt   # 可选：飞书、手机配对二维码
 python -m scripts.setup                              # 配置向导：大模型、访问方式、飞书
-.\start.ps1
+.\start.ps1                                          # macOS / Linux：./start.sh；Windows 也可双击 TRUSTA.cmd
 ```
 
 用窗口里打印的 `http://127.0.0.1:8000/#token=…` 链接打开网页。不配置大模型也能用，此时使用规则引擎，只认标准说法。
@@ -91,6 +101,8 @@ python -m scripts.setup                              # 配置向导：大模型�
 **手机 H5**：在配置向导里把访问方式设为“局域网”，重启后在网页“设置 → 访问与设备”生成配对码，手机连同一 Wi-Fi 扫码即可；可“添加到主屏幕”全屏使用。
 
 **飞书**：向导里填飞书应用凭据（长连接，不需要公网地址），然后 `python -m scripts.pair --feishu` 生成绑定码，在飞书里发给机器人。黄色操作可在飞书内确认，红色操作会引导回 APP 验证。
+
+完整文档（安装、配置、授权等级、可信机制、API）在网站的 `/docs.html`，源文件在 `frontend-app/src/docs/content/`。
 
 ## 项目结构
 

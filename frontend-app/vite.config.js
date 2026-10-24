@@ -7,6 +7,6 @@ export default defineConfig({
   plugins: [react()],
   base: "/",
   build: { outDir: "../frontend/dist", emptyOutDir: true, assetsInlineLimit: 0, sourcemap: false,
-    rollupOptions: { input: { main: "index.html", intro: "intro.html" } } },
+    rollupOptions: { input: { main: "index.html", intro: "intro.html", docs: "docs.html" } } },
   server: { port: 5173, proxy: { "/api": "http://127.0.0.1:8000", "/health": "http://127.0.0.1:8000" } },
 });

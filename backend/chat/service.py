@@ -254,6 +254,20 @@ class ChatService(AutomationMixin):
                        "tools": [], "error": code}
         return self._finish(body, owner, message_id, outcome, emit)
 
+    @staticmethod
+    def _smart_title(body, cards):
+        """After the first exchange, name the conversation by what it did ("转账给 张三 · ¥500.00"), not by the
+        customer's raw words; a title the customer set themselves is never touched."""
+        if not body.get("title_auto") or sum(1 for m in body["messages"] if m["role"] == "user") != 1:
+            return
+        card = next((c for c in cards if c.get("title") and c.get("type") in {"confirm", "report", "risk_alert", "automation_confirm", "knowledge"}), None)
+        if not card:
+            return
+        amount = next((f["value"] for f in card.get("fields") or [] if f.get("label") == "金额"), None)
+        title = card["title"] + (f" · {amount}" if amount else "")
+        body["title"] = " ".join(title.split())[:28]
+        body["title_auto"] = False
+
     def _finish(self, body, owner, message_id, outcome, emit):
         reply = {"text": outcome["text"], "cards": outcome["cards"]}
         body["messages"].append({"role": "assistant", "message_id": message_id, "text": outcome["text"],
@@ -267,6 +281,7 @@ class ChatService(AutomationMixin):
         if outcome.get("fallback_reason"):
             turn["fallback_reason"] = outcome["fallback_reason"]
         body["turns"][message_id]["response"] = turn
+        self._smart_title(body, outcome["cards"])
         if outcome.get("trace"):
             # The full decision chain lives with the session; its hash is anchored in the append-only audit chain.
             trace = outcome["trace"] | {"message_id": message_id, "at": time.time()}

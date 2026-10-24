@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api, explain } from "../api.js";
 import { Drawer, Tag, useToast } from "../components/ui.jsx";
+import { bankName } from "../format.js";
 
 const EXAMPLES = {
   transfer: ["给张三转500元", "每月1号给房东转3000"], payee_add: ["新增收款人李四，尾号6688"], split: ["昨晚聚餐600，我和张三李四AA"],
@@ -41,14 +42,14 @@ export default function Features({ capabilities, refresh, ask, navigate }) {
           <h1>功能</h1>
           <p>能用哪些功能，取决于你接入的大模型、银行接口和渠道。关掉的功能，助手看不到也调用不了；灰色的开关点一下会告诉你需要接什么。</p>
         </header>
-        <div className="grid-3">
+        <div className="grid-3 stats">
           <div className="panel"><div className="stat-label">可用</div><div className="stat-value num">{sum.AVAILABLE + sum.DEGRADED}</div></div>
           <div className="panel"><div className="stat-label">已关闭</div><div className="stat-value num">{sum.OFF}</div></div>
           <div className="panel"><div className="stat-label">未开通</div><div className="stat-value num">{sum.UNAVAILABLE}</div></div>
         </div>
         <div className="panel" style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center", fontSize: 14 }}>
           <span><span className="muted">大模型</span> {capabilities.llm.model || "未接入（规则模式）"}</span>
-          <span><span className="muted">银行</span> {capabilities.bank.provider || "—"}{capabilities.bank.environment ? `（${capabilities.bank.environment}）` : ""}</span>
+          <span><span className="muted">银行</span> {bankName(capabilities.bank)}</span>
           <span><span className="muted">渠道</span> {["网页 / H5", ...(capabilities.channels?.feishu ? ["飞书"] : [])].join("、")}</span>
           <span className="spacer" style={{ flex: 1 }} />
           <button className="btn small" onClick={() => navigate("settings", { tab: "model" })}>更改接入</button>

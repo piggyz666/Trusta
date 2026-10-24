@@ -2,7 +2,7 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { api, auth, explain } from "../api.js";
 import { Tag, useToast } from "../components/ui.jsx";
-import { dateTime, yuan } from "../format.js";
+import { bankName, dateTime, yuan } from "../format.js";
 
 const TABS = [["account", "账户"], ["model", "模型与接口"], ["access", "访问与设备"], ["feishu", "飞书"], ["security", "安全"],
   ["rules", "联动规则"], ["privacy", "隐私与审计"], ["appearance", "外观"], ["about", "关于"]];
@@ -110,7 +110,7 @@ function Model({ data, reload, refresh, toast }) {
       <Row label="今日调用" hint={`每个账户每天最多 ${data.llm.daily_call_limit} 次，超出后自动改用规则引擎`}>
         <span className="num">{usage?.calls ?? 0} 次</span></Row>
       <Row label="银行接口" hint={`${data.bank.tools.length} 个银行能力${data.bank.config_file ? " · 来自银行配置文件" : ""}`}>
-        <span>{data.bank.provider || "—"} {data.bank.environment && <Tag tone="neutral">{data.bank.environment}</Tag>}</span></Row>
+        <span>{bankName(data.bank)}</span></Row>
       <Row label="连通性检测" hint="依次检测大模型、银行接口、飞书；检测结果决定功能页里哪些功能亮起">
         <button className="btn small" disabled={!!busy} onClick={probe}>{busy === "probe" ? "检测中…" : "重新检测"}</button></Row>
       {Object.keys(probes).length > 0 && (

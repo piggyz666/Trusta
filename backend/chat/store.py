@@ -107,6 +107,7 @@ class ChatStore:
             body["messages"].append({"role": "user", "message_id": message_id, "text": text, "at": now})
             if not body.get("title"):
                 body["title"] = " ".join(text.split())[:24]
+                body["title_auto"] = True
             self._write(conn, body, bump=False)
             return body, None
 
@@ -132,6 +133,7 @@ class ChatStore:
         with self.db.transaction() as conn:
             body = self._row(conn, session_id, owner)
             body["title"] = " ".join(title.split())
+            body["title_auto"] = False
             self._write(conn, body, bump=True)
         return {"session_id": session_id, "title": body["title"]}
 

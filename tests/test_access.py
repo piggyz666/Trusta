@@ -222,3 +222,16 @@ class ProseOfferTests(Base):
         self.assertEqual([c["action_type"] for c in turn["reply"]["cards"] if c["type"] == "confirm"], ["CARD_REPORT_LOST"])
         turn = chat.send(session["session_id"], "demo", "p2", turn["revision"], "信息呢")
         self.assertNotIn("准备挂失", turn["reply"]["text"])
+
+
+class FeishuAppLinkTests(FeishuLongConnectionTests):
+    mode = "lan"
+    def test_red_action_link_points_at_a_reachable_address_and_the_conversation(self):
+        link = self.channel.app_link("cs_abc12345")
+        # Base runs in LAN mode: the phone gets this computer's LAN address, not the loopback default
+        self.assertEqual(link, self.access.urls(8000)["lan"] + "?s=cs_abc12345")
+        card = self.channel.confirm_card("cs_abc12345", {"risk_level": "RED", "title": "挂失卡片", "fields": [{"label": "卡片", "value": "借记卡"}],
+                                                         "action_id": "a", "action_hash": "h"})
+        self.assertIn("?s=cs_abc12345", json.dumps(card, ensure_ascii=False))
+        self.channel.config.app_url = "https://bank.example.com"
+        self.assertEqual(self.channel.app_link("cs_abc12345"), "https://bank.example.com/?s=cs_abc12345")

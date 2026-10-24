@@ -66,7 +66,7 @@ class FrontendApiTests(unittest.TestCase):
         self.approve(sid, self.turn(sid, "给张三转500")["reply"]["cards"][0])
         self.approve(sid, self.turn(sid, "冻结卡")["reply"]["cards"][0])
         sessions = self.request("/api/chat/sessions")[1]["sessions"]
-        self.assertEqual([s["title"] for s in sessions], ["给张三转500"])
+        self.assertEqual([s["title"] for s in sessions], ["转账给 张三 · ¥500.00"])  # named by what it did
         items = self.request("/api/chat/activity")[1]["items"]
         kinds = {i["kind"]: i for i in items}
         self.assertEqual(kinds["transfer"]["amount_minor"], 50000)

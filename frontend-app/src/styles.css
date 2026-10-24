@@ -560,3 +560,10 @@ html { background: var(--edge); }
 /* light theme: the mark sits on its own dark tile (the ribbon's shaded inner faces need the dark ground) */
 :root[data-theme="light"] .hero-mark { content: url(/mark-tile.png); border-radius: 24px; width: 96px; height: 96px; filter: drop-shadow(0 14px 26px rgba(20, 70, 80, .35)); }
 :root[data-theme="light"] .brand-mark, :root[data-theme="light"] .msg-ai .avatar { content: url(/mark-tile.png); border-radius: 8px; filter: none; }
+:root[data-theme="light"] .sources .evidence { color: var(--accent-solid); border-color: rgba(31, 143, 179, .35); }
+:root[data-theme="light"] .sources span { border-color: rgba(20, 60, 70, .14); }
+@media (max-width: 880px) {
+  .grid-3.stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .grid-3.stats .panel { padding: 12px 14px; }
+  .grid-3.stats .stat-value { font-size: 22px; }
+}

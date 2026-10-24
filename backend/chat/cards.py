@@ -402,6 +402,12 @@ class CardRenderer:
             top = result["top_merchants"][0]
             text += f"，花得最多的是{top['merchant']} {format_cents(top['net_spend'])}"
         comparison = result.get("comparison")
+        if result["summary"]["settled_count"] == 0 and comparison and comparison["previous_net_spend"] > 0:
+            # nothing posted yet this period (e.g. the first days of a month): say so plainly and show the last one
+            previous = "、".join(comparison["previous_months"])
+            text = (f"{period}{scope}还没有已入账的消费。上一期（{previous}）共消费 {format_cents(comparison['previous_net_spend'])}，"
+                    "可以说“上个月花了多少”看明细")
+            return card, text + "。"
         if comparison and comparison["previous_net_spend"] > 0:
             change = comparison["net_change"]
             text += f"；比之前同样长的时段{'多' if change > 0 else '少'}花了 {format_cents(abs(change))}"

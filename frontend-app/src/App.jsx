@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { api, auth, bootstrapAuth, explain } from "./api.js";
+import { bankName } from "./format.js";
 import Sidebar from "./components/Sidebar.jsx";
 import Backdrop from "./components/Backdrop.jsx";
 import { EvidenceDrawer, ProofDrawer, TraceDrawer } from "./components/Trace.jsx";
@@ -13,6 +14,9 @@ const Settings = lazy(loaders[2]);
 // fetch the other pages' code while idle so switching never waits on a download
 (window.requestIdleCallback || ((f) => setTimeout(f, 1200)))(() => loaders.forEach((l) => l()));
 
+// "?s=<session>" opens that conversation (used by the Feishu "去 APP 验证" button for red actions)
+const linkedSession = (() => { const v = new URLSearchParams(location.search).get("s"); return v && /^[A-Za-z0-9_-]{8,64}$/.test(v) ? v : null; })();
+if (linkedSession) history.replaceState(null, "", location.pathname + location.hash);
 const boot = bootstrapAuth();
 const TITLES = { overview: "资金总览", features: "功能", settings: "设置" };
 
@@ -26,7 +30,7 @@ export default function App() {
   const toast = useToast();
   const [authed, setAuthed] = useState(!!auth.token());
   const [route, setRoute] = useState(readRoute);
-  const [sessionId, setSessionId] = useState(null);
+  const [sessionId, setSessionId] = useState(linkedSession);
   const [sessions, setSessions] = useState([]);
   const [capabilities, setCapabilities] = useState(null);
   const [railOpen, setRailOpen] = useState(false);
@@ -69,7 +73,7 @@ export default function App() {
   const llm = capabilities?.llm;
   const status = !capabilities ? { text: "连接中…" }
     : llm?.state === "NOT_CONFIGURED" ? { text: "规则模式 · 未接入大模型", warn: true }
-    : { text: `${capabilities.bank?.environment === "sandbox" || !capabilities.bank?.provider ? "演示银行" : capabilities.bank.provider} · ${llm?.model || "大模型"}` };
+    : { text: `${bankName(capabilities.bank)} · ${llm?.model || "大模型"}` };
   const current = sessions.find((s) => s.session_id === sessionId);
   const title = route === "chat" ? (current?.title || "") : TITLES[route];
 

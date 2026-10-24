@@ -46,7 +46,7 @@ class FeishuConfig:
                 bindings[open_id.strip()] = owner.strip()
         return cls(os.environ.get("FEISHU_APP_ID", ""), os.environ.get("FEISHU_APP_SECRET", ""),
                    os.environ.get("FEISHU_VERIFICATION_TOKEN", ""), os.environ.get("FEISHU_ENCRYPT_KEY", ""), bindings,
-                   os.environ.get("TRUSTA_APP_URL", "http://127.0.0.1:8000/"), os.environ.get("FEISHU_MODE") or None)
+                   os.environ.get("TRUSTA_APP_URL", ""), os.environ.get("FEISHU_MODE") or None)
 
     @property
     def enabled(self):
@@ -192,8 +192,18 @@ class FeishuChannel:
         from backend.access import AccessControl
         access = getattr(self.s, "access", None)
         if access is None:
-            access = self.s.access = AccessControl(self.s, mode="local")
+            access = self.s.access = AccessControl(self.s)  # same TRUSTA_ACCESS_MODE / TRUSTA_PUBLIC_HOST as the server
         return access
+
+    def app_link(self, session_id=None):
+        """Where "去 APP 验证" goes: an explicit TRUSTA_APP_URL, else the address a phone can actually reach
+        (tunnel → public host, LAN → this computer's LAN address), opening the very conversation that holds the card."""
+        base = self.config.app_url
+        if not base:
+            urls = self._access().urls(int(os.environ.get("TRUSTA_PORT", "8000")))
+            base = urls.get("public") or urls.get("lan") or urls["local"]
+        base = base if base.endswith("/") else base + "/"
+        return base + (f"?s={session_id}" if session_id else "")
 
     def _owner(self, open_id):
         return self.config.bindings.get(open_id) or (self._access().channel_owner("feishu", open_id) if open_id else None)
@@ -274,7 +284,7 @@ class FeishuChannel:
         if red:
             elements.append({"tag": "markdown", "content": "🔒 该操作属于高风险操作，需要在 APP 中完成动态码 / 短信验证，飞书内无法直接确认。"})
             elements.append({"tag": "action", "actions": [{"tag": "button", "type": "primary", "text": {"tag": "plain_text", "content": "去 APP 验证"},
-                                                           "url": self.config.app_url}]})
+                                                           "url": self.app_link(session_id)}]})
         else:
             value = {"session_id": session_id, "action_id": card["action_id"], "action_hash": card["action_hash"]}
             elements.append({"tag": "action", "actions": [

@@ -48,3 +48,11 @@ export const TIER = {
 };
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+
+// bank adapter → a name a customer understands
+export const bankName = (bank) => {
+  if (!bank?.provider) return "未配置";
+  if (bank.provider === "virtual" || bank.environment === "local") return "本地演示银行";
+  if (bank.environment === "sandbox") return `${bank.provider}（沙箱）`;
+  return bank.provider;
+};

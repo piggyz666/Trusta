@@ -63,7 +63,6 @@ export function Nav({ c, lang, setLang, theme, toggleTheme }) {
       <nav aria-label={lang === "zh" ? "页面导航" : "Site"}>
         <a className="wide" href="#product">{c.nav.product}</a>
         <a className="wide" href="#trust">{c.nav.trust}</a>
-        <a className="wide" href="#integrations">{c.nav.integrations}</a>
         <a className="wide" href="#install">{c.nav.install}</a>
         <a href={DOCS}>{c.nav.docs}</a>
         <a className="icon" href={GITHUB} aria-label="GitHub"><GitHubIcon /></a>
@@ -328,37 +327,6 @@ export function Numbers({ c }) {
         </Reveal>
         <Reveal as="p" className="num-note">{n.note}</Reveal>
       </div>
-    </section>
-  );
-}
-
-// ---------------------------------------------------------------- integrations ----
-export function Integrations({ c }) {
-  const g = c.integrations;
-  const label = Object.fromEntries(g.legend);
-  return (
-    <section id="integrations" className="integrations wrap" aria-labelledby="int-title">
-      <Reveal as="p" className="kicker">{g.kicker}</Reveal>
-      <Reveal as="h2" id="int-title" className="h2" delay={60}>{g.title}</Reveal>
-      <Reveal as="p" className="lede" delay={120}>{g.lead}</Reveal>
-      <Reveal className="int-stats" delay={160}>
-        {g.stats.map(([n, l]) => <div key={l}><b>{n}</b><span>{l}</span></div>)}
-      </Reveal>
-      <div className="int-legend">{g.legend.map(([k, l]) => <span key={k} className={`st ${k}`}>{l}</span>)}</div>
-      {g.groups.map(([name, sub, items]) => (
-        <div key={name} className="int-group">
-          <Reveal className="int-head"><h3>{name}</h3><p>{sub}</p></Reveal>
-          <div className="int-grid">
-            {items.map(([mark, title, desc, st], i) => (
-              <Reveal key={title} className="int-card" delay={(i % 4) * 50}>
-                <span className="mark" aria-hidden="true">{mark}</span>
-                <div><h4>{title}</h4><p>{desc}</p><span className={`st ${st}`}>{label[st]}</span></div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      ))}
-      <Reveal as="a" className="more" href={`${DOCS}#/integrations`}>{g.more} →</Reveal>
     </section>
   );
 }

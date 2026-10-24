@@ -1,7 +1,7 @@
 // Landing page copy, Chinese and English. Facts come from the README, docs/ and the benchmark files.
 export const COPY = {
   zh: {
-    nav: { product: "产品", trust: "可信机制", integrations: "集成", install: "安装", docs: "文档", lang: "EN", langLabel: "Switch to English", theme: "切换深浅色" },
+    nav: { product: "产品", trust: "可信机制", install: "安装", docs: "文档", lang: "EN", langLabel: "Switch to English", theme: "切换深浅色" },
     hero: {
       tags: ["运行在你自己的电脑上", "多 Agent 签名通信", "每笔操作由你授权"],
       start: "开始使用", docs: "阅读文档", github: "GitHub", hint: "移动鼠标，划过这个词",
@@ -100,50 +100,6 @@ export const COPY = {
       rerun: "自己重跑一遍",
       note: "受控的本地实验，不是生产环境渗透测试；原始数据在仓库的 docs/phase5-security-benchmark.json。",
     },
-    integrations: {
-      kicker: "集成",
-      title: "接到你已经在用的渠道、模型、银行和链上。",
-      lead: "TRUSTA 不是一个封闭的聊天框：同一套可信执行链，可以从网页、手机、飞书或你自己的程序进来，接不同的大模型和银行，并把证据锚定到区块链上。下面只列真实接通的，并注明验证程度。",
-      stats: [["5", "个接入渠道"], ["5", "家大模型真实调用"], ["3", "种银行后端"], ["2", "条区块链实测"]],
-      legend: [["live", "已实测"], ["local", "本地测试"], ["builtin", "内置"]],
-      groups: [
-        ["渠道", "同一个会话服务，多个入口", [
-          ["W", "网页", "桌面浏览器打开，交互卡片、总览、设置", "live"],
-          ["H5", "手机 H5", "局域网扫码配对，可添加到主屏幕全屏使用", "live"],
-          ["飞", "飞书机器人", "长连接免公网；黄色操作卡片内确认", "live"],
-          [">_", "终端对话", "chat_cli：在命令行里对话、确认、看决策链", "live"],
-          ["{}", "HTTP API", "REST + SSE 流式，可接你自己的界面", "live"],
-        ]],
-        ["大模型", "模型只能提议；换模型不改变安全边界", [
-          ["D", "DeepSeek", "对话层默认模型（deepseek-flash）", "live"],
-          ["≈", "OpenAI 兼容接口", "填接口地址和模型名即可接入对话层", "builtin"],
-          ["K", "Kimi", "kimi-k2.6，统一评测中真实调用", "live"],
-          ["Mi", "MiMo", "mimo-v2.6-flash，统一评测中真实调用", "live"],
-          ["G", "Gemini", "gemini-3.1-flash-lite，评测中在本地银行完成转账闭环", "live"],
-          ["Z", "GLM", "glm-4-flash，统一评测中真实调用", "live"],
-          ["R", "规则引擎", "不接模型也能用，只认标准说法", "builtin"],
-        ]],
-        ["银行", "按真实能力点亮功能", [
-          ["V", "本地虚拟银行", "六大场景全部可用，含入账推送；数据虚构", "builtin"],
-          ["Re", "Revolut 沙箱", "官方沙箱：真实账户与交易读回，一笔逐笔授权的付款", "live"],
-          ["St", "Starling", "适配器与请求签名，通过本地协议测试", "local"],
-        ]],
-        ["可信基础设施", "身份、证明与锚定", [
-          ["P", "ECDSA P-256", "每个 Agent 独立密钥，签名每条消息", "builtin"],
-          ["F", "FISCO BCOS + WeID", "联盟链身份与 CollaborationAnchor 合约", "live"],
-          ["zk", "Groth16", "零知识能力准入证明，真实生成与验证", "live"],
-          ["Ξ", "以太坊 Sepolia", "审计根上公链，公开测试网验收通过", "live"],
-          ["M", "MetaMask", "钱包本机签署，私钥不离开钱包", "live"],
-        ]],
-        ["网络与自动化", "什么时候、在哪里替你做事", [
-          ["L", "局域网配对", "一次性配对码，每台设备独立令牌，可吊销", "live"],
-          ["T", "Cloudflare Tunnel", "已有隧道时可公网访问", "builtin"],
-          ["→", "自动化规则", "5 类触发 × 7 类动作，资金动作仍逐笔确认", "builtin"],
-          ["⏱", "定时计划", "生日下单、周期转账，到点再请你确认", "builtin"],
-        ]],
-      ],
-      more: "查看集成文档",
-    },
     install: {
       kicker: "快速开始",
       title: "在你自己的电脑上，几分钟跑起来。",
@@ -182,7 +138,7 @@ export const COPY = {
   },
 
   en: {
-    nav: { product: "Product", trust: "Trust", integrations: "Integrations", install: "Install", docs: "Docs", lang: "中文", langLabel: "切换到中文", theme: "Toggle light / dark" },
+    nav: { product: "Product", trust: "Trust", install: "Install", docs: "Docs", lang: "中文", langLabel: "切换到中文", theme: "Toggle light / dark" },
     hero: {
       tags: ["Runs on your machine", "Signed agent-to-agent messages", "You authorise every action"],
       start: "Get started", docs: "Read the docs", github: "GitHub", hint: "Move across the word",
@@ -280,50 +236,6 @@ export const COPY = {
       ],
       rerun: "Run it yourself",
       note: "A controlled local experiment, not a production penetration test; raw data in docs/phase5-security-benchmark.json in the repository.",
-    },
-    integrations: {
-      kicker: "Integrations",
-      title: "Plugs into the channels, models, banks and chains you already use.",
-      lead: "TRUSTA isn't a closed chat box: one trusted execution chain, reachable from the web, your phone, Feishu or your own program, connected to different models and banks, with evidence anchored on chain. Only real, working integrations are listed, with how far each was verified.",
-      stats: [["5", "channels"], ["5", "models really called"], ["3", "bank back-ends"], ["2", "chains tested"]],
-      legend: [["live", "Tested live"], ["local", "Local tests"], ["builtin", "Built in"]],
-      groups: [
-        ["Channels", "One conversation service, many entry points", [
-          ["W", "Web", "Desktop browser: interactive cards, overview, settings", "live"],
-          ["H5", "Phone", "Pair once by QR on your network; add to home screen", "live"],
-          ["飞", "Feishu bot", "Persistent connection, no public URL; confirm yellow actions in-card", "live"],
-          [">_", "Terminal", "chat_cli: chat, confirm and inspect the decision chain", "live"],
-          ["{}", "HTTP API", "REST + SSE streaming for your own interface", "live"],
-        ]],
-        ["Models", "Models only propose; switching models doesn't move the safety line", [
-          ["D", "DeepSeek", "Default model for conversations (deepseek-flash)", "live"],
-          ["≈", "OpenAI-compatible", "Any endpoint and model name for the conversation layer", "builtin"],
-          ["K", "Kimi", "kimi-k2.6, really called in the shared evaluation", "live"],
-          ["Mi", "MiMo", "mimo-v2.6-flash, really called in the shared evaluation", "live"],
-          ["G", "Gemini", "gemini-3.1-flash-lite, completed a transfer end to end on the local bank in evaluation", "live"],
-          ["Z", "GLM", "glm-4-flash, really called in the shared evaluation", "live"],
-          ["R", "Rule engine", "Works with no model; understands standard phrasings", "builtin"],
-        ]],
-        ["Banks", "Features light up from real capabilities", [
-          ["V", "Local virtual bank", "All six scenarios incl. incoming-payment push; fictional data", "builtin"],
-          ["Re", "Revolut sandbox", "Official sandbox: real accounts and transactions read back, one individually authorised payment", "live"],
-          ["St", "Starling", "Adapter and request signing, passing local protocol tests", "local"],
-        ]],
-        ["Trust infrastructure", "Identity, proofs and anchoring", [
-          ["P", "ECDSA P-256", "A key per agent, signing every message", "builtin"],
-          ["F", "FISCO BCOS + WeID", "Consortium-chain identity and the CollaborationAnchor contract", "live"],
-          ["zk", "Groth16", "Zero-knowledge admission proofs, really generated and verified", "live"],
-          ["Ξ", "Ethereum Sepolia", "Audit roots on a public chain; testnet acceptance passed", "live"],
-          ["M", "MetaMask", "Signed in the wallet; the key never leaves it", "live"],
-        ]],
-        ["Network & automation", "When and where it acts for you", [
-          ["L", "LAN pairing", "One-time codes, a token per device, revocable", "live"],
-          ["T", "Cloudflare Tunnel", "Public access if you already run a tunnel", "builtin"],
-          ["→", "Automation rules", "5 triggers × 7 actions; money still needs each confirmation", "builtin"],
-          ["⏱", "Scheduled plans", "Birthday orders, recurring transfers, confirmed when due", "builtin"],
-        ]],
-      ],
-      more: "Read the integrations guide",
     },
     install: {
       kicker: "Quick start",

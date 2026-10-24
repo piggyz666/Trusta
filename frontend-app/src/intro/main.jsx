@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import Hero from "./Hero.jsx";
-import { Footer, Install, Integrations, Nav, Numbers, Product, Statement, Trust } from "./Sections.jsx";
+import { Footer, Install, Nav, Numbers, Product, Statement, Trust } from "./Sections.jsx";
 import { COPY } from "./copy.js";
 import { useLang } from "../site/lang.js";
 import { applyTheme, currentTheme, useTheme } from "../site/theme.js";
@@ -22,7 +22,6 @@ function Page() {
         <Product c={c} />
         <Trust c={c} />
         <Numbers c={c} />
-        <Integrations c={c} />
         <Install c={c} />
       </main>
       <Footer c={c} />

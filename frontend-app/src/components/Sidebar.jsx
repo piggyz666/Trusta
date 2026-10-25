@@ -3,7 +3,7 @@ import { api, explain } from "../api.js";
 import { chatBucket } from "../format.js";
 import { Icon, useToast } from "./ui.jsx";
 
-const NAV = [["chat", "对话", "chat"], ["overview", "资金总览", "ledger"], ["bills", "账单与订阅", "subscription"], ["wealth", "理财", "wealth"], ["features", "功能", "spark"], ["settings", "设置", "gear"]];
+const NAV = [["chat", "对话", "chat"], ["overview", "资金总览", "ledger"], ["bills", "账单与订阅", "subscription"], ["wealth", "理财", "wealth"], ["life", "生活服务", "ticket"], ["features", "功能", "spark"], ["settings", "设置", "gear"]];
 
 export default function Sidebar({ open, onClose, route, sessionId, sessions, onSelect, onNew, onNavigate, onChanged, status }) {
   const toast = useToast();

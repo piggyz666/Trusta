@@ -94,6 +94,11 @@ class ChatService(AutomationMixin):
         view["suggestions"] = ["我这个月花了多少钱", "给张三转500元", "我的卡丢了", "帮我看看有哪些订阅"]
         return view
 
+    @staticmethod
+    def _life_context(body):
+        context = body.get("life_context")
+        return context if context and time.time() - context["at"] < 600 else None
+
     def view(self, body):
         return {"session_id": body["session_id"], "revision": body["revision"], "state": self._state(body),
                 "title": body.get("title") or "新对话", "active": not body["closed"] and body["expires_at"] > time.time(),
@@ -379,6 +384,10 @@ class ChatService(AutomationMixin):
                 if calls is None:
                     rule_text = text
                     calls = rule_calls(text, catalog, payee) or None
+                if calls is None and self._life_context(body):
+                    from backend.chat import life
+                    if life.adds_detail(text):  # “从上海出发” after “下周六飞往三亚”
+                        calls = [{"name": "life_service", "arguments": {"category": self._life_context(body)["category"]}}]
             if calls is None and not steps:
                 steps, clarifications = self._rule_steps(body, text, catalog)
             if calls is None:
@@ -462,6 +471,22 @@ class ChatService(AutomationMixin):
                 cards.append({"type": "knowledge", "card_id": "c_kb_" + uid()[:8], "topic": args["topic"],
                               "title": knowledge.TITLES[args["topic"]], "text": answer, "sources": sources})
                 texts.append(answer)
+            elif name == "life_service":
+                from backend.chat import life
+                result = life.understand(text)
+                context = self._life_context(body)
+                if context and (not result or not result[0]["complete"]) and life.adds_detail(text):
+                    result = life.understand(context["text"] + "，" + text) or result
+                    merged = context["text"] + "，" + text
+                else:
+                    merged = text
+                if not result:
+                    result = life.homes_card(args["category"])
+                card, said = result
+                card["card_id"] = "c_life_" + uid()[:8]
+                cards.append(card)
+                texts.append(said)
+                body["life_context"] = None if card["complete"] else {"text": merged, "category": card["category"], "at": time.time()}
             elif name == "navigate":
                 from backend.chat import knowledge
                 cards.append(knowledge.navigate_card(args["page"], "c_nav_" + uid()[:8]))
@@ -799,7 +824,7 @@ class ChatService(AutomationMixin):
             # The model answered in prose although the request is actionable ("我的卡丢了怎么办" → "需要我帮你挂失吗？").
             # Prose never authorises or prepares anything, so prefer the deterministic grammar when it recognises an action.
             from backend.chat.rules import rule_calls
-            actionable = [c for c in rule_calls(text, catalog) if c["name"] not in {"smalltalk", "ask_user", "knowledge", "navigate"}]
+            actionable = [c for c in rule_calls(text, catalog) if c["name"] not in {"smalltalk", "ask_user", "knowledge", "navigate", "life_service"}]
             if actionable:
                 return actionable
             # Plain model text is shown only when it carries no numbers it could have invented and does not

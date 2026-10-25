@@ -19,7 +19,7 @@ TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=u
          ".svg": "image/svg+xml", ".woff2": "font/woff2", ".woff": "font/woff", ".png": "image/png", ".ico": "image/x-icon",
          ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json",
          ".mp4": "video/mp4", ".webm": "video/webm", ".jpg": "image/jpeg", ".webp": "image/webp"}
-SPA_ROUTES = {"/", "/overview", "/bills", "/wealth", "/features", "/settings"}
+SPA_ROUTES = {"/", "/overview", "/bills", "/wealth", "/life", "/features", "/settings"}
 
 
 def serve_static(path):

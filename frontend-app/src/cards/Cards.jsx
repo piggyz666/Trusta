@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { api, explain } from "../api.js";
 import { Bars, Columns, Donut } from "../components/Charts.jsx";
 import { Icon, Tag, useToast } from "../components/ui.jsx";
 import { TIER, dateOnly, dateTime, yuan } from "../format.js";
+import { safeLink } from "../life.js";
 
 // Every card is interactive, but anything that changes money or account state is turned into a *message* (so it goes
 // through understanding → proposal → confirmation card) or a decision on an existing card. No card executes by itself.
@@ -19,6 +20,7 @@ export function Card({ card, ctx }) {
     case "risk_alert": return <RiskCard card={card} ctx={ctx} />;
     case "knowledge": return <KnowledgeCard card={card} ctx={ctx} />;
     case "navigate": return <NavigateCard card={card} ctx={ctx} />;
+    case "life": return <LifeCard card={card} />;
     case "questionnaire": return <QuestionnaireCard card={card} ctx={ctx} />;
     case "automation_confirm": return <RuleCard card={card} ctx={ctx} />;
     case "handoff": return <HandoffCard card={card} />;
@@ -442,8 +444,27 @@ function KnowledgeCard({ card, ctx }) {
   );
 }
 
-const PAGE_ROUTES = { transfer: "chat", payees: "overview", bills: "bills", wealth: "wealth", cards: "overview", subscriptions: "bills",
+const PAGE_ROUTES = { life: "life", transfer: "chat", payees: "overview", bills: "bills", wealth: "wealth", cards: "overview", subscriptions: "bills",
   wish_funds: "overview", security: "settings", audit: "overview" };
+
+function LifeCard({ card }) {
+  const links = card.links.filter((l) => safeLink(l.url));
+  return (
+    <article className="card life-card">
+      <div className="card-head"><h3>{card.title}</h3><Tag tone="neutral">跳转第三方</Tag></div>
+      <div className="card-body">
+        {card.fields.length > 0 && <dl className="fields">{card.fields.map((f) => <Fragment key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></Fragment>)}</dl>}
+        <div className="life-links">
+          {links.map((l, i) => (
+            <a key={l.url} className={`btn ${i === 0 && l.prefilled ? "primary" : "small"}`} href={l.url} target="_blank" rel="noopener noreferrer">
+              {l.prefilled ? "去查询 · " : ""}{l.label} ↗</a>
+          ))}
+        </div>
+        <span className="faint" style={{ fontSize: 12.5 }}>{card.note}</span>
+      </div>
+    </article>
+  );
+}
 
 function NavigateCard({ card, ctx }) {
   return <div><button className="btn" onClick={() => ctx.navigate(PAGE_ROUTES[card.page] || "overview")}>打开{card.title}</button> <span className="faint" style={{ fontSize: 13 }}>{card.note}</span></div>;

@@ -128,7 +128,7 @@ def answer(topic, config, irreversible=(), market=None, plan=None):
 
 
 # navigate: deep links into the APP, a fixed list. The model picks a page id; the link is built here.
-PAGES = {"transfer": "转账", "payees": "收款人管理", "bills": "账单与订阅", "wealth": "理财", "cards": "银行卡",
+PAGES = {"life": "生活服务", "transfer": "转账", "payees": "收款人管理", "bills": "账单与订阅", "wealth": "理财", "cards": "银行卡",
          "subscriptions": "账单与订阅", "wish_funds": "心愿金", "security": "安全设置", "audit": "操作记录"}
 
 

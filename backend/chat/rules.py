@@ -287,7 +287,7 @@ KNOWLEDGE_RULES = [
     (r"联动规则.{0,4}(怎么|如何|是什么)|(怎么|如何).{0,4}设置.{0,4}(规则|自动)", "AUTOMATION"),
     (r"(转账保护|冷静期).{0,4}(是什么|怎么|多久)", "PROTECTION"),
 ]
-PAGE_WORDS = {"转账": "transfer", "收款人": "payees", "账单": "bills", "理财": "wealth", "银行卡": "cards", "卡片": "cards",
+PAGE_WORDS = {"生活服务": "life", "生活": "life", "转账": "transfer", "收款人": "payees", "账单": "bills", "理财": "wealth", "银行卡": "cards", "卡片": "cards",
               "订阅": "subscriptions", "代扣": "subscriptions", "心愿金": "wish_funds", "安全设置": "security", "操作记录": "audit"}
 
 
@@ -309,7 +309,10 @@ def rule_calls(text, catalog, pending_payee=None):
     for pattern, topic in KNOWLEDGE_RULES:
         if re.search(pattern, text):
             return [_call("knowledge", topic=topic)]
-    page = re.search(r"(?:打开|进入|带我去|跳转到?)(转账|收款人|账单|理财|银行卡|卡片|订阅|代扣|心愿金|安全设置|操作记录)(?:页面?|页|界面)?$", text)
+    from backend.chat import life
+    if life.wants_life_service(text):
+        return [_call("life_service", category=life.category(text))]
+    page = re.search(r"(?:打开|进入|带我去|跳转到?)(生活服务|生活|转账|收款人|账单|理财|银行卡|卡片|订阅|代扣|心愿金|安全设置|操作记录)(?:页面?|页|界面)?$", text)
     if page:
         return [_call("navigate", page=PAGE_WORDS[page.group(1)])]
     calls = []

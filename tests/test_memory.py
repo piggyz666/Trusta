@@ -97,7 +97,7 @@ class MemoryTests(unittest.TestCase):
             db.execute("UPDATE risk_profiles SET risk_level=1 WHERE customer_id='demo'")
         task = self.s.create_task("推荐适合我的理财产品")
         self.assertEqual(task["result"]["customer_risk_level"], 1)
-        self.assertEqual([p["product_id"] for p in task["result"]["recommendations"]], ["sandbox-r1", "wp-r1-7d"])
+        self.assertEqual([p["product_id"] for p in task["result"]["recommendations"]], ["sandbox-r1", "wp-r1-mmf", "wp-r1-7d"])
         with self.s.db.transaction() as db:
             db.execute("DELETE FROM risk_profiles WHERE customer_id='demo'")
         blocked = self.s.create_task("推荐适合我的理财产品")

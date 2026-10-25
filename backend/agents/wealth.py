@@ -47,7 +47,13 @@ class WealthAgent:
                 raise Rejected("INVALID_PRODUCT_DATA")
             if product["active"] == 1 and product["currency"] == "CNY" and product["risk_level"] <= profile["risk_level"]:
                 suitable.append(product)
-        return sorted(suitable, key=lambda p: (p["risk_level"], p["term_days"], p["id"]))[:3]
+        ranked = sorted(suitable, key=lambda p: (p["risk_level"], p["term_days"], p["id"]))
+        # one per allowed risk level first (so a R2 customer also sees an R2 product), then fill by the same order
+        picked = []
+        for level in sorted({p["risk_level"] for p in ranked}):
+            picked.append(next(p for p in ranked if p["risk_level"] == level))
+        picked = picked[:3] + [p for p in ranked if p not in picked][:max(0, 3 - len(picked))]
+        return sorted(picked, key=lambda p: (p["risk_level"], p["term_days"], p["id"]))
 
     def explain(self, profile, matched):
         results = []
@@ -60,7 +66,7 @@ class WealthAgent:
                             "risk_note": product["risk_note"],
                             "evidence_refs": [f"bank:risk_profiles:{profile['customer_id']}", f"bank:wealth_products:{product['id']}"]})
         return {"customer_risk_level": profile["risk_level"], "recommendations": results,
-                "selection_basis": "按有效风险等级筛选在架CNY产品，按风险等级、持有期和产品ID排序；最多3项。",
+                "selection_basis": "按有效风险等级筛选在架CNY产品；每个可接受的风险等级先取一款（持有期短者优先），再按风险等级、持有期补足；最多3项。",
                 "limitations": "仅为虚构产品库的风险匹配演示，未评估预算与流动性需求，不保证收益。",
                 "message": "已生成只读推荐；未发起任何购买或赎回。" if results else "没有匹配当前风险等级的在架产品。",
                 "evidence_refs": [f"bank:risk_profiles:{profile['customer_id']}"] + [f"bank:wealth_products:{p['id']}" for p in matched]}

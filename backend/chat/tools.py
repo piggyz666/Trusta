@@ -202,14 +202,14 @@ TOOLS = {
     "knowledge": {"kind": "control",
                   "description": "用户询问银行规则或功能说明（不是要办理业务）：权限分级、转账限额、验证方式、确认卡有效期、"
                                  "哪些操作能撤销、心愿金是什么、冻结和挂失区别、理财适当性、AI 能看到什么数据、防诈骗、人工服务、联动规则怎么用、转账保护；"
-                                 "问金价、汇率行情选 MARKET_QUOTES；要求推荐具体股票、问买哪支股票选 NO_STOCK_PICKS（不荐个股）；不认识某笔周期扣费选 UNKNOWN_CHARGE；想开通音乐、视频等第三方会员选 THIRD_PARTY_MEMBERSHIP。"
+                                 "问金价、汇率行情选 MARKET_QUOTES；要求推荐具体股票、问买哪支股票选 NO_STOCK_PICKS（不荐个股）；不认识某笔周期扣费选 UNKNOWN_CHARGE；想开通音乐、视频等第三方会员选 THIRD_PARTY_MEMBERSHIP；要按自己的消费/收支情况做理财规划、资产配置、问闲钱怎么放选 WEALTH_PLAN。"
                                  "答案由系统按真实规则生成，你只选主题",
                   "parameters": {"topic": {"type": "string", "enum": ["PERMISSION_TIERS", "TRANSFER_LIMITS", "VERIFICATION",
                                                                       "CONFIRMATION_EXPIRY", "UNDO_POLICY", "WISH_FUND", "CARD_LOSS",
                                                                       "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD",
                                                                       "HUMAN_SUPPORT", "AUTOMATION", "PROTECTION",
                                                                       "NO_STOCK_PICKS", "MARKET_QUOTES", "UNKNOWN_CHARGE",
-                                                                      "THIRD_PARTY_MEMBERSHIP"]}},
+                                                                      "THIRD_PARTY_MEMBERSHIP", "WEALTH_PLAN"]}},
                   "required": ["topic"]},
     "navigate": {"kind": "control",
                  "description": "用户只想打开某个功能页面（“打开转账页面”“带我去理财”），不办理具体业务时使用",

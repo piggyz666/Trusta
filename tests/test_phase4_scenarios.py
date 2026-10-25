@@ -14,5 +14,5 @@ class Phase4Scenarios(unittest.TestCase):
         self.assertTrue(result["independent_proof_verification"])
         self.assertTrue(result["receipt_tampering_detected"])
         self.assertEqual(result["BILL_ANALYSIS"]["net_spend_cents"], 542500)
-        self.assertEqual(result["WEALTH_RECOMMENDATION"]["product_ids"], ["sandbox-r1", "wp-r1-7d", "sandbox-r2"])
+        self.assertEqual(result["WEALTH_RECOMMENDATION"]["product_ids"], ["sandbox-r1", "wp-r1-mmf", "wp-r2-shortbond"])
         self.assertFalse(result["blockchain_externally_verified"])

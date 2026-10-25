@@ -10,7 +10,7 @@ from backend.security.permission_matrix import MATRIX, TIERS
 
 TOPICS = ["PERMISSION_TIERS", "TRANSFER_LIMITS", "VERIFICATION", "CONFIRMATION_EXPIRY", "UNDO_POLICY",
           "WISH_FUND", "CARD_LOSS", "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD", "HUMAN_SUPPORT", "AUTOMATION", "PROTECTION",
-          "NO_STOCK_PICKS", "MARKET_QUOTES", "UNKNOWN_CHARGE", "THIRD_PARTY_MEMBERSHIP"]
+          "NO_STOCK_PICKS", "MARKET_QUOTES", "UNKNOWN_CHARGE", "THIRD_PARTY_MEMBERSHIP", "WEALTH_PLAN"]
 
 TITLES = {"PERMISSION_TIERS": "操作权限分级", "TRANSFER_LIMITS": "转账限额与风控", "VERIFICATION": "验证方式",
           "CONFIRMATION_EXPIRY": "确认卡有效期", "UNDO_POLICY": "哪些操作可以撤销", "WISH_FUND": "心愿金是什么",
@@ -18,7 +18,7 @@ TITLES = {"PERMISSION_TIERS": "操作权限分级", "TRANSFER_LIMITS": "转账�
           "ANTI_FRAUD": "防诈骗提示", "HUMAN_SUPPORT": "人工服务",
           "AUTOMATION": "联动规则怎么用", "PROTECTION": "转账保护（冷静期）",
           "NO_STOCK_PICKS": "为什么不推荐个股", "MARKET_QUOTES": "黄金与汇率行情", "UNKNOWN_CHARGE": "不认识的周期扣费怎么办",
-          "THIRD_PARTY_MEMBERSHIP": "开通第三方会员"}
+          "THIRD_PARTY_MEMBERSHIP": "开通第三方会员", "WEALTH_PLAN": "按你的消费做的理财配置"}
 
 REVERSIBLE = ["冻结 ↔ 解冻", "挂失 ↔ 解除挂失", "限额调整（改回原值）", "交易开关（恢复原设置）", "心愿金锁定（释放）", "理财申购 ↔ 赎回"]
 
@@ -27,9 +27,19 @@ def _src(label, ref, kind="RULE"):
     return {"label": label, "kind": kind, "ref": ref}
 
 
-def answer(topic, config, irreversible=(), market=None):
+def answer(topic, config, irreversible=(), market=None, plan=None):
     if topic not in TOPICS:
         raise KeyError(topic)
+    if topic == "WEALTH_PLAN":
+        if not plan:
+            return "需要先完成风险测评，我才能按你的情况做配置。可以说“做一下风险测评”。", []
+        lines = []
+        for b in plan["buckets"]:
+            items = "、".join(f"{i['name']}（{i['issuer']}，R{i['risk_level']}）{format_cents(i['amount_minor'])}" for i in b["items"])
+            lines.append(f"{b['name']} {format_cents(b['amount_minor'])}：{items}")
+        text = ("；".join(plan["reasons"]) + "。建议这样放：" + "；".join(lines) + "。"
+                + plan["note"] + "想买哪一款，打开“理财”页面点“去申购”，或直接对我说。")
+        return text, [_src("配置规则", "backend/chat/pages.py#plan"), _src("消费数据", "backend/agents/finance.py", "DATA")]
     if topic == "NO_STOCK_PICKS":
         text = ("我不推荐具体股票：荐股属于证券投资咨询，需要专门资质，银行助手也无法替你判断个股涨跌。"
                 "我能做的是按你的风险测评结果，从本行在售的理财、黄金积存、基金类产品里挑选合适的，并说明每款的期限、流动性和风险。"

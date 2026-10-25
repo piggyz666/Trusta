@@ -451,8 +451,14 @@ class ChatService(AutomationMixin):
             elif name == "knowledge":
                 from backend.chat import knowledge
                 from backend.chat.http import market as _market
+                plan = None
+                if args["topic"] == "WEALTH_PLAN":
+                    from backend.chat.pages import WealthPage
+                    plan = WealthPage(self, None).view(owner)["plan"]
                 answer, sources = knowledge.answer(args["topic"], self.s.config, [OPERATIONS.get(k, k) for k in self.IRREVERSIBLE],
-                                                   _market(self) if args["topic"] == "MARKET_QUOTES" else None)
+                                                   _market(self) if args["topic"] == "MARKET_QUOTES" else None, plan)
+                if args["topic"] == "WEALTH_PLAN" and plan:
+                    cards.append(knowledge.navigate_card("wealth", "c_nav_" + uid()[:8]))
                 cards.append({"type": "knowledge", "card_id": "c_kb_" + uid()[:8], "topic": args["topic"],
                               "title": knowledge.TITLES[args["topic"]], "text": answer, "sources": sources})
                 texts.append(answer)

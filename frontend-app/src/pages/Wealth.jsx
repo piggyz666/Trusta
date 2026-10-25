@@ -5,7 +5,72 @@ import { dateOnly, yuan } from "../format.js";
 
 let cache = null;
 const RISK_TONE = { 1: "green", 2: "green", 3: "amber", 4: "red", 5: "red" };
-const CATS = ["全部", "现金管理", "固定收益", "固收+", "黄金", "权益", "QDII"];
+const GROUP_ORDER = ["存款", "现金管理", "固收", "固收+", "黄金", "权益", "QDII"];
+const CURRENCIES = [["CNY", "人民币"], ["USD", "美元"], ["EUR", "欧元"], ["JPY", "日元"], ["HKD", "港币"]];
+
+// yuan per one unit of each currency, from the quote cards (JPY is quoted per 100)
+function ratesFrom(market) {
+  const r = { CNY: 1 };
+  for (const q of market.quotes) if (q.symbol.endsWith("CNY")) { const c = q.symbol.slice(0, 3); r[c] = c === "JPY" ? q.price / 100 : q.price; }
+  return r;
+}
+
+function Converter({ market }) {
+  const rates = ratesFrom(market);
+  const [amount, setAmount] = useState("1000");
+  const [from, setFrom] = useState("CNY");
+  const [to, setTo] = useState("USD");
+  const value = Number(amount) || 0;
+  const result = rates[from] && rates[to] ? (value * rates[from]) / rates[to] : null;
+  const unit = rates[from] && rates[to] ? rates[from] / rates[to] : null;
+  const fmt = (n) => n.toLocaleString("zh-CN", { maximumFractionDigits: n < 1 ? 6 : 2, minimumFractionDigits: 2 });
+  return (
+    <div className="panel converter">
+      <div className="conv-row">
+        <input className="input num" inputMode="decimal" aria-label="金额" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} />
+        <select className="input" aria-label="从" value={from} onChange={(e) => setFrom(e.target.value)}>
+          {CURRENCIES.map(([c, n]) => <option key={c} value={c}>{n} {c}</option>)}
+        </select>
+        <button className="btn small ghost swap" aria-label="交换" onClick={() => { setFrom(to); setTo(from); }}>⇄</button>
+        <select className="input" aria-label="换成" value={to} onChange={(e) => setTo(e.target.value)}>
+          {CURRENCIES.map(([c, n]) => <option key={c} value={c}>{n} {c}</option>)}
+        </select>
+        <div className="conv-result num">{result == null ? "—" : fmt(result)} <small>{to}</small></div>
+      </div>
+      <div className="faint conv-note">
+        {unit != null && <>1 {from} ≈ {fmt(unit)} {to} · </>}按上方参考汇率中间价换算，不是本行结售汇牌价；实际购汇、结汇以办理时的牌价为准。
+      </div>
+    </div>
+  );
+}
+
+function Plan({ plan, ask }) {
+  if (!plan) return null;
+  return (
+    <section className="section">
+      <h2>为你推荐 <span className="count">按你的余额和消费计算</span></h2>
+      <div className="panel plan">
+        <ul className="plan-why">{plan.reasons.map((r) => <li key={r}>{r}</li>)}</ul>
+        <div className="plan-buckets">
+          {plan.buckets.map((b) => (
+            <div key={b.name} className={`bucket b-${b.name}`}>
+              <div className="kv"><b>{b.name}</b><span className="num">{yuan(b.amount_minor)}</span></div>
+              <small className="faint">{b.label}</small>
+              {b.items.map((i) => (
+                <div key={i.product_id} className="bucket-item">
+                  <span className="grow"><b>{i.name}</b><small className="faint row-sub">{i.issuer} · R{i.risk_level} · {i.term_days ? `${i.term_days} 天` : "随存随取"}</small></span>
+                  <span className="num">{yuan(i.amount_minor)}</span>
+                  <button className="btn small" onClick={() => ask(`申购${i.amount_minor / 100}元${i.name}`)}>去申购</button>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <p className="faint rule-note">依据：{plan.basis.join("、")}。{plan.note}</p>
+      </div>
+    </section>
+  );
+}
 
 function ago(iso) {
   const t = Date.parse(iso);
@@ -57,7 +122,9 @@ export default function Wealth({ ask }) {
   if (error && !data) return <div className="page"><div className="inner"><div className="empty">{error}</div></div></div>;
   if (!data) return <div className="page"><div className="inner muted">读取中…</div></div>;
   const { risk, market } = data;
-  const products = data.products.filter((p) => (cat === "全部" || p.category === cat) && (!mine || p.suitable));
+  const groups = ["全部", ...GROUP_ORDER.filter((g) => data.products.some((p) => p.group === g))];
+  const products = data.products.filter((p) => (cat === "全部" || p.group === cat) && (!mine || p.suitable));
+  const issuers = new Set(data.products.map((p) => p.issuer)).size;
 
   return (
     <div className="page">
@@ -84,7 +151,11 @@ export default function Wealth({ ask }) {
             ))}
           </div>
           <p className="faint rule-note">{market.note}{!market.live && " 当前未连上行情源，显示的是最近一次成功获取的数据或内置快照。"}</p>
+          <h2 style={{ marginTop: 18 }}>汇率换算</h2>
+          <Converter market={market} />
         </section>
+
+        <Plan plan={data.plan} ask={ask} />
 
         <div className="grid-2">
           <section className="section panel">
@@ -113,7 +184,7 @@ export default function Wealth({ ask }) {
                 <div className="list">
                   {data.holdings.map((h) => (
                     <div key={h.product_id}>
-                      <span className="grow">{h.name} <Tag tone={RISK_TONE[h.risk_level]}>R{h.risk_level}</Tag>
+                      <span className="grow">{h.name} <Tag tone={RISK_TONE[h.risk_level]}>R{h.risk_level}</Tag> <span className="faint" style={{ fontSize: 12.5 }}>{h.issuer}</span>
                         <small className="faint row-sub">{h.redeemable ? "现在可赎回" : `${dateOnly(h.redeemable_at)} 后可赎回`}</small></span>
                       <span className="num">{yuan(h.amount_minor)}</span>
                       <button className="btn small ghost" disabled={!h.redeemable} onClick={() => ask(`赎回${h.name}`)}>赎回</button>
@@ -126,16 +197,16 @@ export default function Wealth({ ask }) {
         </div>
 
         <section className="section">
-          <h2>在售产品 <span className="count">{products.length}</span></h2>
+          <h2>在售产品 <span className="count">{data.products.length} 款 · {issuers} 家机构</span></h2>
           <div className="filters" role="group" aria-label="产品类型">
-            {CATS.map((c) => <button key={c} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</button>)}
+            {groups.map((c) => <button key={c} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</button>)}
             <button aria-pressed={mine} onClick={() => setMine((v) => !v)} style={{ marginLeft: "auto" }}>只看适合我的</button>
           </div>
           <div className="shelf">
             {products.length === 0 && <div className="panel muted">这一类暂时没有适合你的产品。</div>}
             {products.map((p) => <Product key={p.id} p={p} open={open === p.id} toggle={() => setOpen(open === p.id ? null : p.id)} ask={ask} />)}
           </div>
-          <p className="faint rule-note">理财非存款，产品有风险，投资须谨慎。业绩比较基准不是预期收益，也不代表未来表现。以上产品均为演示用虚构产品。</p>
+          <p className="faint rule-note">理财非存款，产品有风险，投资须谨慎。业绩比较基准不是预期收益，也不代表未来表现。以上机构与产品均为演示用虚构数据；本行代销的产品由发行机构管理，本行负责销售适当性。</p>
         </section>
       </div>
     </div>
@@ -151,6 +222,7 @@ function Product({ p, open, toggle, ask }) {
       <div className="product-head">
         <div>
           <b className="product-name">{p.name}</b>
+          <div className="issuer faint">{p.issuer === "本行" ? "本行发行" : `${p.issuer} 发行 · 本行代销`}</div>
           <div className="product-tags"><Tag tone={RISK_TONE[p.risk_level]}>R{p.risk_level}</Tag><Tag tone="neutral">{p.category}</Tag>
             {!p.suitable && <span className="faint" style={{ fontSize: 12.5 }}>{p.blocked_reason}</span>}</div>
         </div>

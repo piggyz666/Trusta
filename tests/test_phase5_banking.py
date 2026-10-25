@@ -92,7 +92,7 @@ class BankingTests(unittest.TestCase):
         bill=self.task('分析2026-09消费')
         wealth=self.task('推荐适合我的理财产品')
         self.assertEqual(bill['result']['summary']['net_spend'],542500)
-        self.assertEqual([p['product_id'] for p in wealth['result']['recommendations']],['sandbox-r1','wp-r1-7d','sandbox-r2'])
+        self.assertEqual([p['product_id'] for p in wealth['result']['recommendations']],['sandbox-r1','wp-r1-mmf','wp-r2-shortbond'])
         self.assertEqual(self.balance(),before)
         self.assertEqual(self.s.db.rows('SELECT * FROM bank_operations'),[])
 

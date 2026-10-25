@@ -123,6 +123,38 @@ class PagesTest(unittest.TestCase):
         self.assertIn("R2", names["wp-r3-gold"]["blocked_reason"])
         self.assertTrue(all(p["benchmark"] and p["liquidity"] for p in view["products"]))
 
+    def test_shelf_has_several_issuers_and_bank_deposits(self):
+        products = WealthPage(self.chat, None).view("demo")["products"]
+        self.assertGreaterEqual(len({p["issuer"] for p in products}), 5)
+        self.assertTrue(any(p["issuer"] == "本行" and p["group"] == "存款" for p in products))
+
+    def test_plan_keeps_three_months_reserve_and_stays_within_risk_level(self):
+        plan = WealthPage(self.chat, None).view("demo")["plan"]
+        total = sum(b["amount_minor"] for b in plan["buckets"])
+        self.assertLessEqual(total, plan["balance_minor"])
+        self.assertGreaterEqual(plan["reserve_minor"], min(plan["balance_minor"], plan["monthly_minor"] * 3))
+        reserve = next(b for b in plan["buckets"] if b["name"] == "备用金")
+        self.assertTrue(all(i["risk_level"] == 1 and i["term_days"] == 0 for i in reserve["items"]))
+        for b in plan["buckets"]:
+            self.assertEqual(sum(i["amount_minor"] for i in b["items"]), b["amount_minor"])
+            self.assertTrue(all(i["risk_level"] <= 2 for i in b["items"]))
+            self.assertEqual(len({i["issuer"] for i in b["items"]}), len(b["items"]))  # spread across issuers
+
+    def test_plan_grows_riskier_parts_only_for_riskier_profiles(self):
+        with self.s.db.transaction() as conn:
+            conn.execute("UPDATE risk_profiles SET risk_level=4 WHERE customer_id='demo'")
+            conn.execute("UPDATE accounts SET balance=10000000 WHERE id='acct-demo'")
+        plan = WealthPage(self.chat, None).view("demo")["plan"]
+        names = [b["name"] for b in plan["buckets"]]
+        self.assertEqual(names, ["备用金", "稳健", "增强", "进取"])
+        self.assertTrue(all(i["risk_level"] <= 4 for b in plan["buckets"] for i in b["items"]))
+
+    def test_plan_in_chat(self):
+        session = self.chat.create_session("demo", "test")
+        reply = self.chat.send(session["session_id"], "demo", "m-plan", session["revision"], "根据我的消费推荐一下理财", "acct-demo")
+        self.assertIn("备用金", reply["reply"]["text"])
+        self.assertIn("navigate", [c["type"] for c in reply["reply"]["cards"]])
+
     def test_recommendation_stays_within_risk_level(self):
         profile = self.s.wealth.risk_profile("demo")
         picked = self.s.wealth.match(profile, self.s.wealth.products("demo"))
@@ -131,12 +163,13 @@ class PagesTest(unittest.TestCase):
     # ---- language ---------------------------------------------------------------------------------
     def test_product_names_with_shared_series_prefix_match_the_right_product(self):
         catalog = self.chat.catalog("demo")
-        cases = {"申购2000元安睿·稳健30天持有": "sandbox-r2", "申购1000元稳盈90天持有": "wp-r2-90d",
-                 "申购100元安睿·活钱管理": "sandbox-r1", "申购1000元安睿·全球科技(QDII)": "wp-r5-global"}
+        cases = {"申购2000元稳健30天持有": "sandbox-r2", "申购1000元稳盈90天持有": "wp-r2-90d",
+                 "申购100元活钱管理A": "sandbox-r1", "申购1000元鹿鸣全球科技(QDII)": "wp-r5-global",
+                 "申购500元云杉货币A": "wp-r1-mmf", "申购100元云杉沪深300指数A": "wp-r4-csi300"}
         for text, product in cases.items():
             calls = rule_calls(text, catalog)
             self.assertEqual(calls[0]["arguments"]["product"]["id"], product, text)
-        compare = rule_calls("比较一下活钱管理和七天周周开", catalog)[0]
+        compare = rule_calls("比较一下活钱管理和七天周周盈", catalog)[0]
         self.assertEqual([p["id"] for p in compare["arguments"]["products"]], ["sandbox-r1", "wp-r1-7d"])
 
     def test_stock_picks_are_declined_with_shelf_alternative(self):

@@ -129,6 +129,7 @@ class WealthPage:
             why = ("已下架" if p["active"] != 1 else "需要先完成风险测评" if not level else
                    f"高于你的风险等级 R{level}，不能申购" if p["risk_level"] > level else None)
             products.append({"id": p["id"], "name": p["name"], "risk_level": p["risk_level"], "minimum_minor": p["minimum_amount"],
+                             "issuer": extra.get("issuer", "本行"), "group": extra.get("product_group", extra.get("category", "理财")),
                              "term_days": p["term_days"], "currency": p["currency"], "active": p["active"] == 1,
                              "risk_note": p["risk_note"], "category": extra.get("category", "理财"),
                              "benchmark": extra.get("benchmark"), "liquidity": extra.get("liquidity"),
@@ -137,12 +138,97 @@ class WealthPage:
             if account:
                 held = self.s.gateway.read("wealth", owner, "portfolio.get", account_id=account["id"], product_id=p["id"])
                 if held["amount_cents"] > 0:
-                    holdings.append({"product_id": p["id"], "name": p["name"], "risk_level": p["risk_level"],
+                    holdings.append({"product_id": p["id"], "name": p["name"], "risk_level": p["risk_level"], "issuer": extra.get("issuer", "本行"),
                                      "category": extra.get("category", "理财"), "amount_minor": held["amount_cents"],
                                      "redeemable_at": held.get("redeemable_at"),
                                      "redeemable": (held.get("redeemable_at") or 0) <= time.time()})
         products = [p for p in products if p["active"]]
         products.sort(key=lambda p: (not p["suitable"], p["risk_level"], p["term_days"]))
-        return {"risk": risk, "products": products, "holdings": holdings,
-                "holdings_minor": sum(h["amount_minor"] for h in holdings), "market": self.market.view(),
+        return {"risk": risk, "products": products, "holdings": holdings, "plan": self.plan(owner, level, products),
+                "holdings_minor": sum(h["amount_minor"] for h in holdings), "market": self.market.view() if self.market else None,
                 "policy": "只推荐本行在售、且风险等级不高于你测评结果的产品；不推荐个股，不承诺收益。"}
+
+    # ---- personalised allocation -------------------------------------------------------------------
+    # Share of the money left after the cash reserve, by risk level. Fixed rules, shown to the customer as-is.
+    SPLIT = {1: {"稳健": 1.0}, 2: {"稳健": 1.0}, 3: {"稳健": 0.7, "增强": 0.3},
+             4: {"稳健": 0.5, "增强": 0.3, "进取": 0.2}, 5: {"稳健": 0.4, "增强": 0.3, "进取": 0.3}}
+    BUCKETS = {"备用金": "随时要用的钱", "稳健": "一年内不急用的钱", "增强": "能接受中等波动的部分", "进取": "长期不用、能承受较大波动的部分"}
+
+    def _spending(self, owner, account):
+        from datetime import datetime
+        from backend.business import CHINA
+        today = datetime.now(CHINA)
+        months = []
+        for back in (3, 2, 1):
+            y, m = today.year, today.month - back
+            while m <= 0:
+                y, m = y - 1, m + 12
+            months.append(f"{y}-{m:02d}")
+        try:
+            result = self.s.finance.query(owner, account, months, None, None, False)
+        except Exception:
+            return None, months
+        used = [m for m in result.get("by_month", []) if m.get("settled_count")]
+        if not used:
+            return None, months
+        return sum(m["net_spend"] for m in used) // len(used), [m["month"] for m in used]
+
+    @staticmethod
+    def _floor100(minor):
+        return max(0, minor // 10000 * 10000)
+
+    def plan(self, owner, level, products):
+        """Allocation reference from the customer's own numbers: keep three months of spending and fixed charges
+        within reach, split the rest by risk level, and pick products (different issuers where possible) that
+        fit each part. Deterministic; every figure comes from the bank records listed in `basis`."""
+        account = self.s.db.one("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,))
+        if not account or not level:
+            return None
+        balance = self.s.transaction.balance(owner, account["id"])["balance"]
+        spend, months = self._spending(owner, account["id"])
+        fixed = BillsPage(self.chat).view(owner)["monthly_minor"]
+        monthly = (spend or 0) + fixed
+        reserve = min(balance, -(-monthly * 3 // 10000) * 10000) if monthly else min(balance, 500000)
+        rest = self._floor100(balance - reserve)
+        suitable = [p for p in products if p["suitable"] and p["purchase_enabled"]]
+        tiers = {"备用金": [p for p in suitable if p["risk_level"] == 1 and p["term_days"] == 0],
+                 "稳健": [p for p in suitable if p["risk_level"] <= 2 and 7 <= p["term_days"] <= 365],
+                 "增强": [p for p in suitable if p["risk_level"] == 3],
+                 "进取": [p for p in suitable if p["risk_level"] >= 4]}
+        amounts = {"备用金": reserve} | {k: self._floor100(int(rest * v)) for k, v in self.SPLIT[level].items()}
+        buckets = []
+        for name, amount in amounts.items():
+            if amount <= 0:
+                continue
+            picks, issuers = [], set()
+            for p in sorted(tiers[name], key=lambda p: (p["minimum_minor"] > amount, -p["risk_level"] if name != "备用金" else 0, p["term_days"])):
+                if p["minimum_minor"] <= amount and p["issuer"] not in issuers:
+                    picks.append(p)
+                    issuers.add(p["issuer"])
+                if len(picks) == 2:
+                    break
+            if not picks:
+                continue
+            each = self._floor100(amount // len(picks))
+            if any(each < p["minimum_minor"] for p in picks):
+                picks, each = picks[:1], amount
+            shares = [each] * (len(picks) - 1) + [amount - each * (len(picks) - 1)]  # the last one takes the remainder
+            buckets.append({"name": name, "label": self.BUCKETS[name], "amount_minor": amount,
+                            "items": [{"product_id": p["id"], "name": p["name"], "issuer": p["issuer"], "risk_level": p["risk_level"],
+                                       "category": p["category"], "term_days": p["term_days"], "amount_minor": share}
+                                      for p, share in zip(picks, shares)]})
+        reasons = []
+        if spend is not None:
+            reasons.append(f"{months[0]} 至 {months[-1]} 平均每月消费 {spend / 100:,.2f} 元")
+        if fixed:
+            reasons.append(f"订阅和代扣每月固定扣 {fixed / 100:,.2f} 元")
+        reasons.append(f"建议留 {reserve / 100:,.2f} 元（约 3 个月开销）放在随时可取的产品里" if monthly
+                       else f"暂无消费记录，先按 {reserve / 100:,.2f} 元留作备用金")
+        if rest > 0:
+            split = self.SPLIT[level]
+            share = "全部放稳健部分" if len(split) == 1 else "、".join(f"{k} {int(v * 100)}%" for k, v in split.items())
+            reasons.append(f"其余 {rest / 100:,.2f} 元按你的风险等级 R{level}：{share}")
+        return {"balance_minor": balance, "monthly_minor": monthly, "reserve_minor": reserve, "investable_minor": rest,
+                "buckets": buckets, "reasons": reasons,
+                "basis": ["活期余额", "近 3 个月已入账消费", "订阅与代扣", f"风险测评 R{level}"],
+                "note": "这是按你的余额、消费和风险等级算出的配置参考，不是收益承诺；每笔申购仍需你在确认卡上核对。"}

@@ -622,3 +622,23 @@ html { background: var(--edge); }
   .product-head { flex-direction: column; gap: 6px; }
   .product-bench { text-align: left; max-width: none; }
 }
+.issuer { font-size: 12.5px; margin-top: 3px; }
+.converter { display: grid; gap: 10px; }
+.conv-row { display: grid; grid-template-columns: 140px 1fr auto 1fr minmax(140px, 1.2fr); gap: 10px; align-items: center; }
+.conv-row select.input { padding: 8px 10px; }
+.conv-row .swap { font-size: 16px; padding: 5px 10px; }
+.conv-result { font-size: 22px; font-weight: 650; text-align: right; letter-spacing: -0.01em; }
+.conv-result small { font-size: 13px; color: var(--muted); font-weight: 500; }
+.conv-note { font-size: 12.5px; line-height: 1.6; }
+.plan { display: grid; gap: 14px; }
+.plan-why { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13.5px; color: var(--muted); }
+.plan-buckets { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.bucket { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; background: var(--surface-2); }
+.bucket > .kv b { font-size: 15px; } .bucket > .kv .num { font-weight: 650; font-size: 16px; }
+.bucket-item { display: flex; gap: 10px; align-items: center; padding-top: 8px; border-top: 1px solid var(--line); font-size: 13.5px; }
+.bucket-item .grow { flex: 1; min-width: 0; } .bucket-item b { font-weight: 560; }
+@media (max-width: 880px) {
+  .conv-row { grid-template-columns: 1fr 1fr; }
+  .conv-row .swap { justify-self: start; }
+  .conv-result { grid-column: 1 / -1; text-align: left; }
+}

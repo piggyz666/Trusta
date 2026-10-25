@@ -6,7 +6,6 @@ TRUSTA 有四种安装方式，效果一样，按你的习惯选。所有方式�
 |---|---|---|
 | 便携版安装包 | 只想用，不想装 Python（Windows） | 无 |
 | 一行命令 | 大多数人 | Python 3.11+ |
-| pip | 习惯用 Python 工具（即将推出） | Python 3.11+ |
 | 源码 | 想改代码、跑测试、接自己的银行和模型 | Python 3.11+、git |
 
 ## 便携版（Windows）
@@ -17,7 +16,7 @@ TRUSTA 有四种安装方式，效果一样，按你的习惯选。所有方式�
 
 压缩包里自带 Python 运行环境（在 `runtime\` 里）和全部依赖，不需要另外安装任何东西。数据保存在同一文件夹的 `data\` 里，删除文件夹即完全卸载。
 
-macOS 和 Linux 的安装包即将推出，目前请用一行命令安装。
+macOS 和 Linux 请用一行命令安装（见下一节）。
 
 ## 一行命令
 
@@ -49,15 +48,6 @@ curl -fsSL https://raw.githubusercontent.com/piggyz666/Trusta/main/install.sh | 
 | `TRUSTA_NO_SETUP` | 设为 `1` 时跳过配置向导 | — |
 
 再次运行同一条命令会更新代码（git 安装时执行 `git pull`）并保留你的配置和数据。
-
-## pip（即将推出）
-
-发布到 PyPI 后：
-
-```bash
-pip install trusta
-trusta setup && trusta start
-```
 
 ## 从源码运行
 

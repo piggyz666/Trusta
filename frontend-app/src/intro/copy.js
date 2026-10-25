@@ -130,12 +130,12 @@ export const COPY = {
       kicker: "快速开始",
       title: "在你自己的电脑上，几分钟跑起来。",
       all: "全部安装方式",
-      tabs: { apps: "安装包", oneliner: "一行命令", pip: "pip", hack: "源码" },
+      tabs: { apps: "安装包", oneliner: "一行命令", hack: "源码" },
       apps: {
         title: "桌面安装包", lead: "自带运行环境，下载解压即可使用，不需要另外安装 Python。",
         windows: ["Windows", "Windows 10 / 11 · x64", "下载 .zip", "解压后双击 TRUSTA.cmd；首次运行会打开配置向导。"],
-        mac: ["macOS", "Apple Silicon / Intel", "即将推出", "现在可以用一行命令安装。"],
-        linux: ["Linux", "x64", "即将推出", "现在可以用一行命令安装。"],
+        mac: ["macOS", "Apple Silicon / Intel", "用一行命令安装", "在终端粘贴一行命令，自动下载并完成配置。"],
+        linux: ["Linux", "x64", "用一行命令安装", "在终端粘贴一行命令，自动下载并完成配置。"],
         useOneLiner: "改用一行命令",
       },
       oneliner: {
@@ -143,7 +143,6 @@ export const COPY = {
         windows: "Windows · PowerShell", unix: "macOS · Linux",
         req: "需要 Python 3.11+。Windows 上没有安装时，会询问是否用 winget 安装。",
       },
-      pip: { title: "pip", soon: "即将推出", lead: "发布到 PyPI 后，可以像普通 Python 工具一样安装。现在请使用一行命令或源码方式。" },
       hack: {
         title: "从源码运行", lead: "想改代码、跑测试，或者接自己的银行和模型，用这种方式。",
         steps: ["下载代码", "创建虚拟环境（Windows 用第二行激活）并安装依赖", "配置向导：大模型 → 银行 → 访问方式 → 安全", "启动"],
@@ -294,12 +293,12 @@ export const COPY = {
       kicker: "Quick start",
       title: "Running on your own computer in minutes.",
       all: "All install options",
-      tabs: { apps: "Apps", oneliner: "One-liner", pip: "pip", hack: "Hackable" },
+      tabs: { apps: "Apps", oneliner: "One-liner", hack: "Hackable" },
       apps: {
         title: "Desktop packages", lead: "Bundles its own runtime. Download, unzip and go — no separate Python install.",
         windows: ["Windows", "Windows 10 / 11 · x64", "Download .zip", "Unzip and double-click TRUSTA.cmd; the first run opens the setup wizard."],
-        mac: ["macOS", "Apple Silicon / Intel", "Coming soon", "Use the one-liner for now."],
-        linux: ["Linux", "x64", "Coming soon", "Use the one-liner for now."],
+        mac: ["macOS", "Apple Silicon / Intel", "Install with one line", "Paste one command into Terminal; it downloads and sets everything up."],
+        linux: ["Linux", "x64", "Install with one line", "Paste one command into a terminal; it downloads and sets everything up."],
         useOneLiner: "Use the one-liner",
       },
       oneliner: {
@@ -307,7 +306,6 @@ export const COPY = {
         windows: "Windows · PowerShell", unix: "macOS · Linux",
         req: "Needs Python 3.11+. On Windows, if it's missing the installer offers to install it with winget.",
       },
-      pip: { title: "pip", soon: "Coming soon", lead: "Once published to PyPI, TRUSTA installs like any Python tool. For now, use the one-liner or run from source." },
       hack: {
         title: "Run from source", lead: "For changing the code, running the tests, or wiring in your own bank and model.",
         steps: ["Get the code", "Create a virtual environment (Windows: activate with the second line) and install dependencies", "Setup wizard: model → bank → access → safety", "Start"],

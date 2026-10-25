@@ -403,7 +403,7 @@ export function Install({ c }) {
   const t = c.install;
   const [tab, setTab] = useState("apps");
   const [os, setOs] = useState(guessOs);
-  const tabs = ["apps", "oneliner", "pip", "hack"];
+  const tabs = ["apps", "oneliner", "hack"];
   const onKey = (e) => {
     const i = tabs.indexOf(tab);
     if (e.key === "ArrowRight") setTab(tabs[(i + 1) % tabs.length]);
@@ -417,9 +417,8 @@ export function Install({ c }) {
         {primary && SHOW_REPO && RELEASE_READY
           ? <a className="btn solid" href={DOWNLOAD_WINDOWS}>↓ {action}</a>
           : primary ? <span className="btn soon" aria-disabled="true">{t.soon}</span>
-          : <span className="btn soon" aria-disabled="true">{action}</span>}
+          : <button type="button" className="btn" onClick={() => { setTab("oneliner"); setOs("unix"); }}>{action} →</button>}
         <p className="note">{note}</p>
-        {!primary && <button type="button" className="link" onClick={() => { setTab("oneliner"); setOs("unix"); }}>{t.apps.useOneLiner} →</button>}
       </div>
     );
   };
@@ -457,13 +456,6 @@ export function Install({ c }) {
               </div>
               {os === "windows" ? <Cmd t={t} prompt="PS>">{ONE_LINER_WINDOWS}</Cmd> : <Cmd t={t}>{ONE_LINER_UNIX}</Cmd>}
               <p className="fine">{t.oneliner.req}</p>
-            </>
-          )}
-          {tab === "pip" && (
-            <>
-              <h3>{t.pip.title} <span className="badge">{t.pip.soon}</span></h3><p className="pane-lead">{t.pip.lead}</p>
-              <div className="cmd ghost"><code><span className="prompt">$</span>pip install trusta</code></div>
-              <div className="cmd ghost"><code><span className="prompt">$</span>trusta setup &amp;&amp; trusta start</code></div>
             </>
           )}
           {tab === "hack" && (

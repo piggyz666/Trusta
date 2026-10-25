@@ -6,7 +6,6 @@ There are four ways to install TRUSTA; they end up the same, so pick whichever s
 |---|---|---|
 | Portable package | Just using it, without installing Python (Windows) | Nothing |
 | One-liner | Most people | Python 3.11+ |
-| pip | People used to Python tools (coming soon) | Python 3.11+ |
 | From source | Changing code, running tests, wiring in your own bank or model | Python 3.11+, git |
 
 ## Portable package (Windows)
@@ -17,7 +16,7 @@ There are four ways to install TRUSTA; they end up the same, so pick whichever s
 
 The zip carries its own Python runtime (under `runtime\`) and every dependency, so nothing else needs installing. Data lives in the `data\` folder next to it; deleting the folder uninstalls TRUSTA completely.
 
-macOS and Linux packages are coming soon; use the one-liner for now.
+On macOS and Linux, use the one-liner (next section).
 
 ## One-liner
 
@@ -49,15 +48,6 @@ Environment variables you can set first:
 | `TRUSTA_NO_SETUP` | `1` skips the setup wizard | — |
 
 Running the same command again updates the code (`git pull` for git installs) and keeps your configuration and data.
-
-## pip (coming soon)
-
-Once published to PyPI:
-
-```bash
-pip install trusta
-trusta setup && trusta start
-```
 
 ## From source
 

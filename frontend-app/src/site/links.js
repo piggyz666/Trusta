@@ -19,4 +19,4 @@ export const REPO_PUBLIC = true;
 export const SHOW_REPO = REPO_PUBLIC || !STATIC_SITE;
 // Flip to true once a release with TRUSTA-windows-x64.zip exists (the "Packages" workflow on a v* tag); until then the
 // download button says "coming soon" instead of linking to a file that isn't there.
-export const RELEASE_READY = false;
+export const RELEASE_READY = true;

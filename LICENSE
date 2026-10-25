@@ -1,0 +1,25 @@
+TRUSTA 银行助手 —— 版权声明 / Copyright Notice
+
+Copyright (c) 2026 TRUSTA 团队（GitHub: piggyz666）。保留所有权利。
+Copyright (c) 2026 the TRUSTA team (GitHub: piggyz666). All rights reserved.
+
+本仓库公开，仅用于金融科技大赛评审，以及个人阅读、学习和在本地运行评估。
+未经版权所有者书面许可，不得：
+  1. 复制、修改、翻译、再发布本仓库的全部或部分代码、文档、图表和设计；
+  2. 将其用于任何商业目的；
+  3. 将其全部或部分作为自己的作品参加任何比赛、课程作业或评审。
+
+GitHub 服务条款允许的在 GitHub 上查看和创建复刻（fork）不受影响，但复刻不授予上述任何权利。
+第三方依赖（见 requirements.txt、frontend-app/package.json）及其字体、库等各自遵循其原有许可证。
+
+This repository is public solely for evaluation in the fintech competition and for personal reading,
+study and local evaluation. Without the copyright holder's prior written permission you may not:
+  1. copy, modify, translate or redistribute any part of the code, documentation, figures or design;
+  2. use any part of it for commercial purposes;
+  3. submit any part of it as your own work in any competition, coursework or review.
+
+Viewing and forking on GitHub as permitted by the GitHub Terms of Service are unaffected, but a fork
+grants none of the rights above. Third-party dependencies (see requirements.txt and
+frontend-app/package.json), including bundled fonts and libraries, remain under their own licences.
+
+如需授权，请通过 GitHub（piggyz666）联系。 / For permission, contact piggyz666 on GitHub.

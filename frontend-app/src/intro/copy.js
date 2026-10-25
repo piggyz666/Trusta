@@ -160,6 +160,7 @@ export const COPY = {
         ["链接", [["GitHub", "github"], ["更新日志", "/docs.html#/changelog"]]],
       ],
       legal: "金融科技大赛参赛作品。默认运行在本地虚拟银行沙箱，演示数据均为虚构。",
+      rights: "© 2026 TRUSTA 团队，保留所有权利。代码公开仅供评审和学习查看，未经许可不得复制、商用或用于参赛。",
     },
   },
 
@@ -323,6 +324,7 @@ export const COPY = {
         ["Links", [["GitHub", "github"], ["Changelog", "/docs.html#/changelog"]]],
       ],
       legal: "A fintech competition entry. Runs against a local virtual bank sandbox by default; all demo data is fictional.",
+      rights: "© 2026 the TRUSTA team. All rights reserved. The code is public for evaluation and study only; no copying, commercial use or competition entry without permission.",
     },
   },
 };

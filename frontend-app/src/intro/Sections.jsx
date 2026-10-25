@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DOCS, DOWNLOAD_WINDOWS, GITHUB, ONE_LINER_UNIX, ONE_LINER_WINDOWS, CLONE, SHOW_REPO } from "../site/links.js";
+import { DOCS, DOWNLOAD_WINDOWS, GITHUB, ONE_LINER_UNIX, ONE_LINER_WINDOWS, CLONE, RELEASE_READY, SHOW_REPO } from "../site/links.js";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const hex = (n = 8) => Array.from(crypto.getRandomValues(new Uint8Array(n / 2)), (b) => b.toString(16).padStart(2, "0")).join("");
@@ -414,7 +414,7 @@ export function Install({ c }) {
     return (
       <div className={`app-card ${primary ? "primary" : ""}`}>
         <h4>{name}</h4><p className="meta">{meta}</p>
-        {primary && SHOW_REPO
+        {primary && SHOW_REPO && RELEASE_READY
           ? <a className="btn solid" href={DOWNLOAD_WINDOWS}>↓ {action}</a>
           : primary ? <span className="btn soon" aria-disabled="true">{t.soon}</span>
           : <span className="btn soon" aria-disabled="true">{action}</span>}
@@ -504,7 +504,7 @@ export function Footer({ c }) {
           </div>
         ))}
       </div>
-      <div className="wrap foot-legal"><p>{f.legal}</p><p>© 2026 TRUSTA</p></div>
+      <div className="wrap foot-legal"><p>{f.legal}</p><p>{f.rights}</p></div>
     </footer>
   );
 }

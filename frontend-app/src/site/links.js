@@ -15,5 +15,8 @@ export const DOCS = "/docs.html";
 export const STATIC_SITE = import.meta.env.VITE_SITE === "static";
 export const HOME = STATIC_SITE ? "/" : "/intro.html";
 // Flip to true once the repository is public: download buttons, GitHub links and install commands go live on the website.
-export const REPO_PUBLIC = false;
+export const REPO_PUBLIC = true;
 export const SHOW_REPO = REPO_PUBLIC || !STATIC_SITE;
+// Flip to true once a release with TRUSTA-windows-x64.zip exists (the "Packages" workflow on a v* tag); until then the
+// download button says "coming soon" instead of linking to a file that isn't there.
+export const RELEASE_READY = false;

@@ -1,4 +1,4 @@
-var De=Object.defineProperty;var Me=(t,e,n)=>e in t?De(t,e,{enumerable:!0,configurable:!0,writable:!0,value:n}):t[e]=n;var k=(t,e,n)=>Me(t,typeof e!="symbol"?e+"":e,n);import{r as v,j as d,c as ze}from"./client-C9yhCDaK.js";import{u as Fe,a as $e,H as ue,G as ge,B as Be,S as He,b as je,c as We}from"./theme-D2tNs6f-.js";const qe=`# Signed agent messaging
+var De=Object.defineProperty;var Me=(t,e,n)=>e in t?De(t,e,{enumerable:!0,configurable:!0,writable:!0,value:n}):t[e]=n;var k=(t,e,n)=>Me(t,typeof e!="symbol"?e+"":e,n);import{r as v,j as d,c as ze}from"./client-C9yhCDaK.js";import{u as Fe,a as $e,H as ue,G as ge,B as Be,S as He,b as je,c as We}from"./theme-Y_NQYV2C.js";const qe=`# Signed agent messaging
 
 The worst case for a multi-agent system is an agent that gets prompt-injected or compromised, impersonates another, alters messages or proposes things beyond its role — and afterwards nobody can say what happened. TRUSTA makes every message between agents **verifiable, traceable and non-repudiable**.
 

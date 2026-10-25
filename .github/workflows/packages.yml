@@ -45,6 +45,9 @@ jobs:
           Expand-Archive TRUSTA-windows-x64.zip -DestinationPath pkg
           $py = Resolve-Path pkg/TRUSTA/runtime/python/python.exe
           Push-Location pkg/TRUSTA
+          $paths = & $py -c "import sys; print(' ; '.join(sys.path))" 2>&1 | Out-String
+          Write-Host "::notice::sys.path = $paths"
+          Write-Host "::notice::pth = $((Get-ChildItem runtime/python/*._pth | Get-Content) -join ' | ')"
           foreach ($m in @('backend.server', 'scripts.setup', 'scripts.pair', 'scripts.feishu_worker')) {
             $out = & $py -c "import $m; print('ok $m')" 2>&1 | Out-String
             Write-Host $out

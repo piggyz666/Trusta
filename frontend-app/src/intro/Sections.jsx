@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DOCS, DOWNLOAD_WINDOWS, GITHUB, ONE_LINER_UNIX, ONE_LINER_WINDOWS, CLONE } from "../site/links.js";
+import { DOCS, DOWNLOAD_WINDOWS, GITHUB, ONE_LINER_UNIX, ONE_LINER_WINDOWS, CLONE, SHOW_REPO } from "../site/links.js";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const hex = (n = 8) => Array.from(crypto.getRandomValues(new Uint8Array(n / 2)), (b) => b.toString(16).padStart(2, "0")).join("");
@@ -65,7 +65,7 @@ export function Nav({ c, lang, setLang, theme, toggleTheme }) {
         <a className="wide" href="#trust">{c.nav.trust}</a>
         <a className="wide" href="#install">{c.nav.install}</a>
         <a href={DOCS}>{c.nav.docs}</a>
-        <a className="icon" href={GITHUB} aria-label="GitHub"><GitHubIcon /></a>
+        {SHOW_REPO && <a className="icon" href={GITHUB} aria-label="GitHub"><GitHubIcon /></a>}
         <button type="button" className="lang" onClick={() => setLang(lang === "zh" ? "en" : "zh")} aria-label={c.nav.langLabel}>{c.nav.lang}</button>
         <button type="button" className="theme" onClick={toggleTheme} aria-label={c.nav.theme} title={c.nav.theme}>
           {theme === "dark"
@@ -352,8 +352,9 @@ export function Install({ c }) {
     return (
       <div className={`app-card ${primary ? "primary" : ""}`}>
         <h4>{name}</h4><p className="meta">{meta}</p>
-        {primary
+        {primary && SHOW_REPO
           ? <a className="btn solid" href={DOWNLOAD_WINDOWS}>↓ {action}</a>
+          : primary ? <span className="btn soon" aria-disabled="true">{t.soon}</span>
           : <span className="btn soon" aria-disabled="true">{action}</span>}
         <p className="note">{note}</p>
         {!primary && <button type="button" className="link" onClick={() => { setTab("oneliner"); setOs("unix"); }}>{t.apps.useOneLiner} →</button>}
@@ -376,6 +377,7 @@ export function Install({ c }) {
               tabIndex={tab === k ? 0 : -1} onClick={() => setTab(k)}>{t.tabs[k]}</button>
           ))}
         </div>
+        {!SHOW_REPO && <p className="repo-note">{t.notice}</p>}
         <div className="panel-body" role="tabpanel" id={`pane-${tab}`} aria-labelledby={`tab-${tab}`}>
           {tab === "apps" && (
             <>
@@ -436,7 +438,7 @@ export function Footer({ c }) {
         {f.cols.map(([h, links]) => (
           <div key={h} className="foot-col">
             <h4>{h}</h4>
-            <ul>{links.map(([label, to]) => <li key={label}><a href={href(to)}>{label}</a></li>)}</ul>
+            <ul>{links.filter(([, to]) => to !== "github" || SHOW_REPO).map(([label, to]) => <li key={label}><a href={href(to)}>{label}</a></li>)}</ul>
           </div>
         ))}
       </div>

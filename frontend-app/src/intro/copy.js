@@ -124,7 +124,7 @@ export const COPY = {
         front: "修改前端后重新构建：",
       },
       after: ["启动后，用窗口里打印的", "链接打开网页。不配置大模型也能用，此时使用规则引擎，只认标准说法。"],
-      copy: "复制", copied: "已复制",
+      copy: "复制", copied: "已复制", soon: "即将开放", notice: "代码仓库即将公开。届时下面的下载按钮和安装命令可以直接使用。",
     },
     footer: {
       tagline: "可信的多智能体银行 AI 助手",
@@ -261,7 +261,7 @@ export const COPY = {
         front: "After changing the web app, rebuild it:",
       },
       after: ["Once it's running, open the", "link printed in the window. It works without a language model too, using the rule engine, which only understands standard phrasings."],
-      copy: "Copy", copied: "Copied",
+      copy: "Copy", copied: "Copied", soon: "Opening soon", notice: "The code repository opens soon. The downloads and install commands below will work from then on.",
     },
     footer: {
       tagline: "A trustworthy multi-agent banking assistant",

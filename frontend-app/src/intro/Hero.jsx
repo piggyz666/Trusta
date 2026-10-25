@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createInkFluid } from "./inkFluid.js";
-import { DOCS, GITHUB } from "../site/links.js";
+import { DOCS, GITHUB, SHOW_REPO } from "../site/links.js";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HERO = "/hero/";
@@ -73,7 +73,7 @@ export default function Hero({ c, theme }) {
         <div className="hero-ctas">
           <a className="btn solid" href="#install">{h.start}</a>
           <a className="btn" href={DOCS}>{h.docs}</a>
-          <a className="btn" href={GITHUB}>{h.github}</a>
+          {SHOW_REPO && <a className="btn" href={GITHUB}>{h.github}</a>}
         </div>
       </div>
       <div className="hint" aria-hidden="true">{h.hint}</div>

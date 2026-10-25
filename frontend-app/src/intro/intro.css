@@ -245,6 +245,7 @@ html[lang="en"] .hero-tags, html[lang="en"] .kicker, html[lang="en"] .scene li, 
 .panel-tabs button { border: 0; background: none; padding: 16px 16px 14px; font-family: var(--mono); font-size: 13px; color: var(--mute); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
 .panel-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 .panel-body { padding: 40px 48px 44px; min-height: 340px; }
+.repo-note { margin: 0; padding: 12px 48px; font-size: 13.5px; color: var(--gold); background: rgba(168, 132, 78, .08); border-bottom: 1px solid var(--line); }
 .panel-body h3 { margin: 0; font-size: 24px; font-weight: 750; letter-spacing: -.015em; display: flex; align-items: center; gap: 12px; }
 .pane-lead { margin: 10px 0 26px; color: var(--mute); font-size: 15.5px; line-height: 1.6; max-width: 44em; }
 .apps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }

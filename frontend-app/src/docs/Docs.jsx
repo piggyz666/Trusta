@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
 import { NAV, PAGES } from "./nav.js";
 import { useLang } from "../site/lang.js";
-import { GITHUB, BRANCH } from "../site/links.js";
+import { GITHUB, BRANCH, HOME, SHOW_REPO } from "../site/links.js";
 import { useTheme } from "../site/theme.js";
 
 const RAW = import.meta.glob("./content/*/*.md", { query: "?raw", import: "default", eager: true });
@@ -11,9 +11,9 @@ marked.setOptions({ gfm: true, breaks: false });
 
 const UI = {
   zh: { docs: "文档", search: "搜索文档", searchHint: "输入关键词", noResults: "没有找到相关内容", onPage: "本页目录", prev: "上一页", next: "下一页",
-    edit: "在 GitHub 上编辑此页", menu: "目录", home: "首页", lang: "EN", langLabel: "Switch to English", theme: "切换深浅色", copy: "复制", copied: "已复制", top: "回到顶部" },
+    edit: "在 GitHub 上编辑此页", menu: "目录", home: "首页", lang: "EN", langLabel: "Switch to English", theme: "切换深浅色", copy: "复制", copied: "已复制", top: "回到顶部", repo: "代码仓库即将公开。文档中的下载链接和安装命令届时可以直接使用。" },
   en: { docs: "Docs", search: "Search docs", searchHint: "Type to search", noResults: "Nothing found", onPage: "On this page", prev: "Previous", next: "Next",
-    edit: "Edit this page on GitHub", menu: "Menu", home: "Home", lang: "中文", langLabel: "切换到中文", theme: "Toggle theme", copy: "Copy", copied: "Copied", top: "Back to top" },
+    edit: "Edit this page on GitHub", menu: "Menu", home: "Home", lang: "中文", langLabel: "切换到中文", theme: "Toggle theme", copy: "Copy", copied: "Copied", top: "Back to top", repo: "The code repository opens soon; download links and install commands in these docs will work from then on." },
 };
 
 function currentSlug() {
@@ -178,17 +178,17 @@ export default function Docs() {
         <button type="button" className="menu-btn" onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-controls="sidebar" aria-label={ui.menu}>
           <span /><span /><span />
         </button>
-        <a className="brand" href="/intro.html"><img src="/mark.png" alt="" width="24" height="24" /><span>TRUSTA</span></a>
+        <a className="brand" href={HOME}><img src="/mark.png" alt="" width="24" height="24" /><span>TRUSTA</span></a>
         <span className="crumb">{ui.docs}</span>
         <button type="button" className="search-btn" onClick={() => setSearching(true)}>
           <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="1.8" d="M8.5 15a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13Zm9 3-4.5-4.5" /></svg>
           <span>{ui.search}</span><kbd>{/mac|iphone|ipad/i.test(navigator.platform || navigator.userAgent) ? "⌘K" : "Ctrl K"}</kbd>
         </button>
         <nav className="top-links">
-          <a className="wide" href="/intro.html">{ui.home}</a>
-          <a className="icon" href={GITHUB} aria-label="GitHub">
+          <a className="wide" href={HOME}>{ui.home}</a>
+          {SHOW_REPO && <a className="icon" href={GITHUB} aria-label="GitHub">
             <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" /></svg>
-          </a>
+          </a>}
           <button type="button" className="lang" onClick={() => setLang(lang === "zh" ? "en" : "zh")} aria-label={ui.langLabel}>{ui.lang}</button>
           <button type="button" className="theme" onClick={toggleTheme} aria-label={ui.theme}>
             {theme === "dark"
@@ -214,10 +214,11 @@ export default function Docs() {
         {menu && <div className="scrim" onClick={() => setMenu(false)} aria-hidden="true" />}
 
         <main className="content">
+          {!SHOW_REPO && <p className="repo-note">{ui.repo}</p>}
           <p className="eyebrow">{page.group[lang]}</p>
           <article ref={article} className="prose" dangerouslySetInnerHTML={{ __html: html }} />
           <div className="page-foot">
-            <a className="edit" href={editUrl} target="_blank" rel="noopener noreferrer">{ui.edit} ↗</a>
+            {SHOW_REPO && <a className="edit" href={editUrl} target="_blank" rel="noopener noreferrer">{ui.edit} ↗</a>}
             <nav className="pager">
               {prev ? <a href={`#/${prev.slug}`} className="prev"><small>{ui.prev}</small><b>{prev[lang]}</b></a> : <span />}
               {next ? <a href={`#/${next.slug}`} className="next"><small>{ui.next}</small><b>{next[lang]}</b></a> : <span />}

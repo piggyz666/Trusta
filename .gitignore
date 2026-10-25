@@ -9,3 +9,4 @@ config/llm*.local.yaml
 config/llm*.local.yml
 *.keys/
 config/bank.*.local.toml
+site-dist/

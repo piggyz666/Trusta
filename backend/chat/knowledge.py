@@ -10,14 +10,15 @@ from backend.security.permission_matrix import MATRIX, TIERS
 
 TOPICS = ["PERMISSION_TIERS", "TRANSFER_LIMITS", "VERIFICATION", "CONFIRMATION_EXPIRY", "UNDO_POLICY",
           "WISH_FUND", "CARD_LOSS", "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD", "HUMAN_SUPPORT", "AUTOMATION", "PROTECTION",
-          "NO_STOCK_PICKS", "MARKET_QUOTES", "UNKNOWN_CHARGE"]
+          "NO_STOCK_PICKS", "MARKET_QUOTES", "UNKNOWN_CHARGE", "THIRD_PARTY_MEMBERSHIP"]
 
 TITLES = {"PERMISSION_TIERS": "操作权限分级", "TRANSFER_LIMITS": "转账限额与风控", "VERIFICATION": "验证方式",
           "CONFIRMATION_EXPIRY": "确认卡有效期", "UNDO_POLICY": "哪些操作可以撤销", "WISH_FUND": "心愿金是什么",
           "CARD_LOSS": "冻结和挂失的区别", "INVESTMENT_SUITABILITY": "理财适当性规则", "DATA_PRIVACY": "AI 能看到哪些数据",
           "ANTI_FRAUD": "防诈骗提示", "HUMAN_SUPPORT": "人工服务",
           "AUTOMATION": "联动规则怎么用", "PROTECTION": "转账保护（冷静期）",
-          "NO_STOCK_PICKS": "为什么不推荐个股", "MARKET_QUOTES": "黄金与汇率行情", "UNKNOWN_CHARGE": "不认识的周期扣费怎么办"}
+          "NO_STOCK_PICKS": "为什么不推荐个股", "MARKET_QUOTES": "黄金与汇率行情", "UNKNOWN_CHARGE": "不认识的周期扣费怎么办",
+          "THIRD_PARTY_MEMBERSHIP": "开通第三方会员"}
 
 REVERSIBLE = ["冻结 ↔ 解冻", "挂失 ↔ 解除挂失", "限额调整（改回原值）", "交易开关（恢复原设置）", "心愿金锁定（释放）", "理财申购 ↔ 赎回"]
 
@@ -34,6 +35,11 @@ def answer(topic, config, irreversible=(), market=None):
                 "我能做的是按你的风险测评结果，从本行在售的理财、黄金积存、基金类产品里挑选合适的，并说明每款的期限、流动性和风险。"
                 "想看的话可以说“推荐适合我的理财”，或打开“理财”页面查看黄金和汇率行情。")
         return text, [_src("适当性规则", "backend/agents/wealth.py"), _src("理财页产品货架", "backend/chat/pages.py")]
+    if topic == "THIRD_PARTY_MEMBERSHIP":
+        text = ("音乐、视频、网盘这类会员需要在对应的 App 里开通，银行助手不能替你开通或登录第三方账号。"
+                "开通后如果是每月自动扣费，扣满 3 次我会在“账单与订阅”里识别出来，你确认后每次扣费前我都会提醒；"
+                "以后不想续了，银行登记过的订阅可以直接对我说“取消××订阅”。")
+        return text, [_src("周期扣费识别", "backend/agents/finance.py#recurring")]
     if topic == "UNKNOWN_CHARGE":
         text = ("这类扣费没有登记为订阅或代扣，银行不能直接替你“取消”，但可以先止损：① 说“冻结我的卡”，冻结后新的扣款会被拒绝，找到原因后可自己解冻；"
                 "② 说“转人工”，由客服核实商户并发起争议或拒付流程；③ 检查常用 App 里的自动续费，从源头关掉。"

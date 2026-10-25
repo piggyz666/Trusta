@@ -146,6 +146,11 @@ class PagesTest(unittest.TestCase):
         reply = self.chat.send(session["session_id"], "demo", "m-stock", session["revision"], "推荐几支股票", "acct-demo")
         self.assertIn("不推荐具体股票", reply["reply"]["text"])
 
+    def test_third_party_membership_is_explained_not_out_of_scope(self):
+        session = self.chat.create_session("demo", "test")
+        reply = self.chat.send(session["session_id"], "demo", "m-qq", session["revision"], "我要开通一个qq音乐的会员", "acct-demo")
+        self.assertIn("对应的 App 里开通", reply["reply"]["text"])
+
     def test_gold_price_question_answers_with_source(self):
         from backend.chat import knowledge
         text, sources = knowledge.answer("MARKET_QUOTES", self.s.config, (), MarketQuotes(None, (gold_ok,), (fx_ok,)))

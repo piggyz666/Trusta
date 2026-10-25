@@ -20,6 +20,14 @@ def _local(handler):
     return bool(getattr(handler, "is_local", lambda: False)()) and not getattr(handler, "via_device", True)
 
 
+def market(chat):
+    """One quote cache per running server (shared by every customer: market data is not personal)."""
+    if getattr(chat, "market", None) is None:
+        from backend.market import MarketQuotes
+        chat.market = MarketQuotes(chat.s.db)
+    return chat.market
+
+
 def handle_get(handler, chat, path, user_id):
     parts = path.strip("/").split("/")
     if parts == ["api", "chat", "permissions"]:
@@ -40,6 +48,16 @@ def handle_get(handler, chat, path, user_id):
     if parts == ["api", "chat", "overview"]:
         from backend.chat.activity import ActivityFeed
         return handler.reply(200, ActivityFeed(chat).overview(user_id))
+    if parts == ["api", "chat", "bills"]:
+        from backend.chat.pages import BillsPage
+        return handler.reply(200, BillsPage(chat).view(user_id))
+    if parts == ["api", "chat", "wealth"]:
+        from backend.chat.pages import WealthPage
+        return handler.reply(200, WealthPage(chat, market(chat)).view(user_id))
+    if parts == ["api", "chat", "market"]:
+        from urllib.parse import parse_qs, urlparse
+        force = (parse_qs(urlparse(handler.path).query).get("refresh") or ["0"])[0] == "1"
+        return handler.reply(200, market(chat).view(force))
     if parts == ["api", "chat", "settings"]:
         from backend.chat.settings_api import SettingsAPI
         return handler.reply(200, SettingsAPI(chat).read(user_id, _local(handler), handler.server.server_port))
@@ -66,6 +84,11 @@ def handle_post(handler, chat, path, body, user_id):
         if set(body) - {"text", "close"} or type(body.get("close", False)) is not bool:
             raise Rejected("INVALID_INPUT")
         return handler.reply(200, chat.operator_reply(operator, parts[4], body.get("text"), body.get("close", False)))
+    if parts == ["api", "chat", "bills", "mark"]:
+        if set(body) != {"key", "state"}:
+            raise Rejected("INVALID_INPUT")
+        from backend.chat.pages import BillsPage
+        return handler.reply(200, BillsPage(chat).mark(user_id, body["key"], body["state"]))
     if parts == ["api", "chat", "capabilities", "probe"]:
         if set(body) - {"targets"}:
             raise Rejected("INVALID_INPUT")

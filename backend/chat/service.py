@@ -164,6 +164,29 @@ class ChatService(AutomationMixin):
                 when = datetime.fromtimestamp(r["next_charge_at"], CHINA).strftime("%m月%d日")
                 messages.append({"role": "assistant", "message_id": "nudge-" + r["id"][:12], "at": time.time(), "cards": [],
                                  "text": f"提醒：{r['merchant']} 将在 {when} 扣费 {format_cents(r['amount'])}。不需要的话，可以直接说“取消{r['merchant']}”。"})
+        try:
+            from backend.chat.pages import BillsPage
+            detected = BillsPage(self).detected(owner)
+        except Exception:
+            detected = []
+        for d in detected:
+            if d["state"] == "NEW":
+                key = "recurring:" + d["key"]
+                if key in surfaced or not self.store.claim_nudge(owner, key):
+                    continue
+                surfaced.append(key)
+                messages.append({"role": "assistant", "message_id": "nudge-rec-" + digest({"k": d["key"]})[:10], "at": time.time(), "cards": [],
+                                 "text": f"我发现一笔可能的订阅：{d['merchant']} 每月 {format_cents(d['amount_minor'])}，已经连续扣了 {d['count']} 次，"
+                                         f"但没有登记在你的订阅里。可以到“账单与订阅”确认是不是你在用的服务；不认识的话告诉我，我帮你冻结卡片或联系客服。"})
+            elif d["state"] == "CONFIRMED" and d["next_estimate"]:
+                at = d["next_estimate"]
+                key = f"recurring-due:{d['key']}:{int(at // 86400)}"
+                if not 0 <= at - time.time() <= 3 * 86400 or key in surfaced or not self.store.claim_nudge(owner, key):
+                    continue
+                surfaced.append(key)
+                when = datetime.fromtimestamp(at, CHINA).strftime("%m月%d日")
+                messages.append({"role": "assistant", "message_id": "nudge-due-" + digest({"k": key})[:10], "at": time.time(), "cards": [],
+                                 "text": f"提醒：{d['merchant']} 预计在 {when} 左右再扣 {format_cents(d['amount_minor'])}（按过去的扣费间隔估算）。"})
         today = datetime.now(CHINA).date()
         funds = [f["name"] for f in self.s.service_agent.resources(owner, "wish_fund") if f["status"] == "ACTIVE"]
         for event in self.s.service_agent.resources(owner, "life_event"):
@@ -427,7 +450,9 @@ class ChatService(AutomationMixin):
                              + "。保护期内只能由银行安全人员核实后提前解除")
             elif name == "knowledge":
                 from backend.chat import knowledge
-                answer, sources = knowledge.answer(args["topic"], self.s.config, [OPERATIONS.get(k, k) for k in self.IRREVERSIBLE])
+                from backend.chat.http import market as _market
+                answer, sources = knowledge.answer(args["topic"], self.s.config, [OPERATIONS.get(k, k) for k in self.IRREVERSIBLE],
+                                                   _market(self) if args["topic"] == "MARKET_QUOTES" else None)
                 cards.append({"type": "knowledge", "card_id": "c_kb_" + uid()[:8], "topic": args["topic"],
                               "title": knowledge.TITLES[args["topic"]], "text": answer, "sources": sources})
                 texts.append(answer)

@@ -43,26 +43,40 @@ SYNONYMS = {"电费": "电力", "水费": "水务", "燃气费": "燃气", "话�
 
 def _catalog_match(items, text):
     """Catalogue items sharing a 2+ character word with the text (视频 -> 演示视频). The returned span is always
-    the user's own word, so a synonym hit (电费 -> 电力) is grounded on 电费."""
+    the user's own word, so a synonym hit (电费 -> 电力) is grounded on 电费.
+
+    Each item is scored by its longest overlap with the text; a series prefix shared by many names ("安睿·") never
+    counts, and a weaker hit whose words sit inside a stronger hit's words is dropped (so "稳健30天持有" does not
+    also select "稳盈90天持有" through "0天持有")."""
     aliases = {canonical: word for word, canonical in SYNONYMS.items() if word in text}
-    hits = []
-    for item in items:
+    scored = []
+    for order, item in enumerate(items):
         name = re.split(r"[（( ]", item["display"])[0]
-        for size in (4, 3, 2):
+        name = re.sub(r"^[^·]{1,8}·", "", name)  # series / brand prefix
+        best = None
+        for size in range(len(name), 1, -1):
             for i in range(len(name) - size + 1):
                 piece = name[i:i + size]
-                if piece in {"演示", "每月"}:
+                if piece in {"演示", "每月"} or "·" in piece:
                     continue
                 if piece in text:
-                    hits.append((item, piece))
+                    best = (size, piece, piece)
                     break
                 if piece in aliases:
-                    hits.append((item, aliases[piece]))
+                    best = (size, aliases[piece], aliases[piece])
                     break
-            else:
-                continue
-            break
-    return hits
+            if best:
+                break
+        if best:
+            scored.append((best[0], -order, item, best[1]))
+    taken, hits = [], []
+    for size, neg_order, item, word in sorted(scored, key=lambda h: (-h[0], -h[1])):
+        spots = [m.start() for m in re.finditer(re.escape(word), text)]
+        if spots and all(any(a <= p and p + len(word) <= b for a, b in taken) for p in spots):
+            continue  # every occurrence is part of a better match
+        taken += [(p, p + len(word)) for p in spots]
+        hits.append((-neg_order, item, word))
+    return [(item, word) for _order, item, word in sorted(hits, key=lambda h: h[0])]
 
 
 TIME_WORDS = re.compile(r"明天|后天|下周|下个?月|每月|每周|每天|星期|周[一二三四五六日天]|[0-9一二三四五六七八九十]+[号日]|[0-9一二三四五六七八九十]+点|月底|月初|定时|以后")
@@ -256,6 +270,9 @@ def wealth_calls(text):
 
 
 KNOWLEDGE_RULES = [
+    (r"不认识.{0,24}(扣|收费|订阅)|(莫名|陌生|奇怪).{0,6}(扣费|扣款)", "UNKNOWN_CHARGE"),
+    (r"荐股|炒股|个股|(推荐|买|选|哪[支只个]|什么|好).{0,6}股票|股票.{0,6}(推荐|买哪|能买|哪[支只个]|会涨)", "NO_STOCK_PICKS"),
+    (r"金价|黄金.{0,4}(价格|多少钱|行情|涨|跌)|汇率|(美元|欧元|日元|港币|美金).{0,6}(多少|行情|换|兑)", "MARKET_QUOTES"),
     (r"(限额|额度).{0,6}(多少|是什么|怎么算|规则)|(转账|每天|单日|当日).{0,6}(最多|上限)", "TRANSFER_LIMITS"),
     (r"(权限|风险).{0,2}(分级|等级划分)|绿色.{0,4}黄色|红色.{0,4}操作", "PERMISSION_TIERS"),
     (r"(验证码|动态码|认证器|TOTP).{0,8}(怎么|是什么|有效|多久|几次)", "VERIFICATION"),

@@ -94,7 +94,7 @@ class ConversationTests(unittest.TestCase):
     def test_wealth_reasons_use_bank_risk_and_existing_product_catalog(self):
         task = self.send("帮我推荐一些适合我的理财产品")["task"]
         self.assertEqual(task["result"]["customer_risk_level"], 2)
-        self.assertEqual([p["product_id"] for p in task["result"]["recommendations"]], ["sandbox-r1", "sandbox-r2"])
+        self.assertEqual([p["product_id"] for p in task["result"]["recommendations"]], ["sandbox-r1", "wp-r1-7d", "sandbox-r2"])
         self.assertIn("银行档案 R2", task["presentation"]["text"])
         self.assertEqual(task["proposed_actions"], [])
         self.assertIsNone(task["authorization"])
@@ -264,7 +264,7 @@ class ConversationTests(unittest.TestCase):
         task = self.send("推荐适合我的理财产品")["task"]
         self.assertNotIn("presentation", task)
         self.assertEqual(task["result"]["customer_risk_level"], 2)
-        self.assertEqual([p["product_id"] for p in task["result"]["recommendations"]], ["sandbox-r1", "sandbox-r2"])
+        self.assertEqual([p["product_id"] for p in task["result"]["recommendations"]], ["sandbox-r1", "wp-r1-7d", "sandbox-r2"])
         self.assertEqual(self.balance(), 1000000)
 
     def test_cancel_and_restart_keep_task_and_dialogue_consistent(self):

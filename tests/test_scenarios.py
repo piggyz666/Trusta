@@ -106,7 +106,7 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual(task["status"], "COMPLETED")
         report = task["result"]
         self.assertEqual(report["customer_risk_level"], 2)
-        self.assertEqual([p["product_id"] for p in report["recommendations"]], ["sandbox-r1", "sandbox-r2"])
+        self.assertEqual([p["product_id"] for p in report["recommendations"]], ["sandbox-r1", "wp-r1-7d", "sandbox-r2"])
         for recommendation in report["recommendations"]:
             product = next(p for p in task["context"]["product_catalog"] if p["id"] == recommendation["product_id"])
             self.assertLessEqual(product["risk_level"], report["customer_risk_level"])

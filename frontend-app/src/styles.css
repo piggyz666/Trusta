@@ -567,3 +567,58 @@ html { background: var(--edge); }
   .grid-3.stats .panel { padding: 12px 14px; }
   .grid-3.stats .stat-value { font-size: 22px; }
 }
+
+/* ---------------------------------------------------------------- 账单与订阅 / 理财 */
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rule-note { font-size: 12.5px; margin: 10px 2px 0; line-height: 1.6; }
+.row-sub { display: block; font-size: 12.5px; margin-top: 2px; }
+.bills-hero { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.bills-hero .panel { display: grid; gap: 6px; align-content: start; }
+.panel.attention { border-color: rgba(245, 180, 69, .45); background: var(--amber-bg); }
+.detected { display: grid; gap: 10px; border-color: rgba(245, 180, 69, .4); }
+.upcoming { padding: 4px 16px; }
+.up-row { display: grid; grid-template-columns: 76px 1fr auto; gap: 14px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.up-row:last-child { border-bottom: 0; }
+.up-date { display: grid; } .up-date b { font-size: 15px; font-weight: 620; } .up-date small, .up-what small { color: var(--faint); font-size: 12.5px; }
+.up-what { display: grid; } .up-what b { font-weight: 560; }
+.up-amount { font-weight: 600; }
+
+.quotes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.quote { display: grid; gap: 2px; padding: 14px 14px 12px; }
+.quote.gold { background: linear-gradient(160deg, rgba(232, 190, 90, .16), transparent 70%), var(--surface); border-color: rgba(232, 190, 90, .35); }
+.quote-price { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; margin-top: 4px; }
+.quote-unit { font-size: 12px; }
+.quote-src { font-size: 11.5px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spark { width: 100%; height: 32px; margin-top: 6px; }
+.spark path { fill: none; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.spark.up path { stroke: var(--red); } .spark.down path { stroke: var(--green); } /* 中国习惯：红涨绿跌 */
+.empty-spark { border-bottom: 1px dashed var(--line); height: 20px; margin-bottom: 12px; }
+.risk-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 14px; }
+.risk-scale i { font-style: normal; text-align: center; font-size: 11.5px; padding: 4px 0; border-radius: 6px; background: var(--surface-3); color: var(--faint); }
+.risk-scale i.on { background: var(--accent-solid); color: var(--bg); font-weight: 600; }
+
+.shelf { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; align-items: start; }
+.product { display: grid; gap: 12px; align-content: start; }
+.product.muted-card { opacity: .72; }
+.product-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.product-name { font-size: 15.5px; font-weight: 620; }
+.product-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.product-bench { text-align: right; font-size: 13px; color: var(--muted); max-width: 46%; line-height: 1.45; }
+.product-facts { display: grid; grid-template-columns: auto auto 1fr; gap: 6px 18px; font-size: 13.5px; }
+.product-facts small { display: block; color: var(--faint); font-size: 11.5px; }
+.link-btn { justify-self: start; border: 0; background: none; padding: 0; color: var(--accent-solid); font-size: 13px; cursor: pointer; }
+.product-more { display: grid; gap: 8px; font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 10px; }
+.product-more p { margin: 0; line-height: 1.65; }
+.risk-line b { color: var(--amber); font-weight: 600; margin-right: 8px; }
+.buy { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.buy label { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; }
+.buy .input { width: 110px; padding: 6px 10px; }
+@media (max-width: 880px) {
+  .bills-hero { grid-template-columns: 1fr; }
+  .quotes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shelf { grid-template-columns: 1fr; }
+  .product-facts { grid-template-columns: auto auto; }
+  .product-facts .wide { grid-column: 1 / -1; }
+  .product-head { flex-direction: column; gap: 6px; }
+  .product-bench { text-align: left; max-width: none; }
+}

@@ -60,6 +60,15 @@ Set “when … then …” rules in a sentence, for example “remind me when t
 - Actions: remind, transfer, save to wish fund, buy an investment, freeze a card, switch off a card control, hand off to a human.
 - A rule only takes effect after you confirm it; when it fires, money operations still wait for your confirmation one by one.
 
+## Bills and Wealth pages
+
+Two pages in the side navigation show things at a glance:
+
+- **Bills & subscriptions**: fixed monthly spend, a 30-day timeline of upcoming charges, and registered subscriptions and direct debits. TRUSTA also looks for repeating charges in your history: the same merchant and amount, 25–35 days apart, three times. Those appear as "possible subscriptions" and you are told once in the chat. You can confirm one (you will then be reminded 3 days before each charge), mark it as unknown (you get stop-loss options such as freezing the card or reaching a person), or dismiss it.
+- **Wealth**: reference quotes for gold and USD, EUR, JPY and HKD against CNY (every number shows its source and time; refresh any time; when offline the last value is shown and labelled), your risk level, your holdings, and the bank's product shelf with term, minimum, liquidity, benchmark and risk notes. Products above your risk level are shown but cannot be bought.
+
+Every cancel, buy or redeem button on these pages goes back into the chat as a confirmation card, under the same authorisation as asking in words. TRUSTA does not recommend individual stocks and never promises returns.
+
 ## Developer mode
 
 Turn on Developer mode under 设置 → 外观 (Settings → Appearance) and each reply gets “查看决策过程” (View decision process): every signed message between agents in that turn, re-verified on the page (message signatures, evidence signatures, causal parents). Result cards let you download a signed evidence bundle; see [Verifying evidence offline](#/evidence).

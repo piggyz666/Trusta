@@ -9,13 +9,15 @@ from backend.security.banking_controls import BankingControls
 from backend.security.permission_matrix import MATRIX, TIERS
 
 TOPICS = ["PERMISSION_TIERS", "TRANSFER_LIMITS", "VERIFICATION", "CONFIRMATION_EXPIRY", "UNDO_POLICY",
-          "WISH_FUND", "CARD_LOSS", "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD", "HUMAN_SUPPORT", "AUTOMATION", "PROTECTION"]
+          "WISH_FUND", "CARD_LOSS", "INVESTMENT_SUITABILITY", "DATA_PRIVACY", "ANTI_FRAUD", "HUMAN_SUPPORT", "AUTOMATION", "PROTECTION",
+          "NO_STOCK_PICKS", "MARKET_QUOTES", "UNKNOWN_CHARGE"]
 
 TITLES = {"PERMISSION_TIERS": "操作权限分级", "TRANSFER_LIMITS": "转账限额与风控", "VERIFICATION": "验证方式",
           "CONFIRMATION_EXPIRY": "确认卡有效期", "UNDO_POLICY": "哪些操作可以撤销", "WISH_FUND": "心愿金是什么",
           "CARD_LOSS": "冻结和挂失的区别", "INVESTMENT_SUITABILITY": "理财适当性规则", "DATA_PRIVACY": "AI 能看到哪些数据",
           "ANTI_FRAUD": "防诈骗提示", "HUMAN_SUPPORT": "人工服务",
-          "AUTOMATION": "联动规则怎么用", "PROTECTION": "转账保护（冷静期）"}
+          "AUTOMATION": "联动规则怎么用", "PROTECTION": "转账保护（冷静期）",
+          "NO_STOCK_PICKS": "为什么不推荐个股", "MARKET_QUOTES": "黄金与汇率行情", "UNKNOWN_CHARGE": "不认识的周期扣费怎么办"}
 
 REVERSIBLE = ["冻结 ↔ 解冻", "挂失 ↔ 解除挂失", "限额调整（改回原值）", "交易开关（恢复原设置）", "心愿金锁定（释放）", "理财申购 ↔ 赎回"]
 
@@ -24,9 +26,30 @@ def _src(label, ref, kind="RULE"):
     return {"label": label, "kind": kind, "ref": ref}
 
 
-def answer(topic, config, irreversible=()):
+def answer(topic, config, irreversible=(), market=None):
     if topic not in TOPICS:
         raise KeyError(topic)
+    if topic == "NO_STOCK_PICKS":
+        text = ("我不推荐具体股票：荐股属于证券投资咨询，需要专门资质，银行助手也无法替你判断个股涨跌。"
+                "我能做的是按你的风险测评结果，从本行在售的理财、黄金积存、基金类产品里挑选合适的，并说明每款的期限、流动性和风险。"
+                "想看的话可以说“推荐适合我的理财”，或打开“理财”页面查看黄金和汇率行情。")
+        return text, [_src("适当性规则", "backend/agents/wealth.py"), _src("理财页产品货架", "backend/chat/pages.py")]
+    if topic == "UNKNOWN_CHARGE":
+        text = ("这类扣费没有登记为订阅或代扣，银行不能直接替你“取消”，但可以先止损：① 说“冻结我的卡”，冻结后新的扣款会被拒绝，找到原因后可自己解冻；"
+                "② 说“转人工”，由客服核实商户并发起争议或拒付流程；③ 检查常用 App 里的自动续费，从源头关掉。"
+                "如果确认是自己开通的，可以在“账单与订阅”里点“是我的订阅”，以后扣费前我会提醒你。")
+        return text, [_src("周期扣费识别", "backend/agents/finance.py#recurring"), _src("卡片冻结", "backend/banking/actions.py")]
+    if topic == "MARKET_QUOTES":
+        view = market.view() if market else None
+        if not view:
+            return "暂时取不到行情，请稍后在“理财”页面刷新。", []
+        parts = [f"{q['name']} {q['price']:,.2f} {q['unit']}" if q["symbol"] == "XAU" else f"{q['name']} {q['price']:.4f} {q['unit']}"
+                 for q in view["quotes"]]
+        times = sorted({(q["source"], q["as_of"][:16].replace("T", " ")) for q in view["quotes"]})
+        text = ("、".join(parts) + "。" + "；".join(f"来源：{src}，数据时间 {at}" for src, at in times) + "。"
+                + ("（目前未联网，以上是内置快照，不是实时价格。）" if not view["live"] else "")
+                + "行情仅供参考，不是本行买卖报价，也不构成投资建议。")
+        return text, [_src("行情数据源", "backend/market.py", "DATA")]
     minutes = max(1, config.action_ttl // 60)
     if topic == "PERMISSION_TIERS":
         count = {t: sum(1 for _, tier, _ in MATRIX if tier == t) for t in TIERS}
@@ -89,8 +112,8 @@ def answer(topic, config, irreversible=()):
 
 
 # navigate: deep links into the APP, a fixed list. The model picks a page id; the link is built here.
-PAGES = {"transfer": "转账", "payees": "收款人管理", "bills": "账单分析", "wealth": "理财", "cards": "银行卡",
-         "subscriptions": "订阅与代扣", "wish_funds": "心愿金", "security": "安全设置", "audit": "操作记录"}
+PAGES = {"transfer": "转账", "payees": "收款人管理", "bills": "账单与订阅", "wealth": "理财", "cards": "银行卡",
+         "subscriptions": "账单与订阅", "wish_funds": "心愿金", "security": "安全设置", "audit": "操作记录"}
 
 
 def navigate_card(page, card_id):

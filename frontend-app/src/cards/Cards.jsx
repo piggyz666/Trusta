@@ -442,7 +442,7 @@ function KnowledgeCard({ card, ctx }) {
   );
 }
 
-const PAGE_ROUTES = { transfer: "chat", payees: "overview", bills: "overview", wealth: "overview", cards: "overview", subscriptions: "overview",
+const PAGE_ROUTES = { transfer: "chat", payees: "overview", bills: "bills", wealth: "wealth", cards: "overview", subscriptions: "bills",
   wish_funds: "overview", security: "settings", audit: "overview" };
 
 function NavigateCard({ card, ctx }) {

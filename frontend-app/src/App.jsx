@@ -7,10 +7,13 @@ import { EvidenceDrawer, ProofDrawer, TraceDrawer } from "./components/Trace.jsx
 import { Icon, useToast } from "./components/ui.jsx";
 import Chat from "./pages/Chat.jsx";
 
-const loaders = [() => import("./pages/Overview.jsx"), () => import("./pages/Features.jsx"), () => import("./pages/Settings.jsx")];
+const loaders = [() => import("./pages/Overview.jsx"), () => import("./pages/Features.jsx"), () => import("./pages/Settings.jsx"),
+  () => import("./pages/Bills.jsx"), () => import("./pages/Wealth.jsx")];
 const Overview = lazy(loaders[0]);
 const Features = lazy(loaders[1]);
 const Settings = lazy(loaders[2]);
+const Bills = lazy(loaders[3]);
+const Wealth = lazy(loaders[4]);
 // fetch the other pages' code while idle so switching never waits on a download
 (window.requestIdleCallback || ((f) => setTimeout(f, 1200)))(() => loaders.forEach((l) => l()));
 
@@ -18,12 +21,12 @@ const Settings = lazy(loaders[2]);
 const linkedSession = (() => { const v = new URLSearchParams(location.search).get("s"); return v && /^[A-Za-z0-9_-]{8,64}$/.test(v) ? v : null; })();
 if (linkedSession) history.replaceState(null, "", location.pathname + location.hash);
 const boot = bootstrapAuth();
-const TITLES = { overview: "资金总览", features: "功能", settings: "设置" };
+const TITLES = { overview: "资金总览", bills: "账单与订阅", wealth: "理财", features: "功能", settings: "设置" };
 
 function readRoute() {
   const path = location.pathname.replace(/\/+$/, "");
   const page = path.split("/")[1] || "chat";
-  return ["chat", "overview", "features", "settings"].includes(page) ? page : "chat";
+  return ["chat", "overview", "bills", "wealth", "features", "settings"].includes(page) ? page : "chat";
 }
 
 export default function App() {
@@ -100,6 +103,8 @@ export default function App() {
         )}
         <Suspense fallback={<div className="page"><div className="inner muted">读取中…</div></div>}>
           {route === "overview" && <Overview openSession={selectSession} ask={ask} openProof={(url) => setProof(url)} />}
+          {route === "bills" && <Bills ask={ask} />}
+          {route === "wealth" && <Wealth ask={ask} />}
           {route === "features" && <Features capabilities={capabilities} refresh={refreshCapabilities} ask={ask} navigate={navigate} />}
           {route === "settings" && <Settings capabilities={capabilities} refresh={refreshCapabilities} tab={settingsTab} setTab={setSettingsTab} devMode={devMode} setDevMode={setDevMode}
             onSignOut={() => { auth.clear(); setAuthed(false); }} />}

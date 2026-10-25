@@ -46,15 +46,18 @@ def build(embed_zip: Path, out_dir: Path, py_version: str, name: str) -> Path:
     pth = next(pydir.glob("python3*._pth"), None)
     if pth is None:
         raise SystemExit("embeddable zip has no python3*._pth file")
-    # import path: stdlib zip, the runtime dir, bundled packages and the project root
+    # import path: stdlib zip, the runtime dir and bundled packages. The project root is added by a .pth file inside
+    # site-packages (below): Windows resolved "../.." in python3*._pth one level short (runtime\ instead of TRUSTA\),
+    # while .pth lines are joined to their site directory and normalised by site.py itself.
     zips = [p.name for p in pydir.glob("python3*.zip")]
-    pth.write_text("\n".join(zips + [".", "../site-packages", "../..", "import site", ""]), encoding="utf-8")
+    pth.write_text("\n".join(zips + [".", "../site-packages", "import site", ""]), encoding="utf-8")
 
     site = runtime / "site-packages"
     subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--no-compile", "--target", str(site),
                     "--platform", "win_amd64", "--python-version", py_version, "--implementation", "cp",
                     "--only-binary=:all:", "-r", str(ROOT / "requirements.txt"), "-r", str(ROOT / "requirements-channels.txt")],
                    check=True)
+    (site / "trusta-root.pth").write_text("../..\n", encoding="utf-8")  # runtime/site-packages/../.. = the TRUSTA folder
 
     (stage / "README-先读我.txt").write_text(
         "TRUSTA 便携版（Windows x64）\r\n\r\n"

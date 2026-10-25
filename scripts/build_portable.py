@@ -46,9 +46,8 @@ def build(embed_zip: Path, out_dir: Path, py_version: str, name: str) -> Path:
     pth = next(pydir.glob("python3*._pth"), None)
     if pth is None:
         raise SystemExit("embeddable zip has no python3*._pth file")
-    # import path: stdlib zip, the runtime dir and bundled packages. The project root is added by a .pth file inside
-    # site-packages (below): Windows resolved "../.." in python3*._pth one level short (runtime\ instead of TRUSTA\),
-    # while .pth lines are joined to their site directory and normalised by site.py itself.
+    # import path: stdlib zip, the runtime dir and bundled packages. The TRUSTA folder itself is added by
+    # sitecustomize.py (below): on Windows a "../.." line here resolved one level short (runtime instead of TRUSTA).
     zips = [p.name for p in pydir.glob("python3*.zip")]
     pth.write_text("\n".join(zips + [".", "../site-packages", "import site", ""]), encoding="utf-8")
 
@@ -57,7 +56,13 @@ def build(embed_zip: Path, out_dir: Path, py_version: str, name: str) -> Path:
                     "--platform", "win_amd64", "--python-version", py_version, "--implementation", "cp",
                     "--only-binary=:all:", "-r", str(ROOT / "requirements.txt"), "-r", str(ROOT / "requirements-channels.txt")],
                    check=True)
-    (site / "trusta-root.pth").write_text("../..\n", encoding="utf-8")  # runtime/site-packages/../.. = the TRUSTA folder
+    # Embedded Python imports sitecustomize at start-up ("import site" in the ._pth); it puts the TRUSTA folder
+    # (runtime/site-packages/../..) on sys.path so `python -m backend.server` works from any working directory.
+    (site / "sitecustomize.py").write_text(
+        "import os, sys\n"
+        "_root = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))\n"
+        "if _root not in sys.path:\n"
+        "    sys.path.append(_root)\n", encoding="utf-8")
 
     (stage / "README-先读我.txt").write_text(
         "TRUSTA 便携版（Windows x64）\r\n\r\n"

@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
   push:
     tags: ["v*"]
+    branches: ["ci/packages"]   # push here to test packaging without publishing a release
 
 permissions:
   contents: write
@@ -44,8 +45,15 @@ jobs:
           Expand-Archive TRUSTA-windows-x64.zip -DestinationPath pkg
           $py = Resolve-Path pkg/TRUSTA/runtime/python/python.exe
           Push-Location pkg/TRUSTA
-          & $py -c "import backend.server, scripts.setup, scripts.pair, scripts.feishu_worker; print('imports ok')"
-          if ($LASTEXITCODE -ne 0) { Write-Host "::error::imports failed"; exit 1 }
+          foreach ($m in @('backend.server', 'scripts.setup', 'scripts.pair', 'scripts.feishu_worker')) {
+            $out = & $py -c "import $m; print('ok $m')" 2>&1 | Out-String
+            Write-Host $out
+            if ($LASTEXITCODE -ne 0) {
+              $lines = ($out -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 12) -join ' | '
+              Write-Host "::error::import $m failed: $lines"
+              exit 1
+            }
+          }
           # no PYTHONIOENCODING on purpose: the runner's console is not UTF-8, like many real Windows machines
           $server = Start-Process -FilePath $py -ArgumentList @('-m', 'backend.server') -PassThru -NoNewWindow `
             -RedirectStandardOutput server-out.txt -RedirectStandardError server-err.txt

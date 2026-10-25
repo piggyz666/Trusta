@@ -1,7 +1,7 @@
 // Landing page copy, Chinese and English. Facts come from the README, docs/ and the benchmark files.
 export const COPY = {
   zh: {
-    nav: { product: "产品", trust: "可信机制", install: "安装", docs: "文档", lang: "EN", langLabel: "Switch to English", theme: "切换深浅色" },
+    nav: { product: "产品", beyond: "理财与生活", trust: "可信机制", install: "安装", docs: "文档", lang: "EN", langLabel: "Switch to English", theme: "切换深浅色" },
     hero: {
       tags: ["运行在你自己的电脑上", "多 Agent 签名通信", "每笔操作由你授权"],
       start: "开始使用", docs: "阅读文档", github: "GitHub", hint: "移动鼠标，划过这个词",
@@ -9,7 +9,7 @@ export const COPY = {
     statement: {
       kicker: "TRUSTA 银行助手",
       big: ["AI 提议，", "你授权。"],
-      body: "一句话办理转账、账单、理财、卡片和跨场景安排。TRUSTA 运行在你自己的电脑上，大模型只能提出方案；每一笔资金操作，都要你在确认卡上亲手授权。",
+      body: "一句话办理转账、账单、理财、卡片和跨场景安排，也能帮你查机票、演出。TRUSTA 运行在你自己的电脑上，大模型只能提出方案；每一笔资金操作，都要你在确认卡上亲手授权。",
     },
     product: {
       kicker: "能做什么",
@@ -18,9 +18,9 @@ export const COPY = {
       scenes: [
         ["智能转账", ["给张三转500元", "每月1号给房东转3000"], "按姓名、手机号、称呼找人；支持定时、周期和备注，确认卡上可以直接改金额。"],
         ["账单分析", ["这个月花了多少钱", "上个月外卖花了多少"], "分类占比一目了然，点一类看明细，异常消费自动标出。"],
-        ["理财", ["推荐适合我的理财", "做一下风险测评"], "按你的风险等级筛选，对比后在卡片上直接申购或赎回。"],
+        ["理财", ["根据我的消费推荐理财", "今天金价多少"], "按你的消费留足备用金、按风险等级配置；对比后在卡片上申购或赎回。"],
         ["卡片管理", ["我的卡丢了", "关闭信用卡境外交易"], "挂失需要验证码；境外、线上、闪付开关在卡片上直接拨动。"],
-        ["订阅与代扣", ["我有哪些订阅", "最近有什么要续费"], "列出即将扣费的订阅和代扣，不想要的逐项取消。"],
+        ["订阅与代扣", ["我有哪些订阅", "最近有什么要续费"], "自动识别周期扣费，列出即将扣费的订阅和代扣，不想要的逐项取消。"],
         ["跨场景联动", ["下周去日本玩5天，帮我安排一下", "工资到账后存1000到心愿金"], "核对余额、赎回理财、开通境外交易、返程自动关闭、超预算提醒，每一步都等你确认。"],
       ],
     },
@@ -44,6 +44,32 @@ export const COPY = {
       footDoneRead: "只读查询直接执行，同样每一步签名。",
       footDone: "完成。每一次交接都留下了可离线验证的签名证据。",
       replay: "重新演示", note: "演示动画，不连接真实银行", handoffs: "Agent 交接记录（每条都签名）", auto: "自动演示中", authorised: "已授权",
+    },
+    beyond: {
+      kicker: "不止转账",
+      title: "钱怎么放，钱去了哪，钱拿去做什么。",
+      lead: "除了办理业务，TRUSTA 还会帮你看清固定开销、按自己的消费配理财，并把出行和演出的查询直接带到官方平台。页面上的数字都来自你的账户和公开行情，不由模型编造。",
+      sample: "界面示意",
+      blocks: [
+        { key: "wealth", label: "理财", title: "按你的消费配理财",
+          body: "先看近三个月平均每月花多少、有哪些固定扣费，留足三个月备用金放在随时可取的产品里，剩下的按你的风险等级分到稳健、增强、进取三部分，每部分尽量选不同机构的产品。",
+          points: ["黄金和美元、欧元、日元、港币参考行情，每个数字标来源和时间，附汇率换算", "19 款产品来自 7 家机构：存款、现金管理、债基、黄金、指数基金、QDII",
+                   "高于风险等级的产品看得到、买不了；不荐个股，不承诺收益"] },
+        { key: "bills", label: "账单与订阅", title: "自动识别还没登记的订阅",
+          body: "同一商户、同一金额，约一个月扣一次、连续三次，就标出来问你：是你在用的服务，以后扣费前三天提醒；不认识，就先冻结卡片或转人工止损。",
+          points: ["每月固定支出和未来 30 天的扣费时间线", "取消订阅、关闭代扣仍然要在确认卡上授权", "同一条提醒只说一次，不会每开一个对话都重复"] },
+        { key: "life", label: "生活服务", title: "机票、火车、酒店、演出，一句话带条件跳转",
+          body: "说“下周五北京到上海的机票”，TRUSTA 从原话里取出城市和日期，生成直接打开查询结果的链接；缺什么就追问。交易在官方平台完成，本行不经手、不代付。",
+          points: ["携程机票（单程、往返、国际）、12306、携程酒店、大麦", "生活缴费、社保医保给出官方入口", "只跳转白名单里的网站；话里涉及银行操作，仍走银行流程"] },
+      ],
+      mock: {
+        quotes: [["黄金", "元/克", "958.20"], ["美元", "元", "7.1123"], ["日元", "元/100", "4.6312"]],
+        why: "近 3 个月平均每月开销 ¥3,012 → 留 3 个月备用金",
+        buckets: [["备用金", "¥9,100", "活钱管理A · 云杉货币A", 60], ["稳健", "¥4,000", "稳健30天持有 · 松溪稳健增值1号", 27], ["增强", "¥1,900", "黄金积存", 13]],
+        detected: { tag: "疑似订阅", merchant: "未登记商户", amount: "¥15.00", every: "/ 约 31 天", meta: "已扣 3 次 · 下次约 11月2日", yes: "是我的订阅", no: "不认识这笔" },
+        upcoming: [["11月1日", "视频会员", "¥19.99"], ["11月1日", "电费代扣", "¥120.00"]],
+        say: "下周五北京到上海的机票", card: "机票", fields: [["行程", "北京 → 上海"], ["出发", "10月30日（周五）"]], go: "去查询 · 携程 ↗", note: "跳转第三方，本行不参与交易",
+      },
     },
     tiers: {
       title: "三级权限，风险越高，确认越严。",
@@ -138,7 +164,7 @@ export const COPY = {
   },
 
   en: {
-    nav: { product: "Product", trust: "Trust", install: "Install", docs: "Docs", lang: "中文", langLabel: "切换到中文", theme: "Toggle light / dark" },
+    nav: { product: "Product", beyond: "Wealth & life", trust: "Trust", install: "Install", docs: "Docs", lang: "中文", langLabel: "切换到中文", theme: "Toggle light / dark" },
     hero: {
       tags: ["Runs on your machine", "Signed agent-to-agent messages", "You authorise every action"],
       start: "Get started", docs: "Read the docs", github: "GitHub", hint: "Move across the word",
@@ -146,7 +172,7 @@ export const COPY = {
     statement: {
       kicker: "TRUSTA banking assistant",
       big: ["AI proposes.", "You decide."],
-      body: "Transfers, spending, investments, cards and multi-step plans, all in a sentence. TRUSTA runs on your own computer. The language model can only propose; every money movement waits for you to authorise it on a confirmation card.",
+      body: "Transfers, spending, investments, cards and multi-step plans, all in a sentence, plus flight and show searches. TRUSTA runs on your own computer. The language model can only propose; every money movement waits for you to authorise it on a confirmation card.",
     },
     product: {
       kicker: "What it does",
@@ -155,9 +181,9 @@ export const COPY = {
       scenes: [
         ["Transfers", ["Send ¥500 to Zhang San", "Pay my landlord ¥3,000 on the 1st of every month"], "Find people by name, phone number or how you call them; scheduled, recurring and with a memo. Edit the amount right on the card."],
         ["Spending", ["How much did I spend this month?", "How much went on takeaway last month?"], "Category breakdown at a glance, tap a category for the details, unusual spending flagged automatically."],
-        ["Investments", ["Recommend something that suits me", "Run my risk assessment"], "Filtered by your risk level; compare, then subscribe or redeem from the card."],
+        ["Investments", ["Suggest investments based on my spending", "What's the gold price today?"], "Keeps a cash reserve sized to your spending, allocates the rest by risk level; compare, then subscribe or redeem from the card."],
         ["Cards", ["I lost my card", "Turn off overseas payments on my credit card"], "Reporting a card lost needs a one-time code; overseas, online and contactless switches flip in place."],
-        ["Subscriptions", ["What am I subscribed to?", "What's renewing soon?"], "Upcoming subscriptions and direct debits in one list; cancel the ones you don't want."],
+        ["Subscriptions", ["What am I subscribed to?", "What's renewing soon?"], "Spots recurring charges, lists upcoming subscriptions and direct debits; cancel the ones you don't want."],
         ["Across scenarios", ["I'm going to Japan for 5 days next week, sort it out", "When my salary lands, put ¥1,000 in my wish fund"], "Check the balance, redeem an investment, enable overseas payments, switch them off on return, warn when over budget — each step waits for you."],
       ],
     },
@@ -181,6 +207,32 @@ export const COPY = {
       footDoneRead: "Read-only queries run directly, and every step is still signed.",
       footDone: "Done. Every hand-off left signed evidence you can verify offline.",
       replay: "Replay", note: "Animated demo, no real bank involved", handoffs: "Agent hand-offs (each one signed)", auto: "Playing", authorised: "Authorised",
+    },
+    beyond: {
+      kicker: "Beyond payments",
+      title: "Where your money sits, where it goes, what it's for.",
+      lead: "Besides getting things done, TRUSTA shows your fixed outgoings, sizes investments to your own spending, and takes travel and show searches straight to the official sites. Every figure comes from your account or a public quote, never from the model.",
+      sample: "Illustration",
+      blocks: [
+        { key: "wealth", label: "Wealth", title: "Investing sized to how you spend",
+          body: "It looks at your average monthly spending and fixed charges over the last three months, keeps three months of that in products you can withdraw any time, and splits the rest by your risk level into steady, enhanced and growth parts, picking different issuers where it can.",
+          points: ["Reference quotes for gold and USD, EUR, JPY, HKD, each with its source and time, plus a converter", "19 products from 7 issuers: deposits, cash management, bond funds, gold, index funds, QDII",
+                   "Products above your risk level are visible but can't be bought; no stock tips, no promised returns"] },
+        { key: "bills", label: "Bills & subscriptions", title: "Spots subscriptions you never registered",
+          body: "The same merchant and amount, about a month apart, three times in a row: TRUSTA flags it and asks. If it's yours, you're reminded three days before each charge; if not, freeze the card or reach a person first.",
+          points: ["Fixed monthly spend and a 30-day timeline of upcoming charges", "Cancelling a subscription or direct debit still needs your OK on a card", "Each reminder is said once, not repeated in every new chat"] },
+        { key: "life", label: "Everyday services", title: "Flights, trains, hotels, shows — one sentence, a pre-filled search",
+          body: "Say “flights from Beijing to Shanghai next Friday” and TRUSTA takes the cities and date from your words and builds a link that opens the results directly, asking for anything missing. Booking happens on the official site; the bank never handles or pays for it.",
+          points: ["Ctrip flights (one-way, return, international), 12306 rail, Ctrip hotels, Damai shows", "Official entry points for utility bills and social insurance", "Only allow-listed sites; anything that touches your account still goes through the bank"] },
+      ],
+      mock: {
+        quotes: [["Gold", "CNY/g", "958.20"], ["USD", "CNY", "7.1123"], ["JPY", "CNY/100", "4.6312"]],
+        why: "Average monthly outgoings ¥3,012 → keep three months in reserve",
+        buckets: [["Reserve", "¥9,100", "Cash mgmt A · Money fund A", 60], ["Steady", "¥4,000", "30-day hold · Stable growth No.1", 27], ["Enhanced", "¥1,900", "Gold accumulation", 13]],
+        detected: { tag: "Possible subscription", merchant: "Unregistered merchant", amount: "¥15.00", every: "/ ~31 days", meta: "Charged 3 times · next around 2 Nov", yes: "It's mine", no: "Don't know it" },
+        upcoming: [["1 Nov", "Video membership", "¥19.99"], ["1 Nov", "Electricity debit", "¥120.00"]],
+        say: "Flights Beijing to Shanghai next Friday", card: "Flights", fields: [["Route", "Beijing → Shanghai"], ["Depart", "Fri 30 Oct"]], go: "Search · Ctrip ↗", note: "Opens a third-party site; the bank takes no part",
+      },
     },
     tiers: {
       title: "Three tiers. The riskier it is, the stricter the check.",

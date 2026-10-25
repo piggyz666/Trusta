@@ -171,26 +171,6 @@ export function createWater(canvas, options = {}) {
 
   let a, b, floor, sw, sh, light = 0, frost = 0;
   const seed = Math.random() * 100;
-  const pictures = {};
-  function loadPicture(name) {
-    if (name in pictures) return;
-    pictures[name] = null;
-    const img = new Image();
-    img.onload = () => { pictures[name] = img; paintFloor(); render(0); };
-    img.src = `/bg/${name}.jpg`;
-  }
-  function uploadCover(img) {
-    // draw the picture "object-fit: cover" into the floor texture
-    const c2 = document.createElement("canvas"); c2.width = floor.w; c2.height = floor.h;
-    const g = c2.getContext("2d");
-    const k = Math.max(floor.w / img.width, floor.h / img.height), w = img.width * k, h = img.height * k;
-    g.drawImage(img, (floor.w - w) / 2, (floor.h - h) / 2, w, h);
-    gl.bindTexture(gl.TEXTURE_2D, floor.tex);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c2);
-    mip();
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-  }
   function mip() {
     if (!isWebGL2) return;
     gl.bindTexture(gl.TEXTURE_2D, floor.tex);
@@ -198,9 +178,7 @@ export function createWater(canvas, options = {}) {
     gl.generateMipmap(gl.TEXTURE_2D);
   }
   function paintFloor() {
-    const name = light ? "floor-light" : "floor-dark";
-    if (pictures[name]) { uploadCover(pictures[name]); return; }
-    loadPicture(name);
+    // the floor is procedural; no photo is shipped (requesting one only produced a 404 on every load)
     P.floor.use();
     gl.uniform2f(P.floor.u.res, canvas.width, canvas.height);
     gl.uniform1f(P.floor.u.light, light);

@@ -62,6 +62,7 @@ export function Nav({ c, lang, setLang, theme, toggleTheme }) {
       </a>
       <nav aria-label={lang === "zh" ? "页面导航" : "Site"}>
         <a className="wide" href="#product">{c.nav.product}</a>
+        <a className="wide" href="#beyond">{c.nav.beyond}</a>
         <a className="wide" href="#trust">{c.nav.trust}</a>
         <a className="wide" href="#install">{c.nav.install}</a>
         <a href={DOCS}>{c.nav.docs}</a>
@@ -256,6 +257,67 @@ export function Product({ c }) {
           </Reveal>
         ))}
       </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------- beyond ----
+function Mock({ kind, m, sample }) {
+  if (kind === "wealth") return (
+    <div className="mock" aria-hidden="true">
+      <span className="mock-tag">{sample}</span>
+      <div className="mock-quotes">{m.quotes.map(([n, u, v], i) => (
+        <div key={n} className={i === 0 ? "gold" : ""}><small>{n}</small><b>{v}</b><small>{u}</small></div>))}</div>
+      <p className="mock-why">{m.why}</p>
+      <div className="mock-bar">{m.buckets.map(([n, , , w], i) => <i key={n} className={`b${i}`} style={{ width: w + "%" }} />)}</div>
+      <ul className="mock-buckets">{m.buckets.map(([n, amt, items], i) => (
+        <li key={n}><span className={`sw b${i}`} /><b>{n}</b><span className="amt">{amt}</span><small>{items}</small></li>))}</ul>
+    </div>
+  );
+  if (kind === "bills") return (
+    <div className="mock" aria-hidden="true">
+      <span className="mock-tag">{sample}</span>
+      <div className="mock-detect">
+        <div className="row"><b>{m.detected.merchant}</b><span className="pill">{m.detected.tag}</span></div>
+        <div className="big">{m.detected.amount}<small> {m.detected.every}</small></div>
+        <small>{m.detected.meta}</small>
+        <div className="row btns"><span className="b solid">{m.detected.yes}</span><span className="b">{m.detected.no}</span></div>
+      </div>
+      <ul className="mock-up">{m.upcoming.map(([d, n, a]) => <li key={n}><span>{d}</span><b>{n}</b><span className="amt">{a}</span></li>)}</ul>
+    </div>
+  );
+  return (
+    <div className="mock" aria-hidden="true">
+      <span className="mock-tag">{sample}</span>
+      <div className="mock-say">{m.say}</div>
+      <div className="mock-card">
+        <div className="row"><b>{m.card}</b><span className="pill">↗</span></div>
+        <dl>{m.fields.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+        <span className="b solid">{m.go}</span>
+        <small>{m.note}</small>
+      </div>
+    </div>
+  );
+}
+
+export function Beyond({ c }) {
+  const b = c.beyond;
+  return (
+    <section id="beyond" className="beyond wrap" aria-labelledby="beyond-title">
+      <Reveal as="p" className="kicker">{b.kicker}</Reveal>
+      <Reveal as="h2" id="beyond-title" className="h2" delay={60}>{b.title}</Reveal>
+      <Reveal as="p" className="lede narrow" delay={120}>{b.lead}</Reveal>
+      {b.blocks.map((block, i) => (
+        <div key={block.key} className={`feature ${i % 2 ? "flip" : ""}`}>
+          <Reveal className="feature-text">
+            <p className="flabel">{block.label}</p>
+            <h3>{block.title}</h3>
+            <p>{block.body}</p>
+            <ul>{block.points.map((pt) => <li key={pt}>{pt}</li>)}</ul>
+          </Reveal>
+          <Reveal delay={100}><Mock kind={block.key} m={b.mock} sample={b.sample} /></Reveal>
+        </div>
+      ))}
     </section>
   );
 }

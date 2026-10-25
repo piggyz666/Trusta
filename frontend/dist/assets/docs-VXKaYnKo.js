@@ -257,12 +257,13 @@ Set “when … then …” rules in a sentence, for example “remind me when t
 - Actions: remind, transfer, save to wish fund, buy an investment, freeze a card, switch off a card control, hand off to a human.
 - A rule only takes effect after you confirm it; when it fires, money operations still wait for your confirmation one by one.
 
-## Bills and Wealth pages
+## Bills, Wealth and Everyday services pages
 
-Two pages in the side navigation show things at a glance:
+Three pages in the side navigation show things at a glance:
 
 - **Bills & subscriptions**: fixed monthly spend, a 30-day timeline of upcoming charges, and registered subscriptions and direct debits. TRUSTA also looks for repeating charges in your history: the same merchant and amount, 25–35 days apart, three times. Those appear as "possible subscriptions" and you are told once in the chat. You can confirm one (you will then be reminded 3 days before each charge), mark it as unknown (you get stop-loss options such as freezing the card or reaching a person), or dismiss it.
-- **Wealth**: reference quotes for gold and USD, EUR, JPY and HKD against CNY (every number shows its source and time; refresh any time; when offline the last value is shown and labelled), your risk level, your holdings, and the bank's product shelf with term, minimum, liquidity, benchmark and risk notes. Products above your risk level are shown but cannot be bought.
+- **Wealth**: reference quotes for gold and USD, EUR, JPY and HKD against CNY (every number shows its source and time; refresh any time; when offline the last value is shown and labelled), your risk level, your holdings, and the bank's product shelf with term, minimum, liquidity, benchmark and risk notes. Products above your risk level are shown but cannot be bought. "为你推荐" keeps three months of your recent spending as a cash reserve and splits the rest by risk level, spreading across issuers; asking "根据我的消费推荐理财" in chat gives the same plan.
+- **Everyday services**: official entry points for flights, trains, hotels, shows, films, utility bills and social insurance. Say "下周五北京到上海的机票" or "上海最近有什么演唱会" and the city and date are taken from your words into a card that opens the results directly (Ctrip, 12306, Damai and others); if the departure city is missing, you are asked. Only allow-listed sites are linked; the bank takes no part in the purchase.
 
 Every cancel, buy or redeem button on these pages goes back into the chat as a confirmation card, under the same authorisation as asking in words. TRUSTA does not recommend individual stocks and never promises returns.
 
@@ -1114,12 +1115,13 @@ TRUSTA 的每次回复由一段文字和若干张卡片组成。文字负责说�
 - 动作：提醒、转账、存心愿金、申购理财、冻结卡、关闭交易开关、转人工。
 - 规则要你确认后才生效；触发时涉及资金的操作仍然逐笔请你确认。
 
-## 账单与订阅、理财两个页面
+## 账单与订阅、理财、生活服务页面
 
-左侧导航里有两个独立页面，方便不开口也能看清楚：
+左侧导航里有三个独立页面，方便不开口也能看清楚：
 
 - **账单与订阅**：每月固定支出、未来 30 天的扣费时间线、已登记的订阅和代扣。TRUSTA 会从流水里找周期扣费：同一商户、同一金额，间隔 25–35 天扣满 3 次，就列为“疑似订阅”，并在对话里提醒你一次。你可以确认“是我的订阅”（之后扣费前 3 天提醒）、标记“不认识”（给出冻结卡片、转人工等止损办法）或忽略。
-- **理财**：黄金和美元、欧元、日元、港币的参考行情（每个数字都标来源和数据时间，可手动刷新；断网时显示最近一次的数据并注明），你的风险等级，持仓，以及本行在售产品（期限、起购金额、申赎规则、业绩比较基准和风险提示）。高于你风险等级的产品会显示但不能申购。
+- **理财**：黄金和美元、欧元、日元、港币的参考行情（每个数字都标来源和数据时间，可手动刷新；断网时显示最近一次的数据并注明），你的风险等级，持仓，以及本行在售产品（期限、起购金额、申赎规则、业绩比较基准和风险提示）。高于你风险等级的产品会显示但不能申购。“为你推荐”按近三个月消费留足三个月备用金，其余按风险等级分配，每部分尽量选不同机构的产品；在对话里说“根据我的消费推荐理财”也能得到同样的方案。
+- **生活服务**：机票、火车票、酒店、演出、电影、生活缴费、社保医保的官方入口。在对话里说“下周五北京到上海的机票”“上海最近有什么演唱会”，会从原话里取出城市和日期，给一张直接打开查询结果的卡片（携程、12306、大麦等）；缺出发地就追问。只跳转白名单网站，本行不参与交易、不代付。
 
 两个页面上的“取消”“申购”“赎回”按钮都会回到对话里生成确认卡，和直接说出来走同一套授权。TRUSTA 不推荐个股，也不承诺收益。
 

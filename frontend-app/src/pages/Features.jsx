@@ -5,8 +5,8 @@ import { bankName } from "../format.js";
 
 const EXAMPLES = {
   transfer: ["给张三转500元", "每月1号给房东转3000"], payee_add: ["新增收款人李四，尾号6688"], split: ["昨晚聚餐600，我和张三李四AA"],
-  bills: ["这个月花了多少钱", "上个月外卖花了多少"], balance: ["查一下余额"], wealth: ["推荐适合我的理财", "对比一下稳健型产品"],
-  risk_assessment: ["做一下风险测评"], cards: ["我的卡丢了", "关闭信用卡境外交易"], subscriptions: ["我有哪些订阅", "最近有什么要续费"],
+  bills: ["这个月花了多少钱", "上个月外卖花了多少"], balance: ["查一下余额"], wealth: ["推荐适合我的理财", "根据我的消费推荐理财", "今天金价多少"],
+  risk_assessment: ["做一下风险测评"], cards: ["我的卡丢了", "关闭信用卡境外交易"], subscriptions: ["我有哪些订阅", "最近有什么要续费"], life: ["帮我查下周五北京到上海的机票", "上海最近有什么演唱会"],
   wish_fund: ["下个月妈妈生日，帮我存2000买礼物"], automation: ["外卖每月超过800就提醒我", "余额低于1000提醒我"],
   automation_income: ["工资到账后存1000到心愿金"], automation_tighten: ["单笔超过5000自动冻结信用卡"],
   trip: ["下周去日本玩5天，帮我安排一下"], income: ["最近有哪些入账"], protection: ["有人自称警察让我转账到安全账户"],

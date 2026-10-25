@@ -60,12 +60,13 @@ Set “when … then …” rules in a sentence, for example “remind me when t
 - Actions: remind, transfer, save to wish fund, buy an investment, freeze a card, switch off a card control, hand off to a human.
 - A rule only takes effect after you confirm it; when it fires, money operations still wait for your confirmation one by one.
 
-## Bills and Wealth pages
+## Bills, Wealth and Everyday services pages
 
-Two pages in the side navigation show things at a glance:
+Three pages in the side navigation show things at a glance:
 
 - **Bills & subscriptions**: fixed monthly spend, a 30-day timeline of upcoming charges, and registered subscriptions and direct debits. TRUSTA also looks for repeating charges in your history: the same merchant and amount, 25–35 days apart, three times. Those appear as "possible subscriptions" and you are told once in the chat. You can confirm one (you will then be reminded 3 days before each charge), mark it as unknown (you get stop-loss options such as freezing the card or reaching a person), or dismiss it.
-- **Wealth**: reference quotes for gold and USD, EUR, JPY and HKD against CNY (every number shows its source and time; refresh any time; when offline the last value is shown and labelled), your risk level, your holdings, and the bank's product shelf with term, minimum, liquidity, benchmark and risk notes. Products above your risk level are shown but cannot be bought.
+- **Wealth**: reference quotes for gold and USD, EUR, JPY and HKD against CNY (every number shows its source and time; refresh any time; when offline the last value is shown and labelled), your risk level, your holdings, and the bank's product shelf with term, minimum, liquidity, benchmark and risk notes. Products above your risk level are shown but cannot be bought. "为你推荐" keeps three months of your recent spending as a cash reserve and splits the rest by risk level, spreading across issuers; asking "根据我的消费推荐理财" in chat gives the same plan.
+- **Everyday services**: official entry points for flights, trains, hotels, shows, films, utility bills and social insurance. Say "下周五北京到上海的机票" or "上海最近有什么演唱会" and the city and date are taken from your words into a card that opens the results directly (Ctrip, 12306, Damai and others); if the departure city is missing, you are asked. Only allow-listed sites are linked; the bank takes no part in the purchase.
 
 Every cancel, buy or redeem button on these pages goes back into the chat as a confirmation card, under the same authorisation as asking in words. TRUSTA does not recommend individual stocks and never promises returns.
 

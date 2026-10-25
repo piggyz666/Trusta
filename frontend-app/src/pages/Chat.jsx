@@ -5,7 +5,7 @@ import { stirInk } from "../components/Backdrop.jsx";
 import { Icon, useToast } from "../components/ui.jsx";
 import { uid } from "../format.js";
 
-const SUGGESTIONS = ["查一下余额", "这个月花了多少钱", "给张三转500元", "我的卡丢了", "推荐适合我的理财", "外卖每月超过800就提醒我"];
+const SUGGESTIONS = ["查一下余额", "这个月花了多少钱", "给张三转500元", "我的卡丢了", "根据我的消费推荐理财", "下周五北京到上海的机票", "外卖每月超过800就提醒我"];
 const STAGES = { "turn.started": "收到", "guard.result": "安全检查", "intent.recognized": "理解意图", "tool.started": "调用银行", "plan.created": "生成计划", card: "生成卡片" };
 
 function Composer({ value, setValue, onSend, busy, onStop, autoFocus, placeholder }) {

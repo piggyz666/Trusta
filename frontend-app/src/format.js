@@ -41,6 +41,15 @@ export function dayBucket(seconds) {
   return `${d.getFullYear()}年${d.getMonth() + 1}月`;
 }
 
+// chats expire after 24 h, so the sidebar only needs: today, yesterday, everything older
+export function chatBucket(seconds) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+  if (seconds >= start) return "今天";
+  if (seconds >= start - 86400) return "昨天";
+  return "更早";
+}
+
 export const TIER = {
   GREEN: { label: "直接执行", tone: "green", past: "绿色 · 只读" },
   YELLOW: { label: "需你确认", tone: "amber", past: "黄色 · 本人确认" },

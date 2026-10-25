@@ -158,8 +158,8 @@ class ChatService(AutomationMixin):
         except Rejected:
             reminders = []
         for r in reminders:
-            key = "renewal:" + r["id"]
-            if r["status"] in {"DUE", "OVERDUE"} and key not in surfaced:
+            key = f"renewal:{r['id']}:{r['next_charge_at']}"
+            if r["status"] in {"DUE", "OVERDUE"} and key not in surfaced and self.store.claim_nudge(owner, key):
                 surfaced.append(key)
                 when = datetime.fromtimestamp(r["next_charge_at"], CHINA).strftime("%m月%d日")
                 messages.append({"role": "assistant", "message_id": "nudge-" + r["id"][:12], "at": time.time(), "cards": [],
@@ -170,8 +170,12 @@ class ChatService(AutomationMixin):
             day = date(today.year, event["month"], event["day"])
             if day < today:
                 day = date(today.year + 1, event["month"], event["day"])
-            days, key = (day - today).days, f"life:{event['id']}:{day.year}"
+            days = (day - today).days
+            # once when it first comes into view, once more in the final three days; never on every new chat
+            key = f"life:{event['id']}:{day.year}:{'soon' if days <= 3 else 'ahead'}"
             if not 0 < days <= 30 or key in surfaced or any(event["relation"] in n or event["person"] in n for n in funds):
+                continue
+            if not self.store.claim_nudge(owner, key):
                 continue
             surfaced.append(key)
             kind = "生日" if event["kind"] == "BIRTHDAY" else "纪念日"

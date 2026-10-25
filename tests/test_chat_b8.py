@@ -300,3 +300,5 @@ class TakeoverUndoPlanTests(ChatHarness):
         self.assertTrue(any("演示视频" in t and "扣费" in t for t in texts))
         again = self.chat.get(session["session_id"], "demo")
         self.assertEqual(len(again["messages"]), len(session["messages"]))  # each nudge appears once
+        fresh = self.chat.create_session("demo", "test")  # a new chat must not repeat a nudge the user has already seen
+        self.assertFalse(any("生日" in m["text"] or "扣费" in m["text"] for m in fresh["messages"]))

@@ -20,6 +20,8 @@ class ChatStore:
                          "revision INTEGER NOT NULL, body TEXT NOT NULL)")
             conn.execute("CREATE TABLE IF NOT EXISTS chat_handoffs(id TEXT PRIMARY KEY, owner TEXT NOT NULL, session_id TEXT NOT NULL, "
                          "status TEXT NOT NULL, created_at REAL NOT NULL, body TEXT NOT NULL)")
+            conn.execute("CREATE TABLE IF NOT EXISTS chat_nudges(owner TEXT NOT NULL, key TEXT NOT NULL, at REAL NOT NULL, "
+                         "PRIMARY KEY(owner, key))")
             conn.execute("CREATE TABLE IF NOT EXISTS chat_llm_budget(day TEXT NOT NULL, owner TEXT NOT NULL, used INTEGER NOT NULL, "
                          "tokens INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(day, owner))")
 
@@ -28,6 +30,12 @@ class ChatStore:
         from datetime import datetime
         from backend.business import CHINA
         return datetime.fromtimestamp(time.time(), CHINA).date().isoformat()
+
+    def claim_nudge(self, owner, key):
+        """True only the first time this owner is shown this proactive nudge, across every conversation."""
+        with self.db.transaction() as conn:
+            return conn.execute("INSERT OR IGNORE INTO chat_nudges(owner, key, at) VALUES(?,?,?)",
+                                (owner, key, time.time())).rowcount == 1
 
     def reserve_llm_call(self, owner, limit):
         """Atomically reserve one model call for today (Asia/Shanghai). A failed call still consumes its slot,

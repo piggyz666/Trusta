@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, explain } from "../api.js";
-import { dayBucket } from "../format.js";
+import { chatBucket } from "../format.js";
 import { Icon, useToast } from "./ui.jsx";
 
 const NAV = [["chat", "对话", "chat"], ["overview", "资金总览", "ledger"], ["features", "功能", "spark"], ["settings", "设置", "gear"]];
@@ -21,7 +21,7 @@ export default function Sidebar({ open, onClose, route, sessionId, sessions, onS
 
   const groups = [];
   for (const s of sessions) {
-    const label = dayBucket(s.updated_at);
+    const label = chatBucket(s.updated_at);
     const group = groups.find((g) => g.label === label) || (groups.push({ label, items: [] }), groups[groups.length - 1]);
     group.items.push(s);
   }

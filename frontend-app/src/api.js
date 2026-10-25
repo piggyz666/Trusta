@@ -148,6 +148,7 @@ export const ERRORS = {
   SETTINGS_LOCAL_ONLY: "这项设置只能在运行 TRUSTA 的电脑上修改。",
   FEATURE_LOCKED: "这是安全底线功能，不能关闭。",
   ACTION_NOT_PENDING: "这项操作已经处理过或已失效。",
+  AUDIT_CHECKPOINT_PENDING: "回执已生成，还在等待写入签名检查点。请确认后台审计进程在运行，稍后再打开。",
   ACCOUNT_PROTECTION_ACTIVE: "账户处于转账保护期，对外转账已暂停。",
 };
 

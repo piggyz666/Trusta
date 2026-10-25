@@ -25,7 +25,7 @@ export function TraceDrawer({ target, onClose }) {
 
   return (
     <Drawer title="决策过程（开发者模式）" onClose={onClose}>
-      {!data && !error && <div className="muted">读取中…</div>}
+      {!data && !error && !waiting && <div className="muted">读取中…</div>}
       {error && <div className="muted">{error}</div>}
       {data && <div className="trace-body"><TraceBody data={data} /></div>}
     </Drawer>
@@ -102,7 +102,7 @@ export function EvidenceDrawer({ target, onClose }) {
   return (
     <Drawer title="签名证据包" onClose={onClose}>
       {error && <div className="muted">{error}</div>}
-      {!data && !error && <div className="muted">读取中…</div>}
+      {!data && !error && !waiting && <div className="muted">读取中…</div>}
       {data && <>
         <span>这笔查询或操作由六个 Agent 协作完成，每条 Agent 间消息都带发送方签名，并由运行时按因果顺序加签。证据包可以离线独立验证，不需要相信这台服务器。</span>
         <div className="panel" style={{ display: "grid", gap: 6 }}>
@@ -119,12 +119,24 @@ export function EvidenceDrawer({ target, onClose }) {
 export function ProofDrawer({ url, onClose }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
-  useEffect(() => { api.get(url).then(setData).catch((e) => setError(explain(e))); }, [url]);
+  const [waiting, setWaiting] = useState(false);
+  useEffect(() => {
+    // A receipt is sealed into the next audit checkpoint a few seconds after execution; until then, wait and retry.
+    let alive = true, tries = 0, timer = 0;
+    const load = () => api.get(url).then((d) => { if (alive) { setWaiting(false); setData(d); } }).catch((e) => {
+      if (!alive) return;
+      if (e.code === "AUDIT_CHECKPOINT_PENDING" && tries++ < 20) { setWaiting(true); timer = setTimeout(load, 2000); }
+      else { setWaiting(false); setError(explain(e)); }
+    });
+    load();
+    return () => { alive = false; clearTimeout(timer); };
+  }, [url]);
   const receipt = data?.receipt || data?.record?.receipt;
   return (
     <Drawer title="银行回执与证明" onClose={onClose}>
+      {waiting && <div className="muted">回执已生成，正在等待写入下一个签名检查点（通常几秒钟）…</div>}
       {error && <div className="muted">{error}</div>}
-      {!data && !error && <div className="muted">读取中…</div>}
+      {!data && !error && !waiting && <div className="muted">读取中…</div>}
       {data && <>
         <div className="result ok" style={{ padding: 0 }}><span className="mark">✓</span>
           <div>{data.anchor_verified ? "回执已纳入签名检查点，验证通过" : "回执已记录，检查点等待后台锚定"}</div></div>

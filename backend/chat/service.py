@@ -192,24 +192,8 @@ class ChatService(AutomationMixin):
                 when = datetime.fromtimestamp(at, CHINA).strftime("%m月%d日")
                 messages.append({"role": "assistant", "message_id": "nudge-due-" + digest({"k": key})[:10], "at": time.time(), "cards": [],
                                  "text": f"提醒：{d['merchant']} 预计在 {when} 左右再扣 {format_cents(d['amount_minor'])}（按过去的扣费间隔估算）。"})
-        today = datetime.now(CHINA).date()
-        funds = [f["name"] for f in self.s.service_agent.resources(owner, "wish_fund") if f["status"] == "ACTIVE"]
-        for event in self.s.service_agent.resources(owner, "life_event"):
-            day = date(today.year, event["month"], event["day"])
-            if day < today:
-                day = date(today.year + 1, event["month"], event["day"])
-            days = (day - today).days
-            # once when it first comes into view, once more in the final three days; never on every new chat
-            key = f"life:{event['id']}:{day.year}:{'soon' if days <= 3 else 'ahead'}"
-            if not 0 < days <= 30 or key in surfaced or any(event["relation"] in n or event["person"] in n for n in funds):
-                continue
-            if not self.store.claim_nudge(owner, key):
-                continue
-            surfaced.append(key)
-            kind = "生日" if event["kind"] == "BIRTHDAY" else "纪念日"
-            messages.append({"role": "assistant", "message_id": "nudge-" + event["id"][:12], "at": time.time(), "cards": [],
-                             "text": f"{event['relation']}{event['person']}的{kind}还有 {days} 天（{day.month}月{day.day}日）。"
-                                     f"需要我帮你提前锁定一笔心愿金，并在{kind}前两天预订鲜花和蛋糕吗？"})
+        # No unprompted life-event (birthday / anniversary) messages: they read as noise at the top of an unrelated
+        # conversation. Life events are still used when the customer asks, e.g. "妈妈生日帮我存2000".
         return messages
 
     def submit_assessment(self, session_id, owner, answers):

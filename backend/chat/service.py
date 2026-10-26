@@ -141,7 +141,6 @@ class ChatService(AutomationMixin):
                           "text": f"提醒：{label}到时间了，请确认后执行。" if any(c["type"] == "confirm" for c in new_cards)
                           else f"提醒：{label}到时间了，但这次没能生成待确认的操作。"})
         added += self._deliver_firings(body, owner)
-        added += self._proactive(body, owner, surfaced)
         if not added:
             return False
         del surfaced[:-200]
@@ -151,50 +150,6 @@ class ChatService(AutomationMixin):
         else:
             body["messages"].extend(added)
         return True
-
-    def _proactive(self, body, owner, surfaced):
-        """Proactive, read-only nudges (renewals due within 3 days, life events within 30 days). Never a proposal by itself."""
-        from datetime import datetime, date
-        from backend.business import CHINA
-        from backend.chat.amounts import format_cents
-        messages = []
-        try:
-            reminders = self.s.events.reminders(owner, body["default_account_id"])["reminders"]
-        except Rejected:
-            reminders = []
-        for r in reminders:
-            key = f"renewal:{r['id']}:{r['next_charge_at']}"
-            if r["status"] in {"DUE", "OVERDUE"} and key not in surfaced and self.store.claim_nudge(owner, key):
-                surfaced.append(key)
-                when = datetime.fromtimestamp(r["next_charge_at"], CHINA).strftime("%m月%d日")
-                messages.append({"role": "assistant", "message_id": "nudge-" + r["id"][:12], "at": time.time(), "cards": [],
-                                 "text": f"提醒：{r['merchant']} 将在 {when} 扣费 {format_cents(r['amount'])}。不需要的话，可以直接说“取消{r['merchant']}”。"})
-        try:
-            from backend.chat.pages import BillsPage
-            detected = BillsPage(self).detected(owner)
-        except Exception:
-            detected = []
-        for d in detected:
-            if d["state"] == "NEW":
-                key = "recurring:" + d["key"]
-                if key in surfaced or not self.store.claim_nudge(owner, key):
-                    continue
-                surfaced.append(key)
-                messages.append({"role": "assistant", "message_id": "nudge-rec-" + digest({"k": d["key"]})[:10], "at": time.time(), "cards": [],
-                                 "text": f"我发现一笔可能的订阅：{d['merchant']} 每月 {format_cents(d['amount_minor'])}，已经连续扣了 {d['count']} 次，"
-                                         f"但没有登记在你的订阅里。可以到“账单与订阅”确认是不是你在用的服务；不认识的话告诉我，我帮你冻结卡片或联系客服。"})
-            elif d["state"] == "CONFIRMED" and d["next_estimate"]:
-                at = d["next_estimate"]
-                key = f"recurring-due:{d['key']}:{int(at // 86400)}"
-                if not 0 <= at - time.time() <= 3 * 86400 or key in surfaced or not self.store.claim_nudge(owner, key):
-                    continue
-                surfaced.append(key)
-                when = datetime.fromtimestamp(at, CHINA).strftime("%m月%d日")
-                messages.append({"role": "assistant", "message_id": "nudge-due-" + digest({"k": key})[:10], "at": time.time(), "cards": [],
-                                 "text": f"提醒：{d['merchant']} 预计在 {when} 左右再扣 {format_cents(d['amount_minor'])}（按过去的扣费间隔估算）。"})
-        # No unprompted life-event (birthday / anniversary) messages: they read as noise at the top of an unrelated
-        # conversation. Life events are still used when the customer asks, e.g. "妈妈生日帮我存2000".
-        return messages
 
     def submit_assessment(self, session_id, owner, answers):
         from backend.chat import risk
@@ -263,6 +218,12 @@ class ChatService(AutomationMixin):
             if account not in {a["id"] for a in body["accounts"]}:
                 raise Rejected("ACCOUNT_ACCESS_DENIED")
             outcome = self._process(body, owner, text.strip(), account, emit)
+            if outcome.get("mode") not in {"error", "locked", "guard", "handoff"} and not outcome.get("risk"):
+                # Reminders and the "is this a subscription?" question only ever follow a reply, never open a chat.
+                from backend.chat.subscriptions_chat import SubscriptionTalk
+                notes = SubscriptionTalk(self).after_reply(body, owner, text.strip(), outcome.get("tools"))
+                if notes:
+                    outcome["text"] = (outcome["text"] + "\n\n" if outcome["text"] else "") + "\n".join(notes)
         except Exception as exc:  # The turn fails closed: no new proposal survives.
             code = exc.code if isinstance(exc, Rejected) else "CHAT_FAILED"
             self.s.audit.append(None, None, "CHAT_TURN_FAILED", "chat", {"session_id": session_id, "message_id": message_id, "code": code})
@@ -337,6 +298,11 @@ class ChatService(AutomationMixin):
         self._sync_events(body, owner, before_last=True)
         if self._state(body) == "HANDED_OFF":
             return self._handoff_message(body, owner, text)
+        from backend.chat.subscriptions_chat import SubscriptionTalk, is_declaration
+        talk = SubscriptionTalk(self)
+        said = talk.answer(body, owner, text)
+        if said:
+            return {"text": said, "cards": [], "mode": "rules", "tools": ["subscription_answer"]}
         # 1. chat words never authorise anything
         if body["pending"] and CONFIRM_WORDS.match(text):
             return {"text": "请直接在确认卡上点“确认”完成授权（需要时输入验证码）。聊天消息不能代替授权。",
@@ -347,6 +313,17 @@ class ChatService(AutomationMixin):
         trace["guard"] = hit and {"category": hit["category"], "evidence": hit.get("evidence")}
         if hit:
             return self._risk(body, owner, hit, tools)
+        hint = talk.cancel_hint(owner, text)
+        if hint:
+            from backend.chat import knowledge
+            return {"text": hint, "cards": [knowledge.navigate_card("bills", "c_nav_" + uid()[:8])], "mode": "rules",
+                    "tools": ["subscription_cancel_hint"]}
+        if is_declaration(text):  # "QQ音乐是我每月续订的": bookkeeping only, no money moves, so no confirmation card
+            said = talk.declare(owner, text)
+            if said:
+                from backend.chat import knowledge
+                return {"text": said, "cards": [knowledge.navigate_card("bills", "c_nav_" + uid()[:8])],
+                        "mode": "rules", "tools": ["declare_subscription"]}
         # 3. understanding
         catalog = self.catalog(owner)
         fallback = None

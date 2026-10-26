@@ -27,9 +27,16 @@ export default function Bills({ ask }) {
     setBusy(null);
   }
 
+  async function removeMine(id) {
+    setBusy(id);
+    try { const d = await api.removeUserSub(id); cache = d; setData(d); toast("已从你的订阅里移除，这不会影响对方的自动续费"); }
+    catch (e) { toast(explain(e), "error"); }
+    setBusy(null);
+  }
+
   if (error && !data) return <div className="page"><div className="inner"><div className="empty">{error}</div></div></div>;
   if (!data) return <div className="page"><div className="inner muted">读取中…</div></div>;
-  const subs = data.items.filter((i) => i.kind === "subscription");
+  const subs = data.items.filter((i) => i.kind === "subscription" || i.kind === "user");
   const debits = data.items.filter((i) => i.kind === "direct_debit");
   const fresh = data.detected.filter((d) => d.state === "NEW");
   const confirmed = data.detected.filter((d) => d.state === "CONFIRMED");
@@ -91,7 +98,7 @@ export default function Bills({ ask }) {
           <section className="section panel">
             <h2>订阅 <span className="count">{subs.length + confirmed.length}</span></h2>
             <div className="list">
-              {subs.map((s) => <Row key={s.id} item={s} ask={ask} />)}
+              {subs.map((s) => <Row key={s.id} item={s} ask={ask} remove={removeMine} busy={busy === s.id} />)}
               {confirmed.map((d) => (
                 <div key={d.key}>
                   <span className="grow"><b style={{ fontWeight: 560 }}>{d.merchant}</b>
@@ -157,12 +164,20 @@ function Detected({ d, busy, mark, ask }) {
   );
 }
 
-function Row({ item, ask }) {
+function Row({ item, ask, remove, busy }) {
   const active = item.status === "ACTIVE";
+  if (item.kind === "user") return (
+    <div>
+      <span className="grow"><b style={{ fontWeight: 560 }}>{item.merchant}</b>
+        <small className="faint row-sub">{item.frequency_label} · 你在对话里登记的，银行未登记</small></span>
+      <span className="num">{item.amount_minor != null ? yuan(item.amount_minor) : <span className="faint">金额未知</span>}</span>
+      <button className="btn small ghost" disabled={busy} onClick={() => remove(item.id)}>移除</button>
+    </div>
+  );
   return (
     <div>
       <span className="grow"><b style={{ fontWeight: 560 }}>{item.merchant}</b>
-        <small className="faint row-sub">{item.frequency_label}{active ? ` · 下次 ${dateOnly(item.next_charge_at)}` : ""}</small></span>
+        <small className="faint row-sub">{item.frequency_label}{active && item.next_charge_at ? ` · 下次 ${dateOnly(item.next_charge_at)}` : ""}</small></span>
       <span className="num">{yuan(item.amount_minor)}</span>
       {active ? (item.cancelable &&
         <button className="btn small ghost" onClick={() => ask(item.kind === "subscription" ? `取消${item.merchant}订阅` : `关闭${item.merchant}代扣`)}>

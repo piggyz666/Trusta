@@ -89,6 +89,14 @@ def handle_post(handler, chat, path, body, user_id):
             raise Rejected("INVALID_INPUT")
         from backend.chat.pages import BillsPage
         return handler.reply(200, BillsPage(chat).mark(user_id, body["key"], body["state"]))
+    if parts == ["api", "chat", "bills", "remove"]:
+        if set(body) != {"id"} or not isinstance(body["id"], str):
+            raise Rejected("INVALID_INPUT")
+        from backend.chat.pages import BillsPage
+        from backend.chat.subscriptions_chat import remove_user_subscription
+        if not remove_user_subscription(chat.s.db, user_id, body["id"]):
+            raise Rejected("NOT_FOUND")
+        return handler.reply(200, BillsPage(chat).view(user_id))
     if parts == ["api", "chat", "capabilities", "probe"]:
         if set(body) - {"targets"}:
             raise Rejected("INVALID_INPUT")

@@ -295,10 +295,10 @@ class TakeoverUndoPlanTests(ChatHarness):
             conn.execute("INSERT INTO life_events VALUES('le-test','demo','小美','女儿','BIRTHDAY',?,?)", (soon.month, soon.day))
             conn.execute("UPDATE subscriptions SET next_charge_at=? WHERE id='sub-stream'", (time.time() + 2 * 86400,))
         session = self.chat.create_session("demo", "test")
-        texts = [m["text"] for m in session["messages"]]
-        self.assertFalse(any("生日" in t for t in texts))  # life events are never announced unprompted
-        self.assertTrue(any("演示视频" in t and "扣费" in t for t in texts))
-        again = self.chat.get(session["session_id"], "demo")
-        self.assertEqual(len(again["messages"]), len(session["messages"]))  # each nudge appears once
-        fresh = self.chat.create_session("demo", "test")  # a new chat must not repeat a nudge the user has already seen
-        self.assertFalse(any("生日" in m["text"] or "扣费" in m["text"] for m in fresh["messages"]))
+        self.assertEqual(session["messages"], [])  # nothing before the customer speaks
+        reply = self.chat.send(session["session_id"], "demo", "r1", session["revision"], "查一下余额", "acct-demo")
+        self.assertIn("演示视频", reply["reply"]["text"])
+        self.assertIn("扣费", reply["reply"]["text"])
+        self.assertNotIn("生日", reply["reply"]["text"])  # life events are never announced unprompted
+        again = self.chat.send(session["session_id"], "demo", "r2", reply["revision"], "查一下余额", "acct-demo")
+        self.assertNotIn("演示视频", again["reply"]["text"])  # each reminder once

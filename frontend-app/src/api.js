@@ -80,6 +80,7 @@ export const api = {
   overview: () => request("/api/chat/overview"),
   bills: () => request("/api/chat/bills"),
   markRecurring: (key, state) => request("/api/chat/bills/mark", { key, state }),
+  removeUserSub: (id) => request("/api/chat/bills/remove", { id }),
   wealth: () => request("/api/chat/wealth"),
   market: (refresh) => request("/api/chat/market" + (refresh ? "?refresh=1" : "")),
   activity: (kind) => request("/api/chat/activity" + (kind ? `?kind=${kind}` : "")),

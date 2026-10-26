@@ -37,6 +37,7 @@ class BillsPage:
             raise Rejected("INVALID_INPUT")
         if key not in {d["key"] for d in self.detected(owner)}:
             raise Rejected("NOT_FOUND")
+        # also used from conversation (SubscriptionTalk): the same record either way
         with self.s.db.transaction() as conn:
             conn.execute("INSERT INTO recurring_marks VALUES(?,?,?,?) ON CONFLICT(owner, key) DO UPDATE SET state=excluded.state, at=excluded.at",
                          (owner, key, state, time.time()))
@@ -79,9 +80,15 @@ class BillsPage:
                               "currency": r["currency"], "frequency": r["frequency"], "frequency_label": FREQUENCY.get(r["frequency"], r["frequency"]),
                               "next_charge_at": r["next_charge_at"], "status": r["status"], "cancelable": bool(r["cancelable"]),
                               "monthly_minor": round(r["amount"] * PER_MONTH.get(r["frequency"], 1)) if r["status"] == "ACTIVE" else 0})
+        from backend.chat.subscriptions_chat import user_subscriptions
+        for u in user_subscriptions(self.s.db, owner):
+            items.append({"id": u["id"], "kind": "user", "kind_label": "你登记的", "merchant": u["merchant"], "amount_minor": u["amount"],
+                          "currency": "CNY", "frequency": u["frequency"], "frequency_label": FREQUENCY.get(u["frequency"], u["frequency"]),
+                          "next_charge_at": None, "status": "ACTIVE", "cancelable": False, "removable": True,
+                          "monthly_minor": round((u["amount"] or 0) * PER_MONTH.get(u["frequency"], 1))})
         detected = self.detected(owner)
         upcoming = [{"merchant": i["merchant"], "amount_minor": i["amount_minor"], "at": i["next_charge_at"], "kind_label": i["kind_label"],
-                     "estimated": False} for i in items if i["status"] == "ACTIVE" and now - DAY < i["next_charge_at"] <= now + 30 * DAY]
+                     "estimated": False} for i in items if i["status"] == "ACTIVE" and i["next_charge_at"] and now - DAY < i["next_charge_at"] <= now + 30 * DAY]
         for d in detected:
             if d["state"] == "CONFIRMED" and d["next_estimate"]:
                 at = d["next_estimate"]
@@ -93,7 +100,7 @@ class BillsPage:
         recent = [i for i in self._ledger(owner) if i["kind"] == "subscription"][:10]
         return {"items": items, "detected": detected, "upcoming": upcoming, "monthly_minor": monthly, "yearly_minor": monthly * 12,
                 "history": recent, "generated_at": now,
-                "rule": "同一商户、同一金额，间隔 25–35 天扣费满 3 次，即识别为疑似订阅；由你确认是否计入。"}
+                "rule": "同一商户、同一金额，间隔 25–35 天扣费满 3 次，即识别为疑似订阅，由你确认是否计入；也可以在对话里直接说“QQ音乐是我每月续订的”。"}
 
     def _ledger(self, owner):
         from backend.chat.activity import ActivityFeed

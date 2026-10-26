@@ -74,7 +74,7 @@ class PagesTest(unittest.TestCase):
     # ---- bills ------------------------------------------------------------------------------------
     def test_unregistered_monthly_charge_is_detected_after_three_times(self):
         page = BillsPage(self.chat).view("demo")
-        self.assertEqual([d["merchant"] for d in page["detected"]], ["未登记商户"])
+        self.assertEqual([d["merchant"] for d in page["detected"]], ["QQ音乐"])
         d = page["detected"][0]
         self.assertEqual((d["count"], d["state"]), (3, "NEW"))
         self.assertGreater(d["next_estimate"], time.time() - 86400)  # rolled forward, never a date in the past
@@ -82,7 +82,7 @@ class PagesTest(unittest.TestCase):
 
     def test_two_charges_are_not_enough(self):
         with self.s.db.transaction() as conn:
-            conn.execute("DELETE FROM recurring_charges WHERE id='rec-未登记商户-9'")
+            conn.execute("DELETE FROM recurring_charges WHERE id='rec-未登记商户-9'")  # row id kept from earlier versions
         self.assertEqual(BillsPage(self.chat).view("demo")["detected"], [])
 
     def test_confirm_adds_to_monthly_total_and_dismiss_hides(self):
@@ -96,21 +96,68 @@ class PagesTest(unittest.TestCase):
         with self.assertRaises(Rejected):
             page.mark("demo", key, "DELETE")
 
-    def test_new_subscription_is_announced_once_across_chats(self):
-        first = [m["text"] for m in self.chat.create_session("demo", "test")["messages"]]
-        self.assertTrue(any("未登记商户" in t and "可能的订阅" in t for t in first))
-        again = ChatService(self.s, ScriptedToolClient({})).create_session("demo", "test")  # even after a restart
-        self.assertFalse(any("可能的订阅" in m["text"] for m in again["messages"]))
+    def say(self, session, text, n=[0]):
+        n[0] += 1
+        reply = self.chat.send(session["session_id"], "demo", f"m{n[0]}", session["revision"], text, "acct-demo")
+        session["revision"] = reply["revision"]
+        return reply["reply"]["text"]
+
+    def test_nothing_is_said_before_the_customer_speaks(self):
+        self.assertEqual(self.chat.create_session("demo", "test")["messages"], [])
+        fresh = ChatService(self.s, ScriptedToolClient({})).create_session("demo", "test")
+        self.assertEqual(fresh["messages"], [])
+
+    def test_recurring_charge_question_follows_a_spending_reply_and_yes_records_it(self):
+        session = self.chat.create_session("demo", "test")
+        first = self.say(session, "给张三转500元")
+        self.assertNotIn("QQ音乐", first)  # unrelated request: no question
+        session = self.chat.create_session("demo", "test")
+        text = self.say(session, "这个月花了多少钱")
+        self.assertIn("QQ音乐", text)
+        self.assertIn("每月续订", text)
+        answer = self.say(session, "是")
+        self.assertIn("已把 QQ音乐 记为你的订阅", answer)
+        self.assertEqual(BillsPage(self.chat).view("demo")["detected"][0]["state"], "CONFIRMED")
+        again = self.chat.create_session("demo", "test")
+        self.assertNotIn("QQ音乐", self.say(again, "上个月花了多少钱"))  # asked once only
+
+    def test_no_gets_stop_loss_advice_and_keeps_it_unconfirmed(self):
+        session = self.chat.create_session("demo", "test")
+        self.say(session, "我有哪些订阅")
+        answer = self.say(session, "不是")
+        self.assertIn("冻结", answer)
+        self.assertEqual(BillsPage(self.chat).view("demo")["detected"][0]["state"], "NEW")
+
+    def test_customer_can_declare_a_subscription_directly(self):
+        session = self.chat.create_session("demo", "test")
+        self.assertIn("记为你的订阅", self.say(session, "QQ音乐是我每月续订的"))
+        self.assertIn("已记下", self.say(session, "网易云音乐是我每月续订的，每月15元"))
+        page = BillsPage(self.chat).view("demo")
+        mine = next(i for i in page["items"] if i["merchant"] == "网易云音乐")
+        self.assertEqual((mine["kind"], mine["amount_minor"], mine["frequency"]), ("user", 1500, "MONTHLY"))
+        self.assertIn("不是在本行登记的订阅", self.say(session, "取消网易云音乐"))
+        self.assertEqual(self.chat.get(session["session_id"], "demo")["pending"], [])  # nothing to authorise, no money moves
+
+    def test_declaration_parsing(self):
+        from backend.chat.subscriptions_chat import parse_declaration
+        self.assertEqual(parse_declaration("我每年续费百度网盘会员")["merchant"], "百度网盘")
+        self.assertEqual(parse_declaration("我每年续费百度网盘会员")["frequency"], "YEARLY")
+        self.assertEqual(parse_declaration("把爱奇艺加到订阅，每月25块")["amount_minor"], 2500)
+        self.assertEqual(parse_declaration("qq音乐是我每月续订的", ["QQ音乐"])["merchant"], "QQ音乐")
+        for text in ["取消QQ音乐", "我每月订阅多少钱", "今天扣了300qq音乐", "我有哪些订阅"]:
+            self.assertIsNone(parse_declaration(text), text)
 
     def test_confirmed_subscription_gets_reminder_before_estimated_charge(self):
         page = BillsPage(self.chat)
         d = page.view("demo")["detected"][0]
         page.mark("demo", d["key"], "CONFIRMED")
-        self.chat.store.claim_nudge("demo", "recurring:" + d["key"])
         soon = time.time() + 2 * 86400
         with patch.object(BillsPage, "detected", lambda _self, owner: [d | {"state": "CONFIRMED", "next_estimate": soon}]):
-            texts = [m["text"] for m in self.chat.create_session("demo", "test")["messages"]]
-        self.assertTrue(any("预计" in t and "未登记商户" in t for t in texts))
+            session = self.chat.create_session("demo", "test")
+            self.assertEqual(session["messages"], [])
+            text = self.say(session, "查一下余额")
+        self.assertIn("预计", text)
+        self.assertIn("QQ音乐", text)
 
     # ---- wealth -----------------------------------------------------------------------------------
     def test_shelf_marks_products_above_risk_level_and_hides_delisted(self):

@@ -22,10 +22,12 @@ def seed_extended(conn):
             conn.execute(f"INSERT OR IGNORE INTO {table} VALUES(?,?,'demo','acct-demo',?,'CNY','MONTHLY',?,'ACTIVE',1,'BANK_SANDBOX',0)",
                          (resource_id, merchant, amount, datetime(2026, 11, 1, tzinfo=CHINA).timestamp()))
     # Independent historic bank charge feed, not new deductions from today's balance.
-    for merchant, amount in (("演示视频", 1999), ("演示云盘", 990), ("未登记商户", 1500)):
+    # The third one is a monthly charge the bank has no subscription record for (row ids kept from earlier versions).
+    for merchant, amount, row in (("演示视频", 1999, "演示视频"), ("演示云盘", 990, "演示云盘"), ("QQ音乐", 1500, "未登记商户")):
         for month in (7, 8, 9):
             conn.execute("INSERT OR IGNORE INTO recurring_charges VALUES(?,'demo','acct-demo',?,?,'CNY',?,'SETTLED')",
-                         (f"rec-{merchant}-{month}", merchant, amount, datetime(2026, month, 1, tzinfo=CHINA).timestamp()))
+                         (f"rec-{row}-{month}", merchant, amount, datetime(2026, month, 1, tzinfo=CHINA).timestamp()))
+    conn.execute("UPDATE recurring_charges SET merchant='QQ音乐' WHERE id LIKE 'rec-未登记商户-%'")
     conn.execute("INSERT OR IGNORE INTO product_restrictions SELECT id,1,1 FROM wealth_products")
     conn.execute(f"INSERT OR IGNORE INTO accounts VALUES('{WISH_POOL}',NULL,'CNY',0,0,0)")
     for row in (("m-flower", "演示花店", "FLOWERS", "生日花束", 29900), ("m-cake", "演示蛋糕店", "CAKE", "生日蛋糕（6寸）", 19900),

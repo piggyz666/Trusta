@@ -1,3 +1,4 @@
+import FinancePanel from "../components/FinancePanel.jsx";
 import { useEffect, useState } from "react";
 import { api, explain } from "../api.js";
 import { Tag, useToast } from "../components/ui.jsx";
@@ -93,7 +94,7 @@ function Spark({ points }) {
   return <svg className={`spark ${up ? "up" : "down"}`} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true"><path d={path} /></svg>;
 }
 
-export default function Wealth({ ask }) {
+export default function Wealth({ ask, goldOnly=false }) {
   const toast = useToast();
   const [data, setData] = useState(cache);
   const [error, setError] = useState(null);
@@ -102,9 +103,10 @@ export default function Wealth({ ask }) {
   const [open, setOpen] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => { api.wealth().then((d) => { cache = d; setData(d); }).catch((e) => setError(explain(e))); }, []);
+  useEffect(() => { if(goldOnly)return; api.wealth().then((d) => { cache = d; setData(d); }).catch((e) => setError(explain(e))); }, []);
   // quotes keep themselves current while the page is open
   useEffect(() => {
+    if(goldOnly)return;
     const id = setInterval(() => api.market().then((m) => setData((d) => d && (cache = { ...d, market: m }))).catch(() => {}), 60000);
     return () => clearInterval(id);
   }, []);
@@ -119,6 +121,7 @@ export default function Wealth({ ask }) {
     setRefreshing(false);
   }
 
+  if(goldOnly)return <div className="page"><div className="inner"><header className="page-head"><h1>黄金交易</h1><p>查看黄金持仓，使用虚拟资金买入或卖出。每笔交易仍需确认及身份验证。</p></header><FinancePanel gold/></div></div>;
   if (error && !data) return <div className="page"><div className="inner"><div className="empty">{error}</div></div></div>;
   if (!data) return <div className="page"><div className="inner muted">读取中…</div></div>;
   const { risk, market } = data;
@@ -130,7 +133,7 @@ export default function Wealth({ ask }) {
     <div className="page">
       <div className="inner">
         <header className="page-head">
-          <h1>理财</h1>
+          <h1>理财产品</h1>
           <p>{data.policy}</p>
         </header>
 

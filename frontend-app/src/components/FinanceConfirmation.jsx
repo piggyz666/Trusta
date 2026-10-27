@@ -1,0 +1,16 @@
+import {useRef,useState} from 'react';
+import {api,explain} from '../api.js';
+import {Drawer} from './ui.jsx';
+export const financeError=e=>({NO_PAYABLE_AMOUNT:'当前没有可办理的金额（可能尚未出账或已还清）。',FUND_ORDER_NOT_PENDING:'此订单已确认或撤单，请刷新。',REFUND_EXCEEDS_PURCHASE:'退款不能超过原消费剩余可退金额。',STALE_PRECONDITION:'账户或订单状态已变化，请重新核对。',CREDIT_LIMIT_EXCEEDED:'超过当前可用虚拟信用额度。',FINANCE_STATE_INVALID:'该业务已处理或状态已变化，请刷新。',INSUFFICIENT_BALANCE:'所选卡余额不足。',QUOTE_EXPIRED:'报价过期或计息日期已变化，请重新核对。',FX_QUOTE_UNAVAILABLE:'没有新鲜参考汇率，未生成交易。可明确选择练习汇率。',GOLD_QUOTE_UNAVAILABLE:'暂无新鲜黄金参考价，未生成交易。',SAVINGS_PLAN_CHANGED:'计划已暂停或变更，请刷新。',INSUFFICIENT_HOLDING:'可用持仓不足。',INSUFFICIENT_POINTS:'积分不足。',POINTS_REFUND_DEBT:'消费退款后积分不足，请先补足积分。',DEPOSIT_NOT_MATURE:'尚未到期，可以选择提前支取。',SUITABILITY_RISK_MISMATCH:'风险测评等级不足，不能办理此风险等级的产品。',RISK_PROFILE_REQUIRED:'请先到理财页完成风险测评。',PLAN_ALREADY_EXECUTED:'该期已经完成，不会重复扣款。',REWARD_NOT_AVAILABLE:'权益已使用或取消。',DEBIT_CARD_REQUIRED:'请选择借记卡。'}[e.code]||e.message||explain(e));
+export async function financeProposal(t){
+ const p=await api.post('/api/chat/finance/proposal',{contract_id:t.id,operation:t.type.toUpperCase()});
+ if(p.status!=='WAITING_USER')throw {code:p.errors?.flat()[0],message:'此业务暂不能办理：'+p.status};return p;
+}
+export default function FinanceConfirmation({proposal,onClose,onDone}){
+ const c=proposal.cards.find(c=>c.type==='confirm'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[code,setCode]=useState(''),[sms,setSms]=useState(null),[method,setMethod]=useState(c?.required_verification?.[0]||'SMS');
+ const inFlight=useRef(false);
+ if(!c)return null;
+ async function run(fn){if(inFlight.current)return;inFlight.current=true;setBusy(true);setError('');try{await fn()}catch(e){setError(financeError(e))}finally{inFlight.current=false;setBusy(false)}}
+ async function decide(approve){await run(async()=>{const r=await api.post('/api/chat/finance/decide',{task_id:c.task_id,action_id:c.action_id,action_hash:c.action_hash,approve,...(approve&&c.risk_level==='RED'?{verification:{method,code}}:{})});onDone(r);})}
+ return <Drawer title={c.title} onClose={()=>!busy&&onClose()}><dl className="fields">{c.fields.map((f,i)=><div className="finance-field" key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl><p className="muted">仅虚拟资金。确认后才执行，账户或报价变化时需要重新核对。</p>{c.risk_level==='RED'&&<div className="verify"><label>验证方式<select className="input" value={method} onChange={e=>setMethod(e.target.value)}>{c.required_verification.map(m=><option key={m} value={m}>{m==='SMS'?'短信验证码':m==='TOTP'?'认证器动态码':'测试口令'}</option>)}</select></label><label>验证码<input type="password" className="input" autoComplete="off" value={code} onChange={e=>setCode(e.target.value)}/></label>{method==='SMS'&&<button className="btn" disabled={busy} onClick={()=>run(async()=>setSms(await api.post('/api/chat/finance/sms',{task_id:c.task_id,action_id:c.action_id})))}>获取验证码</button>}{sms?.dev_code&&<p>测试码：{sms.dev_code}</p>}</div>}{error&&<p role="alert" className="finance-alert">{error}</p>}<div className="finance-actions"><button className="btn primary" disabled={busy||(c.risk_level==='RED'&&!code)} onClick={()=>decide(true)}>确认办理</button><button className="btn" disabled={busy} onClick={()=>decide(false)}>拒绝办理</button></div></Drawer>
+}

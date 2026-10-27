@@ -218,6 +218,49 @@ class ToolCallValidator:
         return steps
 
     # ---- read tools --------------------------------------------------------------------------
+    def _ask_user(self, a):
+        # Never render arbitrary model prose via a clarification tool.
+        questions={'amount':'请说明本次业务的金额。','payee':'请说明收款人。','when':'请说明办理日期和具体时间。','card':'请选择要使用的银行卡。','product':'请选择要办理的理财产品。','operation':'你要办理哪项本站业务？','other':'请补充本次银行业务的对象、金额或期数；生活服务可打开官方网站。'}
+        return [{'kind':'control','tool':'ask_user','args':{'slot':a['slot'],'question':questions.get(a['slot'],questions['other'])}}]
+
+    def _get_extended(self,a):
+        return [{"local":"EXTENDED:"+a["page"]}]
+
+    def _propose_extension(self,a):
+        from backend.chat.extension_agent import validate
+        return validate(self,a)
+
+    def _get_finance(self, a):
+        return [{'local':'FINANCE'}]
+
+    def _propose_finance(self, a):
+        op=a['operation']; n={'task_type':'FINANCE_MANAGEMENT','operation':op,'needs_clarification':False}
+        words={'LOAN_DRAW':r'贷款|借款','INSTALLMENT_START':r'分期','CREDIT_REPAY':r'还款|还.*期','CREDIT_SETTLE':r'结清|提前还','GOLD_BUY':r'黄金|买金','GOLD_SELL':r'黄金|卖金'}
+        if not re.search(words[op],self.corpus):raise Clarify('OPERATION_UNGROUNDED','operation','请明确说明你要办理的本站业务。')
+        if op in {'CREDIT_REPAY','CREDIT_SETTLE'}:
+            if 'contract' not in a:raise Clarify('CONTRACT_REQUIRED','other','请选择要还款的合同，可先查询贷款与分期。')
+            n['target_id']=self.ref(a['contract'],'contract','融资合同')['id']
+        else:
+            card=self.ref(a['card'],'card','银行卡') if 'card' in a else self._single_card()
+            draft={'card_id':card['id'],'type':{'LOAN_DRAW':'loan','INSTALLMENT_START':'installment','GOLD_BUY':'gold_buy','GOLD_SELL':'gold_sell'}[op]}
+            if op in {'LOAN_DRAW','INSTALLMENT_START'}:
+                if 'months' not in a:raise Clarify('MONTHS_REQUIRED','other','请选择 3、6 或 12 期。')
+                m=a['months'];self.span(m['span'],'other','期数')
+                if parse_amount_span(m['span'].replace('个月','').replace('期','')) != m['value']*100 or m['value'] not in (3,6,12):raise Clarify('MONTHS_UNGROUNDED','other','请重新说明期数：3、6 或 12 期。')
+                draft['months']=m['value']
+            field='grams' if op.startswith('GOLD_') else 'amount'
+            if op=='INSTALLMENT_START':
+                if 'purchase' not in a:raise Clarify('SOURCE_REQUIRED','other','请选择已入账的消费，可在贷款与分期页面查看。')
+                draft['source_id']=self.ref(a['purchase'],'purchase','消费记录')['id']
+            else:
+                if field not in a:raise Clarify('AMOUNT_REQUIRED','amount','请说明交易重量（克）。' if field=='grams' else '请输入贷款金额。')
+                value=dict(a[field])
+                if field=='grams':
+                    self.span(value['span'],'other','克数');value['span']=value['span'].replace('克','').strip()
+                draft['units' if field=='grams' else 'amount']=self.amount(value)
+            n['finance_draft']=draft
+        return [{'normalized':n}]
+
     def _get_balance(self, a):
         account = a.get("account_id", self.account_id)
         if account not in {x["id"] for x in self.catalog.get("accounts", [])}:
@@ -419,9 +462,9 @@ class ToolCallValidator:
         today = datetime.fromtimestamp(self.now, CHINA).date()
         if "event" in a:
             event = self.ref(a["event"], "life_event", "日子")
-            day = today.replace(month=event["month"], day=event["day"])
-            if day < today:
-                day = day.replace(year=today.year + 1)
+            from backend.banking.personal import next_occurrence
+            day = next_occurrence(event['month'],event['day'],today)
+            if (day-today).days>366:raise Clarify('DATE_OUT_OF_RANGE','when','下一个生日超过一年，请临近时再建立资金计划。')
             label = event["display"]
         elif "date" in a:
             self.span(a["date"]["span"], "when", "日期")
@@ -445,7 +488,9 @@ class ToolCallValidator:
             raise Clarify("ORDER_EXCEEDS_FUND", "amount",
                           f"要订的商品合计 {format_cents(total)}，超过锁定金额 {format_cents(cents)}。要锁定多少？")
         midnight = lambda d, hour=0, minute=0: datetime(d.year, d.month, d.day, hour, minute, tzinfo=CHINA).timestamp()
-        release_at = midnight(day + timedelta(days=1), 23, 59)
+        end_day = self.date(a['end_date'], '结束日期') if 'end_date' in a else day
+        if end_day < day:raise Clarify('DATE_INVALID','when','结束日期不能早于活动日期。')
+        release_at = midnight(end_day + timedelta(days=1), 23, 59)
         fund_id = "wish-" + uid().replace("-", "")[:12]
         events, nodes = [], []
         if items:

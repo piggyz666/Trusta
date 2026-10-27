@@ -1,11 +1,13 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { api, auth, bootstrapAuth, explain } from "./api.js";
+import { api, auth, bootstrapAuth, explain, APP_BASE, appPath } from "./api.js";
 import { bankName } from "./format.js";
 import Sidebar from "./components/Sidebar.jsx";
 import Backdrop from "./components/Backdrop.jsx";
 import { EvidenceDrawer, ProofDrawer, TraceDrawer } from "./components/Trace.jsx";
 import { Icon, useToast } from "./components/ui.jsx";
 import Chat from "./pages/Chat.jsx";
+import ConnectionBanner from './components/ConnectionBanner.jsx';
+import {WEALTH_PAGES,isWealthPage} from './components/wealthNavigation.js';
 
 const loaders = [() => import("./pages/Overview.jsx"), () => import("./pages/Features.jsx"), () => import("./pages/Settings.jsx"),
   () => import("./pages/Bills.jsx"), () => import("./pages/Wealth.jsx"), () => import("./pages/Life.jsx")];
@@ -15,6 +17,11 @@ const Settings = lazy(loaders[2]);
 const Bills = lazy(loaders[3]);
 const Wealth = lazy(loaders[4]);
 const Life = lazy(loaders[5]);
+const AdvancedBanking=lazy(()=>import("./pages/AdvancedBanking.jsx"));
+const Todos=lazy(()=>import("./pages/Todos.jsx"));
+const BankExtensions=lazy(()=>import("./pages/BankExtensions.jsx"));
+const Plans=lazy(()=>import("./pages/Plans.jsx"));
+const Credit=lazy(()=>import("./pages/Credit.jsx"));
 // fetch the other pages' code while idle so switching never waits on a download
 (window.requestIdleCallback || ((f) => setTimeout(f, 1200)))(() => loaders.forEach((l) => l()));
 
@@ -22,12 +29,12 @@ const Life = lazy(loaders[5]);
 const linkedSession = (() => { const v = new URLSearchParams(location.search).get("s"); return v && /^[A-Za-z0-9_-]{8,64}$/.test(v) ? v : null; })();
 if (linkedSession) history.replaceState(null, "", location.pathname + location.hash);
 const boot = bootstrapAuth();
-const TITLES = { overview: "资金总览", bills: "账单与订阅", wealth: "理财", life: "生活服务", features: "功能", settings: "设置" };
+const TITLES = {todos:"统一待办",funds:"基金份额",'credit-account':"信用账单",gold:"黄金交易",deposits:"定期存款","gold-savings":"黄金定投",exchange:"外币账户",membership:"会员与积分",support:"服务工单", plans:"计划中心", credit:"贷款与分期", overview: "资金总览", bills: "账单与订阅", wealth: "理财产品", life: "生活服务", features: "功能", settings: "设置" };
 
 function readRoute() {
-  const path = location.pathname.replace(/\/+$/, "");
+  const path = location.pathname.slice(APP_BASE.length).replace(/\/+$/, "");
   const page = path.split("/")[1] || "chat";
-  return ["chat", "overview", "bills", "wealth", "life", "features", "settings"].includes(page) ? page : "chat";
+  return ["todos","funds","credit-account","gold","deposits","gold-savings","exchange","membership","support","chat", "plans", "overview", "bills", "wealth", "life", "credit", "features", "settings"].includes(page) ? page : "chat";
 }
 
 export default function App() {
@@ -59,7 +66,7 @@ export default function App() {
   }, []);
 
   function navigate(page, options = {}) {
-    if (page !== route) history.pushState(null, "", page === "chat" ? "/" : "/" + page);
+    if (page !== route) history.pushState(null, "", appPath(page === "chat" ? "/" : "/" + page));
     setRoute(page);
     setRailOpen(false);
     if (options.tab) setSettingsTab(options.tab);
@@ -88,6 +95,7 @@ export default function App() {
       <Sidebar open={railOpen} onClose={() => setRailOpen(false)} route={route} sessionId={sessionId} sessions={sessions}
         onSelect={selectSession} onNew={newChat} onNavigate={navigate} onChanged={refreshSessions} status={status} />
       <main className="main">
+        <ConnectionBanner/>
         <div className="topbar">
           <button className="icon-btn menu-button" onClick={() => setRailOpen(true)} aria-label="打开菜单"><Icon name="menu" /></button>
           <h1>{title}</h1>
@@ -102,11 +110,18 @@ export default function App() {
             openEvidence={(sid, taskId) => setEvidence({ sessionId: sid, taskId })} openProof={(url) => setProof(url)}
             prefill={prefill} clearPrefill={() => setPrefill(null)} />
         )}
+        {isWealthPage(route)&&<nav className="wealth-page-nav" aria-label="财富管理二级导航">{WEALTH_PAGES.map(([key,label])=><button key={key} aria-current={route===key?'page':undefined} onClick={()=>navigate(key)}>{label}</button>)}</nav>}
         <Suspense fallback={<div className="page"><div className="inner muted">读取中…</div></div>}>
-          {route === "overview" && <Overview openSession={selectSession} ask={ask} openProof={(url) => setProof(url)} />}
+          {route === "overview" && <Overview navigate={navigate} openSession={selectSession} ask={ask} openProof={(url) => setProof(url)} />}
           {route === "bills" && <Bills ask={ask} />}
           {route === "wealth" && <Wealth ask={ask} />}
-          {route === "life" && <Life ask={ask} />}
+          {route === "gold" && <Wealth key="gold" ask={ask} goldOnly/>}
+          {["funds","credit-account"].includes(route)&&<AdvancedBanking key={route} page={route} navigate={navigate} ask={ask}/>}
+          {route === "todos"&&<Todos navigate={navigate}/>}
+          {route === "credit" && <Credit/>}
+          {["deposits","gold-savings","exchange","membership","support"].includes(route)&&<BankExtensions key={route} page={route} navigate={navigate} openSession={selectSession}/>}
+          {route === "life" && <Life ask={ask} navigate={navigate} />}
+          {route === "plans" && <Plans openSession={selectSession} ask={ask} navigate={navigate}/>}
           {route === "features" && <Features capabilities={capabilities} refresh={refreshCapabilities} ask={ask} navigate={navigate} />}
           {route === "settings" && <Settings capabilities={capabilities} refresh={refreshCapabilities} tab={settingsTab} setTab={setSettingsTab} devMode={devMode} setDevMode={setDevMode}
             onSignOut={() => { auth.clear(); setAuthed(false); }} />}
@@ -142,7 +157,7 @@ function Connect({ pairCode, onConnected }) {
   return (
     <div className="connect">
       <div className="panel">
-        <div className="brand" style={{ padding: 0 }}><img className="brand-mark" src="/mark.png" alt="" width="28" height="28" />TRUSTA<small>银行助手</small></div>
+        <div className="brand" style={{ padding: 0 }}><img className="brand-mark" src={import.meta.env.BASE_URL + 'mark.png'} alt="" width="28" height="28" />TRUSTA<small>银行助手</small></div>
         <h2 style={{ margin: 0, fontSize: 20 }}>连接到你的 TRUSTA</h2>
         <span className="muted">TRUSTA 运行在你自己的电脑上。在电脑上打开“设置 → 访问与设备”，扫码或输入屏幕上的 6 位配对码。</span>
         <form onSubmit={(e) => { e.preventDefault(); claim(); }} style={{ display: "grid", gap: 10 }}>

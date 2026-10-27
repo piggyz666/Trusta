@@ -10,3 +10,23 @@ config/llm*.local.yml
 *.keys/
 config/bank.*.local.toml
 site-dist/
+
+# Private runtime material must never enter a source handoff.
+.env.*
+!.env.example
+!.env.sepolia.example
+private/
+.wrangler/
+*.sqlite*
+*.db
+*.token
+*.key
+*.log
+*.zip
+*.pfx
+*.p12
+**/credentials.json
+**/tunnel.yml
+**/tunnel.yaml
+**/deepseek-api-key.txt
+.pytest_cache/

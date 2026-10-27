@@ -286,7 +286,7 @@ class TakeoverUndoPlanTests(ChatHarness):
         stopped = self.chat.interrupt(self.sid, "demo", self.rev)
         self.assertEqual(stopped["plan"]["nodes"][2]["status"], "CANCELLED")
 
-    def test_renewal_nudge_but_no_unprompted_birthday_message(self):
+    def test_proactive_birthday_and_renewal_nudges(self):
         from datetime import datetime, timedelta
         from backend.business import CHINA
         soon = datetime.now(CHINA) + timedelta(days=10)
@@ -296,7 +296,7 @@ class TakeoverUndoPlanTests(ChatHarness):
             conn.execute("UPDATE subscriptions SET next_charge_at=? WHERE id='sub-stream'", (time.time() + 2 * 86400,))
         session = self.chat.create_session("demo", "test")
         texts = [m["text"] for m in session["messages"]]
-        self.assertFalse(any("生日" in t for t in texts))  # life events are never announced unprompted
+        self.assertTrue(any("女儿小美的生日还有 10 天" in t for t in texts))
         self.assertTrue(any("演示视频" in t and "扣费" in t for t in texts))
         again = self.chat.get(session["session_id"], "demo")
         self.assertEqual(len(again["messages"]), len(session["messages"]))  # each nudge appears once

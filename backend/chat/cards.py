@@ -33,7 +33,8 @@ ERRORS = {
     "HOLDING_PERIOD_NOT_MET": "尚未到可赎回时间",
     "PAYEE_PHONE_EXISTS": "这个手机号已经在你的收款人列表里", "PAYEE_ALIAS_EXISTS": "这个备注名已经被使用", "PAYEE_EXISTS": "收款人已存在",
 }
-OPERATIONS = {
+from backend.banking.finance import LABELS as FINANCE_LABELS
+OPERATIONS = {**FINANCE_LABELS, "RETAIL_PAY":"确认虚拟付款","RETAIL_REFUND":"确认原路退款", 
     "TRANSFER": "转账", "CARD_APPLY": "申请虚拟卡", "CARD_FREEZE": "冻结卡片", "CARD_UNFREEZE": "解冻卡片",
     "CARD_REPORT_LOST": "挂失卡片", "CARD_LIMIT_CHANGE": "调整卡片限额", "CARD_TRANSACTION_CONTROL": "设置交易开关",
     "SUBSCRIPTION_CANCEL": "取消订阅", "DIRECT_DEBIT_DISABLE": "关闭代扣",
@@ -106,6 +107,27 @@ class CardRenderer:
     def action_fields(self, action, account_snapshot=None):
         kind = action["action_type"]
         fields = []
+        if kind in FINANCE_LABELS:
+            t=action['preconditions']['target'];post=action['expected_postconditions'];p=action['parameters']
+            from backend.banking.finance import card_label
+            fields=[{'label':'业务','value':FINANCE_LABELS[kind]},{'label':'本次金额','value':format_cents(p['amount']),'amount_minor':p['amount'],'currency':'CNY'},{'label':'银行卡','value':t.get('card_label') or card_label(self.s.db,t['customer_id'],t['card_id'])},{'label':'完成后余额','value':format_cents(post['account']['balance'])}]
+            from backend.banking import extensions,advanced
+            if kind in advanced.LABELS:fields += advanced.fields(t)
+            elif kind in extensions.LABELS:fields += extensions.fields(t)
+            elif kind.startswith('GOLD_'):
+                fields += [{'label':'重量','value':f"{t['units']/100:.2f} 克"},{'label':'成交参考价','value':format_cents(t['price'])+'/克'},{'label':'行情来源','value':t['quote']['source']+' · '+t['quote']['as_of']},{'label':'手续费','value':'0 元（虚拟交易）'}]
+            else:
+                pending=[x for x in t['schedule'] if not x['paid']]
+                fee=pending[0]['fee'] if kind in {'CREDIT_REPAY','CREDIT_SETTLE'} and pending else sum(x['fee'] for x in pending)
+                principal=t['remaining']-post['target']['remaining'] if kind in {'CREDIT_REPAY','CREDIT_SETTLE'} else t['amount']
+                fields += [{'label':'本次本金','value':format_cents(principal)},{'label':'本期费用' if kind in {'CREDIT_REPAY','CREDIT_SETTLE'} else '计划总费用','value':format_cents(fee)},{'label':'完成后剩余本金','value':format_cents(post['target']['remaining'])},{'label':'规则','value':'贷款按剩余本金年息3.60%；分期每期按原本金0.50%。提前结清免未来期费用。'}]
+            return fields+[{'label':'说明','value':'仅操作虚拟资金，不开立真实金融产品、不交割实物或外汇'}]
+        if kind in {"RETAIL_PAY","RETAIL_REFUND"}:
+            pre=action["preconditions"];t=pre["target"]
+            import json
+            card_name=json.loads(t.get("detail") or "{}").get("payment_card_name", "")
+            card_label=(card_name+" · " if card_name else "")+t["card_id"]
+            return [{"label":"订单","value":t["title"]},{"label":"金额","value":format_cents(t["amount"]),"amount_minor":t["amount"],"currency":"CNY"},{"label":"付款卡","value":card_label},{"label":"账户","value":t["account_id"]},{"label":"完成后余额","value":format_cents(action["expected_postconditions"]["account"]["balance"])},{"label":"说明","value":"仅虚拟资金，不向真实商户付款"}] + ([{"label":"关联计划","value":t["plan"]["name"]},{"label":"计划剩余预算","value":format_cents(t["plan"]["budget"]-t["plan"]["spent"])}] if t.get("plan") else [])
         if kind == "TRANSFER":
             fields.append({"label": "收款人", "value": self._payee(action["recipient_id"])})
             fields.append({"label": "金额", "value": format_cents(action["amount"], action["currency"]),

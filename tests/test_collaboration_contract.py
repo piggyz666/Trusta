@@ -1,5 +1,6 @@
 """Execute actual compiled consortium contract bytecode in local EVM negatives."""
 import json
+import hashlib
 import unittest
 from pathlib import Path
 from eth_tester import EthereumTester
@@ -10,7 +11,9 @@ from eth_utils import keccak
 class CollaborationContractExecutionTests(unittest.TestCase):
     def setUp(self):
         self.evm=EthereumTester();self.sender=self.evm.get_accounts()[0]
-        artifact=json.loads(Path('data/anchor-integration/weidentity-lab/conf/roundanchor-artifact.json').read_text())
+        artifact=json.loads(Path('contracts/artifacts/CollaborationAnchor.json').read_text())
+        source=Path('contracts/CollaborationAnchor.sol').read_text(encoding='utf-8')
+        self.assertEqual(artifact['source_sha256'], hashlib.sha256(source.encode('utf-8')).hexdigest(), 'Recompile the local EVM fixture after changing the contract')
         tx=self.evm.send_transaction({'from':self.sender,'gas':3000000,'data':'0x'+artifact['bytecode']})
         self.address=self.evm.get_transaction_receipt(tx)['contract_address']
         self.args=[bytes([n])*32 for n in range(1,6)]+[3,2]

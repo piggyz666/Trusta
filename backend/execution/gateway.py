@@ -11,9 +11,9 @@ class ToolGateway:
         if capability not in self._adapter.manifest or capability not in self.capabilities.READ_MAP:
             raise Rejected("CAPABILITY_VIOLATION")
         self.capabilities.check(actor, self.capabilities.READ_MAP[capability])
-        if capability in {"card.list", "card.get", "card_application.get", "subscription.list", "subscription.get", "direct_debit.list", "direct_debit.get", "portfolio.get", "operation.get", "operation.evidence", "transaction.recurring_history",
+        if capability in {"finance.get", "retail.get", "card.list", "card.get", "card_application.get", "subscription.list", "subscription.get", "direct_debit.list", "direct_debit.get", "portfolio.get", "operation.get", "operation.evidence", "transaction.recurring_history",
                           "wish_fund.get", "wish_fund.list", "merchant.list", "life_event.list", "payee_entry.get", "payee_contact.list"}:
-            required = {"card.get": {"resource_id"}, "subscription.get": {"resource_id"}, "direct_debit.get": {"resource_id"},
+            required = {"finance.get":{"resource_id"}, "retail.get":{"resource_id"}, "card.get": {"resource_id"}, "subscription.get": {"resource_id"}, "direct_debit.get": {"resource_id"},
                         "card_application.get":{"resource_id"}, "wish_fund.get": {"resource_id"}, "payee_entry.get": {"resource_id"},
                         "portfolio.get": {"account_id", "product_id"}, "operation.get": {"operation_id"}, "operation.evidence": {"operation_id"}, "transaction.recurring_history": {"account_id"}}
             if set(params) != required.get(capability, set()) or any(not isinstance(value, str) or not value for value in params.values()):

@@ -1,3 +1,6 @@
+export const APP_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+export const appPath = (path = "/") => APP_BASE + path;
+
 // Thin client for the local TRUSTA server. Credentials:
 //  - master token: from the link the server prints (#token=…), kept for this browser tab only;
 //  - device token: a phone that paired (#pair=CODE) keeps its own revocable token.
@@ -42,14 +45,17 @@ async function request(path, body, { method } = {}) {
   const headers = { "Content-Type": "application/json" };
   const token = auth.token();
   if (token) headers.Authorization = "Bearer " + token;
-  const response = await fetch(path, {
+  let response;
+  try { response = await fetch(appPath(path), {
     method: method || (body === undefined ? "GET" : "POST"),
     headers,
+    signal: AbortSignal.timeout(30000),
     body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  }); } catch { throw new ApiError(0, body === undefined ? 'NETWORK_UNAVAILABLE' : 'TRANSACTION_RESULT_UNKNOWN'); }
   let data = null;
   try { data = await response.json(); } catch { data = null; }
   if (!response.ok) throw new ApiError(response.status, data?.error || "HTTP_" + response.status, data?.message);
+  if (data === null) throw new ApiError(response.status, body === undefined ? 'INVALID_SERVER_RESPONSE' : 'TRANSACTION_RESULT_UNKNOWN');
   return data;
 }
 
@@ -104,11 +110,13 @@ export const api = {
     const headers = { "Content-Type": "application/json", Accept: "text/event-stream" };
     const token = auth.token();
     if (token) headers.Authorization = "Bearer " + token;
-    const response = await fetch(`/api/chat/sessions/${id}/messages`, { method: "POST", headers, body: JSON.stringify(body) });
+    try {
+    const response = await fetch(appPath(`/api/chat/sessions/${id}/messages`), { method: "POST", headers, body: JSON.stringify(body), signal: AbortSignal.timeout(65000) });
     if (!response.ok || !(response.headers.get("Content-Type") || "").includes("event-stream")) {
       let data = null;
       try { data = await response.json(); } catch { data = null; }
       if (!response.ok) throw new ApiError(response.status, data?.error || "HTTP_" + response.status, data?.message);
+      if (!data) throw new ApiError(0, 'TRANSACTION_RESULT_UNKNOWN');
       return data;
     }
     const reader = response.body.getReader();
@@ -133,11 +141,25 @@ export const api = {
         if (name === "turn.failed") throw new ApiError(400, data?.code || "TURN_FAILED");
       }
     }
+    if (!final) throw new ApiError(0, 'TRANSACTION_RESULT_UNKNOWN');
     return final;
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(0, 'TRANSACTION_RESULT_UNKNOWN');
+    }
   },
 };
 
 export const ERRORS = {
+  INVALID_SERVER_RESPONSE: "服务返回了无法读取的数据，请刷新重试。",
+  BUDGET_BELOW_SPENT: "预算不能低于该计划已经支付的净额。",
+  INVALID_DATE_RANGE: "结束日期不能早于开始日期，计划跨度不能超过一年。",
+  PLAN_ARCHIVED: "计划已归档，请先重新启用后再创建订单。",
+  PLAN_LIMIT: "进行中的计划已达上限，请先归档不再使用的计划。",
+  INVALID_INPUT: "请检查填写内容与金额格式。",
+  LOCAL_SERVER_OFFLINE: "本地后台暂未连接，请启动 TRUSTA 与隧道。刚提交过交易时请先核对记录，勿重复提交。",
+  NETWORK_UNAVAILABLE: "网络连接失败，请检查连接后重新读取。",
+  TRANSACTION_RESULT_UNKNOWN: "未能收到办理结果，请恢复连接后先查记录；不要重复提交，系统不会自动重试扣款。",
   UNAUTHENTICATED: "这台设备还没有连接到 TRUSTA。请用电脑上显示的链接打开，或在手机上输入配对码。",
   CHAT_STALE: "对话已在别处更新，已为你刷新。",
   CHAT_BUSY: "上一句还在处理中，请稍等。",

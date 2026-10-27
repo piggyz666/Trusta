@@ -12,6 +12,9 @@ def main():
     artifact={'version':1,'compiler':'solc-0.4.25','source_sha256':hashlib.sha256(source.encode()).hexdigest(),
               'abi':compiled['abi'],'bytecode':compiled['bin'],'runtime':compiled['bin-runtime']}
     output=Path('data/anchor-integration/weidentity-lab/conf/roundanchor-artifact.json')
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.exists():
+        raise RuntimeError('Existing pinned artifact preserved; inspect it before rebuilding.')
     output.write_text(json.dumps(artifact,sort_keys=True,indent=2),encoding='utf-8')
     print(json.dumps({'artifact_sha256':hashlib.sha256(output.read_bytes()).hexdigest(),
                       'runtime_bytes':len(compiled['bin-runtime'])//2}))

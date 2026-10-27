@@ -6,10 +6,10 @@ from pathlib import Path
 import secrets
 import shutil
 import subprocess
-import urllib.request
+import requests
 
 ROOT=Path(__file__).resolve().parents[1]
-PTAU_URL='https://circom.info/powersOfTau28_hez_final_11.ptau'
+PTAU_URL='https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_11.ptau'
 # BLAKE2b-512 published in the primary snarkjs ceremony table.
 PTAU_HASH='47c282116b892e5ac92ca238578006e31a47e7c7e70f0baa8b687f0a5203e28ea07bbbec765a98dcd654bad618475d4661bfaec3bd9ad2ed12e7abc251d94d33'
 
@@ -37,8 +37,11 @@ def build(destination,local_phase1=False):
         run(snark+['powersoftau','contribute',str(phase1),str(contributed),'--name=TRUSTA-development-only','-e='+secrets.token_hex(64)],crypto)
         run(snark+['powersoftau','prepare','phase2',str(contributed),str(ptau)],crypto)
     else:
-        with urllib.request.urlopen(PTAU_URL,timeout=60) as response,ptau.open('xb') as stream:
-            shutil.copyfileobj(response,stream)
+        with requests.get(PTAU_URL,stream=True,timeout=(15,60)) as response:
+            response.raise_for_status()
+            with ptau.open('xb') as stream:
+                for chunk in response.iter_content(1024*1024):
+                    stream.write(chunk)
         if hashlib.blake2b(ptau.read_bytes()).hexdigest()!=PTAU_HASH: raise RuntimeError('Public ceremony digest mismatch.')
     run([circom,str(crypto/'banking_eligibility.circom'),'--r1cs','--wasm','--sym','-o',str(destination)],crypto)
     run(snark+['powersoftau','verify',str(ptau)],crypto)

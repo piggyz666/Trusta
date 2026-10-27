@@ -11,6 +11,9 @@ SPAN = {"type": "string", "minLength": 1, "maxLength": 64,
 AMOUNT = {"type": "object", "additionalProperties": False, "required": ["value", "span"],
           "description": "金额。value 为十进制元（最多两位小数），span 为用户原话中表示该金额的原文",
           "properties": {"value": {"type": "string", "pattern": r"^[0-9]{1,10}(\.[0-9]{1,2})?$"}, "span": SPAN}}
+QUANTITY = {"type":"object","additionalProperties":False,"required":["value","span"],
+            "description":"数量。基金份额最多4位小数，外币数量最多2位；span逐字引用用户原文。",
+            "properties":{"value":{"type":"string","pattern":r"^[0-9]{1,10}(\.[0-9]{1,4})?$"},"span":SPAN}}
 PAYEE = {"type": "object", "additionalProperties": False, "required": ["value", "span"],
          "description": "收款人。value 为姓名、手机号或称呼（如 妈妈、房东），span 为原话中的原文",
          "properties": {"value": {"type": "string", "minLength": 1, "maxLength": 32}, "span": SPAN}}
@@ -28,6 +31,18 @@ def ref(kind):
 MONTH = {"type": "string", "pattern": r"^[0-9]{4}-[0-9]{2}$", "description": "YYYY-MM，按 Asia/Shanghai 计算"}
 
 TOOLS = {
+    "get_extended": {"kind":"read","description":"查询定期存款、外币、基金份额订单、信用账单或统一待办，数据仅来自本人站内账户。","parameters":{"page":{"type":"string","enum":["deposits","exchange","funds","credit-account","todos"]}},"required":["page"]},
+    "propose_extension": {"kind":"propose","description":"准备存款、支取续存、外币兑换、练习基金申购/确认份额/撤单/赎回、信用账单全额最低还款/消费退款/溢缴款退还，或已建黄金定投本期买入。只生成逐笔确认卡；对象引用 extensions 目录。不能直接批准，不登记虚构信用消费，不自动执行。", "parameters":{
+        "operation":{"type":"string","enum":["DEPOSIT_OPEN","DEPOSIT_WITHDRAW","DEPOSIT_RENEW","FX_BUY","FX_SELL","FUND_SUBSCRIBE","FUND_CONFIRM","FUND_CANCEL","FUND_REDEEM","CARD_REPAY","CARD_REFUND","CARD_SURPLUS","GOLD_SAVINGS_BUY"]},
+        "card":ref("银行卡"),"resource":ref("extensions中的存单、基金产品/订单、信用消费或定投计划"),"amount":AMOUNT,"quantity":QUANTITY,
+        "term":{"type":"object","additionalProperties":False,"required":["value","span"],"properties":{"value":{"type":"integer","enum":[90,180,365]},"span":SPAN}},
+        "currency":{"type":"string","enum":["USD","EUR","JPY","HKD"]},"repay_mode":{"type":"string","enum":["full","minimum"]}},"required":["operation"]},
+    "get_finance": {"kind":"read", "description":"查询本站虚拟贷款负债、下一期还款、黄金克数及持仓成本，不提供真实贷款审批", "parameters":{}},
+    "propose_finance": {"kind":"propose", "description":"准备虚拟贷款、消费分期、还款或黄金买卖，只生成待确认动作；生活缴费和机票请用 life_service。金额、期数、克数均须引用用户原话。", "parameters":{
+        "operation":{"type":"string","enum":["LOAN_DRAW","INSTALLMENT_START","CREDIT_REPAY","CREDIT_SETTLE","GOLD_BUY","GOLD_SELL"]},
+        "card":ref("银行卡"), "contract":ref("融资合同"), "purchase":ref("已入账消费"), "amount":AMOUNT,
+        "months":{"type":"object","additionalProperties":False,"required":["value","span"],"properties":{"value":{"type":"integer","enum":[3,6,12],"minimum":3,"maximum":12},"span":SPAN}},
+        "grams":AMOUNT},"required":["operation"]},
     # ---- GREEN: read-only, executed directly -------------------------------------------------
     "get_balance": {"kind": "read", "description": "查询账户余额",
                     "parameters": {"account_id": {"type": "string", "maxLength": 64}}},
@@ -118,6 +133,7 @@ TOOLS = {
                                          "到期后剩余资金自动提醒释放回活期。例：“我爱人生日，锁 1000 元，生日前两天订花和蛋糕”",
                           "parameters": {"name": {"type": "string", "minLength": 1, "maxLength": 20, "description": "心愿金名称，如“爱人生日”"},
                                          "lock_amount": AMOUNT,
+                                         "end_date": {"type":"object","additionalProperties":False,"required":["iso","span"],"properties":{"iso":{"type":"string","pattern":r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},"span":SPAN},"description":"活动结束日期；剩余资金在结束后提醒释放"},
                                          "event": ref("人生事件（生日、纪念日）"),
                                          "date": {"type": "object", "additionalProperties": False, "required": ["iso", "span"],
                                                   "description": "没有对应人生事件时，用户明确说出的日期（YYYY-MM-DD）",
@@ -218,7 +234,7 @@ TOOLS = {
                      "required": ["category"]},
     "navigate": {"kind": "control",
                  "description": "用户只想打开某个功能页面（“打开转账页面”“带我去理财”），不办理具体业务时使用",
-                 "parameters": {"page": {"type": "string", "enum": ["life", "transfer", "payees", "bills", "wealth", "cards",
+                 "parameters": {"page": {"type": "string", "enum": ["todos","funds","credit-account","gold","deposits","gold-savings","exchange","membership","support","plans", "credit", "overview", "life", "transfer", "payees", "bills", "wealth", "cards",
                                                                     "subscriptions", "wish_funds", "security", "audit"]}},
                  "required": ["page"]},
     "out_of_scope": {"kind": "control", "description": "请求超出银行助手能力范围（如贷款审批、股票交易、非金融闲聊）",

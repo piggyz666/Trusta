@@ -1,6 +1,6 @@
 import { LIFE_SECTIONS, safeLink } from "../life.js";
 
-export default function Life({ ask }) {
+export default function Life({ ask, navigate }) {
   return (
     <div className="page">
       <div className="inner">
@@ -8,6 +8,7 @@ export default function Life({ ask }) {
           <h1>生活服务</h1>
           <p>机票、火车票、酒店、演出和缴费都在对方官方平台办理。直接在对话里说需求，我会把城市、日期带进链接，点开就是查询结果；本行不参与交易，也不会代你付款。</p>
         </header>
+        <button className="btn" onClick={()=>navigate("plans")}>管理生日、旅行与活动预算</button>
         <div className="life-grid">
           {LIFE_SECTIONS.map((s) => (
             <section key={s.key} className="panel life-section">

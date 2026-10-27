@@ -40,6 +40,14 @@ class ExtendedBank:
         self.db = db
 
     def resource(self, customer, kind, resource_id=None):
+        if kind == "finance":
+            from backend.banking.finance import snapshot
+            with self.db.transaction() as conn:return snapshot(conn,customer,resource_id)
+        if kind == "retail":
+            from backend.banking.retail import snapshot
+            with self.db.transaction() as conn:
+                target,card=snapshot(conn,customer,resource_id)
+                return {"target":target,"card":card}
         if kind=='card_application' and resource_id:
             with self.db.transaction() as conn:
                 return self.application(conn,customer,resource_id)
@@ -128,6 +136,16 @@ class ExtendedBank:
         if not account:
             raise Rejected("ACCOUNT_ACCESS_DENIED")
         kind = action["target"]["kind"]
+        if kind == "finance":
+            from backend.banking.finance import snapshot
+            data=snapshot(conn,customer,target_id)
+            if data["target"]["account_id"]!=account_id:raise Rejected("RESOURCE_ACCOUNT_MISMATCH")
+            return {"account":dict(account),**data}
+        if kind == "retail":
+            from backend.banking.retail import snapshot
+            target,card=snapshot(conn,customer,target_id)
+            if target["account_id"]!=account_id:raise Rejected("RESOURCE_ACCOUNT_MISMATCH")
+            return {"account":dict(account),"target":target,"card":card}
         if kind == 'wish_fund':
             target = ExtendedBank.wish_fund(conn, customer, target_id, account_id)
             if target["account_id"] != account_id:
@@ -182,7 +200,13 @@ class ExtendedBank:
                 raise Rejected("BANK_POSTCONDITION_INVALID")
             operation_id, now = uid(), time.time()
             kind = action["target"]["kind"]
-            if kind == "wish_fund":
+            if kind == "finance":
+                from backend.banking.finance import apply
+                apply(conn,action,before,after,operation_id)
+            elif kind == "retail":
+                from backend.banking.retail import apply
+                apply(conn,action,before,after,operation_id)
+            elif kind == "wish_fund":
                 self._apply_wish_fund(conn, action, before, after, operation_id)
             elif kind == "payee_entry":
                 t = after["target"]

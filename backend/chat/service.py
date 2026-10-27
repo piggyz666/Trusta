@@ -26,7 +26,7 @@ SMALLTALK = {
     "THANKS": "不客气，还有什么可以帮你？",
     "CAPABILITIES": "我可以帮你：① 转账（按姓名 / 手机号 / 称呼，支持定时）和 AA 收款；② 账单分析和异常交易识别；"
                     "③ 理财推荐、对比、申购赎回；④ 卡片冻结、挂失、限额和交易开关；⑤ 订阅和代扣的识别与取消。"
-                    "所有资金操作都需要你逐笔确认。",
+                    "⑥ 虚拟贷款、消费分期、还款和黄金交易；⑦ 定期存款、支取续存、外币兑换、基金份额及订单、信用账单还款、已建定投的当期办理；⑧ 查询统一待办，打开会员积分和交易工单页面；⑨ 生活服务官方网站导航。所有资金操作都需要你逐笔确认。",
 }
 OFFER_TEXT = re.compile(r"需要我.{0,16}吗|要不要我|是否需要我|我(来|帮你|为你|可以帮你).{0,8}(办理|提交|执行|挂失|转账|冻结|申购|赎回|取消|关闭)"
                         r"|(已|已经)(为你|帮你)?.{0,4}(提交|执行|办理|转账|挂失|冻结)|确认后.{0,4}(执行|提交)|准备.{0,6}操作|待确认的信息")
@@ -66,8 +66,9 @@ class ChatService(AutomationMixin):
         products = [{"id": p["id"], "display": f"{p['name']}（R{p['risk_level']}，{p['term_days']}天）"}
                     for p in s.wealth.products(owner) if p["active"]]
         months = lambda e: f"{e['month']}月{e['day']}日"
+        from backend.banking.personal import event_rows
         events = [{"id": e["id"], "display": f"{e['relation']}{e['person']}{'生日' if e['kind'] == 'BIRTHDAY' else '纪念日'}（{months(e)}）",
-                   "month": e["month"], "day": e["day"]} for e in s.service_agent.resources(owner, "life_event")]
+                  "month": e["month"], "day": e["day"]} for e in event_rows(s,owner)]
         merchants = [{"id": m["id"], "display": f"{m['name']}·{m['item']}（{m['price'] / 100:.2f}元）", "price": m["price"]}
                      for m in s.service_agent.resources(owner, "merchant")]
         funds = [{"id": f["id"], "display": f"心愿金“{f['name']}”（余 {f['balance'] / 100:.2f} 元）"}
@@ -79,7 +80,13 @@ class ChatService(AutomationMixin):
         engine = getattr(s, "automation", None)
         automations = [{"id": r["id"], "display": f"{r['name']}（{engine.describe_trigger(r['trigger'])}）"}
                        for r in engine.rules(owner)] if engine else []
-        return {"accounts": accounts, "cards": cards, "subscriptions": subs, "direct_debits": debits, "products": products,
+        from backend.banking.finance import Finance
+        fv=Finance(self).view(owner) if not s.config.bank_config_path else {'contracts':[], 'eligible':[]}
+        contracts=[{'id':t['id'],'display':('贷款' if t['type']=='loan' else '消费分期')+' '+t['id'][-6:]} for t in fv['contracts'] if t['status']=='ACTIVE' and t['type'] in {'loan','installment'}]
+        purchases=[{'id':t['id'],'display':t['merchant']+' '+t['id'][-6:]} for t in fv['eligible']]
+        from backend.chat.extension_agent import resources
+        extended=resources(self,owner) if not s.config.bank_config_path else []
+        return {"extensions":extended,"contracts":contracts, "purchases":purchases, "accounts": accounts, "cards": cards, "subscriptions": subs, "direct_debits": debits, "products": products,
                 "life_events": events, "merchants": merchants, "wish_funds": funds, "payees": payees, "automations": automations}
 
     # ---- sessions ----------------------------------------------------------------------------
@@ -105,7 +112,7 @@ class ChatService(AutomationMixin):
                 "plan": body.get("plan"),
                 "channel": body["channel"], "default_account_id": body["default_account_id"],
                 "accounts": body["accounts"], "llm_mode": "deepseek" if getattr(self.llm, "available", False) else "rules",
-                "messages": [{k: m[k] for k in ("role", "text", "at", "message_id", "cards") if k in m} for m in body["messages"]],
+                "messages": [{k: m[k] for k in ("role", "text", "at", "message_id", "cards", "fallback_reason") if k in m} for m in body["messages"]],
                 "pending": [p["card"] for p in body["pending"]] + [p["card"] for p in body.get("pending_rules", [])]}
 
     def get(self, session_id, owner):
@@ -158,6 +165,13 @@ class ChatService(AutomationMixin):
         from backend.business import CHINA
         from backend.chat.amounts import format_cents
         messages = []
+        from backend.banking.extensions import GoldSavings
+        for plan in GoldSavings(self).view(owner)['plans']:
+            due=[r['due'] for r in plan['runs'] if r['state']=='DUE']
+            key='gold-due:'+plan['id']+':'+','.join(due)
+            if plan['status']=='ACTIVE' and due and key not in surfaced and self.store.claim_nudge(owner,key):
+                surfaced.append(key)
+                messages.append({'role':'assistant','message_id':'nudge-'+plan['id'],'at':time.time(),'text':f"黄金定投「{plan['name']}」有 {len(due)} 期待确认，每期预算 {format_cents(plan['amount'])}。未自动扣款，请核对当前行情后逐笔确认。",'cards':[{'type':'navigate','card_id':'nav-'+plan['id'],'page':'gold-savings','title':'黄金定投','note':'到期提醒，不自动扣款'}]})
         try:
             reminders = self.s.events.reminders(owner, body["default_account_id"])["reminders"]
         except Rejected:
@@ -192,8 +206,23 @@ class ChatService(AutomationMixin):
                 when = datetime.fromtimestamp(at, CHINA).strftime("%m月%d日")
                 messages.append({"role": "assistant", "message_id": "nudge-due-" + digest({"k": key})[:10], "at": time.time(), "cards": [],
                                  "text": f"提醒：{d['merchant']} 预计在 {when} 左右再扣 {format_cents(d['amount_minor'])}（按过去的扣费间隔估算）。"})
-        # No unprompted life-event (birthday / anniversary) messages: they read as noise at the top of an unrelated
-        # conversation. Life events are still used when the customer asks, e.g. "妈妈生日帮我存2000".
+        today = datetime.now(CHINA).date()
+        funds = [f["name"] for f in self.s.service_agent.resources(owner, "wish_fund") if f["status"] == "ACTIVE"]
+        from backend.banking.personal import event_rows,next_occurrence
+        for event in event_rows(self.s,owner,proactive=True):
+            day = next_occurrence(event['month'],event['day'],today)
+            days = (day - today).days
+            # once when it first comes into view, once more in the final three days; never on every new chat
+            key = f"life:{event['id']}:{day.year}:{'soon' if days <= 3 else 'ahead'}"
+            if not 0 <= days <= 30 or key in surfaced or any((event['relation'] and event['relation'] in n) or event['person'] in n for n in funds):
+                continue
+            if not self.store.claim_nudge(owner, key):
+                continue
+            surfaced.append(key)
+            kind = "生日" if event["kind"] == "BIRTHDAY" else "纪念日"
+            messages.append({"role": "assistant", "message_id": "nudge-" + event["id"], "at": time.time(),
+                             "text": f"{event['relation']}{event['person']}的{kind}还有 {days} 天（{day.month}月{day.day}日）。"
+                                     f"可以到计划中心设置这次预算，或让我准备心愿金。鲜花、蛋糕仅支持虚拟体验，真实购买请到官方平台。", "cards":[{'type':'navigate','card_id':'nav-'+event['id'],'page':'plans','title':'计划中心','note':'建计划不会扣款'}]})
         return messages
 
     def submit_assessment(self, session_id, owner, answers):
@@ -252,7 +281,7 @@ class ChatService(AutomationMixin):
         return "IDLE"
 
     # ---- turn --------------------------------------------------------------------------------
-    def send(self, session_id, owner, message_id, revision, text, account_id=None, on_event=None):
+    def send(self, session_id, owner, message_id, revision, text, account_id=None, on_event=None, *, prepared_calls=None):
         emit = on_event or (lambda name, data: None)
         body, replay = self.store.claim(session_id, owner, message_id, revision, text, account_id)
         if replay is not None:
@@ -262,7 +291,7 @@ class ChatService(AutomationMixin):
         try:
             if account not in {a["id"] for a in body["accounts"]}:
                 raise Rejected("ACCOUNT_ACCESS_DENIED")
-            outcome = self._process(body, owner, text.strip(), account, emit)
+            outcome = self._process(body, owner, text.strip(), account, emit, prepared_calls)
         except Exception as exc:  # The turn fails closed: no new proposal survives.
             code = exc.code if isinstance(exc, Rejected) else "CHAT_FAILED"
             self.s.audit.append(None, None, "CHAT_TURN_FAILED", "chat", {"session_id": session_id, "message_id": message_id, "code": code})
@@ -287,7 +316,7 @@ class ChatService(AutomationMixin):
     def _finish(self, body, owner, message_id, outcome, emit):
         reply = {"text": outcome["text"], "cards": outcome["cards"]}
         body["messages"].append({"role": "assistant", "message_id": message_id, "text": outcome["text"],
-                                 "cards": outcome["cards"], "at": time.time()})
+                                 "cards": outcome["cards"], "fallback_reason": outcome.get("fallback_reason"), "at": time.time()})
         body["busy"] = None
         turn = {"session_id": body["session_id"], "message_id": message_id, "revision": body["revision"] + 1,
                 "state": None, "reply": reply, "plan": outcome.get("plan"), "understanding": outcome.get("mode"),
@@ -321,15 +350,15 @@ class ChatService(AutomationMixin):
     def _corpus(self, body):
         return [m["text"] for m in body["messages"] if m["role"] == "user"][-8:]
 
-    def _process(self, body, owner, text, account, emit):
+    def _process(self, body, owner, text, account, emit, prepared_calls=None):
         trace = {"text_hash": digest(text), "guard": None, "calls": [], "steps": [], "clarifications": []}
-        outcome = self._process_inner(body, owner, text, account, emit, trace)
+        outcome = self._process_inner(body, owner, text, account, emit, trace, prepared_calls)
         trace.update(understanding=outcome.get("mode"), fallback_reason=outcome.get("fallback_reason"), risk=outcome.get("risk"),
                      model=getattr(self.llm, "model", None) if outcome.get("mode") == "deepseek" else None)
         outcome["trace"] = trace
         return outcome
 
-    def _process_inner(self, body, owner, text, account, emit, trace):
+    def _process_inner(self, body, owner, text, account, emit, trace, prepared_calls=None):
         cards, texts, tools = [], [], []
         now = time.time()
         if body.get("locked_until", 0) > now:
@@ -347,11 +376,17 @@ class ChatService(AutomationMixin):
         trace["guard"] = hit and {"category": hit["category"], "evidence": hit.get("evidence")}
         if hit:
             return self._risk(body, owner, hit, tools)
+        if re.search(r'写.{0,4}(诗|小说|作文|代码)|编程作业|解.{0,3}(数学题|方程)|角色扮演|讲.{0,3}笑话|天气预报|诊断疾病', text):
+            return {'text':'我只处理 TRUSTA 的银行业务及生活服务导航，不能处理这类无关请求。','cards':[],'mode':'scope','tools':[]}
         # 3. understanding
         catalog = self.catalog(owner)
         fallback = None
         try:
-            calls, mode = self._understand(body, owner, text, catalog), "deepseek"
+            if prepared_calls is not None:
+                calls,mode=prepared_calls,'form'
+            else:
+                if getattr(self.llm, 'available', False):emit('model.waiting', {})
+                calls, mode = self._understand(body, owner, text, catalog), "deepseek"
         except LLMUnavailable as exc:
             calls, mode, fallback = None, "rules", exc.code
             self.s.audit.append(None, None, "CHAT_LLM_FALLBACK", "chat", {"session_id": body["session_id"], "reason": exc.code})
@@ -476,7 +511,7 @@ class ChatService(AutomationMixin):
                 cards.append(knowledge.navigate_card(args["page"], "c_nav_" + uid()[:8]))
                 texts.append(f"已为你找到“{knowledge.PAGES[args['page']]}”入口，点击下方按钮打开。没有发起任何交易")
             elif name == "out_of_scope":
-                texts.append("这个我暂时帮不上忙。" + SMALLTALK["CAPABILITIES"])
+                texts.append("我只处理 TRUSTA 站内银行业务和生活服务导航，不处理其他领域的任务。" + SMALLTALK["CAPABILITIES"])
         # 5. execute reads, register proposals
         renderer = CardRenderer(self.s, owner, catalog)
         goal = text
@@ -624,6 +659,19 @@ class ChatService(AutomationMixin):
         """Hand a validated intent to the six-agent runtime. `origin` (provenance of the interpretation) rides inside the
         normalized intent, so the Supervisor's signed REQUEST message attests where the request came from."""
         from backend.runtime.banking_plan import TASKS
+        if normalized.get('task_type')=='FINANCE_MANAGEMENT':
+            from backend.banking.finance import Finance,payment
+            f=Finance(self)
+            if 'savings_prepare' in normalized:
+                from backend.banking.extensions import GoldSavings
+                t=GoldSavings(self).prepare(owner,normalized['savings_prepare'])['contract']
+            elif 'finance_draft' in normalized:
+                t=f.create(owner,normalized['finance_draft'])['contract']
+            else:
+                t=next((t for t in f.view(owner)['contracts'] if t['id']==normalized.get('target_id')),None)
+                if not t:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
+            account=t['account_id']
+            normalized={k:v for k,v in normalized.items() if k not in {'finance_draft','savings_prepare'}}|{'target_id':t['id'],'parameters':{'amount':payment(normalized['operation'],t),'currency':'CNY'}}
         if origin:
             # The deployment capability snapshot in force is bound into the signed request as well.
             normalized = normalized | {"origin": origin | {"capability_snapshot": self.capabilities.snapshot()[0]}}
@@ -675,7 +723,7 @@ class ChatService(AutomationMixin):
         count += self._cancel_rule_drafts(body, owner)
         return count
 
-    BALANCE_OPERATIONS = {"TRANSFER", "INVESTMENT_PURCHASE", "INVESTMENT_REDEEM", "FUND_LOCK", "FUND_RELEASE"}
+    BALANCE_OPERATIONS = {"LOAN_DRAW","INSTALLMENT_START","CREDIT_REPAY","CREDIT_SETTLE","GOLD_BUY","GOLD_SELL","TRANSFER", "INVESTMENT_PURCHASE", "INVESTMENT_REDEEM", "FUND_LOCK", "FUND_RELEASE"}
 
     @classmethod
     def _moves_balance(cls, normalized):
@@ -799,6 +847,10 @@ class ChatService(AutomationMixin):
                            for p in body["pending"])
         prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog)
         disabled = set(self.capabilities.disabled_tools(owner))
+        if isinstance(self.llm,DeepSeekToolClient):
+            from backend.chat.tool_selection import relevant_tools
+            context=' '.join(m['text'] for m in body['messages'][-5:] if m['role']=='user')
+            disabled |= set(TOOLS)-relevant_tools(context)
         result = self.llm.complete(prompt, history, tools=openai_tools(disabled)) if disabled else self.llm.complete(prompt, history)
         usage = result.get("usage") or {}
         self.store.record_llm_tokens(owner, usage.get("total_tokens"))
@@ -813,8 +865,7 @@ class ChatService(AutomationMixin):
                 return actionable
             # Plain model text is shown only when it carries no numbers it could have invented and does not
             # describe / offer an operation in words (the confirmation card is the only place an operation is offered).
-            if content and not re.search(r"[0-9０-９]", content) and len(content) <= 200 and not OFFER_TEXT.search(content):
-                return self._plain(content)
+            # No general chatbot escape hatch: arbitrary model text is never rendered.
             if content and OFFER_TEXT.search(content):
                 return [{"name": "ask_user", "arguments": {"slot": "operation",
                                                            "question": "请直接告诉我要办理的操作，例如“挂失我的卡”“冻结卡片”，我会生成确认卡给你核对。"}}]

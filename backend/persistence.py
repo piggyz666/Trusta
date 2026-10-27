@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import sqlite3
+import json
 from pathlib import Path
 
 
@@ -88,6 +89,25 @@ class Database:
             db.executescript(SCHEMA)
             from backend.banking.extended_schema import SCHEMA as BANKING_SCHEMA
             db.executescript(BANKING_SCHEMA)
+            from backend.banking.retail import SCHEMA as RETAIL_SCHEMA
+            db.executescript(RETAIL_SCHEMA)
+            from backend.banking.finance import SCHEMA as FINANCE_SCHEMA
+            db.executescript(FINANCE_SCHEMA)
+            from backend.banking.advanced import SCHEMA as ADVANCED_SCHEMA
+            db.executescript(ADVANCED_SCHEMA)
+            from backend.banking.extensions import SCHEMA as EXTENSION_SCHEMA
+            db.executescript(EXTENSION_SCHEMA)
+            from backend.banking.member_support import SCHEMA as MEMBER_SCHEMA
+            db.executescript(MEMBER_SCHEMA)
+            from backend.banking.personal import SCHEMA as PERSONAL_SCHEMA
+            db.executescript(PERSONAL_SCHEMA)
+            from backend.banking.personal import sync_profile_events
+            from backend.domain import digest
+            with db:
+                for profile in db.execute('SELECT owner,body FROM personal_profiles').fetchall():
+                    value=json.loads(profile['body'])
+                    synced=db.execute('SELECT hash FROM profile_event_sync WHERE owner=?',(profile['owner'],)).fetchone()
+                    if not synced or synced['hash']!=digest(value):sync_profile_events(db,profile['owner'],value)
         finally:
             db.close()
 

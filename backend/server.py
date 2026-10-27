@@ -19,7 +19,7 @@ TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=u
          ".svg": "image/svg+xml", ".woff2": "font/woff2", ".woff": "font/woff", ".png": "image/png", ".ico": "image/x-icon",
          ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json",
          ".mp4": "video/mp4", ".webm": "video/webm", ".jpg": "image/jpeg", ".webp": "image/webp"}
-SPA_ROUTES = {"/", "/overview", "/bills", "/wealth", "/life", "/features", "/settings"}
+SPA_ROUTES = {"/funds","/credit-account","/todos","/gold", "/", "/overview", "/bills", "/wealth", "/credit", "/life", "/plans", "/features", "/settings", "/deposits", "/gold-savings", "/exchange", "/membership", "/support"}
 
 
 def serve_static(path):
@@ -40,6 +40,13 @@ def serve_static(path):
     if file.is_file() and DIST.resolve() in file.parents and file.suffix in TYPES:
         return file.read_bytes(), TYPES[file.suffix]
     return None
+
+
+def bank_path(path):
+    """Mount the app at /bank without changing its authenticated API contract."""
+    if path == "/bank" or path.startswith("/bank?"):
+        return "/" + path[5:]
+    return path[5:] if path.startswith("/bank/") else path
 
 
 class BoundedHTTPServer(ThreadingHTTPServer):
@@ -202,6 +209,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
             return owner
 
         def do_GET(self):
+            self.path = bank_path(self.path)
             self._input_timer.cancel()
             try:
                 path = urlparse(self.path).path
@@ -300,6 +308,7 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                 self.reply(500, {"error": "INTERNAL_ERROR", "message": "状态未确认，请刷新任务；不要重复提交转账。"})
 
         def do_POST(self):
+            self.path = bank_path(self.path)
             try:
                 if len(self.headers.get_all('Content-Length',[]))!=1 or self.headers.get_all('Transfer-Encoding'):
                     raise Rejected('INVALID_BODY_SIZE')
@@ -506,9 +515,10 @@ def main():
     if config.api_token:
         token = config.api_token
     else:
+        from backend.security.local_files import write_secret_atomic, protect_secret
         if not token_file.exists():
-            with token_file.open("x", encoding="utf-8") as stream:
-                stream.write(secrets.token_urlsafe(32))
+            write_secret_atomic(token_file, secrets.token_urlsafe(32).encode(), create_only=True)
+        protect_secret(token_file)
         token = token_file.read_text(encoding="utf-8").strip()
     server = create_server(service, token)
     print("TRUSTA V1 — 本地虚拟银行")

@@ -1,19 +1,21 @@
+import {BankCard,CardDesigner} from "../components/BankCard.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { api, explain } from "../api.js";
 import { Donut } from "../components/Charts.jsx";
 import { Drawer, Icon, Tag } from "../components/ui.jsx";
 import { TIER, dateOnly, dateTime, dayBucket, yuan } from "../format.js";
 
-const KINDS = [["", "全部"], ["transfer", "转账"], ["card", "卡片"], ["wish", "心愿金"], ["wealth", "理财"], ["subscription", "订阅代扣"],
-  ["income", "入账"], ["automation", "联动规则"], ["payee", "收款人"]];
-const GLYPH = { transfer: "transfer", card: "card", wish: "wish", wealth: "wealth", subscription: "subscription", income: "income",
+const KINDS = [["", "全部"], ["transfer", "转账"], ["card", "卡片"], ["wish", "心愿金"], ["wealth", "理财"], ["subscription", "订阅代扣"], ["retail", "生活订单"],
+  ["credit", "贷款分期"], ["income", "入账"], ["automation", "联动规则"], ["payee", "收款人"]];
+const GLYPH = { transfer: "transfer", card: "card", wish: "wish", wealth: "wealth", subscription: "subscription", retail: "card", income: "income",
   automation: "automation", payee: "payee", other: "spark" };
 const CARD_STATUS = { ACTIVE: ["green", "正常"], FROZEN: ["amber", "已冻结"], LOST: ["red", "已挂失"], CANCELLED: ["neutral", "已注销"] };
 
 // last result kept for the session: revisiting the page shows it instantly and refreshes in the background
 const cache = { overview: null, items: {} };
 
-export default function Overview({ openSession, ask, openProof }) {
+export default function Overview({ openSession, ask, openProof, navigate }) {
+  const [designCard,setDesignCard]=useState(null);
   const [data, setData] = useState(cache.overview);
   const [error, setError] = useState(null);
   const [kind, setKind] = useState("");
@@ -55,8 +57,8 @@ export default function Overview({ openSession, ask, openProof }) {
         <div className="balance-hero">
           <div className="balance-total">
             <div>
-              <div className="stat-label">总资产（账户 + 理财 + 心愿金）</div>
-              <div className="stat-value num">{yuan(data.total_minor + data.portfolio_minor + data.wish_funds.reduce((s, f) => s + f.balance_minor, 0))}</div>
+              <div className="stat-label">资产合计（成本口径）</div>
+              <div className="stat-value num">{yuan(data.finance?.assets_at_cost_minor ?? (data.total_minor + data.portfolio_minor + data.wish_funds.reduce((s, f) => s + f.balance_minor, 0)))}</div>
             </div>
             <div className="accounts">
               {data.accounts.map((a) => <span key={a.id}>{a.name} <b className="num">{yuan(a.balance_minor)}</b></span>)}
@@ -71,6 +73,12 @@ export default function Overview({ openSession, ask, openProof }) {
           </div>
         </div>
 
+        {data.finance&&<section className="section panel"><h2>资产与还款</h2><div className="grid-2">
+          <button className="btn" onClick={()=>navigate('wealth')}>黄金 {(data.finance.gold_units/100).toFixed(2)} 克 · 成本 {yuan(data.finance.gold_cost_minor)}</button>
+          <button className="btn" onClick={()=>navigate('deposits')}>定期存款 {yuan(data.finance.deposit_principal_minor||0)}</button><button className="btn" onClick={()=>navigate('exchange')}>外币成本 {yuan(data.finance.fx_cost_minor||0)}</button><button className="btn" onClick={()=>navigate('credit')}>贷款与分期待还本金 {yuan(data.finance.debt_minor)}</button>
+          <div>净资产（成本口径）<b className="num"> {yuan(data.finance.net_at_cost_minor)}</b></div>
+          <div>{data.finance.next_due?`最近还款 ${data.finance.next_due} · ${yuan(data.finance.next_due_minor)}`:'暂无待还款'}</div>
+        </div><p className="faint">黄金和外币按持仓成本计，定期存款按未支取本金计，理财按申购本金计；不等于当前市场价值。还款不会自动扣款。</p></section>}
         <div className="grid-2">
           <section className="section panel">
             <h2>消费构成</h2>
@@ -129,7 +137,7 @@ export default function Overview({ openSession, ask, openProof }) {
               {data.cards.map((c) => {
                 const [tone, label] = CARD_STATUS[c.status] || ["neutral", c.status];
                 return (
-                  <div key={c.id} style={{ display: "grid", gap: 4 }}>
+                  <div key={c.id} style={{ display: "grid", gap: 10 }}><BankCard card={c}/><button className="btn small" onClick={()=>setDesignCard(c)}>定制卡面</button>
                     <div className="kv"><span><Icon name="card" style={{ width: 16, height: 16, verticalAlign: -3, marginRight: 6 }} />
                       {c.type === "credit" ? "信用卡" : "借记卡"} ·{c.id.slice(-4)}</span><Tag tone={tone}>{label}</Tag></div>
                     <span className="faint" style={{ fontSize: 12.5 }}>
@@ -170,6 +178,7 @@ export default function Overview({ openSession, ask, openProof }) {
           </div>
         </section>
       </div>
+      {designCard && <CardDesigner card={designCard} onClose={()=>setDesignCard(null)} onSaved={()=>api.overview().then(setData)}/>}
       {detail && <RecordDrawer item={detail} onClose={() => setDetail(null)} openSession={openSession} openProof={openProof} />}
     </div>
   );

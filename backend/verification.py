@@ -24,6 +24,19 @@ class HardVerifier:
                            and transaction["parameters"] == action["parameters"] and transaction["target"] == action["target"]
                            and transaction["before"] == action["preconditions"] and actual == action["expected_postconditions"]
                            and transaction["after"] == actual)
+                if action["target"]["kind"]=="finance":
+                    from backend.banking.finance import INCOMING
+                    incoming=action["action_type"] in INCOMING;amount=action["parameters"]["amount"]
+                    evidence=self.gateway.read("verifier",action["customer_id"],"operation.evidence",operation_id=transaction_id)
+                    ledger={(action["source_account_id"],"CREDIT" if incoming else "DEBIT",amount),("finance-clearing","DEBIT" if incoming else "CREDIT",amount)}
+                    from backend.banking import advanced
+                    if action["action_type"] in advanced.LABELS:ledger=advanced.ledger(action)
+                    matches=matches and len(evidence["ledger_entries"])==2 and {(r["account_id"],r["side"],r["amount"]) for r in evidence["ledger_entries"]}==ledger
+                if action["target"]["kind"]=="retail":
+                    evidence=self.gateway.read("verifier",action["customer_id"],"operation.evidence",operation_id=transaction_id)
+                    pay=action['action_type']=='RETAIL_PAY';amount=action['parameters']['amount']
+                    ledger={(action['source_account_id'],'DEBIT' if pay else 'CREDIT',amount),('settlement','CREDIT' if pay else 'DEBIT',amount)}
+                    matches=matches and len(evidence['ledger_entries'])==2 and {(r['account_id'],r['side'],r['amount']) for r in evidence['ledger_entries']}==ledger
                 if action["target"]["kind"]=="product":
                     evidence=self.gateway.read("verifier",action["customer_id"],"operation.evidence",operation_id=transaction_id)
                     investment=evidence["investment_transaction"]

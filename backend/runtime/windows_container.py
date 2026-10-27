@@ -23,10 +23,13 @@ def stage_runtime(directory):
     if root==repository or repository in root.parents or len(root.parts)<4:
         raise Rejected('AGENT_RUNTIME_LOCATION_DENIED')
     root.mkdir(parents=True,exist_ok=True)
-    source=Path(sys.executable).parent
-    if os.name!='nt' or sys.version_info[:2]!=(3,13) or not (source/'Lib').is_dir():
+    # A venv executable is a launcher, not a distributable interpreter. Stage
+    # the matching base interpreter and standard library instead.
+    source=Path(sys.base_prefix)
+    runtime_python=source/'python.exe'
+    if os.name!='nt' or sys.version_info[:2]!=(3,13) or not (source/'Lib').is_dir() or not runtime_python.is_file():
         raise Rejected('AGENT_ISOLATION_PLATFORM_UNSUPPORTED')
-    for file in [Path(sys.executable),*source.glob('*.dll')]:
+    for file in [runtime_python,*source.glob('*.dll')]:
         target=root/file.name
         if not target.exists(): shutil.copy2(file,target)
     for name in ('Lib','DLLs'):

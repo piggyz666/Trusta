@@ -362,7 +362,7 @@ class BankingControls:
     # outbound money movement is blocked at Policy time AND again right before execution. It cannot be lifted from the chat
     # or by the customer under pressure -- only by a security operator after verification -- so a scammer coaching the
     # victim gains nothing by asking them to "turn it off".
-    PROTECTED_ACTIONS = frozenset({"TRANSFER", "ADD_PAYEE", "WISH_ORDER", "INVESTMENT_PURCHASE"})
+    PROTECTED_ACTIONS = frozenset({"CARD_CHARGE","CARD_REFUND","CARD_REPAY","CARD_SURPLUS","FUND_SUBSCRIBE","FUND_CONFIRM","FUND_CANCEL","FUND_REDEEM","DEPOSIT_OPEN","DEPOSIT_WITHDRAW","DEPOSIT_RENEW","FX_BUY","FX_SELL","LOAN_DRAW","INSTALLMENT_START","CREDIT_REPAY","CREDIT_SETTLE","GOLD_BUY","GOLD_SELL", "RETAIL_PAY", "TRANSFER", "ADD_PAYEE", "WISH_ORDER", "INVESTMENT_PURCHASE"})
     PROTECTION_MAX_HOURS = 72
 
     def protection(self, owner, conn=None):

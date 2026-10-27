@@ -6,7 +6,12 @@ import re
 import time
 from backend.domain import Rejected, digest, uid
 
+from backend.banking.finance import KINDS as FINANCE_KINDS
+
 ACTION_SPECS = {
+    **{k:{"agent":"service","kind":"finance","capability":"banking.finance."+k.lower(),"tool":"finance."+k.lower()} for k in FINANCE_KINDS},
+    "RETAIL_PAY": {"agent":"service","kind":"retail","capability":"banking.retail.pay","tool":"retail.pay"},
+    "RETAIL_REFUND": {"agent":"service","kind":"retail","capability":"banking.retail.refund","tool":"retail.refund"},
     "CARD_APPLY": {"agent":"service", "kind":"card_application", "capability":"banking.card.apply", "tool":"card.apply"},
     "CARD_REPORT_LOST": {"agent":"service", "kind":"card", "capability":"banking.card.report_lost", "tool":"card.report_lost"},
     "CARD_FREEZE": {"agent": "service", "kind": "card", "capability": "banking.card.freeze", "tool": "card.freeze"},
@@ -55,7 +60,7 @@ class BankActionIRV2:
 def validate_parameters(kind, values):
     if not isinstance(values, dict):
         raise Rejected("REJECTED_SCHEMA")
-    keys = {"CARD_LIMIT_CHANGE": {"spending_limit"}, "CARD_TRANSACTION_CONTROL":
+    keys = {**{k:{"amount","currency"} for k in FINANCE_KINDS},"RETAIL_PAY":{"amount","currency"}, "RETAIL_REFUND":{"amount","currency"}, "CARD_LIMIT_CHANGE": {"spending_limit"}, "CARD_TRANSACTION_CONTROL":
             {"online_enabled", "international_enabled", "contactless_enabled"},
             "INVESTMENT_PURCHASE": {"amount", "currency"}, "INVESTMENT_REDEEM": {"amount", "currency"},
             "FUND_LOCK": {"amount", "currency", "name", "release_at"}, "WISH_ORDER": {"amount", "currency", "items"},
@@ -102,6 +107,12 @@ def domain_errors(kind, snapshot, parameters, now=None):
         errors.append("UNSUPPORTED_CURRENCY")
     if not target:
         return errors + ["TARGET_NOT_FOUND"]
+    if kind in FINANCE_KINDS:
+        from backend.banking.finance import errors as finance_errors
+        return finance_errors(kind,snapshot,parameters,now)+errors
+    if kind in {'RETAIL_PAY','RETAIL_REFUND'}:
+        from backend.banking.retail import errors as retail_errors
+        return retail_errors(kind,snapshot,parameters,now) + errors
     if kind == 'CARD_APPLY':
         if target['status']!='AVAILABLE': errors.append('CARD_APPLICATION_ALREADY_SUBMITTED')
     elif kind == "FUND_LOCK":
@@ -180,6 +191,12 @@ def domain_errors(kind, snapshot, parameters, now=None):
 
 def expected_state(kind, snapshot, values, approval_deadline):
     # Conditions used for financial approval; hard verification independently reads the bank.
+    if kind in {"RETAIL_PAY","RETAIL_REFUND"}:
+        from backend.banking.retail import expected
+        return expected(kind,snapshot,values)
+    if kind in FINANCE_KINDS:
+        from backend.banking.finance import expected
+        return expected(kind,snapshot,values)
     result = copy.deepcopy(snapshot)
     target, account = result["target"], result["account"]
     if not target:
@@ -244,6 +261,14 @@ def risk_target(profile, customer_id):
 def snapshot_from_gateway(gateway, actor, user_id, account_id, kind, target_id):
     account = gateway.read(actor, user_id, "account.get", account_id=account_id)
     resource_kind = ACTION_SPECS[kind]["kind"]
+    if resource_kind == "finance":
+        data=gateway.read(actor,user_id,"finance.get",resource_id=target_id)
+        if data["target"]["account_id"]!=account_id:raise Rejected("RESOURCE_ACCOUNT_MISMATCH")
+        return {"account":account,**data}
+    if resource_kind == "retail":
+        data=gateway.read(actor,user_id,"retail.get",resource_id=target_id)
+        if data["target"]["account_id"]!=account_id:raise Rejected("RESOURCE_ACCOUNT_MISMATCH")
+        return {"account":account,**data}
     if resource_kind == "wish_fund":
         target = gateway.read(actor, user_id, "wish_fund.get", resource_id=target_id)
         if target["account_id"] != account_id:

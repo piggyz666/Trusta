@@ -1,3 +1,35 @@
+# TRUSTA Banking · 团队集成评审版
+
+本仓库保存我们在队友 TRUSTA 基础上完成的集成版本，供队友下载、复核和继续开发。原项目：[piggyz666/Trusta](https://github.com/piggyz666/Trusta)。保留原作者设计、版权声明与 LICENSE；本仓库公开不等于授予额外开源许可。
+
+**先读 [交付与验收说明](README-交付与验收.md) 和 [本次验收报告](docs/release-acceptance-20261026.md)。** 本轮合并去重统计：1,537 项通过，17 项因缺少原作者历史实验记录未通过。没有“绝对安全”或全业务全场景通过的保证。
+
+## 下载与运行
+
+在 Releases 下载 `TRUSTA-windows-x64.zip`，解压后双击 `TRUSTA.cmd`。自带 Python 3.14.10 和运行依赖，默认只运行本机虚拟银行、不调用付费模型。源码开发使用本仓库或 `TRUSTA-review.zip`；可选证明实验下载 `TRUSTA-proof-assets.zip`。所有附件以 SHA256SUMS.txt 校验。
+
+## 本仓库包含什么
+
+- 当前完整后端、Agent 工具/确认/权限边界、队友风格前端源码和预构建资源。
+- 虚拟转账、存款、基金、黄金/定投、外币、贷款/分期、信用账单、计划预算与生日联动等集成功能及测试。
+- Windows 启动/停止/监督脚本、便携打包、Cloudflare 接入模板、依赖清单和锁文件。
+- 安全与业务验收文档、可复现测试、开发证明/合约源代码。
+- `legacy-bank/`：旧版银行完整相关前后端、资源、迁移和测试，作为后续迁移参考；不与当前运行版本混用。
+
+真实航班、酒店、演出及便民服务按当前产品设计跳转官方网站；不宣称本站真实出票或代缴。AI 默认规则模式，接入自己的模型需要另外配置。所有扣款需确认且仅使用虚拟资金。
+
+## 明确不公开的内容
+
+个人 API/支付/签名私钥、隧道凭据、真实用户或本机账户数据库、会话令牌、运行日志、旧 Git 历史、重复构建缓存及与银行无关的私人项目。缺失的原始历史评测/链上回执没有编造；具体 17 项见验收报告。公开证明 zkey/验证公钥不属于个人密钥。
+
+源码集成基线为 `d3be8a546ece207db03c36f8744c5520302d1d45`，含本地集成改动。已检查上游 `1026263b0f0f506e89f44b596e73c5f6d7b9a6fd` 的后续提交，但未自动覆盖本版主动建议开关等行为。首次公开提交采用干净导出，不携带原开发机历史。
+
+---
+
+下面保留上游历史介绍；其中旧测试数字、部署状态及实验结论不应替代上方本次验收报告。
+
+> 本次交付请先阅读 [交付与验收说明](README-交付与验收.md) 和 [2026-10-26 验收报告](docs/release-acceptance-20261026.md)。以下包含历史阶段记录，不代表本包所有功能均已验收。
+
 <p align="center"><img src="frontend-app/public/icon-192.png" width="96" alt="TRUSTA"></p>
 
 <h1 align="center">TRUSTA 银行助手</h1>
@@ -97,7 +129,7 @@ irm https://raw.githubusercontent.com/piggyz666/Trusta/main/install.ps1 | iex   
 curl -fsSL https://raw.githubusercontent.com/piggyz666/Trusta/main/install.sh | bash   # macOS / Linux
 ```
 
-**从源码运行**（需要 Python 3.11+）：
+**从源码运行**（需要 Python 3.12+）：
 
 ```powershell
 python -m pip install -r requirements.txt

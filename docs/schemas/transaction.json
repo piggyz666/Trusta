@@ -1,0 +1,1052 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "trusta-bank/transaction.json",
+  "title": "transaction",
+  "type": "object",
+  "required": [
+    "account_id",
+    "amount",
+    "currency",
+    "id",
+    "kind",
+    "occurred_at",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "account_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "amount": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "occurred_at": {
+      "type": "number",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "CREATED",
+        "PENDING",
+        "AUTHORIZED",
+        "PROCESSING",
+        "SETTLED",
+        "FAILED",
+        "REVERSED",
+        "UNKNOWN"
+      ]
+    },
+    "kind": {
+      "type": "string"
+    },
+    "merchant": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "direction": {
+      "enum": [
+        "IN",
+        "OUT",
+        "ZERO"
+      ]
+    },
+    "payer": {
+      "type": "string"
+    },
+    "memo": {
+      "type": "string"
+    }
+  },
+  "description": "transaction.list（按月）的每一项。消费 kind=PURCHASE、退款 REFUND；入账 direction=IN 并可带 payer / memo",
+  "$defs": {
+    "account_list_item": {
+      "type": "object",
+      "required": [
+        "currency",
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "balance": {
+          "type": "integer"
+        },
+        "frozen": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "description": "accounts.read 不带 _tool 时：该客户的全部账户（列表中的每一项）"
+    },
+    "account": {
+      "type": "object",
+      "required": [
+        "balance",
+        "currency",
+        "customer_id",
+        "frozen",
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "balance": {
+          "type": "integer"
+        },
+        "frozen": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "增加即表示状态变化；用于签名动作的前置条件比对"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "description": "account.get：单个账户；customer_id 必须是授权客户"
+    },
+    "balance": {
+      "type": "object",
+      "required": [
+        "balance",
+        "currency",
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "balance": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "增加即表示状态变化；用于签名动作的前置条件比对"
+        }
+      },
+      "description": "account.get_balance"
+    },
+    "recurring_charge": {
+      "type": "object",
+      "required": [
+        "account_id",
+        "amount",
+        "currency",
+        "id",
+        "merchant",
+        "occurred_at",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "merchant": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "occurred_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "status": {
+          "enum": [
+            "CREATED",
+            "PENDING",
+            "AUTHORIZED",
+            "PROCESSING",
+            "SETTLED",
+            "FAILED",
+            "REVERSED",
+            "UNKNOWN"
+          ]
+        }
+      },
+      "description": "transaction.recurring_history（可选）"
+    },
+    "transfer": {
+      "type": "object",
+      "required": [
+        "amount",
+        "currency",
+        "id",
+        "recipient_id",
+        "source_account_id",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recipient_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "status": {
+          "enum": [
+            "CREATED",
+            "PENDING",
+            "AUTHORIZED",
+            "PROCESSING",
+            "SETTLED",
+            "FAILED",
+            "REVERSED",
+            "UNKNOWN"
+          ]
+        },
+        "executed_at": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "description": "transaction.get：一笔转账的状态"
+    },
+    "payee": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "is_new": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "payee.resolve：按姓名（或手机号、备注名）或 recipient_id 查找，返回匹配的收款人列表；两者都为空时返回全部收款人。is_new 表示银行认为是新添加的收款人（可选）"
+    },
+    "card": {
+      "type": "object",
+      "required": [
+        "account_id",
+        "card_type",
+        "contactless_enabled",
+        "id",
+        "international_enabled",
+        "online_enabled",
+        "spending_limit",
+        "status",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "card_type": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "FROZEN",
+            "LOST",
+            "CLOSED"
+          ]
+        },
+        "spending_limit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "online_enabled": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "international_enabled": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "contactless_enabled": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "增加即表示状态变化；用于签名动作的前置条件比对"
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "card.list / card.get"
+    },
+    "subscription": {
+      "type": "object",
+      "required": [
+        "account_id",
+        "amount",
+        "cancelable",
+        "currency",
+        "frequency",
+        "id",
+        "merchant",
+        "next_charge_at",
+        "status",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "merchant": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "frequency": {
+          "enum": [
+            "WEEKLY",
+            "MONTHLY",
+            "QUARTERLY",
+            "YEARLY"
+          ]
+        },
+        "next_charge_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string"
+        },
+        "cancelable": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "增加即表示状态变化；用于签名动作的前置条件比对"
+        }
+      },
+      "description": "subscription.list / direct_debit.list 的每一项（status：ACTIVE 生效，其余为已取消 / 已关闭）"
+    },
+    "product": {
+      "type": "object",
+      "required": [
+        "active",
+        "currency",
+        "id",
+        "minimum_amount",
+        "name",
+        "risk_level",
+        "term_days"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "risk_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "minimum_amount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "term_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "active": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "risk_note": {
+          "type": "string"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "benchmark": {
+          "type": "string"
+        },
+        "liquidity": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "restrictions": {
+          "type": "object",
+          "required": [
+            "purchase_enabled",
+            "redemption_enabled"
+          ],
+          "properties": {
+            "purchase_enabled": {
+              "type": [
+                "boolean",
+                "integer"
+              ]
+            },
+            "redemption_enabled": {
+              "type": [
+                "boolean",
+                "integer"
+              ]
+            }
+          },
+          "description": ""
+        }
+      },
+      "description": "wealth.list_products 的每一项"
+    },
+    "portfolio": {
+      "type": "object",
+      "required": [
+        "account_id",
+        "amount_cents",
+        "product_id",
+        "version"
+      ],
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "product_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "增加即表示状态变化；用于签名动作的前置条件比对"
+        },
+        "redeemable_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "portfolio.get"
+    },
+    "risk_profile": {
+      "type": "object",
+      "required": [
+        "assessed_at",
+        "customer_id",
+        "expires_at",
+        "risk_level"
+      ],
+      "properties": {
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "assessed_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expires_at": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "description": "customer.get_risk_profile"
+    },
+    "wish_fund": {
+      "type": "object",
+      "required": [
+        "account_id",
+        "balance",
+        "id",
+        "name",
+        "release_at",
+        "status",
+        "target_amount",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "balance": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "target_amount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "release_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "增加即表示状态变化；用于签名动作的前置条件比对"
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "wish_fund.list / get"
+    },
+    "merchant": {
+      "type": "object",
+      "required": [
+        "id",
+        "item",
+        "name",
+        "price",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "item": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        }
+      },
+      "description": "merchant.list"
+    },
+    "life_event": {
+      "type": "object",
+      "required": [
+        "day",
+        "id",
+        "kind",
+        "month",
+        "person"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "person": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "BIRTHDAY",
+            "ANNIVERSARY"
+          ]
+        },
+        "month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        },
+        "relation": {
+          "type": "string"
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "life_event.list"
+    },
+    "finance_contract": {
+      "type": "object",
+      "required": [
+        "account_id",
+        "amount",
+        "card_id",
+        "created_at",
+        "customer_id",
+        "expires_at",
+        "id",
+        "paid_fees",
+        "remaining",
+        "schedule",
+        "status",
+        "type",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "card_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "loan",
+            "installment",
+            "gold_buy",
+            "gold_sell",
+            "deposit_open",
+            "deposit_withdraw",
+            "deposit_renew",
+            "fx_buy",
+            "fx_sell",
+            "card_charge",
+            "card_refund",
+            "card_repay",
+            "card_surplus",
+            "fund_subscribe",
+            "fund_confirm",
+            "fund_cancel",
+            "fund_redeem"
+          ]
+        },
+        "status": {
+          "enum": [
+            "DRAFT",
+            "ACTIVE",
+            "SETTLED",
+            "COMPLETED",
+            "ARCHIVED"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "增加即表示状态变化；用于签名动作的前置条件比对"
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "paid_fees": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "schedule": {
+          "type": "array"
+        },
+        "created_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expires_at": {
+          "type": "number",
+          "minimum": 0
+        },
+        "card_label": {
+          "type": "string"
+        },
+        "units": {
+          "type": "integer"
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "quote": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "terms": {
+          "type": "string",
+          "description": "银行的产品条款摘要，显示在确认卡上"
+        },
+        "principal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "term": {
+          "type": "integer"
+        },
+        "rate_bps": {
+          "type": "integer"
+        },
+        "opened": {
+          "type": "string"
+        },
+        "matures": {
+          "type": "string"
+        },
+        "deposit_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "foreign_currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "rate": {
+          "type": "string"
+        },
+        "product_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "order_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_id": {
+          "type": "string"
+        }
+      },
+      "description": "finance.quote 的返回、finance.list.contracts 的每一项、finance.get.target。金额为本次需确认的金额；DRAFT 为未执行的报价，到 expires_at 失效"
+    },
+    "finance_list": {
+      "type": "object",
+      "required": [
+        "contracts",
+        "credit_card_limit",
+        "credit_limit",
+        "credit_states",
+        "currencies",
+        "deposit_rates",
+        "deposits",
+        "eligible",
+        "fund_products",
+        "fx_wallets",
+        "gold_positions",
+        "outstanding"
+      ],
+      "properties": {
+        "contracts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finance_contract"
+          }
+        },
+        "deposits": {
+          "type": "array"
+        },
+        "fx_wallets": {
+          "type": "array"
+        },
+        "gold_positions": {
+          "type": "array"
+        },
+        "credit_states": {
+          "type": "array"
+        },
+        "eligible": {
+          "type": "array"
+        },
+        "outstanding": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "credit_limit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "credit_card_limit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deposit_rates": {
+          "type": "object"
+        },
+        "currencies": {
+          "type": "array"
+        },
+        "fund_products": {
+          "type": "array"
+        },
+        "rules": {
+          "type": "string"
+        }
+      },
+      "description": "finance.list：客户的全部合同、持仓与产品条款"
+    },
+    "finance_snapshot": {
+      "type": "object",
+      "required": [
+        "card",
+        "target"
+      ],
+      "properties": {
+        "target": {
+          "$ref": "#/$defs/finance_contract"
+        },
+        "card": {
+          "$ref": "#/$defs/card"
+        },
+        "position": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "risk_profile": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "credit": {
+          "type": "object"
+        },
+        "deposit": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "wallet": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "advanced": {
+          "type": "object"
+        }
+      },
+      "description": "finance.get：合同及其执行所依赖的状态；就是签名动作的前置条件，执行前后都按它比对"
+    },
+    "write_result": {
+      "type": "object",
+      "required": [
+        "id",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "CREATED",
+            "PENDING",
+            "AUTHORIZED",
+            "PROCESSING",
+            "SETTLED",
+            "FAILED",
+            "REVERSED",
+            "UNKNOWN"
+          ]
+        },
+        "executed_at": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "description": "写请求（BankRequest 带 action）的返回：银行流水号与状态。HTTP 成功只算 CREATED，不算 SETTLED"
+    },
+    "verification": {
+      "type": "object",
+      "required": [
+        "evidence_hash",
+        "provider_status",
+        "reason",
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "VERIFIED",
+            "MANUAL_REVIEW"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "provider_status": {
+          "type": "string"
+        },
+        "evidence_hash": {
+          "type": "string"
+        },
+        "executed_at": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "description": "provider.verify(action, transaction_id)：只有银行记录与已签名动作逐项一致且已入账时才是 VERIFIED"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# 适配器模板的配置样例。复制为 config/bank.<你的银行>.local.toml（已被 git 忽略），在 .env 设置
+# TRUSTA_BANK_CONFIG=config/bank.<你的银行>.local.toml。除 provider / factory 外，其余字段原样交给工厂函数。
+provider = "module"
+factory = "examples.bank_adapter.partner_bank:create"
+environment = "sandbox"            # sandbox 或 production；本模板只允许在 sandbox 写入
+customer_id = "demo"               # 本次授权的客户号（多客户场景由登录后的令牌决定，见 docs/real-bank-integration.md）
+# base_url = "https://sandbox.api.your-bank.example"
+# token_env = "PARTNER_BANK_TOKEN"   # 凭据放在环境变量里，不写进配置文件
+writes_enabled = true              # 写入总开关：默认关，联调时在沙箱打开
+source_accounts = ["acct-1001"]    # 允许付款的账户白名单
+payees = ["payee-2001"]            # 允许收款的收款人白名单
+maximum_amount = 10000             # 每笔上限（最小币种单位）

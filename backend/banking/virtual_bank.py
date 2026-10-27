@@ -35,6 +35,9 @@ class VirtualBank:
         return {k: a[k] for k in ("id", "balance", "currency", "version")}
 
     def resolve_payee(self, customer_id, name=None, recipient_id=None):
+        if not name and not recipient_id:  # no criterion: the customer's whole payee list
+            return self.db.rows("SELECT p.* FROM payees p LEFT JOIN payee_contacts c ON p.id=c.payee_id WHERE p.customer_id=? "
+                                "AND (c.status IS NULL OR c.status='ACTIVE') ORDER BY p.id", (customer_id,))
         if recipient_id:
             if self.banking_version==5:
                 return self.db.rows("SELECT p.* FROM payees p LEFT JOIN payee_contacts c ON p.id=c.payee_id WHERE p.customer_id=? AND p.id=? AND (c.status IS NULL OR c.status='ACTIVE')",(customer_id,recipient_id))

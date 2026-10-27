@@ -61,7 +61,7 @@ class PolicyEngine:
         if decision != "BLOCK":
             decision = "CONFIRM"  # V1 local-bank manifest requires user authorization for every write.
             rules.append("V1_CONFIRM_ALL")
-            if payee[0]["is_new"]:
+            if payee[0].get("is_new"):  # optional: banks that do not flag new payees rely on TRUSTA's own record (safety.risk)
                 rules.append("NEW_RECIPIENT")
             if action["amount"] >= self.config.high_risk_threshold:
                 decision = "STRONG_AUTH"

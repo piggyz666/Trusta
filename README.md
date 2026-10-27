@@ -143,7 +143,7 @@ python -m benchmarks.scenario_audit     # 六大场景 49 项闭环检查
 
 ## 说明
 
-本项目为金融科技大赛参赛作品，默认运行在本地虚拟银行沙箱，演示数据均为虚构；接入真实银行不需要改代码：写一个银行适配器并在配置中指向它，见 [接入真实银行](docs/real-bank-integration.md)（含能力与功能对照表、字段约定和自检测试）；还需要完成银行侧授权。`.env`、`data/` 保存密钥和数据库，已被忽略，不要提交。
+本项目为金融科技大赛参赛作品，默认运行在本地虚拟银行沙箱，演示数据均为虚构；接入真实银行不需要改代码：写一个银行适配器并在配置中指向它，见 [接入真实银行](docs/real-bank-integration.md)。配套有[数据格式规范](docs/bank-data-contract.md)、可直接改的适配器模板 `examples/bank_adapter/`、接入自检工具 `python -m scripts.bank_check`（逐项检查适配器并出报告）和[银行安全审查说明](docs/bank-security-brief.md)；还需要完成银行侧授权。`.env`、`data/` 保存密钥和数据库，已被忽略，不要提交。
 
 ## 版权
 

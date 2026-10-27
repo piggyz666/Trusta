@@ -87,3 +87,4 @@ TRUSTA 的页面和对话只通过标准银行接口取数，银行提供哪些�
 
 - 新渠道：参考 `backend/channels/feishu.py`，把消息转给统一的对话接口 `/api/chat`，并把确认卡渲染成该渠道的交互卡片。渠道不能绕过确认卡授权。
 - 新银行：不用改 TRUSTA 代码。写一个适配器（声明能力清单，实现 `request` 和 `verify`），在配置里写 `provider = "module"`、`factory = "你的模块:create"`。字段约定、示例代码和验证步骤见仓库 `docs/real-bank-integration.md`，`tests/test_real_bank_readiness.py` 可以用来自检。
+- 接入自检：`python -m scripts.bank_check --config 你的配置` 逐项检查适配器（能力清单、每个读取的字段格式、功能点亮、页面与对话，可选沙箱真实写入并核验），输出报告；适配器模板在 `examples/bank_adapter/`，字段规范见 `docs/bank-data-contract.md`。

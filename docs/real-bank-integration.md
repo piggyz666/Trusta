@@ -9,7 +9,13 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 3. 存款、外汇、黄金、基金、贷款与信用账户这几类业务的接口约定；
 4. 如何验证接入后功能真实可用。
 
-协议细节（签名、幂等、状态词汇、核验规则）见 [Bank Integration SDK](bank-integration-sdk.md)。
+配套材料：
+
+- [银行数据格式规范](bank-data-contract.md)：每种数据的字段、类型、必填项，以及写入和核验的要求；
+- 适配器模板 `examples/bank_adapter/`：开箱即可运行，把其中的 `_api_*` 函数换成你们银行的接口即可；
+- 接入自检工具 `python -m scripts.bank_check`：逐项检查你的适配器，输出报告（见第 5 节）；
+- [银行安全审查说明](bank-security-brief.md)：数据流向、凭据、权限与追溯；
+- 协议细节（签名、幂等、状态词汇、核验规则）：[Bank Integration SDK](bank-integration-sdk.md)。
 
 ---
 
@@ -74,7 +80,7 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 | 外币兑换 | `fx_buy` / `fx_sell`：`card_id`, `currency`（USD / EUR / JPY / HKD）, `units`（外币最小单位）, `quote_mode` | `FX_BUY` / `FX_SELL` |
 | 黄金 | `gold_buy` / `gold_sell`：`card_id`, `units`（0.01 克）；定投可附 `reference`（TRUSTA 的计划编号，银行原样保存） | `GOLD_BUY` / `GOLD_SELL` |
 | 贷款与分期 | `loan`：`card_id`, `amount`, `months`；`installment`：`card_id`, `source_id`（一笔已入账消费）, `months` | `LOAN_DRAW` / `INSTALLMENT_START`，之后对同一合同 `CREDIT_REPAY` / `CREDIT_SETTLE` |
-| 信用账户 | `card_charge` / `card_refund` / `card_repay` / `card_surplus`，字段见 `backend/banking/finance_desk.py` | 同名操作 |
+| 信用账户 | `card_charge` / `card_refund` / `card_repay` / `card_surplus`，字段见[数据格式规范](bank-data-contract.md) | 同名操作 |
 | 基金 | `fund_subscribe` / `fund_confirm` / `fund_cancel` / `fund_redeem` | 同名操作 |
 
 银行可以只开放其中几类业务，只要在能力清单里声明它实际支持的那几项：
@@ -86,8 +92,8 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 
 **接入时需要注意：**
 
-- **前置条件格式。** `finance.get` 返回的合同和相关状态，就是签名动作的前置条件。TRUSTA 会用同一套规则（`backend/banking/finance.py` 里的 `errors` / `expected`，以及 `extensions.py`、`advanced.py` 里的同名函数）计算预期结果，银行执行前后都要与之一致。适配器需要把银行自己的数据整理成这些字段。
-- **记账凭证格式。** 独立核验会读取 `operations.evidence.read` 返回的记账分录，核对资金方向和金额。沙箱银行使用一个清算账户 `finance-clearing`，真实银行的适配器需要按同样的借贷格式返回凭证。
+- **前置条件格式。** `finance.get` 返回的合同和相关状态，就是签名动作的前置条件。TRUSTA 会用它判断能否办理、计算办理后的预期状态。每类业务需要哪些字段，见[数据格式规范](bank-data-contract.md)中"存款、外汇……的前置条件"一节；适配器把银行自己的数据整理成这些字段即可。
+- **执行后的核验。** 外部银行由适配器的 `verify(action, transaction_id)` 给出核验结果：银行记录与已签名动作逐项一致且已入账，才算 `VERIFIED`。沙箱银行另外核对记账分录，外部银行不要求提供分录。
 - **产品条款以银行为准。** 利率、期限、额度、费用都由银行在报价里给出。沙箱银行的数值只是演示条款。
 
 ### TRUSTA 自己保存的数据
@@ -167,14 +173,37 @@ TRUSTA 启动时会检查：
 
 错误一律抛出 `BankError(稳定错误码)`。写请求结果不确定（超时、5xx、响应损坏）时抛出 `UncertainBankWrite`。TRUSTA 会把这类写入记为待人工核对，**不会自动重发**。
 
-## 5. 验证接入有效
+## 5. 验证接入有效：接入自检工具
 
-1. `python -m scripts.setup --probe`：用配置的凭据真实调用一次账户与余额读取。
-2. 打开"功能"页：确认点亮的功能和你的银行能力一致。不可用的功能会写明缺哪个接口。
-3. 依次打开资金总览、账单与订阅、理财，在对话里问"查一下余额""这个月花了多少钱""我有哪些订阅"：数据应来自你的银行。
-4. 回归测试：`python -m pytest tests/test_real_bank_readiness.py`。测试通过配置文件加载一个"外部银行"，它的数据在 TRUSTA 读不到的独立数据库里，并且本地沙箱表已清空。测试分两种情况：
-   - **全功能**：各页面和对话正常工作，转账生成确认卡，周期扣费能从普通流水中识别出来。定期存款、外币、黄金、贷款、基金、信用消费逐项完整办理一遍，并核对**银行账本**里的余额、存单和持仓都已变化，TRUSTA 自己的数据库里没有这些账；
-   - **部分业务（银行不提供黄金和基金）**：这两项显示不可用、拒绝报价，其余业务照常；
-   - **只读（与 Revolut 只读一致）**：各页面正常打开，不支持的区块标注"银行未提供"，转账、存款等功能明确说明不可用。
+写好适配器、填好配置后，运行：
 
-   可以仿照它，用你自己的适配器跑一遍同样的检查。
+```bash
+python -m scripts.bank_check --config config/bank.<你的银行>.local.toml
+```
+
+工具在一个临时的 TRUSTA 实例里运行，不碰你的正式数据。输出按五部分逐项列出（✓ 通过、✗ 失败、– 银行未提供、! 注意）：
+
+1. **配置与能力清单**：适配器能否加载；声明的能力是否都是规范能力；是否包含必需的 `accounts.read`；`request` 和 `verify` 是否齐全。
+2. **读取与数据格式**：逐个调用你声明的读取能力，检查是否有响应、账户是否属于该客户、字段是否符合[数据格式规范](bank-data-contract.md)。出错时给出具体位置，例如 `$[0].amount: 应为 integer，实际是 str`。
+3. **功能点亮情况**：按你的能力，列出 TRUSTA 哪些功能可用，以及其余功能缺哪个接口。
+4. **页面与对话**：资金总览、账单与订阅、理财、新建对话能否正常打开；转账能否走到确认卡（只到确认卡为止，不执行）。
+5. **可选：报价与写入**。
+   - `--quote`：试一次定期存款报价，检查报价和前置条件的格式，然后撤回报价。不动钱。
+   - `--write-test transfer --payee 张三 --amount 100`：在沙箱环境真实转一笔，走完整的确认 → 授权 → 执行 → 核验 → 回执。
+   - `--write-test deposit`：存一笔定期再支取，同样走完整流程。
+
+   写入测试在生产环境一律不执行。
+
+其他参数：
+- `--customer` 指定客户号；
+- `--report report.json` 另存 JSON 报告；
+- `--sandbox` 用内置沙箱银行演示本工具；
+- `--export-schemas docs/schemas` 导出 JSON Schema。
+
+有失败项时退出码为 1，可以接入持续集成。
+
+完成自检后，再做三件事：
+
+1. `python -m scripts.setup --probe`：用正式配置真实调用一次账户与余额读取。
+2. 打开"功能"页和各页面，在对话里问"查一下余额""这个月花了多少钱"，确认数据来自你的银行。
+3. 运行回归测试 `python -m pytest tests/test_real_bank_readiness.py tests/test_bank_check.py`。前者用一家数据放在独立数据库里的模拟外部银行，覆盖全功能、部分业务、只读三种情况；后者检查自检工具和适配器模板本身。

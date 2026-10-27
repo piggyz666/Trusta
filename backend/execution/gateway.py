@@ -65,7 +65,8 @@ class ToolGateway:
             row=self.contracts.db.one("SELECT body FROM tasks WHERE id=?",(action["task_id"],))
             if row:
                 import json
-                if json.loads(row["body"])["task_type"]=="SCHEDULED_TRANSFER" and not self._adapter.provider.safe_mode.scheduled_enabled:
+                safe=getattr(self._adapter.provider,"safe_mode",None)
+                if json.loads(row["body"])["task_type"]=="SCHEDULED_TRANSFER" and not (safe and safe.scheduled_enabled):
                     raise Rejected("EXTERNAL_SCHEDULE_DISABLED")
         capability = action.get("requested_capability", "banking.transfer")
         self.capabilities.check(actor, capability)

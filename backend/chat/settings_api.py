@@ -26,8 +26,11 @@ class SettingsAPI:
         bound = s.db.one("SELECT COUNT(*) AS n FROM channel_bindings WHERE channel='feishu' AND owner=?", (owner,)) if access else None
         security = s.safety.status(owner)
         protection = s.safety.protection(owner)
-        accounts = [{"id": r["id"], "name": "储蓄账户" if "saving" in r["id"] else "活期账户"}
-                    for r in s.db.rows("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,))]
+        from backend.bank_sdk.discovery import customer_accounts
+        try:
+            accounts = [{"id": a["id"], "name": a["label"]} for a in customer_accounts(s, owner)]
+        except Exception:  # settings must open even when the bank is unreachable
+            accounts = []
         llm = self.chat.llm
         return {
             "editable": local,

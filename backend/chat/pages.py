@@ -25,8 +25,13 @@ class BillsPage:
         ensure_tables(self.s.db)
 
     def _account(self, owner):
-        row = self.s.db.one("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,))
-        return row and row["id"]
+        from backend.bank_sdk.discovery import primary_account
+        account = primary_account(self.s, owner)
+        return account and account["id"]
+
+    def _registered(self, owner, kind):
+        from backend.bank_sdk.discovery import optional_read
+        return optional_read(self.s, "service", owner, kind + ".list")
 
     def marks(self, owner):
         return {r["key"]: r["state"] for r in self.s.db.rows("SELECT key, state FROM recurring_marks WHERE owner=?", (owner,))}
@@ -49,9 +54,9 @@ class BillsPage:
         account = self._account(owner)
         if not account:
             return []
-        known = {r["merchant"] for kind in ("subscription", "direct_debit") for r in self.s.service_agent.resources(owner, kind)}
+        known = {r["merchant"] for kind in ("subscription", "direct_debit") for r in self._registered(owner, kind)}
         history = {}
-        for row in self.s.gateway.read("finance", owner, "transaction.recurring_history", account_id=account):
+        for row in self.s.finance.recurring_history(owner, account):
             if row["status"] == "SETTLED":
                 history.setdefault(recurring_key(row), []).append(row["occurred_at"])
         marks, out = self.marks(owner), []
@@ -75,7 +80,7 @@ class BillsPage:
         now = time.time()
         items = []
         for kind, label in (("subscription", "订阅"), ("direct_debit", "代扣")):
-            for r in self.s.service_agent.resources(owner, kind):
+            for r in self._registered(owner, kind):
                 items.append({"id": r["id"], "kind": kind, "kind_label": label, "merchant": r["merchant"], "amount_minor": r["amount"],
                               "currency": r["currency"], "frequency": r["frequency"], "frequency_label": FREQUENCY.get(r["frequency"], r["frequency"]),
                               "next_charge_at": r["next_charge_at"], "status": r["status"], "cancelable": bool(r["cancelable"]),
@@ -98,8 +103,12 @@ class BillsPage:
         upcoming.sort(key=lambda u: u["at"])
         monthly = sum(i["monthly_minor"] for i in items) + sum(d["amount_minor"] for d in detected if d["state"] == "CONFIRMED")
         recent = [i for i in self._ledger(owner) if i["kind"] == "subscription"][:10]
+        from backend.bank_sdk.discovery import supports
         return {"items": items, "detected": detected, "upcoming": upcoming, "monthly_minor": monthly, "yearly_minor": monthly * 12,
                 "history": recent, "generated_at": now,
+                "unavailable": [k for k, tool in (("subscriptions", "subscription.list"), ("direct_debits", "direct_debit.list"),
+                                                  ("detection", "transaction.list")) if not supports(self.s, tool)
+                                and not (k == "detection" and supports(self.s, "transaction.recurring_history"))],
                 "rule": "同一商户、同一金额，间隔 25–35 天扣费满 3 次，即识别为疑似订阅，由你确认是否计入；也可以在对话里直接说“QQ音乐是我每月续订的”。"}
 
     def _ledger(self, owner):
@@ -112,6 +121,11 @@ class WealthPage:
         self.chat, self.s, self.market = chat, chat.s, market
 
     def info(self):
+        """Descriptive extras (issuer, benchmark, liquidity …) for the sandbox shelf. A real bank sends these fields with its
+        products and they take precedence; the local table is never applied to an external bank's product ids."""
+        from backend.bank_sdk.discovery import is_external
+        if is_external(self.s):
+            return {}
         try:
             return {r["product_id"]: r for r in self.s.db.rows("SELECT * FROM wealth_product_info")}
         except Exception:
@@ -126,11 +140,12 @@ class WealthPage:
             risk = {"level": level, "label": LEVELS[level], "expires_at": profile["expires_at"]}
         except Rejected as error:
             level, risk = 0, {"level": None, "label": None, "reason": error.code}
+        from backend.bank_sdk.discovery import primary_account, optional_read, supports
         info = self.info()
-        account = self.s.db.one("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,))
+        account = primary_account(self.s, owner)
         products, holdings = [], []
-        for p in self.s.wealth.products(owner):
-            extra = info.get(p["id"], {})
+        for p in optional_read(self.s, "wealth", owner, "wealth.list_products"):
+            extra = {**info.get(p["id"], {}), **{k: p[k] for k in ("issuer", "category", "product_group", "benchmark", "liquidity", "description") if p.get(k)}}
             restrictions = p.get("restrictions") or {}
             suitable = p["active"] == 1 and p["currency"] == "CNY" and 0 < p["risk_level"] <= level
             why = ("已下架" if p["active"] != 1 else "需要先完成风险测评" if not level else
@@ -138,11 +153,11 @@ class WealthPage:
             products.append({"id": p["id"], "name": p["name"], "risk_level": p["risk_level"], "minimum_minor": p["minimum_amount"],
                              "issuer": extra.get("issuer", "本行"), "group": extra.get("product_group", extra.get("category", "理财")),
                              "term_days": p["term_days"], "currency": p["currency"], "active": p["active"] == 1,
-                             "risk_note": p["risk_note"], "category": extra.get("category", "理财"),
+                             "risk_note": p.get("risk_note"), "category": extra.get("category", "理财"),
                              "benchmark": extra.get("benchmark"), "liquidity": extra.get("liquidity"),
                              "description": extra.get("description"), "suitable": suitable, "blocked_reason": why,
                              "purchase_enabled": bool(restrictions.get("purchase_enabled", 1))})
-            if account:
+            if account and supports(self.s, "portfolio.get"):
                 held = self.s.gateway.read("wealth", owner, "portfolio.get", account_id=account["id"], product_id=p["id"])
                 if held["amount_cents"] > 0:
                     holdings.append({"product_id": p["id"], "name": p["name"], "risk_level": p["risk_level"], "issuer": extra.get("issuer", "本行"),
@@ -153,7 +168,9 @@ class WealthPage:
         products.sort(key=lambda p: (not p["suitable"], p["risk_level"], p["term_days"]))
         return {"risk": risk, "products": products, "holdings": holdings, "plan": self.plan(owner, level, products),
                 "holdings_minor": sum(h["amount_minor"] for h in holdings), "market": self.market.view() if self.market else None,
-                "policy": "只推荐本行在售、且风险等级不高于你测评结果的产品；不推荐个股，不承诺收益。"}
+                "policy": "只推荐本行在售、且风险等级不高于你测评结果的产品；不推荐个股，不承诺收益。",
+                "unavailable": [k for k, tool in (("products", "wealth.list_products"), ("holdings", "portfolio.get"),
+                                                  ("purchase", "investment.purchase")) if not supports(self.s, tool)]}
 
     # ---- personalised allocation -------------------------------------------------------------------
     # Share of the money left after the cash reserve, by risk level. Fixed rules, shown to the customer as-is.
@@ -188,10 +205,11 @@ class WealthPage:
         """Allocation reference from the customer's own numbers: keep three months of spending and fixed charges
         within reach, split the rest by risk level, and pick products (different issuers where possible) that
         fit each part. Deterministic; every figure comes from the bank records listed in `basis`."""
-        account = self.s.db.one("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,))
+        from backend.bank_sdk.discovery import primary_account
+        account = primary_account(self.s, owner)
         if not account or not level:
             return None
-        balance = self.s.transaction.balance(owner, account["id"])["balance"]
+        balance = account["balance"]
         spend, months = self._spending(owner, account["id"])
         fixed = BillsPage(self.chat).view(owner)["monthly_minor"]
         monthly = (spend or 0) + fixed

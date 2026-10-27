@@ -91,11 +91,10 @@ class ActivityFeed:
         from datetime import datetime
         from backend.business import CHINA
         s, now = self.s, time.time()
-        accounts = []
-        for row in s.db.rows("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,)):
-            balance = s.transaction.balance(owner, row["id"])
-            accounts.append({"id": row["id"], "name": "储蓄账户" if "saving" in row["id"] else "活期账户",
-                             "balance_minor": balance["balance"], "currency": balance["currency"]})
+        from backend.bank_sdk.discovery import customer_accounts, optional_read, supports, is_external
+        accounts = [{"id": a["id"], "name": a["label"], "balance_minor": a["balance"], "currency": a["currency"]}
+                    for a in customer_accounts(s, owner)]
+        unavailable = []  # sections the connected bank does not offer: shown as "银行未提供", never as an error
         today = datetime.fromtimestamp(now, CHINA)
         month = today.strftime("%Y-%m")
         last = f"{today.year - (today.month == 1)}-{(today.month - 2) % 12 + 1:02d}"
@@ -111,7 +110,9 @@ class ActivityFeed:
                          "previous_minor": (spending.get("comparison") or {}).get("previous_net_spend")}
                 break
         positions = []
-        for product in s.wealth.products(owner):
+        if not supports(s, "portfolio.get"):
+            unavailable.append("portfolio")
+        for product in optional_read(s, "wealth", owner, "wealth.list_products") if supports(s, "portfolio.get") else []:
             if accounts:
                 holdings=[s.gateway.read("wealth",owner,"portfolio.get",account_id=a["id"],product_id=product["id"]) for a in accounts]
                 held={"amount_cents":sum(h["amount_cents"] for h in holdings),"redeemable_at":max((h.get("redeemable_at") or 0 for h in holdings),default=0)}
@@ -119,39 +120,48 @@ class ActivityFeed:
                     positions.append({"product_id": product["id"], "name": product["name"], "risk_level": product["risk_level"],
                                       "amount_minor": held["amount_cents"], "redeemable_at": held.get("redeemable_at")})
         funds = []
-        for fund in s.service_agent.resources(owner, "wish_fund"):
+        if not supports(s, "wish_fund.list"):
+            unavailable.append("wish_funds")
+        for fund in optional_read(s, "service", owner, "wish_fund.list"):
             orders = [i for i in self.list(owner, "wish", 50, fund["id"])]
             funds.append({"id": fund["id"], "name": fund["name"], "balance_minor": fund["balance"], "target_minor": fund["target_amount"],
                           "release_at": fund["release_at"], "status": fund["status"], "events": orders})
         cards = [{"id": c["id"], "type": c["card_type"], "status": c["status"], "limit_minor": c["spending_limit"],
                   "online": bool(c["online_enabled"]), "international": bool(c["international_enabled"]),
-                  "contactless": bool(c["contactless_enabled"])} for c in s.service_agent.resources(owner, "card")]
-        for card in cards:
-            row=s.db.one('SELECT c.account_id,a.balance FROM cards c JOIN accounts a ON a.id=c.account_id WHERE c.id=? AND c.customer_id=?',(card['id'],owner))
-            card.update(account_id=row['account_id'],balance=row['balance'],design=s.db.one('SELECT theme,nickname FROM card_designs WHERE card_id=? AND customer_id=?',(card['id'],owner)) or {'theme':'midnight','nickname':''})
+                  "contactless": bool(c["contactless_enabled"]), "account_id": c.get("account_id")} for c in optional_read(s, "service", owner, "card.list")]
+        if not supports(s, "card.list"):
+            unavailable.append("cards")
+        balances = {a["id"]: a["balance_minor"] for a in accounts}
+        for card in cards:  # the card's balance is its linked account's, as reported by the bank; the design is TRUSTA's own
+            card.update(balance=balances.get(card["account_id"]),
+                        design=s.db.one('SELECT theme,nickname FROM card_designs WHERE card_id=? AND customer_id=?',(card['id'],owner)) or {'theme':'midnight','nickname':''})
         engine = getattr(s, "automation", None)
         rules = [{"id": r["id"], "name": r["name"], "trigger": engine.describe_trigger(r["trigger"]), "runs": r["runs"]}
                  for r in engine.rules(owner)] if engine else []
+        # Loans, gold, term deposits, FX wallets and funds below are the bundled sandbox bank's extension modules. A real bank
+        # exposes none of them through the SDK yet, so with an external bank these totals are simply left out.
+        sandbox = not is_external(s)
         from backend.banking.finance import contracts
-        with s.db.transaction() as conn: financing=contracts(conn,owner)
-        gold=s.db.rows('SELECT units,cost FROM gold_positions WHERE customer_id=?',(owner,))
+        with s.db.transaction() as conn: financing=contracts(conn,owner) if sandbox else []
+        gold=s.db.rows('SELECT units,cost FROM gold_positions WHERE customer_id=?',(owner,)) if sandbox else []
         active=[t for t in financing if t['status']=='ACTIVE' and t['type'] in {'loan','installment'}]
         pending=sorted((p for t in active for p in t['schedule'] if not p['paid']),key=lambda p:p['due'])
         finance={'debt_minor':sum(t['remaining'] for t in active), 'gold_units':sum(p['units'] for p in gold),
                  'gold_cost_minor':sum(p['cost'] for p in gold), 'next_due':pending[0]['due'] if pending else None,
                  'next_due_minor':sum(p['total'] for p in pending if p['due']==pending[0]['due']) if pending else 0}
-        finance['deposit_principal_minor']=sum(json.loads(r['body'])['principal'] for r in s.db.rows("SELECT body FROM term_deposits WHERE customer_id=?",(owner,)) if json.loads(r['body'])['status']=='ACTIVE')
-        finance['fx_cost_minor']=sum(r['cost'] for r in s.db.rows('SELECT cost FROM fx_wallets WHERE customer_id=?',(owner,)))
+        finance['deposit_principal_minor']=sum(json.loads(r['body'])['principal'] for r in (s.db.rows("SELECT body FROM term_deposits WHERE customer_id=?",(owner,)) if sandbox else []) if json.loads(r['body'])['status']=='ACTIVE')
+        finance['fx_cost_minor']=sum(r['cost'] for r in (s.db.rows('SELECT cost FROM fx_wallets WHERE customer_id=?',(owner,)) if sandbox else []))
         finance['assets_at_cost_minor']=finance['deposit_principal_minor']+finance['fx_cost_minor']+sum(a['balance_minor'] for a in accounts)+sum(p['amount_minor'] for p in positions)+sum(f['balance_minor'] for f in funds)+finance['gold_cost_minor']
         from backend.banking.advanced import debt
-        advanced=[json.loads(r['body']) for r in s.db.rows('SELECT body FROM advanced_positions WHERE customer_id=?',(owner,))]
+        advanced=[json.loads(r['body']) for r in s.db.rows('SELECT body FROM advanced_positions WHERE customer_id=?',(owner,))] if sandbox else []
         finance['credit_card_debt_minor']=sum(max(0,debt(v)) for v in advanced)
         finance['fund_cost_minor']=sum(sum(h['cost'] for h in v['holdings'].values())+sum(o['amount'] for o in v['orders'] if o['status']=='PENDING') for v in advanced)
         finance['assets_at_cost_minor']+=finance['fund_cost_minor']+sum(max(0,-debt(v)) for v in advanced)
         finance['debt_minor']+=finance['credit_card_debt_minor']
         finance['net_at_cost_minor']=finance['assets_at_cost_minor']-finance['debt_minor']
+        finance['sandbox_modules']=sandbox
         protection = s.safety.protection(owner)
         return {"finance":finance, "accounts": accounts, "total_minor": sum(a["balance_minor"] for a in accounts), "spending": spend,
                 "portfolio": positions, "portfolio_minor": sum(p["amount_minor"] for p in positions), "wish_funds": funds,
                 "cards": cards, "rules": rules, "protection": protection and {"until": protection["until"], "reason": protection["reason"]},
-                "recent": self.list(owner, limit=8), "generated_at": now}
+                "recent": self.list(owner, limit=8), "generated_at": now, "unavailable": unavailable}

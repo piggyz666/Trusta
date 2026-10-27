@@ -99,7 +99,7 @@ class SubscriptionTalk:
     # -- the customer declares a subscription ---------------------------------------------------------------------
     def declare(self, owner, text):
         detected = self.bills.detected(owner)
-        registered = [r for kind in ("subscription", "direct_debit") for r in self.s.service_agent.resources(owner, kind)]
+        registered = [r for kind in ("subscription", "direct_debit") for r in self.s.service_agent.optional_resources(owner, kind)]
         mine = user_subscriptions(self.s.db, owner)
         known = [d["merchant"] for d in detected] + [r["merchant"] for r in registered] + [u["merchant"] for u in mine]
         parsed = parse_declaration(text, known)
@@ -108,7 +108,7 @@ class SubscriptionTalk:
         name = parsed["merchant"]
         bank = next((r for r in registered if r["merchant"].lower() == name.lower()), None)
         if bank:
-            return (f"{bank['merchant']} 已经是银行登记的{'订阅' if bank in self.s.service_agent.resources(owner, 'subscription') else '代扣'}"
+            return (f"{bank['merchant']} 已经是银行登记的{'订阅' if bank in self.s.service_agent.optional_resources(owner, 'subscription') else '代扣'}"
                     f"（{fmt(bank['amount'])}），不用重复添加。")
         hit = next((d for d in detected if d["merchant"].lower() == name.lower()), None)
         if hit:
@@ -126,7 +126,7 @@ class SubscriptionTalk:
     def cancel_hint(self, owner, text):
         if not re.search(r"取消|退订|关闭|关掉|停掉|不要了|不想要|不续了", text):
             return None
-        registered = {r["merchant"].lower() for kind in ("subscription", "direct_debit") for r in self.s.service_agent.resources(owner, kind)}
+        registered = {r["merchant"].lower() for kind in ("subscription", "direct_debit") for r in self.s.service_agent.optional_resources(owner, kind)}
         low = text.lower()
         if any(m in low for m in registered):
             return None  # the bank can cancel it: normal flow with a confirmation card

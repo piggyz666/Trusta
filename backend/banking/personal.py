@@ -25,7 +25,7 @@ def next_occurrence(month,day_number,today=None):
 
 def event_rows(s,owner,proactive=False):
  profile=s.db.one('SELECT body FROM personal_profiles WHERE owner=?',(owner,))
- rows=s.service_agent.resources(owner,'life_event')
+ rows=s.service_agent.optional_resources(owner,'life_event')
  if not profile:return rows
  if proactive and not json.loads(profile['body']).get('suggestions'):return []
  return [e for e in rows if e['id'].startswith('profile-')]

@@ -50,48 +50,54 @@ class ChatService(AutomationMixin):
     # ---- catalogue ---------------------------------------------------------------------------
     def catalog(self, owner):
         s = self.s
-        accounts = []
-        for row in s.db.rows("SELECT id FROM accounts WHERE customer_id=? ORDER BY id", (owner,)):
-            name = "储蓄账户" if "saving" in row["id"] else "活期账户"
-            accounts.append({"id": row["id"], "display": f"{name}（{row['id']}）"})
+        from backend.bank_sdk.discovery import customer_accounts, optional_read, is_external
+        # Everything below is asked of the connected bank; a tool the bank does not offer simply yields nothing.
+        accounts = [{"id": a["id"], "display": f"{a['label']}（{a['id']}）"} for a in customer_accounts(s, owner)]
+        resources = lambda kind: optional_read(s, "service", owner, kind + ".list")
         status_zh = {"ACTIVE": "正常", "FROZEN": "已冻结", "LOST": "已挂失", "CLOSED": "已注销"}
         cards = [{"id": c["id"], "display": f"{'借记卡' if c['card_type'] == 'DEBIT' else '虚拟卡'}（{c['id']}，{status_zh.get(c['status'], c['status'])}）",
                   "status": c["status"], "controls": {"online": c["online_enabled"], "international": c["international_enabled"],
                                                       "contactless": c["contactless_enabled"]}}
-                 for c in s.service_agent.resources(owner, "card")]
+                 for c in resources("card")]
         subs = [{"id": r["id"], "display": f"{r['merchant']} 每月{r['amount'] / 100:.2f}元"}
-                for r in s.service_agent.resources(owner, "subscription") if r["status"] == "ACTIVE"]
+                for r in resources("subscription") if r["status"] == "ACTIVE"]
         debits = [{"id": r["id"], "display": f"{r['merchant']} 每月{r['amount'] / 100:.2f}元"}
-                  for r in s.service_agent.resources(owner, "direct_debit") if r["status"] == "ACTIVE"]
+                  for r in resources("direct_debit") if r["status"] == "ACTIVE"]
         products = [{"id": p["id"], "display": f"{p['name']}（R{p['risk_level']}，{p['term_days']}天）"}
-                    for p in s.wealth.products(owner) if p["active"]]
+                    for p in optional_read(s, "wealth", owner, "wealth.list_products") if p.get("active", True)]
         months = lambda e: f"{e['month']}月{e['day']}日"
         from backend.banking.personal import event_rows
         events = [{"id": e["id"], "display": f"{e['relation']}{e['person']}{'生日' if e['kind'] == 'BIRTHDAY' else '纪念日'}（{months(e)}）",
                   "month": e["month"], "day": e["day"]} for e in event_rows(s,owner)]
         merchants = [{"id": m["id"], "display": f"{m['name']}·{m['item']}（{m['price'] / 100:.2f}元）", "price": m["price"]}
-                     for m in s.service_agent.resources(owner, "merchant")]
+                     for m in resources("merchant")]
         funds = [{"id": f["id"], "display": f"心愿金“{f['name']}”（余 {f['balance'] / 100:.2f} 元）"}
-                 for f in s.service_agent.resources(owner, "wish_fund") if f["status"] == "ACTIVE"]
+                 for f in resources("wish_fund") if f["status"] == "ACTIVE"]
         # Contacts: names and nicknames only (no phone numbers) so the model can map "房东" / "我妈" itself.
-        payees = [{"id": r["id"], "display": r["name"] + (f"（{r['alias']}）" if r["alias"] else "")}
-                  for r in s.db.rows("SELECT p.id, p.name, c.alias FROM payees p LEFT JOIN payee_contacts c ON c.payee_id=p.id "
-                                     "WHERE p.customer_id=? AND (c.status IS NULL OR c.status='ACTIVE') ORDER BY p.id", (owner,))]
+        if is_external(s):
+            from backend.bank_sdk.presentation import bank_payees
+            payees = [{"id": r["id"], "display": r["name"]} for r in bank_payees(s, owner)]
+        else:
+            payees = [{"id": r["id"], "display": r["name"] + (f"（{r['alias']}）" if r["alias"] else "")}
+                      for r in s.db.rows("SELECT p.id, p.name, c.alias FROM payees p LEFT JOIN payee_contacts c ON c.payee_id=p.id "
+                                         "WHERE p.customer_id=? AND (c.status IS NULL OR c.status='ACTIVE') ORDER BY p.id", (owner,))]
         engine = getattr(s, "automation", None)
         automations = [{"id": r["id"], "display": f"{r['name']}（{engine.describe_trigger(r['trigger'])}）"}
                        for r in engine.rules(owner)] if engine else []
         from backend.banking.finance import Finance
-        fv=Finance(self).view(owner) if not s.config.bank_config_path else {'contracts':[], 'eligible':[]}
+        fv=Finance(self).view(owner) if not is_external(s) else {'contracts':[], 'eligible':[]}
         contracts=[{'id':t['id'],'display':('贷款' if t['type']=='loan' else '消费分期')+' '+t['id'][-6:]} for t in fv['contracts'] if t['status']=='ACTIVE' and t['type'] in {'loan','installment'}]
         purchases=[{'id':t['id'],'display':t['merchant']+' '+t['id'][-6:]} for t in fv['eligible']]
-        from backend.chat.extension_agent import resources
-        extended=resources(self,owner) if not s.config.bank_config_path else []
+        from backend.chat.extension_agent import resources as extension_resources
+        extended=extension_resources(self,owner) if not is_external(s) else []
         return {"extensions":extended,"contracts":contracts, "purchases":purchases, "accounts": accounts, "cards": cards, "subscriptions": subs, "direct_debits": debits, "products": products,
                 "life_events": events, "merchants": merchants, "wish_funds": funds, "payees": payees, "automations": automations}
 
     # ---- sessions ----------------------------------------------------------------------------
-    def create_session(self, owner, channel="app", default_account_id="acct-demo"):
+    def create_session(self, owner, channel="app", default_account_id=None):
         catalog = self.catalog(owner)
+        if default_account_id is None:  # the customer's first account as the bank reports it
+            default_account_id = catalog["accounts"][0]["id"] if catalog["accounts"] else None
         if default_account_id not in {a["id"] for a in catalog["accounts"]}:
             raise Rejected("ACCOUNT_ACCESS_DENIED")
         body = self.store.create(owner, channel, default_account_id, catalog["accounts"])

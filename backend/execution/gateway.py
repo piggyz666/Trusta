@@ -7,6 +7,10 @@ class ToolGateway:
         self.contracts = None
         self.schema = None
 
+    def offers(self, capability):
+        """Whether the connected bank declares this canonical tool (reads that may be absent are skipped, not failed)."""
+        return capability in self._adapter.manifest
+
     def read(self, actor, customer_id, capability, **params):
         if capability not in self._adapter.manifest or capability not in self.capabilities.READ_MAP:
             raise Rejected("CAPABILITY_VIOLATION")

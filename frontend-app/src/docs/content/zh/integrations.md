@@ -46,6 +46,23 @@ TRUSTA 根据实际接入、并且探测通过的能力决定哪些功能可用�
 
 接入外部银行沙箱：参考 `config/bank.*.example.toml` 写一份 `config/bank.*.local.toml`，在[配置向导](#/setup)的“银行”一步选择外部银行。
 
+### 银行能力与功能对照
+
+TRUSTA 的页面和对话只通过标准银行接口取数，银行提供哪些能力，就点亮哪些功能。银行缺少某项能力时，相关页面照常打开，该区块标注“银行未提供”。
+
+| 银行提供的能力 | 点亮的功能 |
+|---|---|
+| `accounts.read`（必需） | 账户、资金总览、新建对话 |
+| `balance.read` | 余额查询、理财规划备用金、余额触发的自动化 |
+| `transactions.read` | 消费查询、账单分析、周期扣费识别（由近 6 个月流水推算） |
+| `payees.*` + `payments.create/status` | 转账、AA 分摊、新增收款人（逐笔确认 + 回查核验） |
+| `cards.*` | 卡片管理、交易开关、出行管家 |
+| `subscriptions.*` / `direct_debits.*` | 账单与订阅页、对话取消订阅 / 代扣 |
+| `investments.*` + `customers.risk.*` | 理财货架、持仓、为你推荐、申购赎回、风险测评 |
+| `savings.goals.*` | 心愿金 |
+
+生活服务链接、行情、规则问答、反诈冷静期和强验证不依赖银行接口。定期存款、外币、基金份额、黄金、贷款与分期、信用账单目前**仅内置沙箱银行**提供；接入真实银行后，这些页面标签自动隐藏，相关请求会被明确拒绝。
+
 ## 可信基础设施
 
 | 集成 | 说明 | 状态 |
@@ -68,4 +85,4 @@ TRUSTA 根据实际接入、并且探测通过的能力决定哪些功能可用�
 ## 想接新的渠道或银行？
 
 - 新渠道：参考 `backend/channels/feishu.py`，把消息转给统一的对话接口 `/api/chat`，并把确认卡渲染成该渠道的交互卡片。渠道不能绕过确认卡授权。
-- 新银行：参考 `backend/bank_sdk/` 中的适配器，实现读取和执行接口；TRUSTA 会根据探测结果自动点亮对应功能。
+- 新银行：不用改 TRUSTA 代码。写一个适配器（声明能力清单，实现 `request` 和 `verify`），在配置里写 `provider = "module"`、`factory = "你的模块:create"`。字段约定、示例代码和验证步骤见仓库 `docs/real-bank-integration.md`，`tests/test_real_bank_readiness.py` 可以用来自检。

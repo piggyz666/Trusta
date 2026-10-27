@@ -1,0 +1,5 @@
+# Any bank through your own adapter, without changing TRUSTA's code. See docs/real-bank-integration.md.
+# Copy to config/bank.<name>.local.toml (ignored by git) and set TRUSTA_BANK_CONFIG to that path.
+provider = "module"
+factory = "partner_bank.adapter:create"   # module:function that returns the provider object
+customer_id = "your-customer-id"          # every other key is passed to the factory unchanged

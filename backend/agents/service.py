@@ -9,6 +9,10 @@ class ServiceAgent:
     def resources(self, user_id, kind):
         return self.gateway.read("service", user_id, kind + ".list")
 
+    def optional_resources(self, user_id, kind):
+        """Same read, but an empty list when the connected bank does not offer this kind of resource at all."""
+        return self.resources(user_id, kind) if self.gateway.offers(kind + ".list") else []
+
     def propose(self, task, kind, target_id, values, account_id):
         self.gateway.capabilities.check("service", "service.propose")
         snapshot = snapshot_from_gateway(self.gateway, "service", task["user_id"], account_id, kind, target_id)

@@ -24,11 +24,10 @@ class PlanBridge:
   return {'session_id':session['session_id']}
  def view(self,owner):
   result=Personal(self.s).plans(owner)
-  result['accounts']=self.chat.catalog(owner)['accounts']
-  for a in result['accounts']:
-   row=self.s.db.one('SELECT balance,frozen FROM accounts WHERE id=? AND customer_id=?',(a['id'],owner));a.update(row)
-  result['funds']=self.s.service_agent.resources(owner,'wish_fund')
-  result['merchants']=[{'id':m['id'],'name':m['name'],'item':m['item'],'price':m['price']} for m in self.s.service_agent.resources(owner,'merchant') if m['status']=='ACTIVE']
+  from backend.bank_sdk.discovery import customer_accounts,optional_read
+  result['accounts']=[{'id':a['id'],'display':f"{a['label']}（{a['id']}）",'balance':a['balance'],'frozen':a['frozen']} for a in customer_accounts(self.s,owner)]
+  result['funds']=optional_read(self.s,'service',owner,'wish_fund.list')
+  result['merchants']=[{'id':m['id'],'name':m['name'],'item':m['item'],'price':m['price']} for m in optional_read(self.s,'service',owner,'merchant.list') if m['status']=='ACTIVE']
   linked={p['binding']['fund_id'] for p in result['plans'] if p['binding']}
   result['funds']=[f for f in result['funds'] if f['id'] not in linked]
   return result
@@ -42,7 +41,8 @@ class PlanBridge:
   if p['spent']:raise Rejected('PLAN_HAS_LEGACY_SPENDING')
   catalog=self.chat.catalog(owner)
   if b['account_id'] not in {a['id'] for a in catalog['accounts']}:raise Rejected('ACCOUNT_ACCESS_DENIED')
-  merchants={m['id']:m for m in self.s.service_agent.resources(owner,'merchant') if m['status']=='ACTIVE'}
+  from backend.bank_sdk.discovery import optional_read
+  merchants={m['id']:m for m in optional_read(self.s,'service',owner,'merchant.list') if m['status']=='ACTIVE'}
   if any(x not in merchants for x in b['items']):raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
   if sum(merchants[x]['price'] for x in b['items'])>p['budget']:raise Rejected('ORDER_EXCEEDS_FUND')
   session=self.chat.create_session(owner,'app',b['account_id'])

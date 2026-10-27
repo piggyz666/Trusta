@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, explain } from "../api.js";
-import { Icon, Tag, useToast } from "../components/ui.jsx";
+import { BankGaps, Icon, Tag, useToast } from "../components/ui.jsx";
 import { dateOnly, yuan } from "../format.js";
 
 let cache = null;
@@ -49,6 +49,7 @@ export default function Bills({ ask }) {
           <h1>账单与订阅</h1>
           <p>所有会自动扣钱的项目：登记在银行的订阅和代扣，以及 TRUSTA 从流水里识别出来的周期扣费。</p>
         </header>
+        <BankGaps items={data.unavailable} />
 
         <div className="bills-hero">
           <div className="panel">

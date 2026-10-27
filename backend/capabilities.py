@@ -16,6 +16,7 @@ which features were switched on when an action happened.
 import os
 import time
 from backend.domain import Rejected, canonical, digest
+from backend.bank_sdk.discovery import is_external
 
 # requirement id -> (label, how to enable)
 REQUIREMENTS = {
@@ -31,6 +32,8 @@ REQUIREMENTS = {
     "bank.card_controls": ("银行接口：交易开关", "银行适配器需支持卡片交易开关"),
     "bank.subscriptions": ("银行接口：订阅与代扣", "银行适配器需支持订阅 / 代扣查询与取消"),
     "bank.savings": ("银行接口：心愿金子账户", "银行适配器需支持储蓄目标（锁定 / 释放 / 支付）"),
+    "bank.sandbox": ("内置沙箱银行", "定期存款、外币、基金份额、黄金、贷款与分期、信用账单是内置沙箱银行的扩展业务，尚未定义真实银行接口；"
+                                     "接入真实银行时自动关闭，需要时可按 docs/bank-integration-sdk.md 为其补充标准接口"),
     "bank.feed": ("银行入账推送", "当前仅本地沙箱银行提供入账推送；真实银行需接入其 webhook"),
     "channel.feishu": ("飞书机器人", "运行 python -m scripts.setup 填写 FEISHU_APP_ID / FEISHU_APP_SECRET（默认长连接，无需公网），"
                                     "pip install lark-oapi，再用 python -m scripts.pair --feishu 绑定账户"),
@@ -70,6 +73,8 @@ FEATURES = [
     ("automation_tighten", "联动规则：自动冻结卡 / 关闭交易开关（预先授权，只收紧）", "跨场景联动", ["bank.cards", "bank.card_controls"], [], []),
     ("trip", "出行管家（余额 → 赎回 → 境外开关 → 返程关闭 → 预算提醒）", "跨场景联动", ["bank.card_controls", "bank.transactions"],
      ["bank.wealth"], ["propose_trip_plan"]),
+    ("sandbox_extensions", "扩展业务：定期存款 / 外币 / 基金份额 / 黄金与定投 / 贷款与分期 / 信用账单（仅内置沙箱银行）", "扩展业务",
+     ["bank.sandbox"], [], ["get_extended", "propose_extension", "get_finance", "propose_finance"]),
     ("life", "生活服务：机票 / 火车 / 酒店 / 演出 / 缴费（带条件跳转官方平台，不交易）", "跨场景联动", [], [], ["life_service"]),
     ("income", "入账明细与外部文本隔离", "安全", ["bank.feed"], [], ["list_income"]),
     ("protection", "反诈冷静期（转账保护）", "安全", [], [], ["enable_protection"]),
@@ -121,6 +126,7 @@ class CapabilityRegistry:
         have = {req: tools >= needed for req, needed in BANK_TOOLS.items()}
         have.update({"llm.tools": llm_state in {"CONFIGURED", "VERIFIED"},
                      "bank.feed": getattr(self.s, "feed", None) is not None,
+                     "bank.sandbox": not is_external(self.s),
                      "channel.feishu": feishu and self._probe.get("feishu", {}).get("status") != "FAILED",
                      "security.strong_auth": bool(safety and safety.enabled) or bool(self.s.config.strong_auth_secret)})
         return {"have": have,
@@ -253,8 +259,9 @@ class CapabilityRegistry:
         """A read the adapter declares: proves the bank answers with the configured credentials."""
         try:
             owner = os.environ.get("TRUSTA_PROBE_CUSTOMER", "demo")
-            account = self.s.db.one("SELECT id FROM accounts WHERE customer_id=? ORDER BY id LIMIT 1", (owner,))
-            if account:
+            from backend.bank_sdk.discovery import primary_account
+            account = primary_account(self.s, owner)  # asks the bank itself for the account list
+            if account and "account.get_balance" in self.s.gateway._adapter.manifest:
                 self.s.gateway.read("transaction", owner, "account.get_balance", account_id=account["id"])
             self._probe["bank"] = {"status": "VERIFIED", "at": time.time()}
         except Exception as exc:

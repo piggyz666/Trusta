@@ -7,9 +7,28 @@ CATEGORIES = {"FOOD": "餐饮", "GROCERIES": "日用采购", "TRANSPORT": "交�
 
 
 class FinanceAgent:
+    def recurring_history(self, user_id, account_id, months=6):
+        """Settled outgoing charges to look for repeats in. Banks that offer a recurring-charge feed
+        (transaction.recurring_history) are asked for it; any other bank is asked for its ordinary transaction list over
+        the last ``months`` months, which every bank provides — so subscription detection works on a real bank too."""
+        if self.gateway.offers("transaction.recurring_history"):
+            return self.gateway.read("finance", user_id, "transaction.recurring_history", account_id=account_id)
+        if not self.gateway.offers("transaction.list"):
+            return []
+        from datetime import datetime
+        from backend.business import CHINA
+        today, rows = datetime.now(CHINA), []
+        for back in range(months - 1, -1, -1):
+            y, m = today.year, today.month - back
+            while m <= 0:
+                y, m = y - 1, m + 12
+            rows += [r for r in self.gateway.read("finance", user_id, "transaction.list", account_id=account_id, month=f"{y}-{m:02d}")
+                     if r.get("kind") == "PURCHASE" and r.get("merchant")]
+        return rows
+
     def recurring(self, user_id, account_id):
         from collections import defaultdict
-        history = self.gateway.read("finance", user_id, "transaction.recurring_history", account_id=account_id)
+        history = self.recurring_history(user_id, account_id)
         groups = defaultdict(list)
         for row in history:
             if row["status"] == "SETTLED":

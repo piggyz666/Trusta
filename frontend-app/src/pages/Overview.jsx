@@ -2,7 +2,7 @@ import {BankCard,CardDesigner} from "../components/BankCard.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { api, explain } from "../api.js";
 import { Donut } from "../components/Charts.jsx";
-import { Drawer, Icon, Tag } from "../components/ui.jsx";
+import { BankGaps, Drawer, Icon, Tag } from "../components/ui.jsx";
 import { TIER, dateOnly, dateTime, dayBucket, yuan } from "../format.js";
 
 const KINDS = [["", "全部"], ["transfer", "转账"], ["card", "卡片"], ["wish", "心愿金"], ["wealth", "理财"], ["subscription", "订阅代扣"], ["retail", "生活订单"],
@@ -47,6 +47,7 @@ export default function Overview({ openSession, ask, openProof, navigate }) {
           <h1>资金总览</h1>
           <p>所有余额、持仓、心愿金和每一笔经 TRUSTA 办理的记录都在这里，点任意一条可以看回执，或回到当时的对话。</p>
         </header>
+        <BankGaps items={data.unavailable} />
 
         {data.protection && (
           <div className="panel" style={{ borderColor: "rgba(245,180,69,.45)", background: "var(--amber-bg)" }}>
@@ -73,7 +74,7 @@ export default function Overview({ openSession, ask, openProof, navigate }) {
           </div>
         </div>
 
-        {data.finance&&<section className="section panel"><h2>资产与还款</h2><div className="grid-2">
+        {data.finance&&data.finance.sandbox_modules!==false&&<section className="section panel"><h2>资产与还款</h2><div className="grid-2">
           <button className="btn" onClick={()=>navigate('wealth')}>黄金 {(data.finance.gold_units/100).toFixed(2)} 克 · 成本 {yuan(data.finance.gold_cost_minor)}</button>
           <button className="btn" onClick={()=>navigate('deposits')}>定期存款 {yuan(data.finance.deposit_principal_minor||0)}</button><button className="btn" onClick={()=>navigate('exchange')}>外币成本 {yuan(data.finance.fx_cost_minor||0)}</button><button className="btn" onClick={()=>navigate('credit')}>贷款与分期待还本金 {yuan(data.finance.debt_minor)}</button>
           <div>净资产（成本口径）<b className="num"> {yuan(data.finance.net_at_cost_minor)}</b></div>

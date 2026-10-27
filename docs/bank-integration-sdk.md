@@ -1,5 +1,7 @@
 # Bank Integration SDK（Phase 6）
 
+> 接入一家新银行的步骤、能力与功能对照表、字段约定和自检测试，见 [接入真实银行](real-bank-integration.md)。本文是协议层细节。
+
 Core 调用 ToolGateway 的规范工具，兼容桥将历史签名 grant/工具名投影到 SDK 规范能力；厂商路径仅存在于厂商 Adapter。默认 Provider 为 VirtualBankProvider，配置 TRUSTA_BANK_CONFIG 后显式替换。SDK 不授予 Agent 写权限。
 
 `BankRequest(capability, customer_id, parameters, action, idempotency, deadline)` → Provider → `BankResponse(data, provider, environment, status)`。Manifest 包含真实可用能力、币种、异步性与限流。Auth、Webhook、Verification 是独立协议；错误只向 Core 暴露稳定码。金融输入始终是整数最小币种单位，不做兑换。

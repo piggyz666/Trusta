@@ -1,7 +1,7 @@
 import FinancePanel from "../components/FinancePanel.jsx";
 import { useEffect, useState } from "react";
 import { api, explain } from "../api.js";
-import { Tag, useToast } from "../components/ui.jsx";
+import { BankGaps, Tag, useToast } from "../components/ui.jsx";
 import { dateOnly, yuan } from "../format.js";
 
 let cache = null;
@@ -136,6 +136,7 @@ export default function Wealth({ ask, goldOnly=false }) {
           <h1>理财产品</h1>
           <p>{data.policy}</p>
         </header>
+        <BankGaps items={data.unavailable} />
 
         <section className="section">
           <h2>行情

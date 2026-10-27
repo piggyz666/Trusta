@@ -79,7 +79,7 @@ class EventPlans:
                 items=parameters.get('items')
                 if set(parameters)!={'wish_fund_id','items'} or not isinstance(items,list) or not 1<=len(items)<=5:
                     raise Rejected('INVALID_EVENT_PLAN')
-                catalogue={m['id']:m for m in self.s.service_agent.resources(owner,'merchant')}
+                catalogue={m['id']:m for m in self.s.service_agent.optional_resources(owner,'merchant')}
                 for item in items:
                     # Prices are fixed from the bank's merchant catalogue at planning time and re-checked at execution.
                     if (not isinstance(item,dict) or set(item)!={'merchant_id','amount'} or item['merchant_id'] not in catalogue
@@ -200,7 +200,7 @@ class EventPlans:
         current=[]
         now=time.time()
         for kind in ('subscription','direct_debit'):
-            for row in self.s.service_agent.resources(owner,kind):
+            for row in self.s.service_agent.optional_resources(owner,kind):
                 if row['account_id']!=account_id or row['status']!='ACTIVE': continue
                 deadline=row['next_charge_at']
                 if type(deadline) not in (int,float) or not math.isfinite(deadline): raise Rejected('INVALID_RENEWAL_EVIDENCE')

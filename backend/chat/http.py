@@ -200,7 +200,7 @@ def handle_post(handler, chat, path, body, user_id):
     if parts == ["api", "chat", "sessions"]:
         if set(body) - {"channel", "default_account_id"}:
             raise Rejected("INVALID_INPUT")
-        return handler.reply(201, chat.create_session(user_id, body.get("channel", "app"), body.get("default_account_id", "acct-demo")))
+        return handler.reply(201, chat.create_session(user_id, body.get("channel", "app"), body.get("default_account_id")))
     if len(parts) < 5 or parts[:3] != ["api", "chat", "sessions"]:
         return handler.reply(404, {"error": "NOT_FOUND"})
     session_id, operation = parts[3], parts[4]

@@ -46,6 +46,23 @@ TRUSTA enables features based on what is actually connected and passes its check
 
 To connect an external bank sandbox, write a `config/bank.*.local.toml` based on `config/bank.*.example.toml` and choose an external bank at the bank step of the [setup wizard](#/setup).
 
+### Bank capabilities and features
+
+Pages and chat read only through the standard bank interface: whatever capabilities the bank offers, the matching features light up. When a capability is missing, the page still opens and that section says the bank does not provide it.
+
+| Bank capability | Features it enables |
+|---|---|
+| `accounts.read` (required) | Accounts, overview, new conversations |
+| `balance.read` | Balance queries, cash reserve in the allocation plan, balance-triggered automations |
+| `transactions.read` | Spending queries, bill analysis, recurring-charge detection (from the last 6 months of transactions) |
+| `payees.*` + `payments.create/status` | Transfers, bill splitting, new payees (confirmed one by one, then verified) |
+| `cards.*` | Card management, card controls, trip assistant |
+| `subscriptions.*` / `direct_debits.*` | Bills & subscriptions page, cancelling in chat |
+| `investments.*` + `customers.risk.*` | Product shelf, holdings, personalised plan, buy/redeem, risk assessment |
+| `savings.goals.*` | Wish funds |
+
+Everyday-service links, market quotes, rule Q&A, the anti-fraud cooling-off period and strong authentication need no bank interface. Term deposits, FX, fund units, gold, loans and instalments and the credit statement are **sandbox-bank only** for now: with a real bank their tabs are hidden and such requests are clearly declined.
+
 ## Trust infrastructure
 
 | Integration | Notes | Status |
@@ -68,4 +85,4 @@ To connect an external bank sandbox, write a `config/bank.*.local.toml` based on
 ## Adding a channel or a bank
 
 - New channel: follow `backend/channels/feishu.py` — pass messages to the unified chat endpoint `/api/chat` and render confirmation cards as that channel's interactive cards. A channel can never bypass the confirmation card.
-- New bank: follow the adapters in `backend/bank_sdk/` and implement the read and execute interfaces; TRUSTA lights up the matching features from its capability checks.
+- New bank: no change to TRUSTA's code. Write an adapter (a capability manifest plus `request` and `verify`) and configure `provider = "module"`, `factory = "your_module:create"`. Field contracts, sample code and checks are in `docs/real-bank-integration.md` in the repository; `tests/test_real_bank_readiness.py` can be reused as a self-test.

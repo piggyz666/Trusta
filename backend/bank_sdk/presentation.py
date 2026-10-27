@@ -5,18 +5,9 @@ from backend.bank_sdk.contracts import BankRequest
 def bank_overview(service,user_id):
     provider=service.gateway._adapter.provider
     manifest=provider.manifest
-    if manifest.environment=='local':
-        ids=[row['id'] for row in service.db.rows('SELECT id FROM accounts WHERE customer_id=? ORDER BY id',(user_id,))]
-        rows=[service.gateway.read('verifier',user_id,'account.get',account_id=value) for value in ids]
-    else:
-        # Catalogue discovery is infrastructure, not a new Agent grant. The
-        # provider binds the caller to the bank-authorised organisation.
-        rows=provider.request(BankRequest('accounts.read',user_id)).data
-        rows=[r if {'balance','frozen'}<=set(r) else
-              service.gateway.read('verifier',user_id,'account.get',account_id=r['id'])
-              for r in rows]
-    accounts=[{k:r[k] for k in ('id','currency','balance','frozen')}|
-              {'name':r.get('name') or r['currency']+'账户'} for r in rows]
+    from backend.bank_sdk.discovery import customer_accounts
+    accounts=[{k:a[k] for k in ('id','currency','balance','frozen')}|{'name':a['name'] or a['currency']+'账户'}
+              for a in customer_accounts(service,user_id)]
     safe=getattr(provider,'safe_mode',None)
     return {'provider':manifest.provider,'environment':manifest.environment,'accounts':accounts,
             'capabilities':sorted(manifest.capabilities),

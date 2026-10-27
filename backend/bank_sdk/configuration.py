@@ -10,6 +10,8 @@ from backend.bank_sdk.auth import StarlingAuth
 def reference_from_config(path, db):
     try:
         raw=tomllib.loads(Path(path).read_text(encoding='utf-8'))
+        if raw.get('provider')=='module':
+            return module_provider(raw,db)
         if raw.get('provider')=='revolut':
             from backend.bank_sdk.revolut import RevolutReadOnlyAdapter, decimal_json
             from backend.bank_sdk.revolut_auth import RevolutAuth, SANDBOX
@@ -50,3 +52,22 @@ def reference_from_config(path, db):
         return ReferenceBankAdapter(db,BankTransport(endpoint),StarlingAuth(raw.get('token_env','BANK_ACCESS_TOKEN'),raw.get('key_path',''),raw.get('key_id','')),customer,mode)
     except Exception:
         raise Rejected('INVALID_BANK_PROVIDER_CONFIGURATION') from None
+
+
+def module_provider(raw,db):
+    """Any bank, without touching TRUSTA's code: ``provider = "module"`` and ``factory = "package.module:create"``.
+    The factory receives the parsed configuration and the database and returns a provider object with ``manifest``
+    (BankCapabilityManifest, environment "sandbox" or "production"), ``request(BankRequest) -> BankResponse`` and
+    ``verify(action, transaction_id)``. See docs/real-bank-integration.md."""
+    import importlib
+    from backend.bank_sdk.contracts import BankCapabilityManifest, CANONICAL
+    factory=raw.get('factory')
+    if not isinstance(factory,str) or factory.count(':')!=1: raise ValueError()
+    module,name=factory.split(':')
+    provider=getattr(importlib.import_module(module),name)(raw,db)
+    manifest=getattr(provider,'manifest',None)
+    if (not isinstance(manifest,BankCapabilityManifest) or manifest.environment not in {'sandbox','production'}
+            or not callable(getattr(provider,'request',None)) or not callable(getattr(provider,'verify',None))
+            or not manifest.capabilities<=set(CANONICAL.values()) or 'accounts.read' not in manifest.capabilities):
+        raise ValueError()
+    return provider

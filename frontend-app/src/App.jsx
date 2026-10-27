@@ -7,7 +7,7 @@ import { EvidenceDrawer, ProofDrawer, TraceDrawer } from "./components/Trace.jsx
 import { Icon, useToast } from "./components/ui.jsx";
 import Chat from "./pages/Chat.jsx";
 import ConnectionBanner from './components/ConnectionBanner.jsx';
-import { GROUPS, groupOf } from './components/navGroups.js';
+import { groupOf, visibleTabs } from './components/navGroups.js';
 
 const loaders = [() => import("./pages/Overview.jsx"), () => import("./pages/Features.jsx"), () => import("./pages/Settings.jsx"),
   () => import("./pages/Bills.jsx"), () => import("./pages/Wealth.jsx"), () => import("./pages/Life.jsx")];
@@ -112,7 +112,7 @@ export default function App() {
         )}
         {groupOf(route) && (
           <nav className="page-subnav" aria-label="分类页面">
-            {GROUPS[groupOf(route)].map(([key, label]) => <button key={key} aria-current={route === key ? "page" : undefined} onClick={() => navigate(key)}>{label}</button>)}
+            {visibleTabs(groupOf(route), capabilities).map(([key, label]) => <button key={key} aria-current={route === key ? "page" : undefined} onClick={() => navigate(key)}>{label}</button>)}
           </nav>
         )}
         <Suspense fallback={<div className="page"><div className="inner muted">读取中…</div></div>}>

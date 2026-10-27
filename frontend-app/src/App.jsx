@@ -1,3 +1,4 @@
+import { setBankMode } from './bankMode.js';
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { api, auth, bootstrapAuth, explain, APP_BASE, appPath } from "./api.js";
 import { bankName } from "./format.js";
@@ -55,7 +56,7 @@ export default function App() {
     try { setSessions((await api.sessions()).sessions); } catch (e) { if (e.status === 401) setAuthed(false); }
   }, []);
   const refreshCapabilities = useCallback(async () => {
-    try { setCapabilities(await api.capabilities()); } catch (e) { if (e.status === 401) setAuthed(false); }
+    try { const caps = await api.capabilities(); setBankMode(caps); setCapabilities(caps); } catch (e) { if (e.status === 401) setAuthed(false); }
   }, []);
 
   useEffect(() => { if (authed) { refreshSessions(); refreshCapabilities(); } }, [authed]);

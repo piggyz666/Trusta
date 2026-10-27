@@ -35,9 +35,9 @@ REQUIREMENTS = {
     "bank.fx": ("银行接口：外币兑换", "银行适配器需提供 finance.list / finance.quote 与 finance.fx_buy / fx_sell"),
     "bank.gold": ("银行接口：黄金买卖", "银行适配器需提供 finance.list / finance.quote 与 finance.gold_buy / gold_sell"),
     "bank.loans": ("银行接口：贷款与分期", "银行适配器需提供 finance.list / finance.quote 与 finance.loan_draw / installment_start / credit_repay / credit_settle"),
-    "bank.credit_account": ("银行接口：信用账户", "银行适配器需提供 finance.list / finance.quote 与 finance.card_charge / card_refund / card_repay / card_surplus"),
+    "bank.credit_account": ("银行接口：信用账户", "银行适配器需提供 finance.list / finance.quote 与 finance.card_refund / card_repay / card_surplus"),
     "bank.funds": ("银行接口：基金份额", "银行适配器需提供 finance.list / finance.quote 与 finance.fund_subscribe / fund_confirm / fund_cancel / fund_redeem"),
-    "bank.feed": ("银行入账推送", "当前仅本地沙箱银行提供入账推送；真实银行需接入其 webhook"),
+    "bank.feed": ("银行入账数据", "银行需提供交易流水（transactions.read，含入账方向）；沙箱银行另有实时推送"),
     "channel.feishu": ("飞书机器人", "运行 python -m scripts.setup 填写 FEISHU_APP_ID / FEISHU_APP_SECRET（默认长连接，无需公网），"
                                     "pip install lark-oapi，再用 python -m scripts.pair --feishu 绑定账户"),
     "security.strong_auth": ("强验证（TOTP / 短信）", "TRUSTA_SAFETY_PROFILE=competition，或设置 TRUSTA_STRONG_AUTH_SECRET"),
@@ -58,7 +58,8 @@ BANK_TOOLS.update({
     "bank.fx": DESK | {"finance.fx_buy", "finance.fx_sell"},
     "bank.gold": DESK | {"finance.gold_buy", "finance.gold_sell"},
     "bank.loans": DESK | {"finance.loan_draw", "finance.installment_start", "finance.credit_repay", "finance.credit_settle"},
-    "bank.credit_account": DESK | {"finance.card_charge", "finance.card_refund", "finance.card_repay", "finance.card_surplus"},
+    # card_charge (registering a test purchase) exists only in the sandbox; a real bank's card purchases arrive by themselves.
+    "bank.credit_account": DESK | {"finance.card_refund", "finance.card_repay", "finance.card_surplus"},
     "bank.funds": DESK | {"finance.fund_subscribe", "finance.fund_confirm", "finance.fund_cancel", "finance.fund_redeem"},
 })
 # Chat tools shared by several of the businesses below: a tool stays available while any of them is.

@@ -32,13 +32,13 @@ MONTH = {"type": "string", "pattern": r"^[0-9]{4}-[0-9]{2}$", "description": "YY
 
 TOOLS = {
     "get_extended": {"kind":"read","description":"查询定期存款、外币、基金份额订单、信用账单或统一待办，数据仅来自本人站内账户。","parameters":{"page":{"type":"string","enum":["deposits","exchange","funds","credit-account","todos"]}},"required":["page"]},
-    "propose_extension": {"kind":"propose","description":"准备存款、支取续存、外币兑换、练习基金申购/确认份额/撤单/赎回、信用账单全额最低还款/消费退款/溢缴款退还，或已建黄金定投本期买入。只生成逐笔确认卡；对象引用 extensions 目录。不能直接批准，不登记虚构信用消费，不自动执行。", "parameters":{
+    "propose_extension": {"kind":"propose","description":"准备存款、支取续存、外币兑换、基金申购/确认份额/撤单/赎回、信用账单全额最低还款/消费退款/溢缴款退还，或已建黄金定投本期买入。只生成逐笔确认卡；对象引用 extensions 目录。不能直接批准，不登记虚构信用消费，不自动执行。", "parameters":{
         "operation":{"type":"string","enum":["DEPOSIT_OPEN","DEPOSIT_WITHDRAW","DEPOSIT_RENEW","FX_BUY","FX_SELL","FUND_SUBSCRIBE","FUND_CONFIRM","FUND_CANCEL","FUND_REDEEM","CARD_REPAY","CARD_REFUND","CARD_SURPLUS","GOLD_SAVINGS_BUY"]},
         "card":ref("银行卡"),"resource":ref("extensions中的存单、基金产品/订单、信用消费或定投计划"),"amount":AMOUNT,"quantity":QUANTITY,
         "term":{"type":"object","additionalProperties":False,"required":["value","span"],"properties":{"value":{"type":"integer","enum":[90,180,365]},"span":SPAN}},
         "currency":{"type":"string","enum":["USD","EUR","JPY","HKD"]},"repay_mode":{"type":"string","enum":["full","minimum"]}},"required":["operation"]},
-    "get_finance": {"kind":"read", "description":"查询本站虚拟贷款负债、下一期还款、黄金克数及持仓成本，不提供真实贷款审批", "parameters":{}},
-    "propose_finance": {"kind":"propose", "description":"准备虚拟贷款、消费分期、还款或黄金买卖，只生成待确认动作；生活缴费和机票请用 life_service。金额、期数、克数均须引用用户原话。", "parameters":{
+    "get_finance": {"kind":"read", "description":"查询贷款与分期负债、下一期还款、黄金克数及持仓成本（来自银行），不代表贷款审批", "parameters":{}},
+    "propose_finance": {"kind":"propose", "description":"准备贷款、消费分期、还款或黄金买卖（由银行报价），只生成待确认动作；生活缴费和机票请用 life_service。金额、期数、克数均须引用用户原话。", "parameters":{
         "operation":{"type":"string","enum":["LOAN_DRAW","INSTALLMENT_START","CREDIT_REPAY","CREDIT_SETTLE","GOLD_BUY","GOLD_SELL"]},
         "card":ref("银行卡"), "contract":ref("融资合同"), "purchase":ref("已入账消费"), "amount":AMOUNT,
         "months":{"type":"object","additionalProperties":False,"required":["value","span"],"properties":{"value":{"type":"integer","enum":[3,6,12],"minimum":3,"maximum":12},"span":SPAN}},

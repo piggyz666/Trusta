@@ -347,9 +347,13 @@ class BankingControls:
         if recent >= self.VELOCITY_LIMIT:
             reasons.append("TRANSFER_VELOCITY_STRONG_AUTH")
         # A payee added within 24h receiving a meaningful amount: the typical "new account from a scammer" case.
-        fresh = conn.execute("SELECT 1 FROM payee_registrations WHERE payee_id=? AND customer_id=? AND created_at>?",
-                             (action.get("recipient_id"), action["customer_id"], time.time()-86400)).fetchone() \
-            if conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='payee_registrations'").fetchone() else None
+        # Payees TRUSTA itself added (recorded with the verified receipt, so this works with any bank); the sandbox bank's
+        # own registration table is consulted too when present.
+        fresh = None
+        for table in ("payee_additions", "payee_registrations"):
+            if not fresh and conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone():
+                fresh = conn.execute(f"SELECT 1 FROM {table} WHERE payee_id=? AND customer_id=? AND created_at>?",
+                                     (action.get("recipient_id"), action["customer_id"], time.time()-86400)).fetchone()
         if fresh and action["amount"] >= self.NEW_PAYEE_LIMIT:
             reasons.append("NEW_PAYEE_STRONG_AUTH")
         strong = bool(reasons)

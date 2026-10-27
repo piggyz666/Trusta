@@ -6,6 +6,24 @@ class ReceiptService:
     def __init__(self, db, audit):
         self.db, self.audit = db, audit
 
+    @staticmethod
+    def _remember(db, action):
+        """TRUSTA's own record of what it executed, so its safety checks and plan budgets never depend on reading the
+        bank's internal tables (which a real bank does not expose)."""
+        kind = action.get("action_type")
+        if kind == "ADD_PAYEE":
+            payee = (action.get("expected_postconditions") or {}).get("target") or {}
+            payee_id = payee.get("id") or action["target"]["id"]
+            db.execute("CREATE TABLE IF NOT EXISTS payee_additions(payee_id TEXT NOT NULL, customer_id TEXT NOT NULL, created_at REAL NOT NULL, "
+                       "PRIMARY KEY(payee_id, customer_id))")
+            db.execute("INSERT OR IGNORE INTO payee_additions VALUES(?,?,?)", (payee_id, action["customer_id"], action.get("created_at") or 0))
+        elif kind == "WISH_ORDER":
+            binding = db.execute("SELECT plan_id FROM life_plan_bindings WHERE fund_id=? AND owner=?", (action["target"]["id"], action["customer_id"])).fetchone() \
+                if db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='life_plan_bindings'").fetchone() else None
+            if binding:
+                db.execute("CREATE TABLE IF NOT EXISTS plan_spending(action_id TEXT PRIMARY KEY, plan_id TEXT NOT NULL, owner TEXT NOT NULL, amount INTEGER NOT NULL)")
+                db.execute("INSERT OR IGNORE INTO plan_spending VALUES(?,?,?,?)", (action["action_id"], binding["plan_id"], action["customer_id"], action["parameters"]["amount"]))
+
     def create(self, action, contract, transaction, verification):
         if verification["status"] != "VERIFIED":
             raise Rejected("UNVERIFIED_RECEIPT")
@@ -27,4 +45,5 @@ class ReceiptService:
                 return existing
             receipt['audit_ref']=self.audit.append_in(db,action['task_id'],action['action_id'],'RECEIPT_GENERATED','receipts',receipt)
             db.execute("INSERT INTO receipts VALUES(?,?)", (receipt["receipt_id"], canonical(receipt)))
+            self._remember(db, action)
         return receipt

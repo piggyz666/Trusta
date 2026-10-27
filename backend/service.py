@@ -153,7 +153,14 @@ class TrustaService:
             from backend.runtime.event_plans import EventPlans
             self.events = EventPlans(self,recover=recover_workflows)
             from backend.banking.sandbox_feed import SandboxFeed
-            self.feed = SandboxFeed(self) if self.gateway._adapter.provider.manifest.provider=='virtual' else None
+            if self.gateway._adapter.provider.manifest.provider=='virtual':
+                self.feed = SandboxFeed(self)
+            elif self.gateway.offers('transaction.list'):
+                # Any other bank: incoming credits are read from its ordinary transaction list.
+                from backend.banking.transaction_feed import BankTransactionFeed
+                self.feed = BankTransactionFeed(self)
+            else:
+                self.feed = None
             from backend.automation.engine import AutomationEngine
             self.automation = AutomationEngine(self)
             if recover_workflows:

@@ -60,9 +60,9 @@ SYSTEM_PROMPT = """你是 TRUSTA 银行的 AI 助手中的“理解与规划”�
     不要用文字问“需要我帮你……吗”，也不要用文字描述将要执行的操作——确认卡就是询问，文字回复不能代替确认卡。
 
 ## 当前信息
-本站没有真实贷款、真实付款或出票能力。生活缴费、机票、酒店、演出只能 life_service 跳转官网，绝不声称已缴费或订票。
-贷款、消费分期、黄金为虚拟资金：get_finance 查询，propose_finance 准备确认；交易金额、期数、重量必须来自用户原话，缺失则追问。不能承诺收益、审批通过或改变风险等级。
-定期存款、支取续存、换汇、基金份额订单、信用账单还款和退款、已建黄金定投当期买入可使用 propose_extension，只准备确认卡。resource 只引用 extensions 目录且必须唯一对应用户原话，缺卡/金额/对象/期限时追问，不猜。换汇使用公开参考价，不能偷偷替换练习价。基金固定测试净值不是市场行情。信用额度不是现金，不能承诺实际银行服务。get_extended 查这些业务及 todos。新建定投、会员积分、交易工单仍 navigate 至对应页面；不要把导航称为已完成。扣款/资产变动必须经用户逐笔点击确认；模型的“同意”无授权作用。
+{bank_note}
+贷款、消费分期、黄金：get_finance 查询，propose_finance 准备确认；交易金额、期数、重量必须来自用户原话，缺失则追问。不能承诺收益、审批通过或改变风险等级。
+定期存款、支取续存、换汇、基金份额订单、信用账单还款和退款、已建黄金定投当期买入可使用 propose_extension，只准备确认卡。resource 只引用 extensions 目录且必须唯一对应用户原话，缺卡/金额/对象/期限时追问，不猜。价格、利率、净值以银行报价为准。信用额度不是现金。get_extended 查这些业务及 todos。新建定投、交易工单仍 navigate 至对应页面；不要把导航称为已完成。扣款/资产变动必须经用户逐笔点击确认；模型的“同意”无授权作用。
 工具参数里禁止携带任意网址、代码、密码、API key。禁止调用 shell、浏览器或任意 HTTP；你没有这些工具。
 - 现在时间：{now}（Asia/Shanghai，星期{weekday}）
 - 当前会话状态：{state}
@@ -94,7 +94,12 @@ def data_text(value, limit=40):
     return "（名称含可疑内容，已隐藏）" if guard.inspect(text) else text
 
 
-def build_system_prompt(state, pending_summary, catalog, now=None):
+SANDBOX_NOTE = ("当前连接的是演示用沙箱银行：资金和产品都是虚拟的，没有真实付款或出票能力；换汇用公开参考价，不能偷偷替换练习价；基金为固定测试净值。"
+                "生活缴费、机票、酒店、演出只能 life_service 跳转官网，绝不声称已缴费或订票。")
+BANK_NOTE = "当前连接的是真实银行接口：所有数据与报价来自银行。生活缴费、机票、酒店、演出只能 life_service 跳转官网，绝不声称已缴费或订票。"
+
+
+def build_system_prompt(state, pending_summary, catalog, now=None, sandbox=True):
     moment = datetime.fromtimestamp(now if now is not None else time.time(), CHINA)
     lines = []
     for title, key in (("账户", "accounts"), ("收款人", "payees"), ("银行卡", "cards"), ("订阅", "subscriptions"),
@@ -106,7 +111,8 @@ def build_system_prompt(state, pending_summary, catalog, now=None):
             lines.append(f"- {title}: " + "；".join(f"{data_text(item['id'], 64)}={data_text(item['display'])}" for item in items))
     pending = f"- 待处理：{data_text(pending_summary, 200)}\n" if pending_summary else ""
     return SYSTEM_PROMPT.format(now=moment.strftime("%Y-%m-%d %H:%M"), weekday=WEEKDAYS[moment.weekday()],
-                                state=state, pending=pending, catalog="\n".join(lines) or "（空）")
+                                state=state, pending=pending, catalog="\n".join(lines) or "（空）",
+                                bank_note=SANDBOX_NOTE if sandbox else BANK_NOTE)
 
 
 class DeepSeekToolClient:

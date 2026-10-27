@@ -26,7 +26,7 @@ SMALLTALK = {
     "THANKS": "不客气，还有什么可以帮你？",
     "CAPABILITIES": "我可以帮你：① 转账（按姓名 / 手机号 / 称呼，支持定时）和 AA 收款；② 账单分析和异常交易识别；"
                     "③ 理财推荐、对比、申购赎回；④ 卡片冻结、挂失、限额和交易开关；⑤ 订阅和代扣的识别与取消。"
-                    "⑥ 虚拟贷款、消费分期、还款和黄金交易；⑦ 定期存款、支取续存、外币兑换、基金份额及订单、信用账单还款、已建定投的当期办理；⑧ 查询统一待办，打开会员积分和交易工单页面；⑨ 生活服务官方网站导航。所有资金操作都需要你逐笔确认。",
+                    "⑥ 贷款、消费分期、还款和黄金交易；⑦ 定期存款、支取续存、外币兑换、基金份额及订单、信用账单还款、已建定投的当期办理；⑧ 查询统一待办，打开交易工单页面；⑨ 生活服务官方网站导航。所有资金操作都需要你逐笔确认。",
 }
 OFFER_TEXT = re.compile(r"需要我.{0,16}吗|要不要我|是否需要我|我(来|帮你|为你|可以帮你).{0,8}(办理|提交|执行|挂失|转账|冻结|申购|赎回|取消|关闭)"
                         r"|(已|已经)(为你|帮你)?.{0,4}(提交|执行|办理|转账|挂失|冻结)|确认后.{0,4}(执行|提交)|准备.{0,6}操作|待确认的信息")
@@ -815,7 +815,8 @@ class ChatService(AutomationMixin):
                 history.append({"role": message["role"], "content": redact_for_model(content)})
         pending = "；".join(p["card"]["title"] + "（" + "，".join(f["value"] for f in p["card"]["fields"][:2]) + "）"
                            for p in body["pending"])
-        prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog)
+        from backend.bank_sdk.discovery import is_external
+        prompt = build_system_prompt(STATE_LABELS.get(self._state(body), "空闲"), pending, catalog, sandbox=not is_external(self.s))
         disabled = set(self.capabilities.disabled_tools(owner))
         if isinstance(self.llm,DeepSeekToolClient):
             from backend.chat.tool_selection import relevant_tools

@@ -1,3 +1,4 @@
+import { T, isSandbox } from '../bankMode.js';
 import { useState } from 'react';
 import { api, explain } from '../api.js';
 import { yuan } from '../format.js';
@@ -7,7 +8,7 @@ export const CARD_THEMES=[['midnight','曜石黑'],['champagne','香槟金'],['r
 export function BankCard({card,compact=false}) {
  const theme=card.design?.theme || 'midnight';
  return <article className={`bank-face bank-face-${theme} ${compact?'bank-face-compact':''}`} aria-label={card.design?.nickname || '虚拟银行卡'}>
-  <div className="bank-face-top"><b>TRUSTA</b><span>虚拟借记卡</span></div>
+  <div className="bank-face-top"><b>TRUSTA</b><span>{T('虚拟借记卡')}</span></div>
   <div className="bank-face-chip" aria-hidden="true"><i/><i/><i/></div>
   <div className="bank-face-name">{card.design?.nickname || (card.account_id?.includes('saving')?'储蓄卡':'生活卡')}</div>
   <div className="bank-face-balance"><small>可用余额</small><strong>{yuan(card.balance ?? 0)}</strong></div>

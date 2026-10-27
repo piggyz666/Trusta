@@ -313,7 +313,7 @@ class AutomationMixin:
             v=Finance(self).view(owner)
             units=sum(p['units'] for p in v['positions']);cost=sum(p['cost'] for p in v['positions'])
             pending=sorted((r for t in v['contracts'] if t['status']=='ACTIVE' for r in t['schedule'] if not r['paid']),key=lambda r:r['due'])
-            text=f"虚拟贷款与分期待还本金 {format_cents(v['outstanding'])}；黄金 {units/100:.2f} 克，持仓成本 {format_cents(cost)}（不是市值）。"
+            text=f"贷款与分期待还本金 {format_cents(v['outstanding'])}；黄金 {units/100:.2f} 克，持仓成本 {format_cents(cost)}（不是市值）。"
             if pending:text+=f"最近还款日 {pending[0]['due']}，当日应还 {format_cents(sum(r['total'] for r in pending if r['due']==pending[0]['due']))}。"
             return navigate_card('credit','c_fin_'+uid()[:8]),text
         card = {"type": "report", "card_id": "c_" + uid()[:8]}
@@ -362,14 +362,14 @@ class AutomationMixin:
 
     # ---- sandbox demo hooks (TRUSTA_DEMO_MODE only) ---------------------------------------------------
     def demo_income(self, session_id, owner, amount, payer, memo=""):
-        if not DEMO() or not getattr(self.s, "feed", None):
+        if not DEMO() or not hasattr(getattr(self.s, "feed", None), "credit"):  # simulating money only exists in the sandbox bank
             raise Rejected("DEMO_MODE_DISABLED")
         body = self.store.get(session_id, owner)
         self.s.feed.credit(owner, body["default_account_id"], amount, payer, memo)
         return self.get(session_id, owner)
 
     def demo_purchase(self, session_id, owner, merchant, category, amount):
-        if not DEMO() or not getattr(self.s, "feed", None):
+        if not DEMO() or not hasattr(getattr(self.s, "feed", None), "purchase"):
             raise Rejected("DEMO_MODE_DISABLED")
         body = self.store.get(session_id, owner)
         self.s.feed.purchase(owner, body["default_account_id"], merchant, category, amount)

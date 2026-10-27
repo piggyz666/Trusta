@@ -124,7 +124,14 @@ class CardRenderer:
                 fee=pending[0]['fee'] if kind in {'CREDIT_REPAY','CREDIT_SETTLE'} and pending else sum(x['fee'] for x in pending)
                 principal=t['remaining']-post['target']['remaining'] if kind in {'CREDIT_REPAY','CREDIT_SETTLE'} else t['amount']
                 fields += [{'label':'本次本金','value':format_cents(principal)},{'label':'本期费用' if kind in {'CREDIT_REPAY','CREDIT_SETTLE'} else '计划总费用','value':format_cents(fee)},{'label':'完成后剩余本金','value':format_cents(post['target']['remaining'])},{'label':'规则','value':'贷款按剩余本金年息3.60%；分期每期按原本金0.50%。提前结清免未来期费用。'}]
-            return fields+[{'label':'说明','value':'仅操作虚拟资金，不开立真实金融产品、不交割实物或外汇'}]
+            from backend.bank_sdk.discovery import is_external
+            if not is_external(self.s):
+                return fields+[{'label':'说明','value':'仅操作虚拟资金，不开立真实金融产品、不交割实物或外汇'}]
+            # A real bank: the sandbox's own product rules do not apply; show the bank's terms instead.
+            sandbox_rules={'规则','虚拟产品规则','信用账户','到期处理','提前支取','手续费'}
+            fields=[f|{'value':f['value'].replace('虚拟','').replace('（固定练习值，非市场行情）','')} if isinstance(f.get('value'),str) else f
+                    for f in fields if f['label'] not in sandbox_rules]
+            return fields+[{'label':'产品条款','value':t.get('terms') or '利率、费用、期限与额度以银行报价及合同为准'}]
         if kind in {"RETAIL_PAY","RETAIL_REFUND"}:
             pre=action["preconditions"];t=pre["target"]
             import json

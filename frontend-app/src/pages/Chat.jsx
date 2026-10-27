@@ -1,3 +1,4 @@
+import { T, isSandbox } from '../bankMode.js';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, explain } from "../api.js";
 import { Card, PlanCard } from "../cards/Cards.jsx";
@@ -123,7 +124,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
           </div>
         </section>
         <div className="hero-foot">
-          <span><Icon name="shield" style={{ width: 14, height: 14 }} />虚拟资金 · AI 只能提议，不能替你授权</span>
+          <span><Icon name="shield" style={{ width: 14, height: 14 }} />{T('虚拟资金 · AI 只能提议，不能替你授权')}</span>
           <span><Icon name="lock" style={{ width: 14, height: 14 }} />大额与高风险操作需要验证码</span>
           {nlu && nlu.status !== "AVAILABLE" && <span style={{ color: "var(--amber)" }}>未接入大模型：只能识别标准说法</span>}
         </div>
@@ -169,7 +170,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
             <>
               <Composer value={input} setValue={setInput} onSend={send} busy={busy} onStop={view?.pending?.length ? interrupt : null}
                 placeholder={view?.state === "HANDED_OFF" ? "已转人工，人工客服会在这里回复你" : "继续说，如“改成800”“算了不转了”"} />
-              <div className="hint">虚拟资金演示 · 确认卡上的按钮才是授权，聊天里说“确认”不会执行任何操作。</div>
+              <div className="hint">{T('虚拟资金演示 · 确认卡上的按钮才是授权，聊天里说“确认”不会执行任何操作。')}</div>
             </>
           )}
         </div>

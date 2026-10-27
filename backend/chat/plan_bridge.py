@@ -6,13 +6,13 @@ import json
 from datetime import datetime,timedelta
 from backend.business import CHINA
 from backend.domain import Rejected,canonical
-from backend.banking.personal import Personal,plan_snapshot,day
+from backend.banking.personal import Personal,plan_snapshot,plan_view,day
 
 class PlanBridge:
  def __init__(self,chat):self.chat=chat;self.s=chat.s
  def open(self,owner,b):
   if set(b)!={'plan_id'} or not isinstance(b['plan_id'],str):raise Rejected('INVALID_INPUT')
-  with self.s.db.transaction() as c:p=plan_snapshot(c,owner,b['plan_id'])
+  p=plan_view(self.s,owner,b['plan_id'])
   if not p['binding']:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
   session=self.chat.get(p['binding']['session_id'],owner)
   if not session['active'] and p['fund']:
@@ -35,7 +35,7 @@ class PlanBridge:
   if set(b)!={'plan_id','account_id','items'} or not isinstance(b['plan_id'],str) or not isinstance(b['account_id'],str) or not isinstance(b['items'],list) or len(b['items'])>3 or any(not isinstance(x,str) for x in b['items']) or len(set(b['items']))!=len(b['items']):raise Rejected('INVALID_INPUT')
   existing=self.s.db.one('SELECT session_id FROM life_plan_bindings WHERE plan_id=? AND owner=?',(b['plan_id'],owner))
   if existing:return {'session_id':existing['session_id'],'reused':True}
-  with self.s.db.transaction() as c:p=plan_snapshot(c,owner,b['plan_id'])
+  p=plan_view(self.s,owner,b['plan_id'])
   today=datetime.now(CHINA).date()
   if p['status']!='ACTIVE' or not today<=day(p['start'])<=day(p['end'])<=today+timedelta(days=366):raise Rejected('PLAN_DATE_OR_STATE_INVALID')
   if p['spent']:raise Rejected('PLAN_HAS_LEGACY_SPENDING')
@@ -75,7 +75,7 @@ class PlanBridge:
    raise
  def release(self,owner,b):
   if set(b)!={'plan_id'} or not isinstance(b['plan_id'],str):raise Rejected('INVALID_INPUT')
-  with self.s.db.transaction() as c:p=plan_snapshot(c,owner,b['plan_id'])
+  p=plan_view(self.s,owner,b['plan_id'])
   if not p['binding'] or not p['fund'] or p['fund']['balance']<=0:raise Rejected('WISH_FUND_NOT_ACTIVE')
   session=self.chat.get(self.open(owner,b)['session_id'],owner)
   if session['pending']:return {'session_id':session['session_id'],'reused':True}

@@ -1,3 +1,4 @@
+import { T, isSandbox } from '../bankMode.js';
 import FinancePanel from "../components/FinancePanel.jsx";
 import { useEffect, useState } from "react";
 import { api, explain } from "../api.js";
@@ -121,7 +122,7 @@ export default function Wealth({ ask, goldOnly=false }) {
     setRefreshing(false);
   }
 
-  if(goldOnly)return <div className="page"><div className="inner"><header className="page-head"><h1>黄金交易</h1><p>查看黄金持仓，使用虚拟资金买入或卖出。每笔交易仍需确认及身份验证。</p></header><FinancePanel gold/></div></div>;
+  if(goldOnly)return <div className="page"><div className="inner"><header className="page-head"><h1>黄金交易</h1><p>{T('查看黄金持仓，使用虚拟资金买入或卖出。每笔交易仍需确认及身份验证。')}</p></header><FinancePanel gold/></div></div>;
   if (error && !data) return <div className="page"><div className="inner"><div className="empty">{error}</div></div></div>;
   if (!data) return <div className="page"><div className="inner muted">读取中…</div></div>;
   const { risk, market } = data;

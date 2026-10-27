@@ -32,7 +32,7 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 |---|---|---|---|
 | `accounts.read` | 账户列表、`account.get` | 所有页面的账户、资金总览、新建对话 | **必需** |
 | `balance.read` | `account.get_balance` | 余额查询、理财规划里的备用金、余额触发的自动化 | 建议 |
-| `transactions.read` | `transaction.list`（按月） | 消费查询与账单分析、总览本月消费、**周期扣费识别**（取近 6 个月流水推算） | 建议 |
+| `transactions.read` | `transaction.list`（按月） | 消费查询与账单分析、总览本月消费、**周期扣费识别**（取近 6 个月流水推算）、**入账明细与“工资到账”联动规则**（取流水中的入账） | 建议 |
 | `transactions.recurring.read` | `transaction.recurring_history` | 更精确的周期扣费识别（银行自带周期扣费数据时） | 可选 |
 | `payees.read` / `payees.create` | `payee.resolve` / `payee.add` | 转账收款人、AA 分摊 / 新增收款人 | 可选 |
 | `payments.create` + `payments.status` | `transfer.create` / `transaction.get` | 转账（写），执行后回查状态并独立核验 | 可选 |
@@ -49,8 +49,8 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 | 同上 + `finance.gold_buy / gold_sell` | | 黄金买卖、黄金定投 | 可选 |
 | 同上 + `finance.fund_subscribe / confirm / cancel / redeem` | | 基金份额 | 可选 |
 | 同上 + `finance.loan_draw / installment_start / credit_repay / credit_settle` | | 贷款与消费分期 | 可选 |
-| 同上 + `finance.card_charge / card_refund / card_repay / card_surplus` | | 信用账单 | 可选 |
-| 入账推送（webhook） | 推送 → 只触发查询 | 入账明细、工资到账触发的自动化 | 可选 |
+| 同上 + `finance.card_refund / card_repay / card_surplus` | | 信用账单（`card_charge`“登记测试消费”只在沙箱银行有） | 可选 |
+| 入账推送（webhook） | 推送 → 只触发查询 | 入账提醒更及时（没有推送时由交易流水提供，见上） | 可选 |
 
 以下功能不依赖银行接口，接任何银行都可用：生活服务跳转链接、黄金与外汇参考行情（来自公开数据源）、规则问答、反诈冷静期、强验证、自动化规则引擎、会话记录与审计链。
 
@@ -89,6 +89,14 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 - **前置条件格式。** `finance.get` 返回的合同和相关状态，就是签名动作的前置条件。TRUSTA 会用同一套规则（`backend/banking/finance.py` 里的 `errors` / `expected`，以及 `extensions.py`、`advanced.py` 里的同名函数）计算预期结果，银行执行前后都要与之一致。适配器需要把银行自己的数据整理成这些字段。
 - **记账凭证格式。** 独立核验会读取 `operations.evidence.read` 返回的记账分录，核对资金方向和金额。沙箱银行使用一个清算账户 `finance-clearing`，真实银行的适配器需要按同样的借贷格式返回凭证。
 - **产品条款以银行为准。** 利率、期限、额度、费用都由银行在报价里给出。沙箱银行的数值只是演示条款。
+
+### TRUSTA 自己保存的数据
+
+下面这些是客户在 TRUSTA 里的设置或 TRUSTA 自己的记录，不依赖银行内部数据，接任何银行都一样：
+
+- 个人资料里的重要日期、活动计划（预算以银行心愿金为准，已花金额来自 TRUSTA 自己的回执）；
+- 黄金定投计划、联动规则、卡面昵称、对话记录、审计链；
+- 安全控制用到的记录：当日经 TRUSTA 发起的转账累计、24 小时内经 TRUSTA 新增的收款人（来自 TRUSTA 签发的回执），用于触发强验证。
 
 ## 4. 写一个适配器
 
@@ -151,7 +159,7 @@ TRUSTA 启动时会检查：
 |---|---|
 | 账户列表 / `account.get` | `id`, `customer_id`, `currency`, `balance`, `frozen`，可选 `name` |
 | `account.get_balance` | `id`（账户号）, `balance`, `currency` |
-| `transaction.list` | 列表：`id`, `account_id`, `merchant`, `category`, `amount`（>0）, `currency`, `occurred_at`, `kind`（`PURCHASE` / `REFUND` / 其他）, `status`（`SETTLED` 等） |
+| `transaction.list` | 列表：`id`, `account_id`, `merchant`, `category`, `amount`（>0）, `currency`, `occurred_at`, `kind`（`PURCHASE` / `REFUND` / 其他）, `status`（`SETTLED` 等）, `direction`（`IN` / `OUT`）；入账可带 `payer`、`memo`（他人填写的文字，TRUSTA 按不可信数据隔离处理） |
 | `card.list` | `id`, `account_id`, `card_type`, `status`, `spending_limit`, `online_enabled`, `international_enabled`, `contactless_enabled` |
 | `subscription.list` / `direct_debit.list` | `id`, `account_id`, `merchant`, `amount`, `currency`, `frequency`（`MONTHLY` 等）, `next_charge_at`, `status`, `cancelable` |
 | `wealth.list_products` | `id`, `name`, `risk_level`（1–5）, `minimum_amount`, `term_days`, `currency`, `active`, `risk_note`, `restrictions{purchase_enabled, redemption_enabled}`；可选 `issuer`, `category`, `benchmark`, `liquidity`, `description`（用于页面展示，优先于本地资料） |

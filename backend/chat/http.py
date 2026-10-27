@@ -30,6 +30,30 @@ def market(chat):
 
 def handle_get(handler, chat, path, user_id):
     parts = path.strip("/").split("/")
+    if parts==["api","chat","todos"]:
+        from backend.banking.todos import view
+        return handler.reply(200,view(chat,user_id))
+    if parts==["api","chat","advanced"]:
+        from backend.banking.advanced import Advanced
+        return handler.reply(200,Advanced(chat).view(user_id))
+    if len(parts)==3 and parts[:2]==['api','chat'] and parts[2] in {'extensions','gold-savings','membership','support'}:
+        from backend.banking.extensions import Extensions,GoldSavings
+        from backend.banking.member_support import Membership,Support
+        cls={'extensions':Extensions,'gold-savings':GoldSavings,'membership':Membership,'support':Support}[parts[2]]
+        return handler.reply(200,cls(chat).view(user_id))
+    if parts == ['api','chat','plan-center']:
+        from backend.chat.plan_bridge import PlanBridge
+        return handler.reply(200,PlanBridge(chat).view(user_id))
+    if parts in [["api","chat","profile"],["api","chat","plans"]]:
+        from backend.banking.personal import Personal
+        p=Personal(chat.s)
+        return handler.reply(200,p.profile(user_id) if parts[-1]=="profile" else p.plans(user_id))
+    if parts == ["api","chat","finance"]:
+        from backend.banking.finance import Finance
+        return handler.reply(200,Finance(chat).view(user_id))
+    if parts == ["api","chat","retail"]:
+        from backend.banking.retail import Retail
+        return handler.reply(200,Retail(chat).view(user_id)|{"catalog":[]})
     if parts == ["api", "chat", "permissions"]:
         from backend.security.permission_matrix import public_matrix
         return handler.reply(200, public_matrix())
@@ -42,7 +66,7 @@ def handle_get(handler, chat, path, user_id):
         from backend.chat.activity import ActivityFeed
         query = parse_qs(urlparse(handler.path).query)
         kind = (query.get("kind") or [None])[0]
-        if kind not in {None, "transfer", "card", "wealth", "wish", "subscription", "payee", "income", "automation"}:
+        if kind not in {None, "transfer", "card", "wealth", "wish", "subscription", "payee", "income", "automation", "retail", "credit"}:
             raise Rejected("INVALID_INPUT")
         return handler.reply(200, {"items": ActivityFeed(chat).list(user_id, kind)})
     if parts == ["api", "chat", "overview"]:
@@ -75,7 +99,46 @@ def handle_get(handler, chat, path, user_id):
 
 def handle_post(handler, chat, path, body, user_id):
     parts = path.strip("/").split("/")
+    if parts == ['api','chat','plans','open']:
+        from backend.chat.plan_bridge import PlanBridge
+        return handler.reply(200,PlanBridge(chat).open(user_id,body))
+    if parts == ['api','chat','plans','release']:
+        from backend.chat.plan_bridge import PlanBridge
+        return handler.reply(200,PlanBridge(chat).release(user_id,body))
+    if parts == ['api','chat','plans','prepare']:
+        from backend.chat.plan_bridge import PlanBridge
+        return handler.reply(200,PlanBridge(chat).prepare(user_id,body))
+    if len(parts)==4 and parts[:2]==['api','chat'] and parts[2] in {'extensions','gold-savings','membership','support'}:
+        from backend.banking.extensions import Extensions,GoldSavings
+        from backend.banking.member_support import Membership,Support
+        cls,allowed={'extensions':(Extensions,{'create'}),'gold-savings':(GoldSavings,{'create','update','prepare'}),'membership':(Membership,{'observe','prepare','confirm','update'}),'support':(Support,{'create','update'})}[parts[2]]
+        if parts[3] not in allowed:raise Rejected('INVALID_INPUT')
+        return handler.reply(200,getattr(cls(chat),parts[3])(user_id,body))
     operator = handler.headers.get("X-TRUSTA-Operator", "")
+    if parts[:3]==["api","chat","finance"]:
+        from backend.banking.finance import Finance
+        f=Finance(chat)
+        methods={'create':f.create,'proposal':f.propose,'decide':f.decide,'sms':f.sms,'archive':f.archive}
+        if len(parts)!=4 or parts[-1] not in methods:raise Rejected('INVALID_INPUT')
+        return handler.reply(200,methods[parts[-1]](user_id,body))
+    if parts in [["api","chat","profile"],["api","chat","plans"],["api","chat","plans","update"]]:
+        from backend.banking.personal import Personal
+        p=Personal(chat.s)
+        return handler.reply(200,p.save_profile(user_id,body) if parts[-1]=="profile" else p.update(user_id,body) if parts[-1]=="update" else p.create(user_id,body))
+    if parts[:3]==["api","chat","retail"]:
+        from backend.banking.retail import Retail
+        r=Retail(chat)
+        if parts==["api","chat","retail","design"]:return handler.reply(200,r.design(user_id,body))
+        if parts==["api","chat","retail","orders"]:raise Rejected("FEATURE_UNAVAILABLE")
+        if parts==["api","chat","retail","proposal"] and set(body)=={"order_id","refund"}:
+            if body["refund"] is not True:raise Rejected("FEATURE_UNAVAILABLE")
+            return handler.reply(200,r.propose(user_id,body["order_id"],True))
+        if parts==["api","chat","retail","decide"]:
+            if body.get("approve"):
+                task=chat.s.get_task(body.get("task_id"),user_id)
+                if any(a["action"]["action_type"]=="RETAIL_PAY" for a in task.get("action_records",[])):raise Rejected("FEATURE_UNAVAILABLE")
+            return handler.reply(200,r.decide(user_id,body))
+        raise Rejected("INVALID_INPUT")
     if parts == ["api", "chat", "operator", "handoffs"]:
         if body:
             raise Rejected("INVALID_INPUT")

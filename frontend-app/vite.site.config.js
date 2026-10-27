@@ -14,7 +14,8 @@ export default defineConfig({
       // Cloudflare Pages: long cache for fingerprinted assets, a day for media, sane security headers
       writeFileSync(resolve(out, "_headers"), [
         "/*", "  X-Content-Type-Options: nosniff", "  Referrer-Policy: strict-origin-when-cross-origin", "  X-Frame-Options: DENY",
-        "  Permissions-Policy: camera=(), microphone=(), geolocation=()", "",
+        "  Permissions-Policy: camera=(), microphone=(), geolocation=()",
+        "  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'", "",
         "/assets/*", "  Cache-Control: public, max-age=31536000, immutable", "",
         "/hero/*", "  Cache-Control: public, max-age=86400", "", "/figs/*", "  Cache-Control: public, max-age=86400", "",
         "/fonts/*", "  Cache-Control: public, max-age=2592000", "",

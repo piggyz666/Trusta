@@ -272,13 +272,15 @@ class ChatServiceTests(unittest.TestCase):
         self.script["随便聊聊"] = LLMUnavailable("LLM_NETWORK")
         self.assertIn("智能理解暂不可用", self.say("随便聊聊")["reply"]["text"])
 
-    def test_model_free_text_without_numbers_only(self):
+    def test_model_free_text_is_never_rendered(self):
         class Talker(ScriptedToolClient):
             def complete(self, system_prompt, history):
                 return {"calls": [], "text": "你的余额是 99999 元" if "余额" in history[-1]["content"] else "请问你想办理什么业务？", "usage": None}
         self.chat.llm = Talker({})
         self.assertNotIn("99999", self.say("我余额多少")["reply"]["text"])
-        self.assertIn("办理什么业务", self.say("嗯")["reply"]["text"])
+        result=self.say("嗯")["reply"]["text"]
+        self.assertNotIn("请问你想办理什么业务",result)
+        self.assertIn("只处理 TRUSTA",result)
 
     def test_idempotency_staleness_and_isolation(self):
         self.script["给张三转100"] = [transfer("张三", "100", "100")]

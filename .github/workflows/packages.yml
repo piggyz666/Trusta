@@ -25,6 +25,8 @@ jobs:
           python-version: "3.12"
       - name: Download embeddable Python
         run: curl -fsSL -o embed.zip "https://www.python.org/ftp/python/${PYTHON_EMBED}/python-${PYTHON_EMBED}-embed-amd64.zip"
+      - name: Verify the Python download (MD5 published on python.org for the 3.12.10 embeddable 64-bit zip)
+        run: echo "fe8ef205f2e9c3ba44d0cf9954e1abd3  embed.zip" | md5sum -c -
       - name: Build
         run: python -m scripts.build_portable --python-embed embed.zip --out dist --python-version 3.12
       - uses: actions/upload-artifact@v4

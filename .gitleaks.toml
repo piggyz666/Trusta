@@ -1,0 +1,141 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public RFC 6238 SHA-1 test vector in archived unit tests only; not an account secret"
+condition = "AND"
+regexTarget = "secret"
+regexes = ['''^GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ$''']
+paths = ['''(^|/)legacy-bank/tests/(bank-scenarios|bank-accounts)\.test\.mjs$''']
+
+[[allowlists]]
+description="Natural-language prompt, not an API credential"
+condition="AND"
+regexTarget="match"
+regexes=[
+'''^APIs,\ safety/execution\ $'''
+]
+paths=[
+'''(^|/)backend/llm/graph_protocol\.py$''',
+'''(^|/)docs/llm\-development\-deepseek\.json$''',
+'''(^|/)docs/llm\-development\-gemini\.json$''',
+'''(^|/)docs/llm\-holdout\-deepseek\.json$''',
+'''(^|/)docs/llm\-holdout\-gemini\.json$'''
+]
+
+[[allowlists]]
+description="Historical virtual test idempotency identifiers, not authorization credentials"
+condition="AND"
+regexTarget="match"
+regexes=[
+'''^idempotency_key"":\ ""03df22ea\-1b21\-4046\-8498\-10ca0d247c4d"$''',
+'''^idempotency_key"":\ ""2746cea5\-f014\-4098\-9c35\-8efffd4dad45"$''',
+'''^idempotency_key"":\ ""2a2bfd65\-db62\-4a58\-a78e\-46de95dfbbcf"$''',
+'''^idempotency_key"":\ ""32056fdf\-b783\-442e\-9f5e\-b77179a9fcd4"$''',
+'''^idempotency_key"":\ ""40d129c5\-33c0\-4037\-ae8b\-4e9fa4ac3c50"$''',
+'''^idempotency_key"":\ ""72dfde1a\-d10d\-4311\-b7e7\-750725c97b99"$''',
+'''^idempotency_key"":\ ""85b18e88\-1617\-4a7a\-b055\-403c330134f8"$''',
+'''^idempotency_key"":\ ""9189e29d\-d1fb\-4938\-99d0\-12a1cdba34ab"$''',
+'''^idempotency_key"":\ ""a19b9016\-bf10\-4806\-b457\-fb13bff87764"$''',
+'''^idempotency_key"":\ ""d3cf5bb3\-34bf\-4823\-9295\-36300b7f3e0b"$''',
+'''^idempotency_key"":\ ""da9d014c\-5ef8\-4b12\-af61\-239f3abeb77c"$''',
+'''^idempotency_key"":\ ""ecc60083\-23dc\-4b22\-b873\-7a508fabbca7"$''',
+'''^idempotency_key":\ "0109fc64\-2737\-4388\-a878\-e78be71737e2"$''',
+'''^idempotency_key":\ "03df22ea\-1b21\-4046\-8498\-10ca0d247c4d"$''',
+'''^idempotency_key":\ "08110865\-f3e0\-4a08\-be73\-a074a5d345ea"$''',
+'''^idempotency_key":\ "23f58ff3\-a378\-4f05\-bbeb\-962a7a475c7e"$''',
+'''^idempotency_key":\ "2746cea5\-f014\-4098\-9c35\-8efffd4dad45"$''',
+'''^idempotency_key":\ "2a2bfd65\-db62\-4a58\-a78e\-46de95dfbbcf"$''',
+'''^idempotency_key":\ "31403379\-a63d\-4aac\-b567\-f703efc7a6c7"$''',
+'''^idempotency_key":\ "32056fdf\-b783\-442e\-9f5e\-b77179a9fcd4"$''',
+'''^idempotency_key":\ "40d129c5\-33c0\-4037\-ae8b\-4e9fa4ac3c50"$''',
+'''^idempotency_key":\ "432ccdc0\-870d\-418e\-b1c3\-7c1e2fdbc264"$''',
+'''^idempotency_key":\ "72dfde1a\-d10d\-4311\-b7e7\-750725c97b99"$''',
+'''^idempotency_key":\ "79f393f3\-112e\-48d6\-8e2e\-28062d87ebd2"$''',
+'''^idempotency_key":\ "7eb19d80\-e5b1\-44c3\-ab2f\-b6bd4babca0f"$''',
+'''^idempotency_key":\ "85b18e88\-1617\-4a7a\-b055\-403c330134f8"$''',
+'''^idempotency_key":\ "9189e29d\-d1fb\-4938\-99d0\-12a1cdba34ab"$''',
+'''^idempotency_key":\ "91bfe686\-c05f\-4967\-9cb8\-64f6953870a8"$''',
+'''^idempotency_key":\ "9216cd88\-af09\-44a7\-afad\-ccaefcb52913"$''',
+'''^idempotency_key":\ "99164e8b\-516d\-47ab\-8572\-361eff41ae63"$''',
+'''^idempotency_key":\ "9e485d77\-ada3\-4c36\-b6b0\-9ff7314ff78a"$''',
+'''^idempotency_key":\ "a19b9016\-bf10\-4806\-b457\-fb13bff87764"$''',
+'''^idempotency_key":\ "bce58322\-55eb\-44dc\-8e0d\-74b78e21ad25"$''',
+'''^idempotency_key":\ "c6bc4930\-b21a\-490e\-a9f5\-a3311279215b"$''',
+'''^idempotency_key":\ "cd0ca511\-e1b0\-4f06\-a10f\-386c3c8aab78"$''',
+'''^idempotency_key":\ "d3cf5bb3\-34bf\-4823\-9295\-36300b7f3e0b"$''',
+'''^idempotency_key":\ "d7422055\-b939\-4ac5\-a20d\-b97ecdc94f99"$''',
+'''^idempotency_key":\ "da9d014c\-5ef8\-4b12\-af61\-239f3abeb77c"$''',
+'''^idempotency_key":\ "ecc60083\-23dc\-4b22\-b873\-7a508fabbca7"$'''
+]
+paths=[
+'''(^|/)docs/backend\-final\-hardening/aa\-demo\.json$''',
+'''(^|/)docs/backend\-final\-hardening/banking\-task\-benchmark\.csv$''',
+'''(^|/)docs/backend\-final\-hardening/banking\-task\-benchmark\.json$''',
+'''(^|/)docs/backend\-final\-hardening/llm\-historical\-replay\.json$''',
+'''(^|/)docs/banking\-regression\.json$''',
+'''(^|/)docs/final\-backend/LLM_Live_Benchmark\.json$''',
+'''(^|/)docs/final\-backend/LLM_Postfix_Dev_Probe\.json$''',
+'''(^|/)docs/final\-backend/LLM_Score_Amendment\.json$''',
+'''(^|/)docs/final\-backend/aa\-demo\.json$''',
+'''(^|/)docs/final\-backend/banking\-task\-benchmark\.csv$''',
+'''(^|/)docs/final\-backend/banking\-task\-benchmark\.json$''',
+'''(^|/)docs/hardening\-banking\-task\.csv$''',
+'''(^|/)docs/hardening\-banking\-task\.json$''',
+'''(^|/)docs/phase5\-banking\-benchmark\.csv$''',
+'''(^|/)docs/phase5\-banking\-benchmark\.json$''',
+'''(^|/)docs/phase6\-banking\-task\.csv$''',
+'''(^|/)docs/phase6\-banking\-task\.json$''',
+'''(^|/)docs/targeted\-banking\-task\.csv$''',
+'''(^|/)docs/targeted\-banking\-task\.json$''',
+'''(^|/)docs/targeted\-security\-regression\.json$'''
+]
+
+[[allowlists]]
+description="Historical source-file SHA256 integrity hashes"
+condition="AND"
+regexTarget="match"
+regexes=[
+'''^Secret_Scan\.json":\ "d880ae664632bf71bd6d437d5b38a8d787a85b11750fd1a0ab9506b8b22ad525"$''',
+'''^agent\-transport\-and\-key\-isolation\.md":\ "8185a2cb06ad177de7142a5b4df3383b465d0c63e0cea498523de8589420776c"$''',
+'''^auth\.py":\ "0cbcb9877948cd2dbf674ad6b23985b89cd30c2f076cebe2be4923ebd82820ee"$''',
+'''^did_key\.py":\ "2ebd9063e00e2392403043a201cd84a12d23c6e8fbbb863dcbd5a6a6a2a254c9"$''',
+'''^revolut_auth\.py":\ "bc65cf53273edeb246a358e70c8ab16fe2387d6c3eb65ef3ef06db3be3273f4e"$''',
+'''^revolut_auth\.py":\ "ecff9253de901b920f24dd6f73f81f8bf32afa24bfcdf6c1c9a4678f4eeec6f6"$''',
+'''^rotate_message_key\.py":\ "452bdeb11a8f0d7d74a101e8cf014a3760dc31e970b9a6d011cd92dea4858368"$''',
+'''^secret\-scan\.json":\ "b7843817786aede39b8670c05c5e8089c1f6ea1b621493f5c2775ffd6d767655"$''',
+'''^test_api\.py":\ "9af143f941223338074b881da05b3c59645e210e027931120406467ab66bcc3b"$''',
+'''^test_conversation_api\.py":\ "39b59306e77ebca8aef6b373f830843fac940d5a2a8eee77b89dbede63674ad8"$''',
+'''^test_did_key\.py":\ "04bd2858af329d1591ab1923ebdf3ad902f32d2039937b59aec4da965804c91c"$''',
+'''^test_memory_api\.py":\ "aa8a44065b7c1c2765a453d3e1b4c2e7de55c68b3225a64ee27a5e5bee4b73a5"$''',
+'''^test_phase4_api\.py":\ "b21bc9dce9335f2cd2bcf143ed8d5629ee8168eb7a4265ecfd83c67961e7f94f"$''',
+'''^test_phase5_api\.py":\ "70fb8df29ddb3b82822f788603a8868d6d16e59b61bb2355dfd3cb42947b2b1c"$'''
+]
+paths=[
+'''(^|/)docs/backend\-final\-hardening/evidence\-manifest\.json$''',
+'''(^|/)docs/backend\-final\-hardening/source\-after\.json$''',
+'''(^|/)docs/backend\-final\-hardening/source\-before\.json$''',
+'''(^|/)docs/backend\-verification\-manifest\.json$''',
+'''(^|/)docs/final\-backend/Evidence_Manifest\.json$''',
+'''(^|/)docs/final\-backend/source\-after\.json$''',
+'''(^|/)docs/final\-backend/source\-before\.json$''',
+'''(^|/)docs/llm\-final\-blind\-holdout\.json$''',
+'''(^|/)docs/llm\-locked\-evaluation\.json$''',
+'''(^|/)docs/phase5\-code\-hashes\.json$''',
+'''(^|/)docs/phase5\-original\-test\-hashes\.json$''',
+'''(^|/)docs/phase6\-change\-manifest\.json$''',
+'''(^|/)docs/revolut\-readonly\-engineering\-validation\.json$''',
+'''(^|/)docs/targeted\-verification\-manifest\.json$'''
+]
+
+[[allowlists]]
+description="Public DID verification-key example"
+condition="AND"
+regexTarget="match"
+regexes=[
+'''^key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK'$''',
+'''^key:zDnaeSGfSQMYvnLbLWEubhhGDPoq7pA9MMNvumvbsmMCZovUR'$'''
+]
+paths=[
+'''(^|/)tests/test_did_key\.py$'''
+]

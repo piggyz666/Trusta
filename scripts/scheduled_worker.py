@@ -19,6 +19,14 @@ def run_once(service):
         chat=getattr(service,'chat',None) or ChatService(service)
         for row in service.db.rows("SELECT DISTINCT owner FROM automation_rules WHERE status='ACTIVE'"):
             acted+=chat.run_automations(row['owner'])
+    # Opt-in daily observation only; never backfill missing days and never move money.
+    from datetime import datetime
+    from backend.business import CHINA
+    from backend.banking.member_support import Membership
+    from backend.chat.service import ChatService
+    for row in service.db.rows('SELECT owner FROM member_enrolments WHERE owner NOT IN (SELECT owner FROM member_observations WHERE day=?)',(datetime.now(CHINA).date().isoformat(),)):
+        chat=getattr(service,'chat',None) or ChatService(service)
+        Membership(chat).observe(row['owner'],{})
     # No event parameters, financial facts or authentication material in worker output.
     return {'scheduled':scheduled,'events_processed':triggered,'automation_firings':acted}
 

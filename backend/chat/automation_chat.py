@@ -291,6 +291,31 @@ class AutomationMixin:
 
     # ---- local reads --------------------------------------------------------------------------------
     def _local_read(self, owner, kind):
+        if kind.startswith('EXTENDED:'):
+            from backend.chat.knowledge import navigate_card
+            from backend.banking.extensions import Extensions
+            from backend.banking.advanced import Advanced
+            page=kind.split(':',1)[1]
+            if page=='todos':
+                from backend.banking.todos import view
+                v=view(self,owner);text=f"目前有 {len(v['items'])} 项待办。"+'；'.join(x['title']+('（'+x['due']+'）' if x['due'] else '') for x in v['items'][:5])
+            elif page in {'deposits','exchange'}:
+                v=Extensions(self).view(owner)
+                text='；'.join((d['id']+' 本金 '+format_cents(d['principal'])+' 到期 '+d['matures']) for d in v['deposits'] if d['status']=='ACTIVE') if page=='deposits' else '；'.join(str(w['units']/100)+' '+w['currency'] for w in v['wallets'])
+                text=text or '暂无相关持仓。'
+            else:
+                v=Advanced(self).view(owner)
+                text=('信用账户待还 '+format_cents(sum(s['debt'] for s in v['states']))+'；溢缴款 '+format_cents(sum(s['surplus'] for s in v['states']))) if page=='credit-account' else '基金待确认订单 '+str(sum(sum(o['status']=='PENDING' for o in s['orders']) for s in v['states']))+' 笔；持仓 '+str(sum(len([h for h in s['holdings'].values() if h['units']]) for s in v['states']))+' 项。使用固定测试净值。'
+            return navigate_card(page,'c_ext_'+uid()[:8]),text
+        if kind=='FINANCE':
+            from backend.banking.finance import Finance
+            from backend.chat.knowledge import navigate_card
+            v=Finance(self).view(owner)
+            units=sum(p['units'] for p in v['positions']);cost=sum(p['cost'] for p in v['positions'])
+            pending=sorted((r for t in v['contracts'] if t['status']=='ACTIVE' for r in t['schedule'] if not r['paid']),key=lambda r:r['due'])
+            text=f"虚拟贷款与分期待还本金 {format_cents(v['outstanding'])}；黄金 {units/100:.2f} 克，持仓成本 {format_cents(cost)}（不是市值）。"
+            if pending:text+=f"最近还款日 {pending[0]['due']}，当日应还 {format_cents(sum(r['total'] for r in pending if r['due']==pending[0]['due']))}。"
+            return navigate_card('credit','c_fin_'+uid()[:8]),text
         card = {"type": "report", "card_id": "c_" + uid()[:8]}
         if kind == "AUTOMATIONS":
             engine = self.s.automation

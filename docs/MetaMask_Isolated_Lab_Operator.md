@@ -10,7 +10,7 @@ Launch this separate Chrome for Testing profile from your own PowerShell:
 
 ```powershell
 Set-Location -LiteralPath 'D:\TRUSTA金融科技'
-& '.\data\metamask-validation\chrome-win64\chrome.exe' '--user-data-dir=D:\TRUSTA金融科技\data\metamask-validation\isolated-profile' '--load-extension=C:\Users\35111\AppData\Local\Google\Chrome\User Data\Default\Extensions\nkbihfbeogaeaoehlefnkodbefgpgknn\13.50.0.0_0' '--no-first-run' '--no-default-browser-check' 'http://127.0.0.1:18765/'
+& '.\data\metamask-validation\chrome-win64\chrome.exe' '--user-data-dir=D:\TRUSTA金融科技\data\metamask-validation\isolated-profile' '--load-extension=<LOCAL_ROOT>\AppData\Local\Google\Chrome\User Data\Default\Extensions\nkbihfbeogaeaoehlefnkodbefgpgknn\13.50.0.0_0' '--no-first-run' '--no-default-browser-check' 'http://127.0.0.1:18765/'
 ```
 
 This uses the already installed MetaMask extension program files, not the existing Chrome wallet profile. The test browser was downloaded from Google's official Chrome for Testing distribution. Its version is 155.0.8059.39. Do not use a shortcut that opens the usual Chrome profile.

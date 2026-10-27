@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { api, explain } from "../api.js";
 import { chatBucket } from "../format.js";
 import { Icon, useToast } from "./ui.jsx";
+import { groupOf } from './navGroups.js';
 
-const NAV = [["chat", "对话", "chat"], ["overview", "资金总览", "ledger"], ["bills", "账单与订阅", "subscription"], ["wealth", "理财", "wealth"], ["life", "生活服务", "ticket"], ["features", "功能", "spark"], ["settings", "设置", "gear"]];
+const NAV = [["chat", "对话", "chat"], ["overview", "资金总览", "ledger"], ["bills", "账单与信用", "subscription"], ["wealth", "理财", "wealth"], ["life", "生活服务", "ticket"], ["features", "功能", "spark"], ["settings", "设置", "gear"]];
 
 export default function Sidebar({ open, onClose, route, sessionId, sessions, onSelect, onNew, onNavigate, onChanged, status }) {
   const toast = useToast();
@@ -37,7 +38,7 @@ export default function Sidebar({ open, onClose, route, sessionId, sessions, onS
     <>
       {open && <div className="rail-backdrop" onClick={onClose} />}
       <nav className={`rail ${open ? "open" : ""}`} aria-label="导航">
-        <div className="brand"><img className="brand-mark" src="/mark.png" alt="" width="28" height="28" />TRUSTA<small>银行助手</small></div>
+        <div className="brand"><img className="brand-mark" src={import.meta.env.BASE_URL + 'mark.png'} alt="" width="28" height="28" />TRUSTA<small>银行助手</small></div>
         <button className="new-chat" onClick={onNew}><Icon name="plus" style={{ width: 16, height: 16 }} />新对话</button>
         <div className="history" ref={listRef}>
           {groups.length === 0 && <div className="history-empty">还没有对话。说一句话就会出现在这里。</div>}
@@ -65,7 +66,7 @@ export default function Sidebar({ open, onClose, route, sessionId, sessions, onS
         </div>
         <div className="nav">
           {NAV.map(([key, label, icon]) => (
-            <button key={key} aria-current={route === key ? "page" : undefined} onClick={() => onNavigate(key)}>
+            <button key={key} aria-current={route === key || groupOf(route) === key ? "page" : undefined} onClick={() => onNavigate(key)}>
               <Icon name={icon} />{label}
             </button>
           ))}

@@ -29,7 +29,7 @@ class PolicyEngine:
                 if action["action_type"] in {"CARD_UNFREEZE","CARD_REPORT_LOST","CARD_CANCEL_LOST","CARD_PIN_RESET","ADD_PAYEE"} or increased or enabled or values.get("amount", 0) >= self.config.high_risk_threshold:
                     decision = "STRONG_AUTH"
                     rules.append("HIGH_RISK_CHANGE")
-                if self.safety and self.safety.enabled and action["action_type"] in {"INVESTMENT_PURCHASE", "INVESTMENT_REDEEM"}:
+                if self.safety and self.safety.enabled and action["action_type"] in {"FUND_SUBSCRIBE", "FUND_CONFIRM", "FUND_CANCEL", "FUND_REDEEM", "INVESTMENT_PURCHASE", "INVESTMENT_REDEEM", "GOLD_BUY", "GOLD_SELL", "FX_BUY", "FX_SELL"}:
                     decision = "STRONG_AUTH"
                     rules.append("INVESTMENT_STRONG_AUTH")
             record = {"policy_decision_id": uid(), "decision": decision, "rule_ids": rules, "reason_codes": rules,

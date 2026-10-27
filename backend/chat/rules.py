@@ -294,6 +294,18 @@ PAGE_WORDS = {"生活服务": "life", "生活": "life", "转账": "transfer", "�
 def rule_calls(text, catalog, pending_payee=None):
     """Return tool calls or [] when nothing is recognised."""
     text = text.strip()
+    from backend.chat.extension_agent import rule
+    extended=rule(text,catalog)
+    if extended:return extended
+    for words,page in [(r'待办','todos'),(r'基金','funds'),(r'信用账单|信用账户|信用卡账单','credit-account')]:
+        if re.search(words,text):return [_call('get_extended',page=page)]
+    for words,page in [(r'定期存款|存单|提前支取|到期续存','deposits'),(r'黄金定投|黄金积存计划','gold-savings'),(r'外币账户|兑换外币|换汇|购汇|结汇','exchange'),(r'积分|会员等级','membership'),(r'服务工单|交易争议','support')]:
+        if re.search(words,text):return [_call('navigate',page=page)]
+
+    if re.search(r'查看|查询|看看',text) and re.search(r'贷款|分期|黄金',text):
+        return [_call('get_finance')]
+    if re.search(r'打开|进入|带我去',text) and re.search(r'贷款|分期',text):
+        return [_call('navigate',page='credit')]
     if re.fullmatch(r"(你好|您好|hi|hello|嗨)[！!。.~]*", text, re.I):
         return [_call("smalltalk", kind="GREETING")]
     if re.fullmatch(r"(谢谢|多谢|感谢)[你您]?[！!。.~]*", text):
@@ -312,6 +324,8 @@ def rule_calls(text, catalog, pending_payee=None):
     from backend.chat import life
     if life.wants_life_service(text):
         return [_call("life_service", category=life.category(text))]
+    if re.search(r"(?:打开|进入|带我去|查看)计划中心", text):
+        return [_call("navigate", page="plans")]
     page = re.search(r"(?:打开|进入|带我去|跳转到?)(生活服务|生活|转账|收款人|账单|理财|银行卡|卡片|订阅|代扣|心愿金|安全设置|操作记录)(?:页面?|页|界面)?$", text)
     if page:
         return [_call("navigate", page=PAGE_WORDS[page.group(1)])]

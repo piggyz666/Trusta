@@ -182,6 +182,15 @@ class SubscriptionTalk:
                 if self.chat.store.claim_nudge(owner, key):
                     when = datetime.fromtimestamp(d["next_estimate"], CHINA).strftime("%m月%d日")
                     notes.append(f"提醒：{d['merchant']} 预计在 {when} 左右再扣 {fmt(d['amount_minor'])}（按过去的扣费间隔估算）。")
+        try:  # gold savings plans the customer set up: a due period waits for their confirmation, never auto-buys
+            from backend.banking.extensions import GoldSavings
+            for plan in GoldSavings(self.chat).view(owner)["plans"]:
+                due = [r["due"] for r in plan["runs"] if r["state"] == "DUE"]
+                if plan["status"] == "ACTIVE" and due and self.chat.store.claim_nudge(owner, "gold-due:" + plan["id"] + ":" + ",".join(due)):
+                    notes.append(f"提醒：黄金定投「{plan['name']}」有 {len(due)} 期待确认，每期预算 {fmt(plan['amount'])}。"
+                                 f"不会自动扣款，请到“理财 → 黄金定投”核对行情后逐笔确认。")
+        except Exception:
+            pass
         relevant = bool(TOPIC.search(text)) or bool(TOPIC_TOOLS & set(tools or []))
         # never while a confirmation card is waiting: a bare "是" must not be ambiguous
         if relevant and not body.get("sub_question") and not body.get("pending"):

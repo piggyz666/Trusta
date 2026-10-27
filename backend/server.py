@@ -19,7 +19,7 @@ TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=u
          ".svg": "image/svg+xml", ".woff2": "font/woff2", ".woff": "font/woff", ".png": "image/png", ".ico": "image/x-icon",
          ".json": "application/json; charset=utf-8", ".webmanifest": "application/manifest+json",
          ".mp4": "video/mp4", ".webm": "video/webm", ".jpg": "image/jpeg", ".webp": "image/webp"}
-SPA_ROUTES = {"/", "/overview", "/bills", "/wealth", "/life", "/features", "/settings"}
+SPA_ROUTES = {"/funds","/credit-account","/todos","/gold", "/", "/overview", "/bills", "/wealth", "/credit", "/life", "/plans", "/features", "/settings", "/deposits", "/gold-savings", "/exchange", "/membership", "/support"}
 
 
 def serve_static(path):
@@ -506,9 +506,10 @@ def main():
     if config.api_token:
         token = config.api_token
     else:
+        from backend.security.local_files import write_secret_atomic, protect_secret
         if not token_file.exists():
-            with token_file.open("x", encoding="utf-8") as stream:
-                stream.write(secrets.token_urlsafe(32))
+            write_secret_atomic(token_file, secrets.token_urlsafe(32).encode(), create_only=True)
+        protect_secret(token_file)
         token = token_file.read_text(encoding="utf-8").strip()
     server = create_server(service, token)
     print("TRUSTA V1 — 本地虚拟银行")

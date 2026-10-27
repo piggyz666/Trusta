@@ -6,7 +6,8 @@ import { Icon, useToast } from "../components/ui.jsx";
 import { uid } from "../format.js";
 
 const SUGGESTIONS = ["查一下余额", "这个月花了多少钱", "给张三转500元", "我的卡丢了", "根据我的消费推荐理财", "下周五北京到上海的机票", "外卖每月超过800就提醒我"];
-const STAGES = { "turn.started": "收到", "guard.result": "安全检查", "intent.recognized": "理解意图", "tool.started": "调用银行", "plan.created": "生成计划", card: "生成卡片" };
+const STAGES = { "turn.started": "收到", "guard.result": "安全检查", "model.waiting": "等待模型理解", "intent.recognized": "理解意图", "tool.started": "调用银行", "plan.created": "生成计划", card: "生成卡片" };
+const MODEL_NOTICE = {LLM_NOT_CONFIGURED:'当前使用规则助手，大模型尚未连接。',LLM_BUSY:'模型正忙，本次改用规则助手，请勿重复提交。',LLM_CIRCUIT_OPEN:'模型暂不可用，正在冷却，本次改用规则助手。',LLM_BUDGET_EXHAUSTED:'模型调用额度已用完或试用已到期，本次改用规则助手。'};
 
 function Composer({ value, setValue, onSend, busy, onStop, autoFocus, placeholder }) {
   const ref = useRef(null);
@@ -48,10 +49,11 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
   const [entered, setEntered] = useState(true);
   const threadRef = useRef(null);
   const currentId = useRef(sessionId);
+  const inFlight = useRef(false);
 
   async function load(id = sessionId) {
     if (!id) { setView(null); return; }
-    try { setView(await api.session(id)); } catch (error) { toast(explain(error), "error"); }
+    try { const next=await api.session(id); if(currentId.current===id)setView(next); } catch (error) { toast(explain(error), "error"); }
   }
   useEffect(() => { currentId.current = sessionId; setOptimistic(null); setStages([]); load(sessionId); }, [sessionId]);
   useEffect(() => { if (prefill) { send(prefill); clearPrefill?.(); } }, [prefill]);
@@ -61,7 +63,8 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
   const pendingRuleIds = useMemo(() => new Set((view?.pending || []).filter((c) => c.type === "automation_confirm").map((c) => c.bundle_id)), [view]);
 
   async function send(text) {
-    if (busy) return;
+    if (inFlight.current) return;
+    inFlight.current=true;
     let id = currentId.current;
     let revision = view?.revision;
     setBusy(true);
@@ -84,6 +87,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
       toast(explain(error), "error");
       if (error.code === "CHAT_STALE") await load(id);
     } finally {
+      inFlight.current=false;
       setBusy(false);
       setOptimistic(null);
       setStages([]);
@@ -111,7 +115,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
       <div className="hero-wrap">
         <section className={`hero ${entered ? "enter" : ""}`} onAnimationEnd={(e) => e.target === e.currentTarget.querySelector(".chips") && setEntered(false)}>
           <div className="hero-inner">
-            <img className="hero-mark" src="/mark.png" alt="" width="64" height="64" />
+            <img className="hero-mark" src={import.meta.env.BASE_URL + 'mark.png'} alt="" width="64" height="64" />
             <h2>今天想办点什么？</h2>
             <p>一句话转账、查账单、管卡片、安排理财。资金操作都会先给你一张确认卡，由你决定。</p>
             <Composer value={input} setValue={setInput} onSend={send} busy={busy} autoFocus />
@@ -119,7 +123,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
           </div>
         </section>
         <div className="hero-foot">
-          <span><Icon name="shield" style={{ width: 14, height: 14 }} />AI 只能提议，不能替你授权</span>
+          <span><Icon name="shield" style={{ width: 14, height: 14 }} />虚拟资金 · AI 只能提议，不能替你授权</span>
           <span><Icon name="lock" style={{ width: 14, height: 14 }} />大额与高风险操作需要验证码</span>
           {nlu && nlu.status !== "AVAILABLE" && <span style={{ color: "var(--amber)" }}>未接入大模型：只能识别标准说法</span>}
         </div>
@@ -135,8 +139,9 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
             <div key={"u" + i + m.message_id} className="msg-user">{m.text}</div>
           ) : (
             <div key={"a" + i + m.message_id} className="msg-ai">
-              <img className="avatar" src="/mark.png" alt="" width="28" height="28" />
+              <img className="avatar" src={import.meta.env.BASE_URL + 'mark.png'} alt="" width="28" height="28" />
               <div className="body">
+                {m.fallback_reason && <small className="muted" role="status">{MODEL_NOTICE[m.fallback_reason] || '模型连接暂不可用，本次改用规则助手。'} 资金操作仍须确认。</small>}
                 {m.text && <div className="text">{m.text}</div>}
                 {(m.cards || []).map((card) => <Card key={card.card_id || card.action_id} card={card} ctx={ctx} />)}
                 {openTrace && <MessageMeta message={m} messages={messages} sessionId={view.session_id} openTrace={openTrace} />}
@@ -146,7 +151,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
           {optimistic && (
             <>
               <div className="msg-user">{optimistic}</div>
-              <div className="msg-ai"><img className="avatar" src="/mark.png" alt="" width="28" height="28" />
+              <div className="msg-ai"><img className="avatar" src={import.meta.env.BASE_URL + 'mark.png'} alt="" width="28" height="28" />
                 <div className="body"><div className="pipeline" aria-live="polite">
                   {(stages.length ? stages : ["收到"]).map((s, i, all) => <span key={s} className={i === all.length - 1 ? "live" : "done"}>{s}</span>)}
                 </div></div></div>
@@ -164,7 +169,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
             <>
               <Composer value={input} setValue={setInput} onSend={send} busy={busy} onStop={view?.pending?.length ? interrupt : null}
                 placeholder={view?.state === "HANDED_OFF" ? "已转人工，人工客服会在这里回复你" : "继续说，如“改成800”“算了不转了”"} />
-              <div className="hint">确认卡上的按钮才是授权，聊天里说“确认”不会执行任何操作。</div>
+              <div className="hint">虚拟资金演示 · 确认卡上的按钮才是授权，聊天里说“确认”不会执行任何操作。</div>
             </>
           )}
         </div>

@@ -286,7 +286,7 @@ class TakeoverUndoPlanTests(ChatHarness):
         stopped = self.chat.interrupt(self.sid, "demo", self.rev)
         self.assertEqual(stopped["plan"]["nodes"][2]["status"], "CANCELLED")
 
-    def test_renewal_nudge_but_no_unprompted_birthday_message(self):
+    def test_proactive_birthday_and_renewal_nudges(self):
         from datetime import datetime, timedelta
         from backend.business import CHINA
         soon = datetime.now(CHINA) + timedelta(days=10)

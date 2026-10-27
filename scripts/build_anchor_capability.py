@@ -9,7 +9,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 PTAU_HASH = '7e6a9c2e5f05179ddfc923f38f917c9e6831d16922a902b0b4758b8e79c2ab8a81bb5f29952e16ee6c5067ed044d7857b5de120a90704c1d3b637fd94b95b13e'
-PTAU_URL = 'https://circom.info/powersOfTau28_hez_final_18.ptau'
+PTAU_URL = 'https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_18.ptau'
 
 
 def build(destination):
@@ -24,6 +24,15 @@ def build(destination):
     cli = ROOT / 'crypto_trust/node_modules/snarkjs/cli.js'
     if not node or not cli.is_file():
         raise RuntimeError('Existing snarkjs runtime required')
+    circuit = ROOT / 'crypto_trust/anchor_capability_v1.circom'
+    r1cs = destination / 'anchor_capability_v1.r1cs'
+    wasm = destination / 'anchor_capability_v1_js/anchor_capability_v1.wasm'
+    if not r1cs.exists() or not wasm.exists():
+        circom = shutil.which('circom')
+        if not circom:
+            raise RuntimeError('Install Circom 2.2.3 and add it to PATH first')
+        subprocess.run([circom, str(circuit), '--r1cs', '--wasm', '--sym', '-o', str(destination)],
+                       cwd=ROOT/'crypto_trust', check=True, timeout=600)
     def run(arguments, seconds=600):
         result = subprocess.run([node, str(cli), *arguments], capture_output=True,
                                 text=True, encoding='utf-8', timeout=seconds)

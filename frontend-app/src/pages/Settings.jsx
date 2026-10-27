@@ -1,3 +1,4 @@
+import {PersonalProfile} from "../components/PersonalLife.jsx";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { api, auth, explain } from "../api.js";
@@ -42,7 +43,7 @@ export default function Settings({ capabilities, refresh, tab, setTab, onSignOut
             {TABS.map(([key, label]) => <button key={key} aria-current={current === key} onClick={() => setTab(key)}>{label}</button>)}
           </nav>
           <div className="panel" style={{ padding: "4px 20px" }}>
-            {current === "account" && <Account {...props} onSignOut={onSignOut} />}
+            {current === "account" && <><Account {...props} onSignOut={onSignOut} /><PersonalProfile/></>}
             {current === "model" && <Model {...props} />}
             {current === "access" && <Access {...props} />}
             {current === "feishu" && <Feishu {...props} />}
@@ -311,7 +312,7 @@ function About({ data }) {
       <Row label="TRUSTA" hint="可信多智能体银行助手 · 六 Agent 协作 · 签名证据链"><span>v1.0</span></Row>
       <Row label="能力快照" hint="当前模型、银行、渠道配置的哈希，写入每个请求的签名来源"><span className="mono">{data.about.snapshot_hash.slice(0, 16)}…</span></Row>
       <Row label="运行模式"><Tag tone={data.about.demo_mode ? "amber" : "green"}>{data.about.demo_mode ? "演示模式" : "正式"}</Tag></Row>
-      <Row label="旧版界面" hint="调试用的单页界面"><a href="/legacy">打开</a></Row>
+      <Row label="旧版界面" hint="调试用的单页界面"><a href={import.meta.env.BASE_URL + 'legacy'}>打开</a></Row>
     </>
   );
 }

@@ -651,3 +651,6 @@ html { background: var(--edge); }
 .life-asks { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .life-asks small { width: 100%; font-size: 12px; }
 @media (max-width: 880px) { .life-grid { grid-template-columns: 1fr; } }
+
+/* Wealth navigation: one parent, independently addressable business pages. */
+.page-subnav{display:flex;gap:6px;flex:none;overflow-x:auto;border-bottom:1px solid var(--line);padding:10px 24px;background:var(--surface)}.page-subnav button{font:inherit;flex:none;white-space:nowrap;border:0;border-radius:8px;padding:10px 16px;color:var(--muted);background:transparent;cursor:pointer}.page-subnav button:hover{background:var(--surface-2)}.page-subnav button[aria-current=page]{background:var(--surface-3);color:var(--text);font-weight:600}.page-subnav button:focus-visible{outline:2px solid currentColor;outline-offset:-2px}.rail .nav{max-height:57vh;overflow-y:auto;flex-shrink:1}@media(max-width:700px){.page-subnav{padding:8px 12px}.page-subnav button{min-height:44px;padding:10px 12px}.rail .nav{max-height:62vh}}

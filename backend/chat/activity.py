@@ -12,9 +12,9 @@ import time
 from backend.chat.amounts import format_cents
 from backend.chat.cards import CardRenderer, OPERATIONS
 
-KINDS = {"TRANSFER": "transfer", "CARD_": "card", "INVESTMENT_": "wealth", "RISK_PROFILE_UPDATE": "wealth", "FUND_": "wish",
-         "WISH_ORDER": "wish", "SUBSCRIPTION_CANCEL": "subscription", "DIRECT_DEBIT_DISABLE": "subscription", "ADD_PAYEE": "payee"}
-FINAL = {"COMPLETED": "SUCCEEDED", "SUCCEEDED": "SUCCEEDED", "FAILED": "FAILED", "BLOCKED": "BLOCKED", "REJECTED": "DECLINED",
+KINDS = {"CARD_CHARGE":"credit","CARD_REFUND":"credit","CARD_REPAY":"credit","CARD_SURPLUS":"credit","FUND_SUBSCRIBE":"wealth","FUND_CONFIRM":"wealth","FUND_CANCEL":"wealth","FUND_REDEEM":"wealth","DEPOSIT_":"wealth","FX_":"wealth","LOAN_DRAW":"credit","INSTALLMENT_START":"credit","CREDIT_":"credit","GOLD_":"wealth", "TRANSFER": "transfer", "CARD_": "card", "INVESTMENT_": "wealth", "RISK_PROFILE_UPDATE": "wealth", "FUND_": "wish",
+         "RETAIL_PAY":"retail", "RETAIL_REFUND":"retail", "WISH_ORDER": "wish", "SUBSCRIPTION_CANCEL": "subscription", "DIRECT_DEBIT_DISABLE": "subscription", "ADD_PAYEE": "payee"}
+FINAL = {"DENIED": "DECLINED", "COMPLETED": "SUCCEEDED", "SUCCEEDED": "SUCCEEDED", "FAILED": "FAILED", "BLOCKED": "BLOCKED", "REJECTED": "DECLINED",
          "CANCELLED": "CANCELLED", "SCHEDULED": "SCHEDULED", "EXPIRED": "EXPIRED"}
 STATUS_ZH = {"SUCCEEDED": "已完成", "FAILED": "失败", "BLOCKED": "被拦截", "DECLINED": "已拒绝", "CANCELLED": "已取消",
              "SCHEDULED": "已排期", "EXPIRED": "已过期", "RECEIVED": "已到账", "TRIGGERED": "已触发"}
@@ -59,8 +59,8 @@ class ActivityFeed:
                 items.append({"id": action["action_id"], "kind": item_kind, "action_type": action["action_type"],
                               "title": OPERATIONS.get(action["action_type"], action["action_type"]),
                               "fields": fields, "amount_minor": amount,
-                              "direction": "in" if action["action_type"] in {"INVESTMENT_REDEEM", "FUND_RELEASE"} else
-                                           "out" if action["action_type"] in {"TRANSFER", "INVESTMENT_PURCHASE", "FUND_LOCK"} else None,
+                              "direction": "in" if action["action_type"] in {"FUND_CANCEL","FUND_REDEEM","CARD_SURPLUS","DEPOSIT_WITHDRAW","DEPOSIT_RENEW","FX_SELL","LOAN_DRAW","INSTALLMENT_START","GOLD_SELL", "INVESTMENT_REDEEM", "FUND_RELEASE", "RETAIL_REFUND"} else
+                                           "out" if action["action_type"] in {"FUND_SUBSCRIBE","CARD_REPAY","DEPOSIT_OPEN","FX_BUY","CREDIT_REPAY","CREDIT_SETTLE","GOLD_BUY", "TRANSFER", "INVESTMENT_PURCHASE", "FUND_LOCK", "RETAIL_PAY"} else None,
                               "status": final, "status_label": STATUS_ZH[final], "risk_level": tier,
                               "at": (receipt or {}).get("executed_at") or action.get("created_at") or task.get("updated_at"),
                               "task_id": task["task_id"], "receipt_id": (receipt or {}).get("receipt_id"),
@@ -113,7 +113,8 @@ class ActivityFeed:
         positions = []
         for product in s.wealth.products(owner):
             if accounts:
-                held = s.gateway.read("wealth", owner, "portfolio.get", account_id=accounts[0]["id"], product_id=product["id"])
+                holdings=[s.gateway.read("wealth",owner,"portfolio.get",account_id=a["id"],product_id=product["id"]) for a in accounts]
+                held={"amount_cents":sum(h["amount_cents"] for h in holdings),"redeemable_at":max((h.get("redeemable_at") or 0 for h in holdings),default=0)}
                 if held["amount_cents"] > 0:
                     positions.append({"product_id": product["id"], "name": product["name"], "risk_level": product["risk_level"],
                                       "amount_minor": held["amount_cents"], "redeemable_at": held.get("redeemable_at")})
@@ -125,11 +126,32 @@ class ActivityFeed:
         cards = [{"id": c["id"], "type": c["card_type"], "status": c["status"], "limit_minor": c["spending_limit"],
                   "online": bool(c["online_enabled"]), "international": bool(c["international_enabled"]),
                   "contactless": bool(c["contactless_enabled"])} for c in s.service_agent.resources(owner, "card")]
+        for card in cards:
+            row=s.db.one('SELECT c.account_id,a.balance FROM cards c JOIN accounts a ON a.id=c.account_id WHERE c.id=? AND c.customer_id=?',(card['id'],owner))
+            card.update(account_id=row['account_id'],balance=row['balance'],design=s.db.one('SELECT theme,nickname FROM card_designs WHERE card_id=? AND customer_id=?',(card['id'],owner)) or {'theme':'midnight','nickname':''})
         engine = getattr(s, "automation", None)
         rules = [{"id": r["id"], "name": r["name"], "trigger": engine.describe_trigger(r["trigger"]), "runs": r["runs"]}
                  for r in engine.rules(owner)] if engine else []
+        from backend.banking.finance import contracts
+        with s.db.transaction() as conn: financing=contracts(conn,owner)
+        gold=s.db.rows('SELECT units,cost FROM gold_positions WHERE customer_id=?',(owner,))
+        active=[t for t in financing if t['status']=='ACTIVE' and t['type'] in {'loan','installment'}]
+        pending=sorted((p for t in active for p in t['schedule'] if not p['paid']),key=lambda p:p['due'])
+        finance={'debt_minor':sum(t['remaining'] for t in active), 'gold_units':sum(p['units'] for p in gold),
+                 'gold_cost_minor':sum(p['cost'] for p in gold), 'next_due':pending[0]['due'] if pending else None,
+                 'next_due_minor':sum(p['total'] for p in pending if p['due']==pending[0]['due']) if pending else 0}
+        finance['deposit_principal_minor']=sum(json.loads(r['body'])['principal'] for r in s.db.rows("SELECT body FROM term_deposits WHERE customer_id=?",(owner,)) if json.loads(r['body'])['status']=='ACTIVE')
+        finance['fx_cost_minor']=sum(r['cost'] for r in s.db.rows('SELECT cost FROM fx_wallets WHERE customer_id=?',(owner,)))
+        finance['assets_at_cost_minor']=finance['deposit_principal_minor']+finance['fx_cost_minor']+sum(a['balance_minor'] for a in accounts)+sum(p['amount_minor'] for p in positions)+sum(f['balance_minor'] for f in funds)+finance['gold_cost_minor']
+        from backend.banking.advanced import debt
+        advanced=[json.loads(r['body']) for r in s.db.rows('SELECT body FROM advanced_positions WHERE customer_id=?',(owner,))]
+        finance['credit_card_debt_minor']=sum(max(0,debt(v)) for v in advanced)
+        finance['fund_cost_minor']=sum(sum(h['cost'] for h in v['holdings'].values())+sum(o['amount'] for o in v['orders'] if o['status']=='PENDING') for v in advanced)
+        finance['assets_at_cost_minor']+=finance['fund_cost_minor']+sum(max(0,-debt(v)) for v in advanced)
+        finance['debt_minor']+=finance['credit_card_debt_minor']
+        finance['net_at_cost_minor']=finance['assets_at_cost_minor']-finance['debt_minor']
         protection = s.safety.protection(owner)
-        return {"accounts": accounts, "total_minor": sum(a["balance_minor"] for a in accounts), "spending": spend,
+        return {"finance":finance, "accounts": accounts, "total_minor": sum(a["balance_minor"] for a in accounts), "spending": spend,
                 "portfolio": positions, "portfolio_minor": sum(p["amount_minor"] for p in positions), "wish_funds": funds,
                 "cards": cards, "rules": rules, "protection": protection and {"until": protection["until"], "reason": protection["reason"]},
                 "recent": self.list(owner, limit=8), "generated_at": now}

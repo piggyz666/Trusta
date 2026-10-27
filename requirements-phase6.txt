@@ -2,7 +2,12 @@
 -r requirements.txt
 eth-account>=0.13,<0.14
 py-solc-x>=2,<3
-eth-tester[py-evm]>=0.13.0b1,<0.14
+# Same local EVM engine, using the maintained binary Keccak backend on Windows.
+# eth-tester's py-evm extra forces safe-pysha3, which requires a C compiler.
+eth-tester>=0.13.0b1,<0.14
+py-evm>=0.12.0b2,<0.13.0b1
+eth-hash[pycryptodome]>=0.7,<1
+-r integrations/weidentity/requirements-otc.txt
 # Pin vulnerable transitive HTTP dependencies used by py-solc-x.
 requests==2.33.0
 urllib3==2.8.0

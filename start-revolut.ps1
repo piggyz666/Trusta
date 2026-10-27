@@ -1,4 +1,4 @@
-param([switch]$Transfers)
+﻿param([switch]$Transfers)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 if ($Transfers) {

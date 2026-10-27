@@ -1,6 +1,6 @@
 import { LIFE_SECTIONS, safeLink } from "../life.js";
 
-export default function Life({ ask }) {
+export default function Life({ ask, navigate }) {
   return (
     <div className="page">
       <div className="inner">

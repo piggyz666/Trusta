@@ -328,10 +328,16 @@ class BankingTests(unittest.TestCase):
         self.assertEqual(self.balance(),990000)
 
     def test_schedule_account_balance_change_requires_new_exact_action(self):
-        task,due=self.scheduled()
-        self.approve(task)
-        transfer=self.task('给张三转100元')
-        self.s.authorize(transfer['task_id'],'demo',transfer['authorization']['action_hash'],True)
+        # Freeze setup time: crypto/database work can exceed the five-second
+        # schedule on a busy machine, otherwise the scheduled payment may
+        # legitimately execute before this test performs the intervening transfer.
+        now=time.time()
+        with patch('time.time',return_value=now):
+            task,due=self.scheduled()
+            approved=self.approve(task)
+            self.assertEqual(approved['status'],'WAITING_TIME')
+            transfer=self.task('给张三转100元')
+            self.s.authorize(transfer['task_id'],'demo',transfer['authorization']['action_hash'],True)
         with patch('time.time',return_value=due+1):
             self.s.banking.tick()
         self.assertEqual(self.balance(),990000)

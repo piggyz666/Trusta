@@ -128,7 +128,7 @@ def answer(topic, config, irreversible=(), market=None, plan=None):
 
 
 # navigate: deep links into the APP, a fixed list. The model picks a page id; the link is built here.
-PAGES = {"gold":"黄金交易","funds":"基金份额","credit-account":"信用账单","todos":"统一待办","deposits":"定期存款","gold-savings":"黄金定投","exchange":"外币账户","membership":"会员与积分","support":"服务工单","plans":"计划中心","credit":"贷款与分期", "overview":"资金总览", "life": "生活服务", "transfer": "转账", "payees": "收款人管理", "bills": "账单与订阅", "wealth": "理财", "cards": "银行卡",
+PAGES = {"gold":"黄金交易","funds":"基金份额","credit-account":"信用账单","todos":"统一待办","deposits":"定期存款","gold-savings":"黄金定投","exchange":"外币账户","support":"服务工单","plans":"计划中心","credit":"贷款与分期", "overview":"资金总览", "life": "生活服务", "transfer": "转账", "payees": "收款人管理", "bills": "账单与订阅", "wealth": "理财", "cards": "银行卡",
          "subscriptions": "账单与订阅", "wish_funds": "心愿金", "security": "安全设置", "audit": "操作记录"}
 
 

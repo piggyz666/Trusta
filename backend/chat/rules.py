@@ -299,7 +299,7 @@ def rule_calls(text, catalog, pending_payee=None):
     if extended:return extended
     for words,page in [(r'待办','todos'),(r'基金','funds'),(r'信用账单|信用账户|信用卡账单','credit-account')]:
         if re.search(words,text):return [_call('get_extended',page=page)]
-    for words,page in [(r'定期存款|存单|提前支取|到期续存','deposits'),(r'黄金定投|黄金积存计划','gold-savings'),(r'外币账户|兑换外币|换汇|购汇|结汇','exchange'),(r'积分|会员等级','membership'),(r'服务工单|交易争议','support')]:
+    for words,page in [(r'定期存款|存单|提前支取|到期续存','deposits'),(r'黄金定投|黄金积存计划','gold-savings'),(r'外币账户|兑换外币|换汇|购汇|结汇','exchange'),(r'服务工单|交易争议','support')]:
         if re.search(words,text):return [_call('navigate',page=page)]
 
     if re.search(r'查看|查询|看看',text) and re.search(r'贷款|分期|黄金',text):

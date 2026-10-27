@@ -3,7 +3,7 @@ from datetime import datetime,timedelta
 from unittest.mock import patch
 from tests import test_finance
 from backend.banking.extensions import Extensions,GoldSavings,interest,occurrence
-from backend.banking.member_support import Membership,Support
+from backend.banking.member_support import Support
 from backend.business import CHINA
 from backend.domain import Rejected,canonical
 
@@ -82,38 +82,12 @@ class ExtensionTests(unittest.TestCase):
   from backend.chat.activity import ActivityFeed
   a=ActivityFeed(self.chat);before=a.overview('demo')['finance']['assets_at_cost_minor'];t=self.create();self.complete(t,'DEPOSIT_OPEN');self.assertEqual(a.overview('demo')['finance']['assets_at_cost_minor'],before)
   t=Extensions(self.chat).create('demo',{'type':'fx_buy','card_id':'card-demo','currency':'USD','units':100,'quote_mode':'practice'})['contract'];self.complete(t,'FX_BUY');self.assertEqual(a.overview('demo')['finance']['assets_at_cost_minor'],before)
- def test_member_enrollment_refund_idempotency_and_rewards(self):
-  m=Membership(self.chat);m.observe('demo',{});m.observe('demo',{});self.assertEqual(m.view('demo')['days'],1);self.assertEqual(m.view('demo')['points'],0)
-  with self.s.db.transaction() as c:c.execute("INSERT INTO consumption_records VALUES('testpurchase','acct-demo','测试消费','餐饮',10000,'CNY',?,'PURCHASE','SETTLED')",(time.time(),))
-  self.assertEqual(m.view('demo')['points'],100);self.assertEqual(m.view('demo')['points'],100)
-  q=m.prepare('demo',{'reward':'birthday'});b={'quote_id':q['quote']['id'],'hash':q['hash'],'approve':True};m.confirm('demo',b);m.confirm('demo',b);v=m.view('demo');self.assertEqual(v['points'],50);self.assertEqual(len(v['rewards']),1)
-  with self.s.db.transaction() as c:c.execute("INSERT INTO consumption_records VALUES('testrefund','acct-demo','测试退款','餐饮',9999,'CNY',?,'REFUND','SETTLED')",(time.time(),))
-  self.assertEqual(m.view('demo')['points'],-50)
-  with self.assertRaises(Rejected):m.update('demo',{'id':v['rewards'][0]['id'],'operation':'use'})
-  m.update('demo',{'id':v['rewards'][0]['id'],'operation':'cancel'});self.assertEqual(m.view('demo')['points'],0)
-  with self.assertRaises(Rejected):m.update('demo',{'id':v['rewards'][0]['id'],'operation':'cancel'})
- def test_member_excludes_principal_and_cost_and_quote_tampering(self):
-  m=Membership(self.chat);m.observe('demo',{});self.complete(self.create(),'DEPOSIT_OPEN');self.assertEqual(m.view('demo')['points'],0)
-  q=m.prepare('demo',{'reward':'birthday'});b={'quote_id':q['quote']['id'],'hash':q['hash'],'approve':True}
-  for owner,body in [('other',b),('demo',b|{'hash':'wrong'}),('demo',b)]:
-   with self.assertRaises(Rejected):m.confirm(owner,body)
- def test_member_use_once_and_operator_reply_visible(self):
-  m=Membership(self.chat);m.observe('demo',{})
-  with self.s.db.transaction() as c:c.execute("INSERT INTO consumption_records VALUES('usepoints','acct-demo','测试消费','餐饮',10000,'CNY',?,'PURCHASE','SETTLED')",(time.time(),))
-  q=m.prepare('demo',{'reward':'birthday'});m.confirm('demo',{'quote_id':q['quote']['id'],'hash':q['hash'],'approve':True})
-  r=m.view('demo')['rewards'][0];m.update('demo',{'id':r['id'],'operation':'use'})
-  with self.assertRaises(Rejected):m.update('demo',{'id':r['id'],'operation':'cancel'})
+ def test_operator_reply_visible(self):
   t=self.create();self.complete(t,'DEPOSIT_OPEN');s=Support(self.chat);item=s.view('demo')['transactions'][0]
   case=s.create('demo',{'action_id':item['id'],'text':'请核对'});self.s.config.security_operator_token='test-operator-only'
   with self.assertRaises(Rejected):self.chat.operator_reply('wrong',case['id'],'越权')
   self.chat.operator_reply('test-operator-only',case['id'],'核对完成',True)
   row=next(c for c in s.view('demo')['cases'] if c['id']==case['id']);self.assertEqual(row['status'],'RESOLVED');self.assertEqual(row['replies'][0]['text'],'核对完成')
- def test_membership_30_day_observation_not_one_day_balance(self):
-  m=Membership(self.chat);m.observe('demo',{});self.assertEqual(m.view('demo')['tier'],'基础会员');today=datetime.now(CHINA).date()
-  with self.s.db.transaction() as c:
-   c.execute('DELETE FROM member_observations')
-   for i in range(30):c.execute('INSERT INTO member_observations VALUES(?,?,?)',('demo',str(today-timedelta(days=i)),6000000))
-  self.assertEqual(m.view('demo')['tier'],'白金会员')
  def test_support_links_owner_transaction_and_existing_operator(self):
   t=self.create();self.complete(t,'DEPOSIT_OPEN');s=Support(self.chat);item=s.view('demo')['transactions'][0]
   with self.assertRaises(Rejected):s.create('other',{'action_id':item['id'],'text':'无法越权'})
@@ -129,7 +103,7 @@ class ExtensionHTTPTests(unittest.TestCase):
  stop=_HTTP.stop
  request=_HTTP.request
  def test_routes_authenticated_forms_decline_and_no_injected_approval(self):
-  for path in ('extensions','gold-savings','membership','support'):
+  for path in ('extensions','gold-savings','support'):
    self.assertEqual(self.request('/api/chat/'+path)[0],200)
    self.assertIn(self.request('/api/chat/'+path,token='wrong')[0],(401,403))
   b={'type':'deposit_open','card_id':'card-demo','amount':10000,'term':90}
@@ -143,22 +117,18 @@ class ExtensionHTTPTests(unittest.TestCase):
   status,case=self.request('/api/chat/support/create',{'action_id':c['action_id'],'text':'检查已拒绝业务'});self.assertEqual(status,200)
   self.assertEqual(self.request('/api/chat/support/update',{'id':case['id'],'operation':'close'})[0],200)
   self.assertEqual(self.service.db.one("SELECT balance FROM accounts WHERE id='acct-demo'")['balance'],before)
-  self.assertEqual(self.request('/api/chat/membership/observe',{})[0],200)
-  for route in ('deposits','gold-savings','exchange','membership','support'):
+  for route in ('deposits','gold-savings','exchange','support'):
    from backend.server import SPA_ROUTES
    self.assertIn('/'+route,SPA_ROUTES)
- def test_agent_navigation_and_scheduled_membership_are_read_only(self):
+ def test_agent_navigation_and_scheduled_worker_are_read_only(self):
   from backend.chat.rules import rule_calls
-  for text,page in [('查看黄金定投','gold-savings'),('定期存款','deposits'),('换汇','exchange'),('积分','membership'),('服务工单','support')]:
+  for text,page in [('查看黄金定投','gold-savings'),('定期存款','deposits'),('换汇','exchange'),('服务工单','support')]:
    calls=rule_calls(text,{})
    self.assertEqual(calls[0]['arguments']['page'],page)
   chat=self.server.chat if hasattr(self.server,'chat') else None
-  # The worker samples assets after opt-in, but cannot backfill yesterday or move balances.
+  # The scheduled worker never moves balances on its own.
   from backend.chat.service import ChatService
   from scripts.scheduled_worker import run_once
-  m=Membership(ChatService(self.service));m.observe('demo',{})
   before=self.service.db.one("SELECT balance FROM accounts WHERE id='acct-demo'")['balance']
-  with self.service.db.transaction() as c:c.execute('DELETE FROM member_observations')
   run_once(self.service);run_once(self.service)
-  self.assertEqual(m.view('demo')['days'],1)
   self.assertEqual(self.service.db.one("SELECT balance FROM accounts WHERE id='acct-demo'")['balance'],before)

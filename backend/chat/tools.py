@@ -234,7 +234,7 @@ TOOLS = {
                      "required": ["category"]},
     "navigate": {"kind": "control",
                  "description": "用户只想打开某个功能页面（“打开转账页面”“带我去理财”），不办理具体业务时使用",
-                 "parameters": {"page": {"type": "string", "enum": ["todos","funds","credit-account","gold","deposits","gold-savings","exchange","membership","support","plans", "credit", "overview", "life", "transfer", "payees", "bills", "wealth", "cards",
+                 "parameters": {"page": {"type": "string", "enum": ["todos","funds","credit-account","gold","deposits","gold-savings","exchange","support","plans", "credit", "overview", "life", "transfer", "payees", "bills", "wealth", "cards",
                                                                     "subscriptions", "wish_funds", "security", "audit"]}},
                  "required": ["page"]},
     "out_of_scope": {"kind": "control", "description": "请求超出银行助手能力范围（如贷款审批、股票交易、非金融闲聊）",

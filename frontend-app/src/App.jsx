@@ -29,12 +29,12 @@ const Credit=lazy(()=>import("./pages/Credit.jsx"));
 const linkedSession = (() => { const v = new URLSearchParams(location.search).get("s"); return v && /^[A-Za-z0-9_-]{8,64}$/.test(v) ? v : null; })();
 if (linkedSession) history.replaceState(null, "", location.pathname + location.hash);
 const boot = bootstrapAuth();
-const TITLES = {todos:"统一待办",funds:"基金份额",'credit-account':"信用账单",gold:"黄金交易",deposits:"定期存款","gold-savings":"黄金定投",exchange:"外币账户",membership:"会员与积分",support:"服务工单", plans:"活动计划", credit:"贷款与分期", overview: "资金总览", bills: "账单与订阅", wealth: "理财产品", life: "生活服务", features: "功能", settings: "设置" };
+const TITLES = {todos:"统一待办",funds:"基金份额",'credit-account':"信用账单",gold:"黄金交易",deposits:"定期存款","gold-savings":"黄金定投",exchange:"外币账户",support:"服务工单", plans:"活动计划", credit:"贷款与分期", overview: "资金总览", bills: "账单与订阅", wealth: "理财产品", life: "生活服务", features: "功能", settings: "设置" };
 
 function readRoute() {
   const path = location.pathname.slice(APP_BASE.length).replace(/\/+$/, "");
   const page = path.split("/")[1] || "chat";
-  return ["todos","funds","credit-account","gold","deposits","gold-savings","exchange","membership","support","chat", "plans", "overview", "bills", "wealth", "life", "credit", "features", "settings"].includes(page) ? page : "chat";
+  return ["todos","funds","credit-account","gold","deposits","gold-savings","exchange","support","chat", "plans", "overview", "bills", "wealth", "life", "credit", "features", "settings"].includes(page) ? page : "chat";
 }
 
 export default function App() {
@@ -123,7 +123,7 @@ export default function App() {
           {["funds","credit-account"].includes(route)&&<AdvancedBanking key={route} page={route} navigate={navigate} ask={ask}/>}
           {route === "todos"&&<Todos navigate={navigate}/>}
           {route === "credit" && <Credit/>}
-          {["deposits","gold-savings","exchange","membership","support"].includes(route)&&<BankExtensions key={route} page={route} navigate={navigate} openSession={selectSession}/>}
+          {["deposits","gold-savings","exchange","support"].includes(route)&&<BankExtensions key={route} page={route} navigate={navigate} openSession={selectSession}/>}
           {route === "life" && <Life ask={ask} navigate={navigate} />}
           {route === "plans" && <Plans openSession={selectSession} ask={ask} navigate={navigate}/>}
           {route === "features" && <Features capabilities={capabilities} refresh={refreshCapabilities} ask={ask} navigate={navigate} />}

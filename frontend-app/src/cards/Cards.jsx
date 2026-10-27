@@ -444,7 +444,7 @@ function KnowledgeCard({ card, ctx }) {
   );
 }
 
-const PAGE_ROUTES = {gold:"gold",funds:"funds",todos:"todos","credit-account":"credit-account",deposits:"deposits","gold-savings":"gold-savings",exchange:"exchange",membership:"membership",support:"support", plans:"plans", credit:"credit", overview:"overview", life: "life", transfer: "chat", payees: "overview", bills: "bills", wealth: "wealth", cards: "overview", subscriptions: "bills",
+const PAGE_ROUTES = {gold:"gold",funds:"funds",todos:"todos","credit-account":"credit-account",deposits:"deposits","gold-savings":"gold-savings",exchange:"exchange",support:"support", plans:"plans", credit:"credit", overview:"overview", life: "life", transfer: "chat", payees: "overview", bills: "bills", wealth: "wealth", cards: "overview", subscriptions: "bills",
   wish_funds: "overview", security: "settings", audit: "overview" };
 
 function LifeCard({ card }) {

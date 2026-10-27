@@ -36,10 +36,10 @@ def handle_get(handler, chat, path, user_id):
     if parts==["api","chat","advanced"]:
         from backend.banking.advanced import Advanced
         return handler.reply(200,Advanced(chat).view(user_id))
-    if len(parts)==3 and parts[:2]==['api','chat'] and parts[2] in {'extensions','gold-savings','membership','support'}:
+    if len(parts)==3 and parts[:2]==['api','chat'] and parts[2] in {'extensions','gold-savings','support'}:
         from backend.banking.extensions import Extensions,GoldSavings
-        from backend.banking.member_support import Membership,Support
-        cls={'extensions':Extensions,'gold-savings':GoldSavings,'membership':Membership,'support':Support}[parts[2]]
+        from backend.banking.member_support import Support
+        cls={'extensions':Extensions,'gold-savings':GoldSavings,'support':Support}[parts[2]]
         return handler.reply(200,cls(chat).view(user_id))
     if parts == ['api','chat','plan-center']:
         from backend.chat.plan_bridge import PlanBridge
@@ -108,10 +108,10 @@ def handle_post(handler, chat, path, body, user_id):
     if parts == ['api','chat','plans','prepare']:
         from backend.chat.plan_bridge import PlanBridge
         return handler.reply(200,PlanBridge(chat).prepare(user_id,body))
-    if len(parts)==4 and parts[:2]==['api','chat'] and parts[2] in {'extensions','gold-savings','membership','support'}:
+    if len(parts)==4 and parts[:2]==['api','chat'] and parts[2] in {'extensions','gold-savings','support'}:
         from backend.banking.extensions import Extensions,GoldSavings
-        from backend.banking.member_support import Membership,Support
-        cls,allowed={'extensions':(Extensions,{'create'}),'gold-savings':(GoldSavings,{'create','update','prepare'}),'membership':(Membership,{'observe','prepare','confirm','update'}),'support':(Support,{'create','update'})}[parts[2]]
+        from backend.banking.member_support import Support
+        cls,allowed={'extensions':(Extensions,{'create'}),'gold-savings':(GoldSavings,{'create','update','prepare'}),'support':(Support,{'create','update'})}[parts[2]]
         if parts[3] not in allowed:raise Rejected('INVALID_INPUT')
         return handler.reply(200,getattr(cls(chat),parts[3])(user_id,body))
     operator = handler.headers.get("X-TRUSTA-Operator", "")

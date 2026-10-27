@@ -10,7 +10,7 @@ from decimal import Decimal,ROUND_HALF_UP,ROUND_DOWN
 from backend.domain import Rejected,canonical,uid
 from backend.business import CHINA
 
-LABELS={'DEPOSIT_OPEN':'开立虚拟定期存款','DEPOSIT_WITHDRAW':'支取虚拟定期存款','DEPOSIT_RENEW':'到期续存','FX_BUY':'购入虚拟外币','FX_SELL':'售出虚拟外币'}
+LABELS={'DEPOSIT_OPEN':'开立定期存款','DEPOSIT_WITHDRAW':'支取定期存款','DEPOSIT_RENEW':'到期续存','FX_BUY':'购入外币','FX_SELL':'售出外币'}
 INCOMING={'DEPOSIT_WITHDRAW','DEPOSIT_RENEW','FX_SELL'}
 RATES={90:80,180:100,365:130}
 PRACTICE={'USD':'7.00','EUR':'8.00','HKD':'0.90','JPY':'0.05'}

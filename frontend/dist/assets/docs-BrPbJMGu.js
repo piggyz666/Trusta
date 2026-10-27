@@ -533,8 +533,9 @@ Pages and chat read only through the standard bank interface: whatever capabilit
 | \`subscriptions.*\` / \`direct_debits.*\` | Bills & subscriptions page, cancelling in chat |
 | \`investments.*\` + \`customers.risk.*\` | Product shelf, holdings, personalised plan, buy/redeem, risk assessment |
 | \`savings.goals.*\` | Wish funds |
+| \`finance.read\` + \`finance.quote\` + each business's execute capability | Term deposits, FX, gold and gold savings, fund units, loans and instalments, credit statement (each lit up separately) |
 
-Everyday-service links, market quotes, rule Q&A, the anti-fraud cooling-off period and strong authentication need no bank interface. Term deposits, FX, fund units, gold, loans and instalments and the credit statement are **sandbox-bank only** for now: with a real bank their tabs are hidden and such requests are clearly declined.
+Everyday-service links, market quotes, rule Q&A, the anti-fraud cooling-off period and strong authentication need no bank interface. Deposits, FX, gold, funds, loans and the credit account run as "bank quote → confirmation → signed execution", with the books kept at the bank; a business the bank does not offer has its tab hidden and requests for it are clearly declined.
 
 ## Trust infrastructure
 
@@ -1308,8 +1309,9 @@ TRUSTA 的页面和对话只通过标准银行接口取数，银行提供哪些�
 | \`subscriptions.*\` / \`direct_debits.*\` | 账单与订阅页、对话取消订阅 / 代扣 |
 | \`investments.*\` + \`customers.risk.*\` | 理财货架、持仓、为你推荐、申购赎回、风险测评 |
 | \`savings.goals.*\` | 心愿金 |
+| \`finance.read\` + \`finance.quote\` + 各业务的执行能力 | 定期存款、外币兑换、黄金与定投、基金份额、贷款与分期、信用账单（按银行开放的业务分别点亮） |
 
-生活服务链接、行情、规则问答、反诈冷静期和强验证不依赖银行接口。定期存款、外币、基金份额、黄金、贷款与分期、信用账单目前**仅内置沙箱银行**提供；接入真实银行后，这些页面标签自动隐藏，相关请求会被明确拒绝。
+生活服务链接、行情、规则问答、反诈冷静期和强验证不依赖银行接口。存款、外汇、黄金、基金、贷款与信用账户按"银行报价 → 确认 → 签名执行"办理，账记在银行一侧；银行没开放的业务，页面标签自动隐藏，相关请求会被明确说明。
 
 ## 可信基础设施
 

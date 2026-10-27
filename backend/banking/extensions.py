@@ -1,5 +1,8 @@
-"""Virtual deposits and FX using Finance's signed, independently verified ledger path.
-Rates below are explicit exercise terms, not real bank offers. No live banking API.
+"""Deposits and FX (bank rules, used by the sandbox bank's desk) and gold savings plans (TRUSTA side).
+
+Rates below are explicit sandbox product terms, not real bank offers. TRUSTA reaches deposits and FX only through the
+canonical bank interface (see finance.py / finance_desk.py); gold savings plans are the customer's own schedule kept by
+TRUSTA, and each due run asks the bank for an ordinary gold quote.
 """
 import copy,json,time,calendar
 from datetime import datetime,timedelta,date
@@ -26,16 +29,13 @@ def owned(c,table,owner,key):
  if not r:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
  return json.loads(r['body'])
 def snapshots(c,owner,t):
- d=None;w=None;plan=None;run=None
+ d=None;w=None
  if t['type'].startswith('deposit_'):
   r=c.execute('SELECT body FROM term_deposits WHERE id=? AND customer_id=?',(t.get('deposit_id',t['id']),owner)).fetchone();d=json.loads(r['body']) if r else None
  if t['type'].startswith('fx_'):
   r=c.execute('SELECT * FROM fx_wallets WHERE customer_id=? AND account_id=? AND currency=?',(owner,t['account_id'],t['foreign_currency'])).fetchone()
   w=dict(r) if r else dict(customer_id=owner,account_id=t['account_id'],currency=t['foreign_currency'],units=0,cost=0,version=0)
- if t.get('savings_plan'):
-  plan=owned(c,'gold_savings_plans',owner,t['savings_plan'])
-  r=c.execute('SELECT * FROM gold_savings_runs WHERE plan_id=? AND due=?',(plan['id'],t['savings_due'])).fetchone();run=dict(r) if r else None
- return {'deposit':d,'wallet':w,'savings_plan':plan,'savings_run':run}
+ return {'deposit':d,'wallet':w}
 def interest(d,at):
  days=max(0,min(d['term'],(datetime.fromtimestamp(at,CHINA).date()-date.fromisoformat(d['opened'])).days))
  rate=d['rate_bps'] if datetime.fromtimestamp(at,CHINA).date()>=date.fromisoformat(d['matures']) else 20
@@ -54,9 +54,13 @@ def errors(kind,s,p,now):
   if kind=='DEPOSIT_RENEW' and d and datetime.fromtimestamp(now,CHINA).date()<date.fromisoformat(d['matures']):out.append('DEPOSIT_NOT_MATURE')
  if kind=='FX_SELL' and s['wallet']['units']<t['units']:out.append('INSUFFICIENT_HOLDING')
  return out
-def recurring_errors(s):
- t=s['target'];p=s.get('savings_plan');r=s.get('savings_run')
- if t.get('savings_plan') and (not p or p['status']!='ACTIVE' or p['version']!=t['savings_version'] or not r or r['contract_id']!=t['id']):return ['SAVINGS_PLAN_CHANGED']
+def savings_errors(db,owner,t):
+ """TRUSTA-side check before proposing a gold quote that belongs to a savings plan: the plan must be unchanged."""
+ if not t.get('savings_plan'):return []
+ r=db.one('SELECT body FROM gold_savings_plans WHERE id=? AND customer_id=?',(t['savings_plan'],owner))
+ p=json.loads(r['body']) if r else None
+ run=db.one('SELECT contract_id FROM gold_savings_runs WHERE plan_id=? AND due=?',(t['savings_plan'],t.get('savings_due')))
+ if not p or p['status']!='ACTIVE' or p['version']!=t.get('savings_version') or not run or run['contract_id']!=t['id']:return ['SAVINGS_PLAN_CHANGED']
  return []
 def expected(kind,s,p):
  r=copy.deepcopy(s);t=r['target'];amount=p['amount']
@@ -90,52 +94,19 @@ def fields(t):
  return [{'label':'外币金额','value':f"{t['units']/100:.2f} {t['foreign_currency']}"},{'label':'汇率','value':f"1 {t['foreign_currency']} = {t['rate']} 人民币"},{'label':'来源','value':t['quote']['source']+' · '+t['quote']['as_of']},{'label':'手续费','value':'0 元；仅虚拟兑换，不是银行实盘汇价'}]
 
 class Extensions:
+ """TRUSTA side: deposits and FX through the bank interface."""
  def __init__(self,chat):
   from backend.banking.finance import Finance
   self.chat=chat;self.s=chat.s;self.f=Finance(chat)
- def view(self,owner):
+ def view(self,owner,state=None):
   from backend.banking.retail import Retail
-  return {'deposits':[json.loads(r['body']) for r in self.s.db.rows('SELECT body FROM term_deposits WHERE customer_id=?',(owner,))],
-   'wallets':self.s.db.rows('SELECT * FROM fx_wallets WHERE customer_id=?',(owner,)),
-   'contracts':[t for t in self.f.view(owner)['contracts'] if t['type'].startswith(('deposit_','fx_'))],
-   'cards':Retail(self.chat).view(owner)['cards'],'deposit_rates':RATES,'currencies':list(PRACTICE)}
+  st=state or self.f.state(owner)
+  return {'deposits':st['deposits'],'wallets':st['fx_wallets'],
+   'contracts':self.f.label(owner,[t for t in st['contracts'] if t['type'].startswith(('deposit_','fx_'))][:100]),
+   'cards':Retail(self.chat).view(owner)['cards'],'deposit_rates':st['deposit_rates'],'currencies':st['currencies']}
  def create(self,owner,b):
-  from backend.banking.finance import card_label
-  typ=b.get('type');allowed={'deposit_open':{'type','card_id','amount','term'},'deposit_withdraw':{'type','deposit_id'},'deposit_renew':{'type','deposit_id'},'fx_buy':{'type','card_id','currency','units','quote_mode'},'fx_sell':{'type','card_id','currency','units','quote_mode'}}
-  if typ not in allowed or set(b)!=allowed[typ]:raise Rejected('INVALID_INPUT')
-  now=time.time();today=datetime.fromtimestamp(now,CHINA).date();extras={};quote=None
-  if typ=='deposit_open':
-   amount=integer(b['amount'],10000,100000000)
-   if type(b['term']) is not int or b['term'] not in RATES:raise Rejected('INVALID_INPUT')
-   extras=dict(principal=amount,term=b['term'],rate_bps=RATES[b['term']],opened=today.isoformat(),matures=(today+timedelta(days=b['term'])).isoformat())
-  elif typ.startswith('fx_'):
-   if b['currency'] not in PRACTICE or b['quote_mode'] not in {'reference','practice'}:raise Rejected('INVALID_INPUT')
-   units=integer(b['units'],1,100000000)
-   if b['quote_mode']=='practice':rate=PRACTICE[b['currency']];quote={'source':'内置练习汇率（非市场报价）','as_of':today.isoformat(),'mode':'practice'}
-   else:
-    from backend.chat.http import market
-    provider=market(self.chat);provider.refresh()
-    q=next((q for q in provider.view()['quotes'] if q['symbol']==b['currency']+'CNY'),None)
-    if not q or q['snapshot'] or q['stale']:raise Rejected('FX_QUOTE_UNAVAILABLE')
-    rate=str(Decimal(str(q['price']))/(100 if b['currency']=='JPY' else 1));quote=q|{'mode':'reference'}
-   amount=rounded(Decimal(rate)*units)
-   if amount<1 or amount>100000000:raise Rejected('INVALID_INPUT')
-   extras=dict(units=units,foreign_currency=b['currency'],rate=rate)
-  with self.s.db.transaction() as c:
-   if typ in {'deposit_withdraw','deposit_renew'}:
-    d=owned(c,'term_deposits',owner,b['deposit_id'])
-    if d['status']!='ACTIVE':raise Rejected('DEPOSIT_NOT_ACTIVE')
-    if typ=='deposit_renew' and today<date.fromisoformat(d['matures']):raise Rejected('DEPOSIT_NOT_MATURE')
-    earned,days,rate=interest(d,now);amount=earned+(d['principal'] if typ=='deposit_withdraw' else 0)
-    extras={k:d[k] for k in ('principal','term','rate_bps')};extras.update(deposit_id=d['id'],interest=earned,days=days,applied_bps=rate,renew_opened=today.isoformat(),renew_matures=(today+timedelta(days=d['term'])).isoformat())
-    card_id=d['card_id']
-   else:card_id=b['card_id']
-   card=c.execute('SELECT * FROM cards WHERE customer_id=? AND id=?',(owner,card_id)).fetchone()
-   if not card:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
-   if card['card_type']!='DEBIT':raise Rejected('DEBIT_CARD_REQUIRED')
-   key='fin-'+uid();t=dict(id=key,customer_id=owner,account_id=card['account_id'],card_id=card_id,card_label=card_label(self.s.db,owner,card_id),type=typ,status='DRAFT',version=0,amount=amount,remaining=0,paid_fees=0,source_id='',schedule=[],created_at=now,expires_at=now+120,units=0,price=0,quote=quote,realized_profit=0)|extras
-   c.execute('INSERT INTO finance_contracts VALUES(?,?,?)',(key,owner,canonical(t)))
-  return {'contract':t}
+  if not isinstance(b,dict) or str(b.get('type','')).upper() not in LABELS:raise Rejected('INVALID_INPUT')
+  return self.f.create(owner,b)
 
 def occurrence(start,cycle,index):
  d=date.fromisoformat(start)
@@ -144,15 +115,25 @@ def occurrence(start,cycle,index):
  return date(y,m,min(d.day,calendar.monthrange(y,m)[1]))
 
 class GoldSavings:
+ """The customer's gold savings schedule (TRUSTA side). A due run asks the bank for an ordinary gold quote, tagged with
+ an opaque reference to the plan, and is confirmed like any other gold purchase."""
  def __init__(self,chat):self.chat=chat;self.s=chat.s
+ def _contracts(self,owner):
+  from backend.bank_sdk.discovery import supports
+  if not supports(self.s,'finance.list'):return {}
+  return {t['id']:t for t in self.s.gateway.read('service',owner,'finance.list')['contracts']}
+ def _debit_card(self,owner,card_id):
+  from backend.bank_sdk.discovery import optional_read
+  return any(c['id']==card_id and c['card_type']=='DEBIT' for c in optional_read(self.s,'service',owner,'card.list'))
  def view(self,owner):
-  today=datetime.now(CHINA).date();plans=[]
+  today=datetime.now(CHINA).date();plans=[];contracts=None
   for row in self.s.db.rows('SELECT body FROM gold_savings_plans WHERE customer_id=?',(owner,)):
    p=json.loads(row['body']);p['runs']=[]
    for i in range(p['count']):
     due=occurrence(p['start'],p['cycle'],i).isoformat()
-    row=self.s.db.one('SELECT f.body FROM gold_savings_runs r JOIN finance_contracts f ON f.id=r.contract_id WHERE r.plan_id=? AND r.due=? AND f.customer_id=?',(p['id'],due,owner))
-    t=json.loads(row['body']) if row else None
+    run=self.s.db.one('SELECT contract_id FROM gold_savings_runs WHERE plan_id=? AND due=?',(p['id'],due))
+    if run and contracts is None:contracts=self._contracts(owner)
+    t=(contracts or {}).get(run['contract_id']) if run else None
     p['runs'].append({'due':due,'contract':t,'state':'COMPLETED' if t and t['status']=='COMPLETED' else 'DUE' if due<=today.isoformat() else 'SCHEDULED'})
    plans.append(p)
   return {'plans':plans}
@@ -162,8 +143,8 @@ class GoldSavings:
   try:d=date.fromisoformat(b['start'])
   except (ValueError,TypeError):raise Rejected('INVALID_INPUT')
   if not datetime.now(CHINA).date()<=d<=datetime.now(CHINA).date()+timedelta(days=366):raise Rejected('INVALID_DATE')
+  if not isinstance(b['card_id'],str) or not self._debit_card(owner,b['card_id']):raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
   with self.s.db.transaction() as c:
-   if not c.execute("SELECT id FROM cards WHERE id=? AND customer_id=? AND card_type='DEBIT'",(b['card_id'],owner)).fetchone():raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
    if c.execute('SELECT COUNT(*) FROM gold_savings_plans WHERE customer_id=?',(owner,)).fetchone()[0]>=50:raise Rejected('PLAN_LIMIT')
    p=dict(b,id='goldplan-'+uid(),customer_id=owner,status='ACTIVE',version=0);c.execute('INSERT INTO gold_savings_plans VALUES(?,?,?)',(p['id'],owner,canonical(p)))
   return {'plan':p}
@@ -173,6 +154,15 @@ class GoldSavings:
    p=owned(c,'gold_savings_plans',owner,b['plan_id'])
    if p['status']=='CANCELLED':raise Rejected('PLAN_CANCELLED')
    p['status']=b['status'];p['version']+=1;c.execute('UPDATE gold_savings_plans SET body=? WHERE id=?',(canonical(p),p['id']))
+   runs=[r['contract_id'] for r in c.execute('SELECT contract_id FROM gold_savings_runs WHERE plan_id=?',(p['id'],)).fetchall()]
+  # Withdraw this plan's open quotes at the bank: a changed draft invalidates any signed action already prepared for it,
+  # so a purchase confirmed after a pause or cancel is refused by the bank's precondition check.
+  from backend.bank_sdk.discovery import supports
+  if runs and supports(self.s,'finance.archive'):
+   for t in self._contracts(owner).values():
+    if t['id'] in runs and t['status']=='DRAFT':
+     try:self.s.gateway.read('service',owner,'finance.archive',contract_id=t['id'])
+     except Rejected:pass
   return {'plan':p}
  def prepare(self,owner,b):
   from backend.banking.finance import Finance
@@ -181,12 +171,14 @@ class GoldSavings:
   if p['status']!='ACTIVE':raise Rejected('SAVINGS_PLAN_CHANGED')
   if b['due'] not in [occurrence(p['start'],p['cycle'],i).isoformat() for i in range(p['count'])] or b['due']>datetime.now(CHINA).date().isoformat():raise Rejected('PLAN_NOT_DUE')
   f=Finance(self.chat)
-  with self.s.db.transaction() as c:
-   row=c.execute('SELECT contract_id FROM gold_savings_runs WHERE plan_id=? AND due=?',(p['id'],b['due'])).fetchone()
-   if row:
-    old=owned(c,'finance_contracts',owner,row['contract_id'])
-    if old['status']=='COMPLETED':raise Rejected('PLAN_ALREADY_EXECUTED')
-    if old['status']=='DRAFT' and old['expires_at']>time.time() and old['savings_version']==p['version']:return {'contract':old}
+  def current_run():
+   row=self.s.db.one('SELECT contract_id FROM gold_savings_runs WHERE plan_id=? AND due=?',(p['id'],b['due']))
+   return f.contract(owner,row['contract_id']) if row else None
+  old=current_run()
+  if old:
+   if old['status']=='COMPLETED':raise Rejected('PLAN_ALREADY_EXECUTED')
+   if old['status']=='DRAFT' and old['expires_at']>time.time() and old.get('savings_version')==p['version']:return {'contract':old}
+  # The bank prices the run (its own gold quote); the plan budget caps it.
   from backend.chat.http import market
   provider=market(self.chat)
   if hasattr(provider,'refresh'):provider.refresh()
@@ -194,21 +186,21 @@ class GoldSavings:
   if not q or q['snapshot'] or q['stale']:raise Rejected('GOLD_QUOTE_UNAVAILABLE')
   units=int((Decimal(p['amount'])/Decimal(str(q['price']))).to_integral_value(rounding=ROUND_DOWN))
   if units<1:raise Rejected('AMOUNT_BELOW_GOLD_UNIT')
-  t=f.create(owner,{'type':'gold_buy','card_id':p['card_id'],'units':units})['contract']
+  t=f.create(owner,{'type':'gold_buy','card_id':p['card_id'],'units':units,
+                    'reference':{'savings_plan':p['id'],'savings_due':b['due'],'savings_version':p['version']}})['contract']
   if t['amount']>p['amount']:f.archive(owner,{'contract_id':t['id']});raise Rejected('QUOTE_CHANGED')
+  replaced=None
   try:
    with self.s.db.transaction() as c:
-    current=owned(c,'gold_savings_plans',owner,p['id'])
-    if current['version']!=p['version'] or current['status']!='ACTIVE':raise Rejected('SAVINGS_PLAN_CHANGED')
+    now_plan=owned(c,'gold_savings_plans',owner,p['id'])
+    if now_plan['version']!=p['version'] or now_plan['status']!='ACTIVE':raise Rejected('SAVINGS_PLAN_CHANGED')
     row=c.execute('SELECT contract_id FROM gold_savings_runs WHERE plan_id=? AND due=?',(p['id'],b['due'])).fetchone()
-    if row:
-     old=owned(c,'finance_contracts',owner,row['contract_id'])
-     if old['status']=='COMPLETED':raise Rejected('PLAN_ALREADY_EXECUTED')
-     if old['status']=='DRAFT' and old['expires_at']>time.time() and old['savings_version']==p['version']:
-      t['status']='ARCHIVED';c.execute('UPDATE finance_contracts SET body=? WHERE id=?',(canonical(t),t['id']));return {'contract':old}
-     old['status']='ARCHIVED';old['version']+=1;c.execute('UPDATE finance_contracts SET body=? WHERE id=?',(canonical(old),old['id']))
-    t.update(savings_plan=p['id'],savings_due=b['due'],savings_version=p['version']);c.execute('UPDATE finance_contracts SET body=? WHERE id=?',(canonical(t),t['id']))
+    if row and (not old or row['contract_id']!=old['id']):raise Rejected('SAVINGS_PLAN_CHANGED')  # changed underneath us
     c.execute('INSERT INTO gold_savings_runs VALUES(?,?,?) ON CONFLICT(plan_id,due) DO UPDATE SET contract_id=excluded.contract_id',(p['id'],b['due'],t['id']))
+    replaced=old
   except Exception:
    f.archive(owner,{'contract_id':t['id']});raise
+  if replaced and replaced['status']=='DRAFT':
+   try:f.archive(owner,{'contract_id':replaced['id']})
+   except Rejected:pass
   return {'contract':t}

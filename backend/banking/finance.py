@@ -1,4 +1,12 @@
-"""Virtual credit and gold. Money writes only run through the signed banking executor."""
+"""Loans, instalments and gold (with deposits, FX, the credit account and funds from extensions / advanced).
+
+Two halves:
+  * module-level functions (snapshot, errors, expected, apply …) are the bank's rules, run inside the bank
+    (sandbox: ExtendedBank) and, for errors / expected, also by TRUSTA's policy check on the signed action;
+  * the Finance class is TRUSTA's side. It talks to the bank only through the canonical interface —
+    finance.list / finance.quote / finance.archive / finance.get, and finance.<operation> to execute — so the same
+    code runs against the sandbox bank or a real one that implements these capabilities.
+"""
 import calendar
 import copy
 import json
@@ -48,8 +56,12 @@ def contracts(conn, owner):
     return [json.loads(r['body']) for r in conn.execute('SELECT body FROM finance_contracts WHERE customer_id=?',(owner,))]
 
 def card_label(db, owner, card_id):
-    row=db.one('SELECT d.nickname,c.card_type FROM cards c LEFT JOIN card_designs d ON d.card_id=c.id AND d.customer_id=c.customer_id WHERE c.id=? AND c.customer_id=?',(card_id,owner))
-    return ((row or {}).get('nickname') or '虚拟银行卡')+' · 标识 '+card_id[-4:]
+    """The customer's own name for a card (a TRUSTA-side card face), else a neutral label."""
+    try:
+        row=db.one('SELECT nickname FROM card_designs WHERE card_id=? AND customer_id=?',(card_id,owner))
+    except Exception:
+        row=None
+    return ((row or {}).get('nickname') or '银行卡')+' · 标识 '+card_id[-4:]
 
 def snapshot(conn, owner, resource_id):
     r=conn.execute('SELECT body FROM finance_contracts WHERE id=? AND customer_id=?',(resource_id,owner)).fetchone()
@@ -85,7 +97,6 @@ def errors(kind,s,p,now):
     if kind not in INCOMING and kind not in advanced.NONCASH and p['amount']>a['balance']:out.append('INSUFFICIENT_BALANCE')
     if kind in advanced.LABELS:return out+advanced.errors(kind,s,p,now)
     if kind in extras.LABELS:return out+extras.errors(kind,s,p,now)
-    out += extras.recurring_errors(s)
     valid={'LOAN_DRAW':'loan','INSTALLMENT_START':'installment','GOLD_BUY':'gold_buy','GOLD_SELL':'gold_sell'}
     if kind in valid:
         if t['type']!=valid[kind] or t['status']!='DRAFT':out.append('FINANCE_STATE_INVALID')
@@ -150,78 +161,65 @@ def apply(conn,action,before,after,opid):
     fee=t['paid_fees']-before['target']['paid_fees']
     if fee:conn.execute('INSERT INTO consumption_records VALUES(?,?,?,?,?,?,?,?,?)',(opid,a['id'],LABELS[kind],'基金费用' if kind.startswith('FUND_') else '融资费用',fee,'CNY',time.time(),'PURCHASE','SETTLED'))
 
+def feature_of(operation):
+    """The deployment feature (see backend/capabilities.py) an operation belongs to."""
+    op=operation.upper()
+    return ('deposits' if op.startswith('DEPOSIT_') else 'fx' if op.startswith('FX_') else 'gold' if op.startswith('GOLD_')
+            else 'funds' if op.startswith('FUND_') else 'credit_account' if op.startswith('CARD_') else 'loans')
+
+# Which bank operation each draft type leads to (for capability checks before asking the bank for a quote).
+OPERATION={'loan':'LOAN_DRAW','installment':'INSTALLMENT_START','gold_buy':'GOLD_BUY','gold_sell':'GOLD_SELL'}
+
 class Finance:
     def __init__(self,chat):
+        from backend.bank_sdk.discovery import supports
         self.chat=chat;self.s=chat.s
-        if self.s.config.bank_config_path or getattr(self.s.gateway._adapter,'external',False):raise Rejected('VIRTUAL_BANK_ONLY')
+        if not supports(self.s,'finance.list'):raise Rejected('BANK_CAPABILITY_UNAVAILABLE')
 
-    def view(self,owner):
+    def state(self,owner):
+        return self.s.gateway.read('service',owner,'finance.list')
+
+    def label(self,owner,items):
+        for t in items:t['card_label']=card_label(self.s.db,owner,t['card_id'])
+        return items
+
+    def view(self,owner,state=None):
         from backend.banking.retail import Retail
-        with self.s.db.transaction() as c:items=contracts(c,owner)
-        sources=self.s.db.rows("SELECT r.* FROM consumption_records r JOIN accounts a ON a.id=r.account_id WHERE a.customer_id=? AND r.kind='PURCHASE' AND r.status='SETTLED' AND r.category!='融资费用' ORDER BY occurred_at DESC LIMIT 100",(owner,))
-        # Legacy local retail orders can still be refunded, so do not refinance those purchases.
-        eligible=[]
-        financed={t['source_id'] for t in items if t['type']=='installment' and t['status'] in {'ACTIVE','SETTLED'}}
-        for row in sources:
-            if row['id'] in financed or not 10000<=row['amount']<=LIMIT:continue
-            if self.s.db.one('SELECT id FROM bank_operations WHERE id=?',(row['id'],)):continue
-            eligible.append(row)
-        return {'cards':Retail(self.chat).view(owner)['cards'],'contracts':sorted(items,key=lambda t:t['created_at'],reverse=True)[:100],
-                'positions':self.s.db.rows('SELECT * FROM gold_positions WHERE customer_id=?',(owner,)), 'eligible':eligible,
-                'risk':self.s.db.one('SELECT * FROM risk_profiles WHERE customer_id=?',(owner,)),
-                'credit_limit':LIMIT,'outstanding':sum(t['remaining'] for t in items if t['status']=='ACTIVE' and t['type'] in {'loan','installment'}),
-                'rules':'仅虚拟产品：贷款按剩余本金计息，年利率 3.60%；消费分期每期按原本金收取 0.50% 手续费（非年化利率）。提前结清收取当前一期费用，免除未来期费用。每月一期，不自动扣款。'}
+        st=state or self.state(owner)
+        try:risk=self.s.wealth.risk_profile(owner)
+        except Rejected:risk=None
+        return {'cards':Retail(self.chat).view(owner)['cards'],'contracts':self.label(owner,st['contracts'][:100]),
+                'positions':st['gold_positions'],'eligible':st['eligible'],'risk':risk,
+                'credit_limit':st['credit_limit'],'outstanding':st['outstanding'],'rules':st['rules']}
 
     def create(self,owner,b):
-        if b.get('type','').upper() in advanced.LABELS:return advanced.Advanced(self.chat).create(owner,b)
-        if b.get('type','').upper() in extras.LABELS:return extras.Extensions(self.chat).create(owner,b)
-        typ=b.get('type');base={'type','card_id'}
-        required=base|({'amount','months'} if typ=='loan' else {'source_id','months'} if typ=='installment' else {'units'} if typ in {'gold_buy','gold_sell'} else set())
-        if typ not in {'loan','installment','gold_buy','gold_sell'} or set(b)!=required:raise Rejected('INVALID_INPUT')
-        if typ in {'loan','installment'} and (type(b['months']) is not int or b['months'] not in (3,6,12)):raise Rejected('INVALID_INPUT')
-        if typ=='loan' and (type(b['amount']) is not int or not 10000<=b['amount']<=LIMIT):raise Rejected('INVALID_INPUT')
-        quote=None
-        if typ.startswith('gold_'):
-            if type(b['units']) is not int or not 1<=b['units']<=100000:raise Rejected('INVALID_INPUT')
-            from backend.chat.http import market
-            provider=market(self.chat)
-            if hasattr(provider,'refresh'):provider.refresh()
-            quote=next((q for q in provider.view()['quotes'] if q['symbol']=='XAU'),None)
-            if not quote or quote['snapshot'] or quote['stale'] or not 0<quote['price']<100000:raise Rejected('GOLD_QUOTE_UNAVAILABLE')
-            price=cents(Decimal(str(quote['price']))*100)
-        with self.s.db.transaction() as c:
-            card=c.execute('SELECT * FROM cards WHERE id=? AND customer_id=?',(b['card_id'],owner)).fetchone()
-            if not card:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
-            if typ=='installment':
-                source=c.execute("SELECT * FROM consumption_records WHERE id=? AND account_id=? AND kind='PURCHASE' AND status='SETTLED' AND category!='融资费用'",(b['source_id'],card['account_id'])).fetchone()
-                if not source or c.execute('SELECT id FROM bank_operations WHERE id=?',(b['source_id'],)).fetchone():raise Rejected('INSTALLMENT_SOURCE_INVALID')
-                amount=source['amount']
-                if not 10000<=amount<=LIMIT:raise Rejected('INSTALLMENT_SOURCE_INVALID')
-            else:amount=b['amount'] if typ=='loan' else cents(Decimal(price)*b['units']/100)
-            if amount<=0:raise Rejected('INVALID_INPUT')
-            now=time.time();cid='fin-'+uid()
-            t={'id':cid,'customer_id':owner,'account_id':card['account_id'],'card_id':card['id'],'card_label':card_label(self.s.db,owner,card['id']),'type':typ,'status':'DRAFT','version':0,
-               'amount':amount,'remaining':amount if typ in {'loan','installment'} else 0,'paid_fees':0,'source_id':b.get('source_id',''),
-               'schedule':schedule(amount,b['months'],typ=='installment') if typ in {'loan','installment'} else [],'created_at':now,'expires_at':now+(120 if quote else 1800),
-               'units':b.get('units',0),'price':price if quote else 0,'quote':quote,'realized_profit':0}
-            c.execute('INSERT INTO finance_contracts VALUES(?,?,?)',(cid,owner,canonical(t)))
-        return {'contract':t}
+        """Ask the bank for a priced draft. Nothing moves until the customer confirms the signed action."""
+        from backend.bank_sdk.discovery import supports
+        if not isinstance(b,dict) or not isinstance(b.get('type'),str):raise Rejected('INVALID_INPUT')
+        operation=OPERATION.get(b['type'],b['type'].upper())
+        if operation not in KINDS:raise Rejected('INVALID_INPUT')
+        if not supports(self.s,'finance.quote') or not supports(self.s,'finance.'+operation.lower()):raise Rejected('BANK_CAPABILITY_UNAVAILABLE')
+        caps=getattr(self.chat,'capabilities',None)
+        if caps:
+            feature=next((f for f in caps.features(owner=owner) if f['id']==feature_of(operation)),None)
+            if feature and feature['status'] in {'UNAVAILABLE','OFF'}:raise Rejected('FEATURE_UNAVAILABLE',feature.get('reason') or '该功能已关闭')
+        t=self.s.gateway.read('service',owner,'finance.quote',request=b)
+        return {'contract':self.label(owner,[t])[0]}
 
     def archive(self,owner,b):
-        if set(b)!={'contract_id'}:raise Rejected('INVALID_INPUT')
-        with self.s.db.transaction() as c:
-            row=c.execute('SELECT body FROM finance_contracts WHERE id=? AND customer_id=?',(b['contract_id'],owner)).fetchone()
-            if not row:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
-            t=json.loads(row['body'])
-            if t['status']!='DRAFT':raise Rejected('FINANCE_STATE_INVALID')
-            # Changing status invalidates every old signed precondition; no ledger/history is removed.
-            t['status']='ARCHIVED';t['version']+=1;t['remaining']=0
-            c.execute('UPDATE finance_contracts SET body=? WHERE id=?',(canonical(t),t['id']))
-        return {'contract':t}
+        if not isinstance(b,dict) or set(b)!={'contract_id'}:raise Rejected('INVALID_INPUT')
+        return {'contract':self.s.gateway.read('service',owner,'finance.archive',contract_id=b['contract_id'])}
+
+    def contract(self,owner,contract_id):
+        if not isinstance(contract_id,str) or not contract_id:raise Rejected('INVALID_INPUT')
+        return self.s.gateway.read('service',owner,'finance.get',resource_id=contract_id)['target']
 
     def propose(self,owner,b):
         if set(b)!={'contract_id','operation'} or b['operation'] not in KINDS:raise Rejected('INVALID_INPUT')
-        with self.s.db.transaction() as c:t=snapshot(c,owner,b['contract_id'])['target']
+        t=self.contract(owner,b['contract_id'])
+        from backend.banking.extensions import savings_errors
+        problems=savings_errors(self.s.db,owner,t)
+        if problems:raise Rejected(problems[0])
         amount=payment(b['operation'],t)
         if not amount:raise Rejected('FINANCE_STATE_INVALID')
         task=self.s.banking.create(LABELS[b['operation']],owner,t['account_id'],{'task_type':'FINANCE_MANAGEMENT','operation':b['operation'],'target_id':t['id'],'parameters':{'amount':amount,'currency':'CNY'}})

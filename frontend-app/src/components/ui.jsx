@@ -78,7 +78,7 @@ export function Drawer({ title, onClose, children }) {
 
 // Sections the connected bank does not provide through its interface. Shown plainly instead of an error.
 const MISSING = { cards: "银行卡", portfolio: "理财持仓", wish_funds: "心愿金", subscriptions: "订阅查询", direct_debits: "代扣查询",
-  detection: "周期扣费识别（需要交易流水）", products: "理财产品货架", holdings: "理财持仓", purchase: "在线申购" };
+  detection: "周期扣费识别（需要交易流水）", finance: "存款、外汇、黄金、基金、贷款与信用账户", products: "理财产品货架", holdings: "理财持仓", purchase: "在线申购" };
 export function BankGaps({ items }) {
   if (!items || !items.length) return null;
   return <div className="panel muted bank-gaps" style={{ fontSize: 13.5 }}>你接入的银行没有通过接口提供：{items.map((k) => MISSING[k] || k).join("、")}。这些区块会在银行开放对应接口后自动出现。</div>;

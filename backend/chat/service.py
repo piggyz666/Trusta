@@ -46,11 +46,18 @@ class ChatService(AutomationMixin):
         from backend.capabilities import CapabilityRegistry
         self.capabilities = service.deployment_capabilities = CapabilityRegistry(service, self)
         self._llm_gate = threading.BoundedSemaphore(max(1, int(os.environ.get("TRUSTA_CHAT_LLM_CONCURRENCY", "4"))))
+        # The bundled sandbox bank quotes gold / FX from the same public market feed TRUSTA displays (one cache per server).
+        # A real bank prices with its own feed; nothing here is used for it.
+        try:
+            from backend.chat.http import market
+            service.gateway._adapter.bank.extended.price_source = lambda: market(self)
+        except AttributeError:
+            pass
 
     # ---- catalogue ---------------------------------------------------------------------------
     def catalog(self, owner):
         s = self.s
-        from backend.bank_sdk.discovery import customer_accounts, optional_read, is_external
+        from backend.bank_sdk.discovery import customer_accounts, optional_read, is_external, supports
         # Everything below is asked of the connected bank; a tool the bank does not offer simply yields nothing.
         accounts = [{"id": a["id"], "display": f"{a['label']}（{a['id']}）"} for a in customer_accounts(s, owner)]
         resources = lambda kind: optional_read(s, "service", owner, kind + ".list")
@@ -85,11 +92,11 @@ class ChatService(AutomationMixin):
         automations = [{"id": r["id"], "display": f"{r['name']}（{engine.describe_trigger(r['trigger'])}）"}
                        for r in engine.rules(owner)] if engine else []
         from backend.banking.finance import Finance
-        fv=Finance(self).view(owner) if not is_external(s) else {'contracts':[], 'eligible':[]}
+        fv=Finance(self).view(owner) if supports(s,'finance.list') else {'contracts':[], 'eligible':[]}
         contracts=[{'id':t['id'],'display':('贷款' if t['type']=='loan' else '消费分期')+' '+t['id'][-6:]} for t in fv['contracts'] if t['status']=='ACTIVE' and t['type'] in {'loan','installment'}]
         purchases=[{'id':t['id'],'display':t['merchant']+' '+t['id'][-6:]} for t in fv['eligible']]
         from backend.chat.extension_agent import resources as extension_resources
-        extended=extension_resources(self,owner) if not is_external(s) else []
+        extended=extension_resources(self,owner)
         return {"extensions":extended,"contracts":contracts, "purchases":purchases, "accounts": accounts, "cards": cards, "subscriptions": subs, "direct_debits": debits, "products": products,
                 "life_events": events, "merchants": merchants, "wish_funds": funds, "payees": payees, "automations": automations}
 
@@ -629,8 +636,10 @@ class ChatService(AutomationMixin):
             elif 'finance_draft' in normalized:
                 t=f.create(owner,normalized['finance_draft'])['contract']
             else:
-                t=next((t for t in f.view(owner)['contracts'] if t['id']==normalized.get('target_id')),None)
-                if not t:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
+                t=f.contract(owner,normalized.get('target_id'))
+                from backend.banking.extensions import savings_errors
+                problems=savings_errors(self.s.db,owner,t)
+                if problems:raise Rejected(problems[0])
             account=t['account_id']
             normalized={k:v for k,v in normalized.items() if k not in {'finance_draft','savings_prepare'}}|{'target_id':t['id'],'parameters':{'amount':payment(normalized['operation'],t),'currency':'CNY'}}
         if origin:

@@ -8,7 +8,7 @@ class CapabilityManager:
         self.identity_guard = None
 
     identity_guard = None
-    READ_MAP = {"finance.get":"account.read", "retail.get":"account.read", "account.get": "account.read", "account.get_balance": "balance.read",
+    READ_MAP = {"finance.get":"account.read", "finance.list":"account.read", "finance.quote":"account.read", "finance.archive":"account.read", "retail.get":"account.read", "account.get": "account.read", "account.get_balance": "balance.read",
                 "payee.resolve": "payee.read", "transaction.get": "transaction.read",
                 "transaction.list": "transaction.read", "customer.get_risk_profile": "risk_profile.read",
                 "wealth.list_products": "wealth_product.read",

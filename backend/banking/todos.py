@@ -2,8 +2,7 @@
 import json,time
 from datetime import datetime,timedelta
 from backend.business import CHINA
-from backend.banking.advanced import Advanced
-from backend.banking.extensions import Extensions,GoldSavings
+from backend.banking.extensions import GoldSavings
 from backend.banking.personal import Personal
 
 def view(chat,owner):
@@ -11,17 +10,20 @@ def view(chat,owner):
  def add(key,title,due,page,detail,amount=None):
   if due and due>str(until):return
   items.append(dict(id=key,title=title,due=due,page=page,detail=detail,amount=amount,overdue=bool(due and due<str(today))))
- for t in Extensions(chat).f.view(owner)['contracts']:
-  if t['type'] in {'loan','installment'} and t['status']=='ACTIVE':
-   row=next((r for r in t['schedule'] if not r['paid']),None)
-   if row:add('repay:'+t['id'],'贷款 / 分期还款',row['due'],'credit',t['card_label'],row['total'])
- for d in Extensions(chat).view(owner)['deposits']:
-  if d['status']=='ACTIVE':add('deposit:'+d['id'],'定期存款到期',d['matures'],'deposits','到期可支取或续存，不会自动扣款',d['principal'])
+ from backend.bank_sdk.discovery import supports
+ st=chat.s.gateway.read('service',owner,'finance.list') if supports(chat.s,'finance.list') else None
+ if st:
+  for t in st['contracts']:
+   if t['type'] in {'loan','installment'} and t['status']=='ACTIVE':
+    row=next((r for r in t['schedule'] if not r['paid']),None)
+    if row:add('repay:'+t['id'],'贷款 / 分期还款',row['due'],'credit',t['card_label'],row['total'])
+  for d in st['deposits']:
+   if d['status']=='ACTIVE':add('deposit:'+d['id'],'定期存款到期',d['matures'],'deposits','到期可支取或续存，不会自动扣款',d['principal'])
  for p in GoldSavings(chat).view(owner)['plans']:
   if p['status']!='ACTIVE':continue
   run=next((r for r in p['runs'] if r['state']!='COMPLETED'),None)
   if run:add('gold:'+p['id']+':'+run['due'],p['name'],run['due'],'gold-savings','定投预算；核对当期金价后确认',p['amount'])
- for s in Advanced(chat).view(owner)['states']:
+ for s in (st['credit_states'] if st else []):
   for g in s['statements']:
    if g['status'] in {'BILLED','OVERDUE'}:add('statement:'+s['card_id']+g['date'],'信用账单待还',g['due'],'credit-account','已出账；可全额或最低还款',g['outstanding'])
   for o in s['orders']:

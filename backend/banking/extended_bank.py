@@ -40,6 +40,20 @@ def seed_extended(conn):
 class ExtendedBank:
     def __init__(self, db):
         self.db = db
+        self.price_source = None  # the bank's market price feed for gold / FX quotes (callable returning a quote provider)
+
+    # Deposits, FX, gold, loans, credit account and funds: see finance_desk (finance.list / quote / archive).
+    def finance_state(self, customer):
+        from backend.banking.finance_desk import state
+        return state(self.db, customer)
+
+    def finance_quote(self, customer, request):
+        from backend.banking.finance_desk import quote
+        return quote(self.db, customer, request, self.price_source)
+
+    def finance_archive(self, customer, contract_id):
+        from backend.banking.finance_desk import archive
+        return archive(self.db, customer, contract_id)
 
     def resource(self, customer, kind, resource_id=None):
         if kind == "finance":

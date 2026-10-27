@@ -15,6 +15,14 @@ class ToolGateway:
         if capability not in self._adapter.manifest or capability not in self.capabilities.READ_MAP:
             raise Rejected("CAPABILITY_VIOLATION")
         self.capabilities.check(actor, self.capabilities.READ_MAP[capability])
+        if capability in {"finance.list", "finance.quote", "finance.archive"}:
+            # Deposits / FX / gold / loans / credit / funds desk: state, a priced unsigned draft, or withdrawing a draft.
+            # None of these moves money; execution is finance.<operation> on the signed write path.
+            expected = {"finance.list": set(), "finance.quote": {"request"}, "finance.archive": {"contract_id"}}[capability]
+            if set(params) != expected or ("request" in params and not isinstance(params["request"], dict)) \
+                    or ("contract_id" in params and (not isinstance(params["contract_id"], str) or not params["contract_id"])):
+                raise Rejected("INVALID_READ_PARAMETERS")
+            return self._adapter.read_domain(customer_id, capability, **params)
         if capability in {"finance.get", "retail.get", "card.list", "card.get", "card_application.get", "subscription.list", "subscription.get", "direct_debit.list", "direct_debit.get", "portfolio.get", "operation.get", "operation.evidence", "transaction.recurring_history",
                           "wish_fund.get", "wish_fund.list", "merchant.list", "life_event.list", "payee_entry.get", "payee_contact.list"}:
             required = {"finance.get":{"resource_id"}, "retail.get":{"resource_id"}, "card.get": {"resource_id"}, "subscription.get": {"resource_id"}, "direct_debit.get": {"resource_id"},

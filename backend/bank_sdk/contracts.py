@@ -5,7 +5,7 @@ from backend.domain import Rejected
 STATUSES = frozenset({'CREATED','PENDING','AUTHORIZED','PROCESSING','SETTLED','FAILED','REVERSED','UNKNOWN'})
 # Aliases preserve historical signed registry commitments; aliases do not grant privileges.
 from backend.banking.finance import KINDS as FINANCE_KINDS
-CANONICAL = {**{'finance.'+k.lower():'finance.'+k.lower() for k in FINANCE_KINDS},'finance.get':'finance.read','retail.get':'retail.read','retail.pay':'retail.pay','retail.refund':'retail.refund',
+CANONICAL = {**{'finance.'+k.lower():'finance.'+k.lower() for k in FINANCE_KINDS},'finance.get':'finance.read','finance.list':'finance.read','finance.quote':'finance.quote','finance.archive':'finance.quote','retail.get':'retail.read','retail.pay':'retail.pay','retail.refund':'retail.refund',
     'account.get':'accounts.read','account.get_balance':'balance.read','payee.resolve':'payees.read',
     'transaction.get':'payments.status','transaction.list':'transactions.read','transfer.create':'payments.create',
     'customer.get_risk_profile':'customers.risk.read','wealth.list_products':'investments.products.read',

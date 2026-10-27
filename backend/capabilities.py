@@ -16,7 +16,6 @@ which features were switched on when an action happened.
 import os
 import time
 from backend.domain import Rejected, canonical, digest
-from backend.bank_sdk.discovery import is_external
 
 # requirement id -> (label, how to enable)
 REQUIREMENTS = {
@@ -32,8 +31,12 @@ REQUIREMENTS = {
     "bank.card_controls": ("银行接口：交易开关", "银行适配器需支持卡片交易开关"),
     "bank.subscriptions": ("银行接口：订阅与代扣", "银行适配器需支持订阅 / 代扣查询与取消"),
     "bank.savings": ("银行接口：心愿金子账户", "银行适配器需支持储蓄目标（锁定 / 释放 / 支付）"),
-    "bank.sandbox": ("内置沙箱银行", "定期存款、外币、基金份额、黄金、贷款与分期、信用账单是内置沙箱银行的扩展业务，尚未定义真实银行接口；"
-                                     "接入真实银行时自动关闭，需要时可按 docs/bank-integration-sdk.md 为其补充标准接口"),
+    "bank.deposits": ("银行接口：定期存款", "银行适配器需提供 finance.list / finance.quote 与 finance.deposit_open / deposit_withdraw / deposit_renew"),
+    "bank.fx": ("银行接口：外币兑换", "银行适配器需提供 finance.list / finance.quote 与 finance.fx_buy / fx_sell"),
+    "bank.gold": ("银行接口：黄金买卖", "银行适配器需提供 finance.list / finance.quote 与 finance.gold_buy / gold_sell"),
+    "bank.loans": ("银行接口：贷款与分期", "银行适配器需提供 finance.list / finance.quote 与 finance.loan_draw / installment_start / credit_repay / credit_settle"),
+    "bank.credit_account": ("银行接口：信用账户", "银行适配器需提供 finance.list / finance.quote 与 finance.card_charge / card_refund / card_repay / card_surplus"),
+    "bank.funds": ("银行接口：基金份额", "银行适配器需提供 finance.list / finance.quote 与 finance.fund_subscribe / fund_confirm / fund_cancel / fund_redeem"),
     "bank.feed": ("银行入账推送", "当前仅本地沙箱银行提供入账推送；真实银行需接入其 webhook"),
     "channel.feishu": ("飞书机器人", "运行 python -m scripts.setup 填写 FEISHU_APP_ID / FEISHU_APP_SECRET（默认长连接，无需公网），"
                                     "pip install lark-oapi，再用 python -m scripts.pair --feishu 绑定账户"),
@@ -49,6 +52,17 @@ BANK_TOOLS = {
     "bank.subscriptions": {"subscription.list", "subscription.cancel", "direct_debit.list", "direct_debit.disable"},
     "bank.savings": {"wish_fund.lock", "wish_fund.release", "wish_fund.order"},
 }
+DESK = {"finance.list", "finance.quote", "finance.archive", "finance.get"}
+BANK_TOOLS.update({
+    "bank.deposits": DESK | {"finance.deposit_open", "finance.deposit_withdraw", "finance.deposit_renew"},
+    "bank.fx": DESK | {"finance.fx_buy", "finance.fx_sell"},
+    "bank.gold": DESK | {"finance.gold_buy", "finance.gold_sell"},
+    "bank.loans": DESK | {"finance.loan_draw", "finance.installment_start", "finance.credit_repay", "finance.credit_settle"},
+    "bank.credit_account": DESK | {"finance.card_charge", "finance.card_refund", "finance.card_repay", "finance.card_surplus"},
+    "bank.funds": DESK | {"finance.fund_subscribe", "finance.fund_confirm", "finance.fund_cancel", "finance.fund_redeem"},
+})
+# Chat tools shared by several of the businesses below: a tool stays available while any of them is.
+FINANCE_TOOLS = ["get_extended", "propose_extension", "get_finance", "propose_finance"]
 
 # feature id, title, group, required, degraded-if-missing, tools
 FEATURES = [
@@ -73,8 +87,12 @@ FEATURES = [
     ("automation_tighten", "联动规则：自动冻结卡 / 关闭交易开关（预先授权，只收紧）", "跨场景联动", ["bank.cards", "bank.card_controls"], [], []),
     ("trip", "出行管家（余额 → 赎回 → 境外开关 → 返程关闭 → 预算提醒）", "跨场景联动", ["bank.card_controls", "bank.transactions"],
      ["bank.wealth"], ["propose_trip_plan"]),
-    ("sandbox_extensions", "扩展业务：定期存款 / 外币 / 基金份额 / 黄金与定投 / 贷款与分期 / 信用账单（仅内置沙箱银行）", "扩展业务",
-     ["bank.sandbox"], [], ["get_extended", "propose_extension", "get_finance", "propose_finance"]),
+    ("deposits", "定期存款（开立 / 到期续存 / 提前支取）", "存款与投资", ["bank.deposits"], [], FINANCE_TOOLS),
+    ("fx", "外币兑换（美元 / 欧元 / 日元 / 港币）", "存款与投资", ["bank.fx"], [], FINANCE_TOOLS),
+    ("gold", "黄金买卖与定投", "存款与投资", ["bank.gold"], [], FINANCE_TOOLS),
+    ("funds", "基金份额（申购 / 确认 / 撤单 / 赎回）", "存款与投资", ["bank.funds"], [], FINANCE_TOOLS),
+    ("loans", "贷款与消费分期", "信用", ["bank.loans"], [], FINANCE_TOOLS),
+    ("credit_account", "信用账单（出账 / 还款 / 退款 / 溢缴款）", "信用", ["bank.credit_account"], [], FINANCE_TOOLS),
     ("life", "生活服务：机票 / 火车 / 酒店 / 演出 / 缴费（带条件跳转官方平台，不交易）", "跨场景联动", [], [], ["life_service"]),
     ("income", "入账明细与外部文本隔离", "安全", ["bank.feed"], [], ["list_income"]),
     ("protection", "反诈冷静期（转账保护）", "安全", [], [], ["enable_protection"]),
@@ -126,7 +144,6 @@ class CapabilityRegistry:
         have = {req: tools >= needed for req, needed in BANK_TOOLS.items()}
         have.update({"llm.tools": llm_state in {"CONFIGURED", "VERIFIED"},
                      "bank.feed": getattr(self.s, "feed", None) is not None,
-                     "bank.sandbox": not is_external(self.s),
                      "channel.feishu": feishu and self._probe.get("feishu", {}).get("status") != "FAILED",
                      "security.strong_auth": bool(safety and safety.enabled) or bool(self.s.config.strong_auth_secret)})
         return {"have": have,
@@ -199,7 +216,22 @@ class CapabilityRegistry:
         return result
 
     def disabled_tools(self, owner=None):
-        return {tool: f for f in self.features(owner=owner) if f["status"] in {"UNAVAILABLE", "OFF"} for tool in f["tools"]}
+        """A tool is withheld when every feature that uses it is unavailable or switched off."""
+        features = self.features(owner=owner)
+        live = {tool for f in features if f["status"] not in {"UNAVAILABLE", "OFF"} for tool in f["tools"]}
+        out = {}
+        for f in features:
+            if f["status"] in {"UNAVAILABLE", "OFF"}:
+                for tool in f["tools"]:
+                    if tool in live:
+                        continue
+                    if tool in out:  # shared by several features: name them together
+                        prev = out[tool]
+                        out[tool] = prev | {"title": prev["title"].split("（")[0] + "、" + f["title"].split("（")[0],
+                                            "reason": prev["reason"] if prev["reason"] == f["reason"] else "你接入的银行没有提供这些业务的接口"}
+                    else:
+                        out[tool] = f
+        return out
 
     def tool_enabled(self, name, owner=None):
         feature = self.disabled_tools(owner).get(name)

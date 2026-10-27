@@ -60,15 +60,23 @@ def apply(conn,action,before,after,opid):
 
 class Retail:
  def __init__(self,chat):self.chat=chat;self.s=chat.s
- def view(self,owner):
-  cards=self.s.db.rows('SELECT c.*,a.balance,a.frozen,a.currency FROM cards c JOIN accounts a ON a.id=c.account_id WHERE c.customer_id=? AND a.customer_id=?',(owner,owner))
-  for card in cards:
+ def cards(self,owner):
+  """The customer's cards as the bank reports them, with the linked account's balance and TRUSTA's own card face."""
+  from backend.bank_sdk.discovery import customer_accounts,optional_read
+  accounts={a['id']:a for a in customer_accounts(self.s,owner)}
+  cards=[]
+  for card in optional_read(self.s,'service',owner,'card.list'):
+   a=accounts.get(card.get('account_id'),{})
+   card=dict(card)|{'balance':a.get('balance'),'frozen':a.get('frozen'),'currency':a.get('currency','CNY')}
    card['design']=self.s.db.one('SELECT theme,nickname FROM card_designs WHERE card_id=? AND customer_id=?',(card['id'],owner)) or {'theme':'midnight','nickname':''}
-  return {'catalog':CATALOG,'cards':cards,'orders':self.s.db.rows('SELECT * FROM retail_orders WHERE customer_id=? ORDER BY created_at DESC LIMIT 100',(owner,)),'mode':'virtual'}
+   cards.append(card)
+  return cards
+ def view(self,owner):
+  return {'catalog':CATALOG,'cards':self.cards(owner),'orders':self.s.db.rows('SELECT * FROM retail_orders WHERE customer_id=? ORDER BY created_at DESC LIMIT 100',(owner,)),'mode':'virtual'}
  def design(self,owner,body):
   if set(body)!={'card_id','theme','nickname'} or body['theme'] not in {'midnight','champagne','ruby','ocean'} or not isinstance(body['nickname'],str) or len(body['nickname'])>20:raise Rejected('INVALID_INPUT')
+  if body['card_id'] not in {c['id'] for c in self.cards(owner)}:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
   with self.s.db.transaction() as c:
-   if not c.execute('SELECT id FROM cards WHERE id=? AND customer_id=?',(body['card_id'],owner)).fetchone():raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
    c.execute('INSERT INTO card_designs VALUES(?,?,?,?) ON CONFLICT(card_id) DO UPDATE SET theme=excluded.theme,nickname=excluded.nickname',(body['card_id'],owner,body['theme'],body['nickname']))
   return {'saved':True}
  def create(self,owner,body):

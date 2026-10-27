@@ -60,8 +60,9 @@ Pages and chat read only through the standard bank interface: whatever capabilit
 | `subscriptions.*` / `direct_debits.*` | Bills & subscriptions page, cancelling in chat |
 | `investments.*` + `customers.risk.*` | Product shelf, holdings, personalised plan, buy/redeem, risk assessment |
 | `savings.goals.*` | Wish funds |
+| `finance.read` + `finance.quote` + each business's execute capability | Term deposits, FX, gold and gold savings, fund units, loans and instalments, credit statement (each lit up separately) |
 
-Everyday-service links, market quotes, rule Q&A, the anti-fraud cooling-off period and strong authentication need no bank interface. Term deposits, FX, fund units, gold, loans and instalments and the credit statement are **sandbox-bank only** for now: with a real bank their tabs are hidden and such requests are clearly declined.
+Everyday-service links, market quotes, rule Q&A, the anti-fraud cooling-off period and strong authentication need no bank interface. Deposits, FX, gold, funds, loans and the credit account run as "bank quote → confirmation → signed execution", with the books kept at the bank; a business the bank does not offer has its tab hidden and requests for it are clearly declined.
 
 ## Trust infrastructure
 

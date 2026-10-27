@@ -6,8 +6,8 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 
 1. 银行需要提供哪些接口，每个接口对应 TRUSTA 的哪些功能；
 2. 如何写适配器、如何配置；
-3. 如何验证接入后功能真实可用；
-4. 哪些功能目前只在沙箱银行可用。
+3. 存款、外汇、黄金、基金、贷款与信用账户这几类业务的接口约定；
+4. 如何验证接入后功能真实可用。
 
 协议细节（签名、幂等、状态词汇、核验规则）见 [Bank Integration SDK](bank-integration-sdk.md)。
 
@@ -44,30 +44,51 @@ TRUSTA 默认连接内置的沙箱银行，演示数据都是虚构的。接入�
 | `savings.goals.*` | `wish_fund.*` | 心愿金 | 可选 |
 | `merchants.read`，`customers.events.read` | `merchant.list`，`life_event.list` | 心愿金下单商户、纪念日计划 | 可选 |
 | `operations.read / evidence.read` | `operation.*` | 回执详情里的银行凭证 | 可选 |
+| `finance.read` + `finance.quote` + `finance.deposit_*` | `finance.list / get / quote / archive`，`finance.deposit_open / withdraw / renew` | 定期存款 | 可选 |
+| 同上 + `finance.fx_buy / fx_sell` | | 外币兑换 | 可选 |
+| 同上 + `finance.gold_buy / gold_sell` | | 黄金买卖、黄金定投 | 可选 |
+| 同上 + `finance.fund_subscribe / confirm / cancel / redeem` | | 基金份额 | 可选 |
+| 同上 + `finance.loan_draw / installment_start / credit_repay / credit_settle` | | 贷款与消费分期 | 可选 |
+| 同上 + `finance.card_charge / card_refund / card_repay / card_surplus` | | 信用账单 | 可选 |
 | 入账推送（webhook） | 推送 → 只触发查询 | 入账明细、工资到账触发的自动化 | 可选 |
 
 以下功能不依赖银行接口，接任何银行都可用：生活服务跳转链接、黄金与外汇参考行情（来自公开数据源）、规则问答、反诈冷静期、强验证、自动化规则引擎、会话记录与审计链。
 
-## 3. 仅沙箱银行可用的扩展业务
+## 3. 存款、外汇、黄金、基金、贷款与信用账户
 
-以下业务目前只有内置沙箱银行实现，SDK 里还没有定义对应的标准能力：
+这六类业务共用一套"报价 → 确认 → 执行"的接口。TRUSTA 不保存这些业务的账，持仓、存单、合同、账单都在银行那一侧，TRUSTA 每次都向银行查询。
 
-- 定期存款
-- 外币账户
-- 基金份额
-- 黄金交易与定投
-- 贷款与分期
-- 信用账单
+| 步骤 | 接口 | 作用 | 是否动钱 |
+|---|---|---|---|
+| 查询 | `finance.list` | 返回客户的全部合同、存单、外币、黄金持仓、信用账户和基金订单，以及产品条款 | 否 |
+| 报价 | `finance.quote` | TRUSTA 提交业务请求，银行按自己的价格和规则生成一份**草稿合同**（含金额、到期时间） | 否 |
+| 撤回 | `finance.archive` | 撤回一份还没执行的草稿 | 否 |
+| 核对 | `finance.get` | 返回一份合同及其执行所依赖的状态，作为签名动作的前置条件 | 否 |
+| 执行 | `finance.<操作>` | 例如 `finance.deposit_open`，走完整签名写路径：确认卡 → 授权 → 银行执行 → 回查 → 独立核验 | **是** |
 
-接入真实银行后：
+报价请求（`finance.quote` 的 `request`）按业务分别为：
 
-- 功能页的"扩展业务"项显示"不可用（仅内置沙箱银行）"；
-- 对应工具不会交给大模型；
-- 页面标签自动隐藏；
-- 对话里提出这类请求，会明确说明"你接入的银行还没有通过接口提供这项业务"；
-- 后端在执行前再次拒绝（`VIRTUAL_BANK_ONLY`），不会改动任何本地虚拟余额。
+| 业务 | `type` 与字段 | 之后执行的操作 |
+|---|---|---|
+| 定期存款 | `deposit_open`：`card_id`, `amount`, `term`（90 / 180 / 365 天）；`deposit_withdraw` / `deposit_renew`：`deposit_id` | `DEPOSIT_OPEN` / `DEPOSIT_WITHDRAW` / `DEPOSIT_RENEW` |
+| 外币兑换 | `fx_buy` / `fx_sell`：`card_id`, `currency`（USD / EUR / JPY / HKD）, `units`（外币最小单位）, `quote_mode` | `FX_BUY` / `FX_SELL` |
+| 黄金 | `gold_buy` / `gold_sell`：`card_id`, `units`（0.01 克）；定投可附 `reference`（TRUSTA 的计划编号，银行原样保存） | `GOLD_BUY` / `GOLD_SELL` |
+| 贷款与分期 | `loan`：`card_id`, `amount`, `months`；`installment`：`card_id`, `source_id`（一笔已入账消费）, `months` | `LOAN_DRAW` / `INSTALLMENT_START`，之后对同一合同 `CREDIT_REPAY` / `CREDIT_SETTLE` |
+| 信用账户 | `card_charge` / `card_refund` / `card_repay` / `card_surplus`，字段见 `backend/banking/finance_desk.py` | 同名操作 |
+| 基金 | `fund_subscribe` / `fund_confirm` / `fund_cancel` / `fund_redeem` | 同名操作 |
 
-要为真实银行开放这些业务，需要先在 `backend/bank_sdk/contracts.py` 的 `CANONICAL` 中定义标准能力，并让这些业务经过网关执行。
+银行可以只开放其中几类业务，只要在能力清单里声明它实际支持的那几项：
+
+- 声明了的业务：功能页显示"可用"，对应页面标签出现。
+- 没有声明的业务：页面标签隐藏；对话里提出时会说明"你接入的银行没有提供"；TRUSTA 不会向银行请求报价。
+
+黄金定投计划是客户自己的安排，保存在 TRUSTA。每期到期时，TRUSTA 向银行申请一次普通的黄金报价。暂停或取消计划时，TRUSTA 会撤回这一期还没执行的报价，已经准备好的签名动作因此失效，不会被误执行。
+
+**接入时需要注意：**
+
+- **前置条件格式。** `finance.get` 返回的合同和相关状态，就是签名动作的前置条件。TRUSTA 会用同一套规则（`backend/banking/finance.py` 里的 `errors` / `expected`，以及 `extensions.py`、`advanced.py` 里的同名函数）计算预期结果，银行执行前后都要与之一致。适配器需要把银行自己的数据整理成这些字段。
+- **记账凭证格式。** 独立核验会读取 `operations.evidence.read` 返回的记账分录，核对资金方向和金额。沙箱银行使用一个清算账户 `finance-clearing`，真实银行的适配器需要按同样的借贷格式返回凭证。
+- **产品条款以银行为准。** 利率、期限、额度、费用都由银行在报价里给出。沙箱银行的数值只是演示条款。
 
 ## 4. 写一个适配器
 
@@ -144,7 +165,8 @@ TRUSTA 启动时会检查：
 2. 打开"功能"页：确认点亮的功能和你的银行能力一致。不可用的功能会写明缺哪个接口。
 3. 依次打开资金总览、账单与订阅、理财，在对话里问"查一下余额""这个月花了多少钱""我有哪些订阅"：数据应来自你的银行。
 4. 回归测试：`python -m pytest tests/test_real_bank_readiness.py`。测试通过配置文件加载一个"外部银行"，它的数据在 TRUSTA 读不到的独立数据库里，并且本地沙箱表已清空。测试分两种情况：
-   - **全功能**：各页面和对话正常工作，转账生成确认卡，周期扣费能从普通流水中识别出来；
-   - **只读（与 Revolut 只读一致）**：各页面正常打开，不支持的区块标注"银行未提供"，转账等功能明确说明不可用。
+   - **全功能**：各页面和对话正常工作，转账生成确认卡，周期扣费能从普通流水中识别出来。定期存款、外币、黄金、贷款、基金、信用消费逐项完整办理一遍，并核对**银行账本**里的余额、存单和持仓都已变化，TRUSTA 自己的数据库里没有这些账；
+   - **部分业务（银行不提供黄金和基金）**：这两项显示不可用、拒绝报价，其余业务照常；
+   - **只读（与 Revolut 只读一致）**：各页面正常打开，不支持的区块标注"银行未提供"，转账、存款等功能明确说明不可用。
 
    可以仿照它，用你自己的适配器跑一遍同样的检查。

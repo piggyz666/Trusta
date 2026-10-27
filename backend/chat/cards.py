@@ -18,7 +18,8 @@ RISK_REASONS = {
     "NEW_PAYEE_STRONG_AUTH": "向 24 小时内新添加的收款人转账 ≥ ¥500.00，需要额外验证", "INVESTMENT_STRONG_AUTH": "理财申购 / 赎回需要强验证",
 }
 ERRORS = {
-    "VIRTUAL_BANK_ONLY": "定期存款、黄金、基金、贷款与分期等业务目前只在内置沙箱银行开放，你接入的银行还没有通过接口提供这项业务",
+    "GOLD_QUOTE_UNAVAILABLE": "暂时拿不到可成交的金价，请稍后再试", "FX_QUOTE_UNAVAILABLE": "暂时拿不到可成交的汇率，请稍后再试",
+    "FEATURE_UNAVAILABLE": "这项功能当前不可用（未开通或已在功能页关闭）",
     "CAPABILITY_VIOLATION": "你接入的银行没有提供这项业务的接口", "BANK_CAPABILITY_UNAVAILABLE": "你接入的银行没有提供这项业务的接口",
     "INSUFFICIENT_BALANCE": "余额不足", "UNKNOWN_PAYEE": "收款人不在你的收款人列表中", "FROZEN_SOURCE": "付款账户已冻结", "ACCOUNT_PROTECTION_ACTIVE": "账户处于反诈保护期，对外转账已暂停（只能由银行安全人员核实后提前解除）",
     "STALE_PRECONDITION": "账户状态已变化，请重新发起", "BANKING_SECURITY_LOCKED": "账户已因安全原因锁定，请联系客服解锁",
@@ -112,7 +113,7 @@ class CardRenderer:
         if kind in FINANCE_LABELS:
             t=action['preconditions']['target'];post=action['expected_postconditions'];p=action['parameters']
             from backend.banking.finance import card_label
-            fields=[{'label':'业务','value':FINANCE_LABELS[kind]},{'label':'本次金额','value':format_cents(p['amount']),'amount_minor':p['amount'],'currency':'CNY'},{'label':'银行卡','value':t.get('card_label') or card_label(self.s.db,t['customer_id'],t['card_id'])},{'label':'完成后余额','value':format_cents(post['account']['balance'])}]
+            fields=[{'label':'业务','value':FINANCE_LABELS[kind]},{'label':'本次金额','value':format_cents(p['amount']),'amount_minor':p['amount'],'currency':'CNY'},{'label':'银行卡','value':card_label(self.s.db,t['customer_id'],t['card_id'])},{'label':'完成后余额','value':format_cents(post['account']['balance'])}]
             from backend.banking import extensions,advanced
             if kind in advanced.LABELS:fields += advanced.fields(t)
             elif kind in extensions.LABELS:fields += extensions.fields(t)

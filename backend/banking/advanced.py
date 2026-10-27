@@ -1,4 +1,4 @@
-"""Virtual credit statements and unit-based practice funds, on the signed Finance path.
+"""Credit statements and unit-based practice funds: bank rules (used by the sandbox bank's desk) and TRUSTA's view.
 
 All amounts are integer CNY cents. Fund units and NAV use 4 decimal places.
 No external bank, merchant, market or model calls. Non-cash entries use distinct
@@ -125,48 +125,16 @@ def fields(t):
  return [{'label':'基金','value':product(t['product_id'])['name']},{'label':'测试净值','value':f"{t['nav']/10000:.4f} 元/份（固定练习值，非市场行情）"},{'label':'份额','value':f"{t['units']/10000:.4f} 份"},{'label':'手续费','value':money(0 if t['type']=='fund_cancel' else t['fee'])},{'label':'规则','value':'申购扣款后待确认份额；确认前可全额撤单。确认份额不再扣款；赎回按固定测试净值结算到原卡，不模拟真实T+1。'}]
 
 class Advanced:
+ """TRUSTA side: the credit account and practice funds through the bank interface."""
  def __init__(self,chat):
   from backend.banking.finance import Finance
   self.chat=chat;self.s=chat.s;self.f=Finance(chat)
- def view(self,owner):
+ def view(self,owner,state=None):
   from backend.banking.retail import Retail
-  cards=[c for c in Retail(self.chat).view(owner)['cards'] if c['card_type']=='DEBIT'];rows=[]
-  with self.s.db.transaction() as c:
-   for card in cards:
-    v=state(c,owner,card['id']);d=debt(v);rows.append(v|{'debt':max(0,d),'surplus':max(0,-d),'available':LIMIT-max(0,d),'statements':statements(v,time.time())})
-  return {'cards':cards,'states':rows,'products':PRODUCTS,'limit':LIMIT,'contracts':[t for t in self.f.view(owner)['contracts'] if t['type'].upper() in LABELS]}
+  st=state or self.f.state(owner)
+  cards=[c for c in Retail(self.chat).view(owner)['cards'] if c['card_type']=='DEBIT']
+  return {'cards':cards,'states':st['credit_states'],'products':st['fund_products'],'limit':st['credit_card_limit'],
+          'contracts':self.f.label(owner,[t for t in st['contracts'] if t['type'].upper() in LABELS][:100])}
  def create(self,owner,b):
-  from backend.banking.finance import card_label
-  typ=b.get('type');required={'card_charge':{'amount','merchant'},'card_refund':{'entry_id','amount'},'card_repay':{'repay_mode'},'card_surplus':set(),'fund_subscribe':{'product_id','amount'},'fund_confirm':{'order_id'},'fund_cancel':{'order_id'},'fund_redeem':{'product_id','units'}}
-  if typ not in required or set(b)!=required[typ]|{'type','card_id'}:raise Rejected('INVALID_INPUT')
-  now=time.time();extra={}
-  with self.s.db.transaction() as c:
-   card=c.execute('SELECT * FROM cards WHERE id=? AND customer_id=?',(b['card_id'],owner)).fetchone()
-   if not card or card['card_type']!='DEBIT':raise Rejected('DEBIT_CARD_REQUIRED')
-   v=state(c,owner,card['id']);amount=0
-   if typ=='card_charge':
-    amount=integer(b['amount'],1,LIMIT)
-    if not isinstance(b['merchant'],str) or not 1<=len(b['merchant'].strip())<=40:raise Rejected('INVALID_INPUT')
-    posted,closing,due=dates(now);extra=dict(merchant=b['merchant'].strip(),posted=posted,statement=closing,due=due)
-   elif typ=='card_refund':
-    e=next((e for e in v['entries'] if e['id']==b['entry_id']),None)
-    if not e:raise Rejected('RESOURCE_NOT_FOUND_OR_DENIED')
-    amount=integer(b['amount'],1,e['amount']-e['refunded']);extra=dict(entry_id=e['id'],merchant=e['merchant'])
-   elif typ=='card_repay':
-    if b['repay_mode'] not in {'full','minimum'}:raise Rejected('INVALID_INPUT')
-    amount=max(0,debt(v)) if b['repay_mode']=='full' else min(max(0,debt(v)),sum(g['minimum'] for g in statements(v,now) if g['status'] in {'BILLED','OVERDUE'}));extra['repay_mode']=b['repay_mode']
-   elif typ=='card_surplus':amount=max(0,-debt(v))
-   elif typ in {'fund_confirm','fund_cancel'}:
-    o=next((o for o in v['orders'] if o['id']==b['order_id'] and o['status']=='PENDING'),None)
-    if not o:raise Rejected('FUND_ORDER_NOT_PENDING')
-    amount=o['amount'];extra={k:o[k] for k in ('product_id','units','fee','nav')};extra['order_id']=o['id']
-   else:
-    pr=product(b['product_id']);extra=dict(product_id=pr['id'],nav=pr['nav'])
-    if typ=='fund_subscribe':
-     amount=integer(b['amount'],100,100000000);fee=amount*pr['buy_bps']//10000;units=(amount-fee)*1000000//pr['nav'];extra.update(fee=fee,units=units)
-    else:
-     units=integer(b['units'],1,10**12);gross=units*pr['nav']//1000000;fee=gross*pr['sell_bps']//10000;amount=gross-fee;extra.update(units=units,fee=fee)
-   if not 1<=amount<=100000000:raise Rejected('NO_PAYABLE_AMOUNT')
-   t=dict(id='fin-'+uid(),customer_id=owner,card_id=card['id'],account_id=card['account_id'],card_label=card_label(self.s.db,owner,card['id']),type=typ,status='DRAFT',version=0,amount=amount,remaining=0,paid_fees=0,source_id='',schedule=[],created_at=now,expires_at=now+120,units=0,price=0,quote=None,realized_profit=0,state_version=v['version'],trade_date=str(datetime.fromtimestamp(now,CHINA).date()))|extra
-   c.execute('INSERT INTO finance_contracts VALUES(?,?,?)',(t['id'],owner,canonical(t)))
-  return {'contract':t}
+  if not isinstance(b,dict) or str(b.get('type','')).upper() not in LABELS:raise Rejected('INVALID_INPUT')
+  return self.f.create(owner,b)

@@ -7,11 +7,11 @@ export const GROUPS = {
 };
 export const groupOf = (route) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([key]) => key === route)) || null;
 
-// Extension businesses of the bundled sandbox bank. With a real bank connected the deployment reports the
-// "sandbox_extensions" feature as unavailable and these tabs are hidden rather than shown as dead pages.
-export const SANDBOX_ONLY = new Set(["credit-account", "credit", "funds", "deposits", "gold", "gold-savings", "exchange"]);
-export const visibleTabs = (group, capabilities) => {
-  const sandbox = capabilities?.features?.find((f) => f.id === "sandbox_extensions");
-  const hide = sandbox && sandbox.status === "UNAVAILABLE";
-  return (GROUPS[group] || []).filter(([key]) => !(hide && SANDBOX_ONLY.has(key)));
-};
+// Tabs that depend on a bank business. When the connected bank does not offer it (the deployment reports the
+// feature as unavailable) the tab is hidden rather than shown as a dead page.
+export const TAB_FEATURE = { "credit-account": "credit_account", credit: "loans", funds: "funds", deposits: "deposits",
+  gold: "gold", "gold-savings": "gold", exchange: "fx" };
+export const visibleTabs = (group, capabilities) => (GROUPS[group] || []).filter(([key]) => {
+  const feature = TAB_FEATURE[key] && capabilities?.features?.find((f) => f.id === TAB_FEATURE[key]);
+  return !(feature && feature.status === "UNAVAILABLE");
+});

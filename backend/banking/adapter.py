@@ -17,11 +17,17 @@ class VirtualBankAdapter:
             from backend.banking.actions import ACTION_SPECS
             for spec in ACTION_SPECS.values():
                 self.manifest[spec["tool"]] = {"risk_class": "WRITE", "requires_auth": True, "supports_idempotency": True, "reversible": False}
-            for tool in ("finance.get", "retail.get", "card.list", "card.get", "card_application.get", "subscription.list", "subscription.get", "direct_debit.list", "direct_debit.get", "portfolio.get", "operation.get", "operation.evidence", "transaction.recurring_history",
+            for tool in ("finance.get", "finance.list", "finance.quote", "finance.archive", "retail.get", "card.list", "card.get", "card_application.get", "subscription.list", "subscription.get", "direct_debit.list", "direct_debit.get", "portfolio.get", "operation.get", "operation.evidence", "transaction.recurring_history",
                          "wish_fund.get", "wish_fund.list", "merchant.list", "life_event.list", "payee_entry.get", "payee_contact.list"):
                 self.manifest[tool] = {"risk_class": "READ"}
 
     def read_domain(self, customer_id, capability, **params):
+        if capability == "finance.list":
+            return self.bank.extended.finance_state(customer_id)
+        if capability == "finance.quote":
+            return self.bank.extended.finance_quote(customer_id, params["request"])
+        if capability == "finance.archive":
+            return self.bank.extended.finance_archive(customer_id, params["contract_id"])
         if capability == "operation.evidence":
             from backend.domain import Rejected
             operation_id=params["operation_id"]

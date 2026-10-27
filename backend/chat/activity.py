@@ -91,7 +91,7 @@ class ActivityFeed:
         from datetime import datetime
         from backend.business import CHINA
         s, now = self.s, time.time()
-        from backend.bank_sdk.discovery import customer_accounts, optional_read, supports, is_external
+        from backend.bank_sdk.discovery import customer_accounts, optional_read, supports
         accounts = [{"id": a["id"], "name": a["label"], "balance_minor": a["balance"], "currency": a["currency"]}
                     for a in customer_accounts(s, owner)]
         unavailable = []  # sections the connected bank does not offer: shown as "银行未提供", never as an error
@@ -138,28 +138,28 @@ class ActivityFeed:
         engine = getattr(s, "automation", None)
         rules = [{"id": r["id"], "name": r["name"], "trigger": engine.describe_trigger(r["trigger"]), "runs": r["runs"]}
                  for r in engine.rules(owner)] if engine else []
-        # Loans, gold, term deposits, FX wallets and funds below are the bundled sandbox bank's extension modules. A real bank
-        # exposes none of them through the SDK yet, so with an external bank these totals are simply left out.
-        sandbox = not is_external(s)
-        from backend.banking.finance import contracts
-        with s.db.transaction() as conn: financing=contracts(conn,owner) if sandbox else []
-        gold=s.db.rows('SELECT units,cost FROM gold_positions WHERE customer_id=?',(owner,)) if sandbox else []
+        # Loans, gold, deposits, FX, the credit account and funds: one finance.list read from the bank, when it offers it.
+        desk = supports(s, "finance.list")
+        st = s.gateway.read("service", owner, "finance.list") if desk else {}
+        if not desk:
+            unavailable.append("finance")
+        financing, gold = st.get("contracts", []), st.get("gold_positions", [])
         active=[t for t in financing if t['status']=='ACTIVE' and t['type'] in {'loan','installment'}]
         pending=sorted((p for t in active for p in t['schedule'] if not p['paid']),key=lambda p:p['due'])
         finance={'debt_minor':sum(t['remaining'] for t in active), 'gold_units':sum(p['units'] for p in gold),
                  'gold_cost_minor':sum(p['cost'] for p in gold), 'next_due':pending[0]['due'] if pending else None,
                  'next_due_minor':sum(p['total'] for p in pending if p['due']==pending[0]['due']) if pending else 0}
-        finance['deposit_principal_minor']=sum(json.loads(r['body'])['principal'] for r in (s.db.rows("SELECT body FROM term_deposits WHERE customer_id=?",(owner,)) if sandbox else []) if json.loads(r['body'])['status']=='ACTIVE')
-        finance['fx_cost_minor']=sum(r['cost'] for r in (s.db.rows('SELECT cost FROM fx_wallets WHERE customer_id=?',(owner,)) if sandbox else []))
+        finance['deposit_principal_minor']=sum(d['principal'] for d in st.get('deposits', []) if d['status']=='ACTIVE')
+        finance['fx_cost_minor']=sum(w['cost'] for w in st.get('fx_wallets', []))
         finance['assets_at_cost_minor']=finance['deposit_principal_minor']+finance['fx_cost_minor']+sum(a['balance_minor'] for a in accounts)+sum(p['amount_minor'] for p in positions)+sum(f['balance_minor'] for f in funds)+finance['gold_cost_minor']
         from backend.banking.advanced import debt
-        advanced=[json.loads(r['body']) for r in s.db.rows('SELECT body FROM advanced_positions WHERE customer_id=?',(owner,))] if sandbox else []
+        advanced=st.get('credit_states', [])
         finance['credit_card_debt_minor']=sum(max(0,debt(v)) for v in advanced)
         finance['fund_cost_minor']=sum(sum(h['cost'] for h in v['holdings'].values())+sum(o['amount'] for o in v['orders'] if o['status']=='PENDING') for v in advanced)
         finance['assets_at_cost_minor']+=finance['fund_cost_minor']+sum(max(0,-debt(v)) for v in advanced)
         finance['debt_minor']+=finance['credit_card_debt_minor']
         finance['net_at_cost_minor']=finance['assets_at_cost_minor']-finance['debt_minor']
-        finance['sandbox_modules']=sandbox
+        finance['sandbox_modules']=desk
         protection = s.safety.protection(owner)
         return {"finance":finance, "accounts": accounts, "total_minor": sum(a["balance_minor"] for a in accounts), "spending": spend,
                 "portfolio": positions, "portfolio_minor": sum(p["amount_minor"] for p in positions), "wish_funds": funds,

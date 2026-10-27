@@ -1,18 +1,18 @@
 """Grounded candidate generation for extended virtual banking; never approval."""
-import json,re
+import re
 from decimal import Decimal,InvalidOperation
-from backend.banking.advanced import PRODUCTS
 from backend.banking.extensions import GoldSavings
 from backend.chat.amounts import format_cents
 
 OPS=['DEPOSIT_OPEN','DEPOSIT_WITHDRAW','DEPOSIT_RENEW','FX_BUY','FX_SELL','FUND_SUBSCRIBE','FUND_CONFIRM','FUND_CANCEL','FUND_REDEEM','CARD_REPAY','CARD_REFUND','CARD_SURPLUS','GOLD_SAVINGS_BUY']
 def resources(chat,owner):
- rows=[{'id':p['id'],'display':p['name'],'kind':'fund_product'} for p in PRODUCTS]
- for r in chat.s.db.rows('SELECT body FROM term_deposits WHERE customer_id=?',(owner,)):
-  d=json.loads(r['body'])
+ from backend.bank_sdk.discovery import supports
+ if not supports(chat.s,'finance.list'):return []
+ st=chat.s.gateway.read('service',owner,'finance.list')
+ rows=[{'id':p['id'],'display':p['name'],'kind':'fund_product'} for p in st['fund_products']]
+ for d in st['deposits']:
   if d['status']=='ACTIVE':rows.append({'id':d['id'],'display':'存单 '+d['id'],'kind':'deposit'})
- for r in chat.s.db.rows('SELECT body FROM advanced_positions WHERE customer_id=?',(owner,)):
-  v=json.loads(r['body'])
+ for v in st['credit_states']:
   for o in v['orders']:
    if o['status']=='PENDING':rows.append({'id':o['id'],'display':'基金订单 '+o['id'],'kind':'fund_order','card_id':v['card_id']})
   for e in v['entries']:

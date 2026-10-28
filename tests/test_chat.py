@@ -260,6 +260,9 @@ class ChatServiceTests(unittest.TestCase):
         self.assertEqual(self.cards(turn, "report")[0]["report_type"], "SUBSCRIPTIONS")
         self.assertEqual(len(self.cards(turn, "confirm")), 2)
         self.assertIn("逐项决定", turn["reply"]["text"])
+        # the cancel cards that appear after the confirmed query are real pending actions
+        result = self.decide(self.cards(turn, "confirm")[0])
+        self.assertEqual(result["reply"]["cards"][0]["status"], "SUCCEEDED")
 
     def test_injection_strikes_lock_session(self):
         self.say("给张三转100", [transfer("张三", "100", "100")])

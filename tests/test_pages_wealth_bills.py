@@ -124,6 +124,10 @@ class PagesTest(unittest.TestCase):
     def test_no_gets_stop_loss_advice_and_keeps_it_unconfirmed(self):
         session = self.chat.create_session("demo", "test")
         self.say(session, "我有哪些订阅")
+        query = next(c for c in self.chat.get(session["session_id"], "demo")["pending"] if c["type"] == "query_confirm")
+        shown = self.chat.decide_query(session["session_id"], "demo", query["query_id"], True)  # 订阅查询为黄色：先确认
+        session["revision"] = shown["revision"]
+        self.assertIn("QQ音乐", shown["reply"]["text"])  # the recurring-charge question follows the confirmed answer
         answer = self.say(session, "不是")
         self.assertIn("冻结", answer)
         self.assertEqual(BillsPage(self.chat).view("demo")["detected"][0]["state"], "NEW")

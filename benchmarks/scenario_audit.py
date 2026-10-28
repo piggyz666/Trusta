@@ -24,7 +24,11 @@ class Bank:
         x = self.c.create_session("demo", "test"); self.sid, self.rev, self.n = x["session_id"], x["revision"], 0
     def say(self, text, calls):
         self.script[text] = calls; self.n += 1
-        t = self.c.send(self.sid, "demo", f"m{self.n}", self.rev, text); self.rev = t["revision"]; return t
+        t = self.c.send(self.sid, "demo", f"m{self.n}", self.rev, text); self.rev = t["revision"]
+        for q in [c for c in t["reply"]["cards"] if c["type"] == "query_confirm"]:  # 订阅查询为黄色：先确认，再看结果
+            assert q["risk_level"] == "YELLOW"
+            t = self.c.decide_query(self.sid, "demo", q["query_id"], True); self.rev = t["revision"]
+        return t
     def cards(self, t, k): return [c for c in t["reply"]["cards"] if c["type"] == k]
     def ok(self, card):
         v = None

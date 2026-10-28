@@ -41,7 +41,10 @@ export default function Bills({ ask }) {
       <header className="page-head"><h1>账单与订阅</h1><p>订阅与代扣涉及扣费信息，按权限规则需要你确认后再显示。</p></header>
       <section className="section panel">
         <h2>{data.confirm.title} <Tag tone="amber">需你确认</Tag></h2>
-        <dl className="fields">{data.confirm.fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl>
+        <div style={{ display: "grid", gap: 8, margin: "10px 0 16px" }}>
+          {data.confirm.fields.map((f, i) => <div key={i} style={{ display: "grid", gridTemplateColumns: "88px 1fr", gap: 12 }}>
+            <span className="muted">{f.label}</span><span>{f.value}</span></div>)}
+        </div>
         <div className="actions"><button className="btn primary" onClick={() => load(true)}>确认查询</button></div>
       </section>
     </div></div>);

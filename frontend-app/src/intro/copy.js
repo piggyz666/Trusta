@@ -19,7 +19,7 @@ export const COPY = {
         ["智能转账", ["给张三转500元", "每月1号给房东转3000"], "按姓名、手机号、称呼找人；支持定时、周期和备注，确认卡上可以直接改金额。"],
         ["账单分析", ["这个月花了多少钱", "上个月外卖花了多少"], "分类占比一目了然，点一类看明细，异常消费自动标出。"],
         ["理财", ["根据我的消费推荐理财", "今天金价多少"], "按你的消费留足备用金、按风险等级配置；对比后在卡片上申购或赎回。"],
-        ["卡片管理", ["我的卡丢了", "关闭信用卡境外交易"], "挂失需要验证码；境外、线上、闪付开关在卡片上直接拨动。"],
+        ["卡片管理", ["我的卡丢了", "关闭信用卡境外交易"], "挂失需要强验证；境外、线上、闪付开关在卡片上直接拨动。"],
         ["订阅与代扣", ["我有哪些订阅", "最近有什么要续费"], "自动识别周期扣费，列出即将扣费的订阅和代扣，不想要的逐项取消。"],
         ["跨场景联动", ["下周去日本玩5天，帮我安排一下", "工资到账后存1000到心愿金"], "核对余额、赎回理财、开通境外交易、返程自动关闭、超预算提醒，每一步都等你确认。"],
       ],
@@ -75,8 +75,8 @@ export const COPY = {
       title: "三级权限，风险越高，确认越严。",
       items: [
         ["green", "绿色 · 直接执行", "查余额、看账单、比较理财产品。只读，不动钱。"],
-        ["amber", "黄色 · 你点确认", "转账、冻结卡、取消订阅、申购理财。在聊天里说“确认”不算数。"],
-        ["red", "红色 · 还要验证码", "大额转账、新收款人、挂失。短信或验证器动态码；飞书里也必须回到 APP 完成。"],
+        ["amber", "黄色 · 你点确认", "小额转账、查询与取消订阅、申请虚拟卡、冻结卡。在聊天里说“确认”不算数。"],
+        ["red", "红色 · 还要强验证", "大额转账、新收款人、挂失、改密码、理财申购。刷脸 / 指纹 / 安全密钥，或短信、动态码；飞书里也必须回到 APP 完成。"],
       ],
     },
     trust: {
@@ -238,8 +238,8 @@ export const COPY = {
       title: "Three tiers. The riskier it is, the stricter the check.",
       items: [
         ["green", "Green · runs directly", "Balances, spending, comparing investments. Read-only, no money moves."],
-        ["amber", "Yellow · you tap confirm", "Transfers, freezing a card, cancelling a subscription, buying an investment. Saying “confirm” in chat doesn't count."],
-        ["red", "Red · plus a one-time code", "Large transfers, new payees, reporting a card lost. SMS or authenticator code; from Feishu you finish it in the app."],
+        ["amber", "Yellow · you tap confirm", "Small transfers, viewing or cancelling subscriptions, a virtual card, freezing a card. Saying “confirm” in chat doesn't count."],
+        ["red", "Red · plus strong verification", "Large transfers, new payees, reporting a card lost, PIN change, buying investments. Face / fingerprint / security key, or an SMS or authenticator code; from Feishu you finish it in the app."],
       ],
     },
     trust: {

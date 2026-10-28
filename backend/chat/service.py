@@ -241,7 +241,8 @@ class ChatService(AutomationMixin):
             if account not in {a["id"] for a in body["accounts"]}:
                 raise Rejected("ACCOUNT_ACCESS_DENIED")
             outcome = self._process(body, owner, text.strip(), account, emit, prepared_calls)
-            if outcome.get("mode") not in {"error", "locked", "guard", "handoff", "scope"} and not outcome.get("risk"):
+            held = any(c.get("type") == "query_confirm" for c in outcome.get("cards") or [])  # a subscription query awaits consent
+            if outcome.get("mode") not in {"error", "locked", "guard", "handoff", "scope"} and not outcome.get("risk") and not held:
                 # Reminders and the "is this a subscription?" question only ever follow a reply, never open a chat.
                 from backend.chat.subscriptions_chat import SubscriptionTalk
                 notes = SubscriptionTalk(self).after_reply(body, owner, text.strip(), outcome.get("tools"))
@@ -913,8 +914,15 @@ class ChatService(AutomationMixin):
                     task = self._run(entry["goal"], owner, entry["account"], step["normalized"])
                     new_cards, new_texts = renderer.task_cards(task, step)
                     cards.extend(new_cards), texts.extend(new_texts)
+                    for card in new_cards:  # e.g. "哪些订阅可以取消" yields cancel cards, each still confirmed on its own
+                        if card["type"] == "confirm":
+                            body["pending"].append({"task_id": task["task_id"], "action_id": card["action_id"], "card": card, "memo": None,
+                                                    "task_type": step["normalized"]["task_type"], "key": self._key(step["normalized"])})
                 except Rejected as exc:
                     texts.append("查询没有完成：" + self._error(exc.code))
+            # the follow-ups a subscription answer normally carries (renewals due, "is this charge a subscription?")
+            from backend.chat.subscriptions_chat import SubscriptionTalk
+            texts.extend(SubscriptionTalk(self).after_reply(body, owner, entry["goal"], [s.get("tool") for s in entry["steps"]]))
         else:
             texts.append("好的，没有查询。")
         text = "".join(t if t.endswith(("。", "？", "！")) else t + "。" for t in texts) or "已完成查询。"

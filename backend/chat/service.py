@@ -373,14 +373,16 @@ class ChatService(AutomationMixin):
                     rule_text = previous + " " + text
                     calls = rule_calls(rule_text, catalog, payee) or None
                 if calls is None:
+                    from backend.chat.quoted import own_words
                     rule_text = text
-                    calls = rule_calls(text, catalog, payee) or None
+                    calls = rule_calls(own_words(text), catalog, payee) or None  # never act on pasted / forwarded text
                 if calls is None and self._life_context(body):
                     from backend.chat import life
                     if life.adds_detail(text):  # “从上海出发” after “下周六飞往三亚”
                         calls = [{"name": "life_service", "arguments": {"category": self._life_context(body)["category"]}}]
             if calls is None and not steps:
-                steps, clarifications = self._rule_steps(body, text, catalog)
+                from backend.chat.quoted import own_words
+                steps, clarifications = self._rule_steps(body, own_words(text), catalog)
             if calls is None:
                 trace["calls"] = [{"name": s.get("tool"), "arguments": s.get("normalized") or s.get("args"), "verdict": "RULES"} for s in steps]
         if calls is not None:

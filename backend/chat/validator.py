@@ -111,13 +111,26 @@ def _scan_forbidden(value):
             _scan_forbidden(item)
 
 
+FORWARDED_MESSAGE = "你转来的内容里提到了要办理的操作。那是别人写的文字，我不会照着办理；如果确实是你本人要办，请用自己的话直接告诉我。"
+# Operations that carry no quoted span of their own: when the latest message contains forwarded text, the customer's own
+# words must name the operation.
+OWN_OPERATION_WORDS = {"FREEZE": r"冻结|锁|停用", "UNFREEZE": r"解冻|解锁|恢复", "REPORT_LOST": r"挂失|丢|偷|掉了",
+                       "CANCEL_LOST": r"解除挂失|解挂|找到", "PIN_RESET": r"密码", "APPLY_VIRTUAL": r"虚拟卡|申请|办.{0,2}卡"}
+
+
 class ToolCallValidator:
     def __init__(self, corpus, catalog, resolve_payee, now=None, default_account_id="acct-demo"):
         """corpus: the user's own utterances in this session (newest last).
         catalog: {"cards":[...], "subscriptions":[...], "direct_debits":[...], "products":[...], "accounts":[...]}.
         resolve_payee: value -> list of payee rows owned by the caller."""
+        from backend.chat.quoted import own_words
         self.corpus = _norm("\n".join(corpus))
         self.latest = _norm(corpus[-1] if corpus else "")
+        # Proposals are grounded in the customer's own words only, never in text they pasted or forwarded.
+        self.own = _norm("\n".join(own_words(t) for t in corpus))
+        self.forwarded = bool(corpus) and own_words(corpus[-1]) != corpus[-1]
+        self.latest_own = _norm(own_words(corpus[-1]) if corpus else "")
+        self.proposing = False
         self.catalog = catalog
         self.resolve_payee = resolve_payee
         self.now = now if now is not None else datetime.now(CHINA).timestamp()
@@ -127,6 +140,8 @@ class ToolCallValidator:
     def span(self, span, slot, label):
         if not isinstance(span, str) or not _norm(span) or _norm(span) not in self.corpus:
             raise Clarify("SPAN_NOT_GROUNDED", slot, f"我没能在你的话里确认{label}，请再说一下{label}。")
+        if self.proposing and _norm(span) not in self.own:
+            raise Clarify("FORWARDED_TEXT", slot, FORWARDED_MESSAGE)
         return span
 
     def amount(self, value, slot="amount", label="金额"):
@@ -211,6 +226,7 @@ class ToolCallValidator:
             # The schema path goes into the decision trace so a failing model call can be diagnosed.
             raise Clarify("ARGUMENTS_INVALID:" + str(exc)[:80], "other", "我没理解清楚，能换个说法再说一次吗？") from None
         handler = getattr(self, "_" + name, None)
+        self.proposing = spec["kind"] == "propose"
         steps = handler(arguments) if handler else [{"kind": spec["kind"], "tool": name, "args": arguments}]
         for step in steps:
             step.setdefault("kind", spec["kind"])
@@ -393,6 +409,8 @@ class ToolCallValidator:
 
     def _propose_card_operation(self, a):
         op = a["op"]
+        if self.forwarded and op in OWN_OPERATION_WORDS and not re.search(OWN_OPERATION_WORDS[op], self.latest_own):
+            raise Clarify("FORWARDED_TEXT", "operation", FORWARDED_MESSAGE)
         if op == "APPLY_VIRTUAL":
             return [{"normalized": {"task_type": "CARD_MANAGEMENT", "operation": "CARD_APPLY", "target_id": self.account_id,
                                     "source_account_id": self.account_id, "parameters": {}, "needs_clarification": False},

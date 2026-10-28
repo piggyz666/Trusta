@@ -30,3 +30,7 @@ private/
 **/tunnel.yaml
 **/deepseek-api-key.txt
 .pytest_cache/
+
+# comparative evaluation: offline pipeline checks
+docs/compare/runs-mock.jsonl
+docs/compare/report-mock.*

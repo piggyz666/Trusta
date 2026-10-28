@@ -59,6 +59,8 @@ def _catalog_match(items, text):
                 piece = name[i:i + size]
                 if piece in {"演示", "每月"} or "·" in piece:
                     continue
+                if piece.isdigit() and not re.search(r"(?<![0-9])" + piece + r"(?![0-9])", text):
+                    continue  # "90" inside a phone number is not 稳盈90天持有
                 if piece in text:
                     best = (size, piece, piece)
                     break

@@ -102,6 +102,62 @@ class FrontendApiTests(unittest.TestCase):
         self.assertEqual(self.request("/api/chat/settings/access", {"mode": "local"}, token=device)[0], 403)
         self.assertEqual(self.request("/api/chat/settings/llm", {"model": "x-model"}, token=device)[0], 403)
 
+    def test_feishu_credentials_from_settings(self):
+        """新部署的人可以在 设置 → 飞书 填凭据：只在本机可改、密钥不回显、凭据立即向飞书验证、权限清单随页面给出。"""
+        import os
+        from backend import envfile
+        from backend.channels.feishu import SCOPES, FeishuSender
+        env = Path(self.tmp.name) / ".env"
+        real_write = envfile.write_env
+        tokens = []
+
+        def token(sender):
+            tokens.append(sender.config.app_id)
+            if sender.config.app_secret != "s" * 32:
+                raise ValueError("飞书返回 10014：app secret invalid")
+            return "t-ok"
+
+        with mock.patch.dict(os.environ, {}, clear=False), \
+                mock.patch.object(envfile, "write_env", lambda updates: real_write(updates, path=env)), \
+                mock.patch.object(FeishuSender, "token", token):
+            for key in ("FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_MODE", "FEISHU_VERIFICATION_TOKEN", "FEISHU_ENCRYPT_KEY"):
+                os.environ.pop(key, None)
+            feishu = self.request("/api/chat/settings")[1]["feishu"]
+            self.assertFalse(feishu["configured"])
+            self.assertEqual([s["scope"] for s in feishu["scopes"]], [s for s, _, _ in SCOPES])
+            self.assertTrue(any("im.message.receive_v1" in step for step in feishu["steps"]))
+            device = self.access.pair_device(self.access.start_pairing("demo", "device")["code"], "phone")["device_token"]
+            body = {"app_id": "cli_a1b2c3d4e5f6", "app_secret": "s" * 32}
+            self.assertEqual(self.request("/api/chat/settings/feishu", body, token=device)[0], 403)
+            for bad in ({"app_id": "a1b2c3", "app_secret": "s" * 32}, {"app_id": "cli_a1b2c3d4e5f6", "app_secret": "short"},
+                        {"app_id": "cli_a1b2c3d4e5f6", "app_secret": "s" * 32, "mode": "webhook"}, body | {"extra": 1}):
+                self.assertEqual(self.request("/api/chat/settings/feishu", bad)[0], 400, bad)
+            self.assertFalse(env.exists())
+            status, result = self.request("/api/chat/settings/feishu", body)
+            self.assertEqual((status, result["status"], result["restart_required"]), (200, "VERIFIED", True))
+            saved = env.read_text(encoding="utf-8")
+            self.assertIn("FEISHU_APP_ID=cli_a1b2c3d4e5f6", saved)
+            self.assertIn("FEISHU_MODE=longconn", saved)
+            settings = self.request("/api/chat/settings")[1]
+            self.assertTrue(settings["feishu"]["configured"])
+            self.assertNotIn("s" * 32, json.dumps(settings))  # the secret is never sent back, only masked
+            # A wrong secret is saved but reported, with Feishu's own message (never the secret).
+            result = self.request("/api/chat/settings/feishu", {"app_id": "cli_a1b2c3d4e5f6", "app_secret": "x" * 32})[1]
+            self.assertEqual(result["status"], "FAILED")
+            self.assertIn("10014", result["detail"])
+            # Changing only the App ID keeps the saved secret.
+            self.request("/api/chat/settings/feishu", {"app_id": "cli_a1b2c3d4e5f6", "app_secret": "s" * 32})
+            self.assertEqual(self.request("/api/chat/settings/feishu", {"app_id": "cli_ffffeeee0000"})[1]["status"], "VERIFIED")
+            # Webhook mode needs a verification token.
+            webhook = {"app_id": "cli_ffffeeee0000", "mode": "webhook", "verification_token": "vtoken123"}
+            self.assertEqual(self.request("/api/chat/settings/feishu", webhook)[0], 200)
+            self.assertEqual(self.request("/api/chat/settings")[1]["feishu"]["mode"], "webhook")
+            self.assertEqual(self.request("/api/chat/settings/feishu", {"disable": True})[1]["status"], "NOT_CONFIGURED")
+            self.assertNotIn("FEISHU_APP_ID", env.read_text(encoding="utf-8"))
+            self.assertFalse(self.request("/api/chat/settings")[1]["feishu"]["configured"])
+            self.assertTrue(any('"SETTINGS_FEISHU_CHANGED"' in r["body"] for r in self.s.db.rows("SELECT body FROM audit_events")))
+            self.assertTrue(self.s.audit.verify_chain())
+
     def test_owner_protection_from_settings(self):
         status, state = self.request("/api/chat/protection", {"hours": 2})
         self.assertEqual(status, 200)

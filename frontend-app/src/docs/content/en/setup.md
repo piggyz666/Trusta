@@ -33,7 +33,7 @@ You can add an HTTPS proxy if needed. Whichever model you connect, it can only p
 | Local network | Phones on the same Wi-Fi or hotspot pair once by QR code; see [Phone access](#/mobile) |
 | Tunnel | When you already have a public address such as a Cloudflare Tunnel; without a tunnel hostname it falls back to local network |
 
-It then asks whether to connect a Feishu bot; see [Feishu](#/feishu).
+It then asks whether to connect a Feishu bot, listing the open-platform steps and the scopes the app needs; see [Feishu](#/feishu). You can skip this and fill it in later under **Settings → Feishu** on the web.
 
 ## 4/4 Safety and demo
 

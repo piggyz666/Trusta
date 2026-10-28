@@ -34,7 +34,13 @@
 
 ## 飞书机器人不回复？
 
-检查 `data/feishu-worker.log` 是否显示已连接；确认已安装 `requirements-channels.txt`；确认在飞书开放平台选择了长连接并发布了版本；确认已用 `python -m scripts.pair --feishu` 绑定。
+按顺序检查：
+
+1. **设置 → 飞书** 是否显示“可用”；点“保存并检测”会直接告诉你 App ID / App Secret 对不对。
+2. 飞书开放平台的**权限管理**里是否开通了 `im:message.p2p_msg:readonly` 和 `im:message:send_as_bot`。漏开时机器人能连上，但收不到或发不出消息。
+3. 事件与回调是否选了长连接、添加了 `im.message.receive_v1`，并且**改完后重新发布了版本**；可用范围是否包含你。
+4. 改完凭据后是否重启了 TRUSTA；`data/feishu-worker.log` 是否显示已连接；是否安装了 `requirements-channels.txt`。
+5. 是否已在 设置 → 飞书 生成绑定码并私聊发给机器人完成绑定。
 
 ## Windows 提示“无法加载脚本，因为在此系统上禁止运行脚本”？
 

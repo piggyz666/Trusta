@@ -29,6 +29,23 @@ from backend.domain import Rejected, uid
 API = "https://open.feishu.cn/open-apis"
 
 
+# What the app needs on 飞书开放平台, shown by the setup wizard, the settings page and the docs (one source).
+SCOPES = (
+    ("im:message.p2p_msg:readonly", "读取用户发给机器人的单聊消息", "收消息"),
+    ("im:message:send_as_bot", "以应用的身份发消息", "回消息、发确认卡片"),
+)
+SETUP_STEPS = (
+    "飞书开放平台 → 创建企业自建应用 → 添加“机器人”能力",
+    "权限管理 → 开通 " + "、".join(s for s, _, _ in SCOPES),
+    "事件与回调 → 事件配置：订阅方式选“使用长连接接收事件”，添加事件 im.message.receive_v1",
+    "事件与回调 → 回调配置：订阅方式选“使用长连接接收回调”，添加卡片回调 card.action.trigger",
+    "版本管理与发布 → 可用范围包含要使用的人 → 发布版本（权限和事件在发布后才生效）",
+    "凭证与基础信息 → 复制 App ID（cli_ 开头）和 App Secret",
+)
+APP_ID_OK = lambda v: isinstance(v, str) and v.startswith("cli_") and 10 <= len(v) <= 64 and v.isascii() and v.replace("_", "").isalnum()
+APP_SECRET_OK = lambda v: isinstance(v, str) and 20 <= len(v) <= 128 and v.isascii() and v.isprintable() and " " not in v
+
+
 class FeishuConfig:
     def __init__(self, app_id="", app_secret="", verification_token="", encrypt_key="", bindings=None, app_url="", mode=None):
         self.app_id, self.app_secret = app_id, app_secret

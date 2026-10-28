@@ -21,7 +21,8 @@ class SettingsAPI:
         s, caps = self.s, self.chat.capabilities
         facts = caps.facts()
         access = getattr(s, "access", None)
-        from backend.channels.feishu import FeishuConfig
+        from importlib.util import find_spec
+        from backend.channels.feishu import SCOPES, SETUP_STEPS, FeishuConfig
         feishu = FeishuConfig.from_env()
         bound = s.db.one("SELECT COUNT(*) AS n FROM channel_bindings WHERE channel='feishu' AND owner=?", (owner,)) if access else None
         security = s.safety.status(owner)
@@ -42,7 +43,10 @@ class SettingsAPI:
             "access": {"mode": access.mode if access else "local", "urls": access.urls(port) if access else {},
                        "devices": access.devices(owner) if access else [], "public_host": getattr(access, "public_host", "")},
             "feishu": {"configured": feishu.enabled, "mode": feishu.mode if feishu.enabled else None, "app_id": feishu.app_id or None,
-                       "available": facts["have"].get("channel.feishu", False), "bound": bool(bound and bound["n"])},
+                       "secret": mask(feishu.app_secret), "token_set": bool(feishu.verification_token),
+                       "encrypt_key_set": bool(feishu.encrypt_key), "sdk_installed": find_spec("lark_oapi") is not None,
+                       "available": facts["have"].get("channel.feishu", False), "bound": bool(bound and bound["n"]),
+                       "scopes": [{"scope": s, "name": n, "used_for": u} for s, n, u in SCOPES], "steps": list(SETUP_STEPS)},
             "security": {"profile": security.get("profile"), "totp_enrolled": security.get("totp_enrolled"),
                          "webauthn_credentials": security.get("webauthn_credentials", []),
                          "locked": bool(security.get("locked")), "daily_limit_minor": security.get("daily_transfer_limit_minor"),
@@ -88,3 +92,46 @@ class SettingsAPI:
         write_env({"TRUSTA_ACCESS_MODE": mode, "TRUSTA_PUBLIC_HOST": public_host if mode == "tunnel" else None})
         self.s.audit.append(None, None, "SETTINGS_ACCESS_CHANGED", "settings", {"mode": mode})
         return {"mode": mode, "restart_required": True}
+
+    FEISHU_KEYS = ("FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_MODE", "FEISHU_VERIFICATION_TOKEN", "FEISHU_ENCRYPT_KEY")
+
+    def update_feishu(self, local, app_id=None, app_secret=None, mode="longconn", verification_token=None, encrypt_key=None,
+                      disable=False):
+        """Feishu app credentials from the settings page (same rules as the setup wizard). The App Secret is never sent back;
+        leaving it empty keeps the saved one. The connection itself starts with TRUSTA, so a restart applies the change."""
+        if not local:
+            raise Rejected("SETTINGS_LOCAL_ONLY")
+        from backend.channels.feishu import APP_ID_OK, APP_SECRET_OK
+        from backend.envfile import write_env
+        if disable:
+            write_env(dict.fromkeys(self.FEISHU_KEYS))
+            for key in self.FEISHU_KEYS:
+                os.environ.pop(key, None)
+            self.s.audit.append(None, None, "SETTINGS_FEISHU_CHANGED", "settings", {"enabled": False})
+            self.chat.capabilities.probe_feishu()
+            return {"status": "NOT_CONFIGURED", "restart_required": True}
+        secret_changed = bool(app_secret)
+        app_secret = app_secret or os.environ.get("FEISHU_APP_SECRET", "")
+        if not APP_ID_OK(app_id) or not APP_SECRET_OK(app_secret) or mode not in {"longconn", "webhook"}:
+            raise Rejected("INVALID_INPUT")
+        updates = {"FEISHU_APP_ID": app_id, "FEISHU_APP_SECRET": app_secret, "FEISHU_MODE": mode}
+        if mode == "webhook":
+            token = verification_token or os.environ.get("FEISHU_VERIFICATION_TOKEN", "")
+            key = encrypt_key if encrypt_key is not None else os.environ.get("FEISHU_ENCRYPT_KEY", "")
+            for value in (token, key):
+                if not isinstance(value, str) or len(value) > 128 or any(c.isspace() or not c.isprintable() for c in value):
+                    raise Rejected("INVALID_INPUT")
+            if not token:
+                raise Rejected("INVALID_INPUT")
+            updates |= {"FEISHU_VERIFICATION_TOKEN": token, "FEISHU_ENCRYPT_KEY": key or None}
+        else:
+            updates |= {"FEISHU_VERIFICATION_TOKEN": None, "FEISHU_ENCRYPT_KEY": None}
+        write_env(updates)
+        for key, value in updates.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+        self.s.audit.append(None, None, "SETTINGS_FEISHU_CHANGED", "settings", {"enabled": True, "mode": mode, "app_id": app_id,
+                                                                                "secret_changed": secret_changed})
+        return self.chat.capabilities.probe_feishu() | {"restart_required": True}

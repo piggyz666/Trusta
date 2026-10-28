@@ -2,6 +2,7 @@
 
 ## 2026-10-28
 
+- Feishu: the App ID / App Secret can be entered in **Settings → Feishu** on the web, and are checked with Feishu as soon as they are saved; the docs, the setup wizard and the settings page list the scopes the app must have (`im:message.p2p_msg:readonly`, `im:message:send_as_bot`) and every step on the open platform.
 - Viewing subscriptions and direct debits is Yellow, as the brief requires: the query is shown and confirmed first, then not asked again for 10 minutes; tests check every tier against the brief.
 - Red operations can be approved with face / fingerprint / security key (WebAuthn), bound to that one operation; the start URL is now `http://localhost:8000`.
 - Real-bank readiness: pages and chat read only through the bank interface; deposits, FX, gold, funds, loans and the credit account run as bank quote → confirmation → signed execution; incoming payments can come from any bank's transaction list.

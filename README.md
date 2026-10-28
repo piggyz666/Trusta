@@ -136,7 +136,7 @@ python -m scripts.setup                              # 配置向导：大模型�
 
 **手机 H5**：在配置向导里把访问方式设为“局域网”，重启后在网页“设置 → 访问与设备”生成配对码，手机连同一 Wi-Fi 扫码即可；可“添加到主屏幕”全屏使用。
 
-**飞书**：向导里填飞书应用凭据（长连接，不需要公网地址），然后 `python -m scripts.pair --feishu` 生成绑定码，在飞书里发给机器人。黄色操作可在飞书内确认，红色操作会引导回 APP 验证。
+**飞书**：在飞书开放平台创建企业自建应用，开通 `im:message.p2p_msg:readonly`（收单聊消息）和 `im:message:send_as_bot`（以应用身份发消息）两项权限，事件与回调选长连接并添加 `im.message.receive_v1` 与卡片回调，发布版本。然后在网页 **设置 → 飞书** 或配置向导里填 App ID / App Secret（长连接，不需要公网地址），重启后生成绑定码，在飞书里私聊发给机器人。完整步骤见 [飞书接入](frontend-app/src/docs/content/zh/feishu.md)。黄色操作可在飞书内确认，红色操作会引导回 APP 验证。
 
 完整文档（安装、配置、授权等级、可信机制、API）在网站的 `/docs.html`，源文件在 `frontend-app/src/docs/content/`。
 

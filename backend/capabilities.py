@@ -38,8 +38,9 @@ REQUIREMENTS = {
     "bank.credit_account": ("银行接口：信用账户", "银行适配器需提供 finance.list / finance.quote 与 finance.card_refund / card_repay / card_surplus"),
     "bank.funds": ("银行接口：基金份额", "银行适配器需提供 finance.list / finance.quote 与 finance.fund_subscribe / fund_confirm / fund_cancel / fund_redeem"),
     "bank.feed": ("银行入账数据", "银行需提供交易流水（transactions.read，含入账方向）；沙箱银行另有实时推送"),
-    "channel.feishu": ("飞书机器人", "运行 python -m scripts.setup 填写 FEISHU_APP_ID / FEISHU_APP_SECRET（默认长连接，无需公网），"
-                                    "pip install lark-oapi，再用 python -m scripts.pair --feishu 绑定账户"),
+    "channel.feishu": ("飞书机器人", "在 设置 → 飞书 填写飞书应用的 App ID / App Secret（或运行 python -m scripts.setup；"
+                                    "默认长连接，无需公网；应用需开通 im:message.p2p_msg:readonly 与 im:message:send_as_bot 权限），"
+                                    "重启后在 设置 → 飞书 生成绑定码绑定账户"),
     "security.strong_auth": ("强验证（TOTP / 短信）", "TRUSTA_SAFETY_PROFILE=competition，或设置 TRUSTA_STRONG_AUTH_SECRET"),
 }
 BANK_TOOLS = {

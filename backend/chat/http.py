@@ -199,6 +199,13 @@ def handle_post(handler, chat, path, body, user_id):
             raise Rejected("INVALID_INPUT")
         from backend.chat.settings_api import SettingsAPI
         return handler.reply(200, SettingsAPI(chat).update_llm(_local(handler), body.get("model"), body.get("api_key")))
+    if parts == ["api", "chat", "settings", "feishu"]:
+        if set(body) - {"app_id", "app_secret", "mode", "verification_token", "encrypt_key", "disable"}:
+            raise Rejected("INVALID_INPUT")
+        from backend.chat.settings_api import SettingsAPI
+        return handler.reply(200, SettingsAPI(chat).update_feishu(_local(handler), body.get("app_id"), body.get("app_secret"),
+                                                                  body.get("mode", "longconn"), body.get("verification_token"),
+                                                                  body.get("encrypt_key"), body.get("disable") is True))
     if parts == ["api", "chat", "settings", "access"]:
         if set(body) - {"mode", "public_host"}:
             raise Rejected("INVALID_INPUT")

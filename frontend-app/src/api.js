@@ -94,6 +94,7 @@ export const api = {
   settings: () => request("/api/chat/settings"),
   updateLlm: (body) => request("/api/chat/settings/llm", body),
   updateAccess: (body) => request("/api/chat/settings/access", body),
+  updateFeishu: (body) => request("/api/chat/settings/feishu", body),
   access: () => request("/api/access"),
   startPairing: (purpose) => request("/api/pairing/start", { purpose }),
   claimPairing: (code, name) => request("/api/pairing/claim", { code, name }),

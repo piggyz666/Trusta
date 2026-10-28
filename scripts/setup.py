@@ -44,8 +44,7 @@ def mask(value):
 
 
 DEEPSEEK_KEY = lambda v: v.startswith("sk-") and len(v) >= 20
-FEISHU_ID = lambda v: v.startswith("cli_") and len(v) >= 10
-FEISHU_SECRET = lambda v: len(v) >= 20 and " " not in v
+from backend.channels.feishu import APP_ID_OK as FEISHU_ID, APP_SECRET_OK as FEISHU_SECRET, SETUP_STEPS as FEISHU_STEPS  # noqa: E402
 HOSTNAME = lambda v: "://" not in v and "/" not in v and "." in v and " " not in v
 
 
@@ -88,7 +87,9 @@ def wizard():
             updates["TRUSTA_ACCESS_MODE"] = "lan"
             print("  没有隧道域名，已改为局域网模式。")
     if ask("接入飞书机器人？(y/n)", "y" if current.get("FEISHU_APP_ID") else "n", choices={"y", "n"}) == "y":
-        print("  飞书开放平台：创建应用 → 开启机器人 → 事件与回调选“使用长连接接收事件” → 添加 im.message.receive_v1 和卡片回调 → 发布版本")
+        print("  先在飞书开放平台完成（漏开权限的话，机器人能连上但收不到也发不出消息）：")
+        for number, step in enumerate(FEISHU_STEPS, 1):
+            print(f"    {number}. {step}")
         updates["FEISHU_APP_ID"] = ask("App ID", current.get("FEISHU_APP_ID", ""), check=FEISHU_ID, hint="以 cli_ 开头")
         updates["FEISHU_APP_SECRET"] = ask("App Secret（输入时不显示）", current.get("FEISHU_APP_SECRET", ""), secret=True,
                                            check=FEISHU_SECRET, hint="开发者后台“凭证与基础信息”里的 App Secret")
@@ -100,7 +101,8 @@ def wizard():
             updates["FEISHU_ENCRYPT_KEY"] = ask("Encrypt Key（没有就回车）", current.get("FEISHU_ENCRYPT_KEY", ""), secret=True) or None
         else:
             updates["FEISHU_VERIFICATION_TOKEN"] = updates["FEISHU_ENCRYPT_KEY"] = None
-        print("  账户绑定：启动后运行 python -m scripts.pair --feishu，把“绑定 123456”私聊发给机器人。")
+        print("  账户绑定：启动后在 设置 → 飞书 点“生成绑定码”（或运行 python -m scripts.pair --feishu），把“绑定 123456”私聊发给机器人。")
+        print("  以后也可以在网页 设置 → 飞书 里修改这些凭据。")
     else:
         for key in ("FEISHU_APP_ID", "FEISHU_APP_SECRET", "FEISHU_VERIFICATION_TOKEN", "FEISHU_ENCRYPT_KEY", "FEISHU_MODE"):
             updates[key] = None

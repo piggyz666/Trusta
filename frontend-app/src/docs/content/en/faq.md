@@ -34,7 +34,13 @@ Check three things: access is set to local network and TRUSTA was restarted; the
 
 ## The Feishu bot doesn't reply.
 
-Check `data/feishu-worker.log` for a successful connection; make sure `requirements-channels.txt` is installed; check that the persistent connection is selected and a version is published on the Feishu Open Platform; make sure you bound your account with `python -m scripts.pair --feishu`.
+Check in this order:
+
+1. Does **Settings → Feishu** say “available”? “Save and check” tells you straight away whether the App ID / App Secret work.
+2. Under **Permissions** on the Feishu Open Platform, are `im:message.p2p_msg:readonly` and `im:message:send_as_bot` granted? Without them the bot connects but cannot receive or send.
+3. Is the persistent connection selected, `im.message.receive_v1` added, and a **new version published after the change**? Does the availability range include you?
+4. Did you restart TRUSTA after changing the credentials? Does `data/feishu-worker.log` show a connection? Is `requirements-channels.txt` installed?
+5. Did you bind your account with a code from Settings → Feishu, sent to the bot in a private chat?
 
 ## Windows says running scripts is disabled on this system.
 

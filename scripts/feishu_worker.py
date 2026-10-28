@@ -4,8 +4,8 @@
 
 Needs FEISHU_APP_ID / FEISHU_APP_SECRET (FEISHU_MODE=longconn, the default when no verification token is set) and the
 official SDK: pip install lark-oapi. In the Feishu open platform: enable the bot, choose “使用长连接接收事件”, add the
-event im.message.receive_v1 and the card callback card.action.trigger, grant im:message + im:message:send_as_bot,
-publish a version.
+event im.message.receive_v1 and the card callback card.action.trigger, grant the scopes in
+backend.channels.feishu.SCOPES (im:message.p2p_msg:readonly + im:message:send_as_bot), publish a version.
 
 The SDK only carries bytes: every event is handed to the same FeishuChannel.process() the webhook uses (dedupe,
 binding check, YELLOW-only buttons, RED → back to the APP), so both transports behave identically.

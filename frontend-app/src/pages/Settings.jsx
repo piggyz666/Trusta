@@ -182,14 +182,76 @@ function Access({ data, reload, toast }) {
 }
 
 function Feishu({ data, reload, toast }) {
-  const [code, setCode] = useState(null);
   const f = data.feishu;
+  const [code, setCode] = useState(null);
+  const [editing, setEditing] = useState(!f.configured);
+  const [form, setForm] = useState({ app_id: f.app_id || "", app_secret: "", mode: f.mode || "longconn", verification_token: "", encrypt_key: "" });
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(null);
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value.trim() });
+  const idOk = /^cli_[A-Za-z0-9_]{6,60}$/.test(form.app_id);
+  const secretOk = form.app_secret ? form.app_secret.length >= 20 : !!f.secret;
+  const tokenOk = form.mode !== "webhook" || !!form.verification_token || f.token_set;
   async function bind() { try { setCode(await api.startPairing("feishu")); } catch (e) { toast(explain(e), "error"); } }
   async function unbind() { try { await api.unbindFeishu(); toast("已解除飞书绑定"); reload(); } catch (e) { toast(explain(e), "error"); } }
+  async function save() {
+    setBusy(true);
+    try {
+      const body = { app_id: form.app_id, mode: form.mode };
+      for (const k of ["app_secret", "verification_token", "encrypt_key"]) if (form[k]) body[k] = form[k];
+      const r = await api.updateFeishu(body);
+      setSaved(r); setForm({ ...form, app_secret: "", verification_token: "", encrypt_key: "" }); setEditing(false); await reload();
+      toast(r.status === "VERIFIED" ? "凭据已验证通过，重启 TRUSTA 后飞书连接生效" : "已保存，但凭据检测未通过：" + (r.detail || r.code || r.status),
+        r.status === "VERIFIED" ? "info" : "error");
+    } catch (e) { toast(explain(e), "error"); } finally { setBusy(false); }
+  }
+  async function disable() {
+    try { await api.updateFeishu({ disable: true }); setSaved(null); setEditing(true); setForm({ ...form, app_id: "", app_secret: "" }); toast("已移除飞书凭据，重启 TRUSTA 后生效"); reload(); }
+    catch (e) { toast(explain(e), "error"); }
+  }
   return (
     <>
-      <Row label="飞书机器人" hint={f.configured ? `应用 ${f.app_id} · ${f.mode === "longconn" ? "长连接（无需公网）" : "事件回调"}` : "未配置：运行 python -m scripts.setup 填写飞书应用凭据"}>
+      <Row label="飞书机器人" hint={f.configured ? `应用 ${f.app_id} · ${f.mode === "longconn" ? "长连接（无需公网）" : "事件回调"}` : "未配置：按下面的步骤创建飞书应用，再填入凭据"}>
         <Tag tone={f.available ? "green" : f.configured ? "amber" : "neutral"}>{f.available ? "可用" : f.configured ? "已配置，未连通" : "未配置"}</Tag></Row>
+      {(editing || !f.configured) && (
+        <div className="feishu-steps">
+          <strong>1. 在飞书开放平台准备应用</strong>
+          <ol>{f.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+          <strong>必须开通的权限</strong>
+          <ul>{f.scopes.map((s) => <li key={s.scope}><code>{s.scope}</code> {s.name}<span className="faint"> · {s.used_for}</span></li>)}</ul>
+          <small className="faint">漏开权限时，机器人能连上，但收不到或发不出消息；改完权限要重新发布版本。</small>
+        </div>
+      )}
+      {editing ? (
+        <>
+          <Row label="App ID" hint={<>“凭证与基础信息”里，以 cli_ 开头{!data.editable && <LocalOnly />}</>}>
+            <input className="input" style={{ width: 220 }} autoComplete="off" placeholder="cli_…" value={form.app_id} disabled={!data.editable} onChange={set("app_id")} /></Row>
+          <Row label="App Secret" hint={f.secret ? `当前：${f.secret}；留空则保持不变` : "只保存在本机 .env 中，不会显示完整内容"}>
+            <input className="input" type="password" style={{ width: 220 }} autoComplete="off" placeholder={f.secret ? "不修改请留空" : "粘贴 App Secret"} value={form.app_secret} disabled={!data.editable} onChange={set("app_secret")} /></Row>
+          <Row label="连接方式" hint={form.mode === "longconn" ? "TRUSTA 主动连飞书，不需要公网地址（推荐）" : "飞书推送到 /api/channels/feishu/webhook，需要公网地址"}>
+            <select className="input" style={{ width: 220 }} value={form.mode} disabled={!data.editable} onChange={set("mode")}>
+              <option value="longconn">长连接</option><option value="webhook">Webhook</option></select></Row>
+          {form.mode === "webhook" && <>
+            <Row label="Verification Token" hint={f.token_set ? "已设置；留空则保持不变" : "“事件与回调 → 加密策略”里"}>
+              <input className="input" type="password" style={{ width: 220 }} autoComplete="off" value={form.verification_token} disabled={!data.editable} onChange={set("verification_token")} /></Row>
+            <Row label="Encrypt Key" hint={f.encrypt_key_set ? "已设置；留空则保持不变" : "可选"}>
+              <input className="input" type="password" style={{ width: 220 }} autoComplete="off" value={form.encrypt_key} disabled={!data.editable} onChange={set("encrypt_key")} /></Row>
+          </>}
+          {form.mode === "longconn" && !f.sdk_installed && <Row label="" hint="长连接需要飞书官方 SDK：在 TRUSTA 目录运行 pip install -r requirements-channels.txt（Windows 便携版已自带）"><Tag tone="amber">缺少 lark-oapi</Tag></Row>}
+          {data.editable && <Row label="">
+            <span style={{ display: "flex", gap: 8 }}>
+              <button className="btn primary small" disabled={busy || !idOk || !secretOk || !tokenOk} onClick={save}>{busy ? "保存并检测中…" : "保存并检测"}</button>
+              {f.configured && <button className="btn small" onClick={() => setEditing(false)}>取消</button>}
+            </span></Row>}
+        </>
+      ) : (
+        <Row label="应用凭据" hint={`App Secret：${f.secret || "未设置"}`}>
+          {data.editable && <span style={{ display: "flex", gap: 8 }}>
+            <button className="btn small" onClick={() => setEditing(true)}>修改</button>
+            <button className="btn small danger" onClick={disable}>移除</button></span>}
+        </Row>
+      )}
+      {saved?.restart_required && <Row label="" hint="飞书连接在 TRUSTA 启动时建立：关闭 TRUSTA 窗口后重新打开即可生效"><Tag tone="amber">需要重启</Tag></Row>}
       <Row label="账户绑定" hint="绑定后可以在飞书里查账、转账；黄色操作可在飞书确认，红色操作会引导回 APP 验证">
         {f.bound ? <button className="btn small danger" onClick={unbind}>解除绑定</button>
           : <button className="btn small" disabled={!f.available || !data.editable} onClick={bind}>生成绑定码</button>}

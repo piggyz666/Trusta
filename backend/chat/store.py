@@ -130,7 +130,7 @@ class ChatStore:
             result.append({"session_id": body["session_id"], "title": body.get("title") or " ".join(first.split())[:24] or "新对话",
                            "channel": body["channel"], "created_at": body["created_at"], "updated_at": body["updated_at"],
                            "messages": sum(1 for m in body["messages"] if m["role"] == "user"),
-                           "pending": len(body["pending"]) + len(body.get("pending_rules", [])),
+                           "pending": len(body["pending"]) + len(body.get("pending_rules", [])) + len(body.get("pending_queries", [])),
                            "active": not body["closed"] and body["expires_at"] > now})
         result.sort(key=lambda s: s["updated_at"], reverse=True)
         return [s for s in result if s["messages"] or s["pending"]][:limit]

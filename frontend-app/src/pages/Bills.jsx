@@ -17,7 +17,7 @@ export default function Bills({ ask }) {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(null);
 
-  const load = () => api.bills().then((d) => { cache = d; setData(d); }).catch((e) => setError(explain(e)));
+  const load = (confirm) => api.bills(confirm).then((d) => { cache = d.requires_confirmation ? null : d; setData(d); }).catch((e) => setError(explain(e)));
   useEffect(() => { load(); }, []);
 
   async function mark(key, state) {
@@ -36,6 +36,15 @@ export default function Bills({ ask }) {
 
   if (error && !data) return <div className="page"><div className="inner"><div className="empty">{error}</div></div></div>;
   if (!data) return <div className="page"><div className="inner muted">读取中…</div></div>;
+  if (data.requires_confirmation) return (
+    <div className="page"><div className="inner">
+      <header className="page-head"><h1>账单与订阅</h1><p>订阅与代扣涉及扣费信息，按权限规则需要你确认后再显示。</p></header>
+      <section className="section panel">
+        <h2>{data.confirm.title} <Tag tone="amber">需你确认</Tag></h2>
+        <dl className="fields">{data.confirm.fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl>
+        <div className="actions"><button className="btn primary" onClick={() => load(true)}>确认查询</button></div>
+      </section>
+    </div></div>);
   const subs = data.items.filter((i) => i.kind === "subscription" || i.kind === "user");
   const debits = data.items.filter((i) => i.kind === "direct_debit");
   const fresh = data.detected.filter((d) => d.state === "NEW");

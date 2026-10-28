@@ -65,6 +65,11 @@ class CapabilityContractTests(unittest.TestCase):
         with self.assertRaises(Rejected):statement_hash(statement()|{'self_granted':True})
 
 
+PROOF_ASSETS = Path(__file__).resolve().parents[1]/'data/anchor-integration/m1-artifacts'
+
+
+@unittest.skipUnless((PROOF_ASSETS/'manifest.json').exists(),
+                     '需要 Groth16 证明资产 data/anchor-integration/m1-artifacts（含证明密钥，体积大，未随仓库发布）；放入后自动运行')
 class ActualGroth16Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

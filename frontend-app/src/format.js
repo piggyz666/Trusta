@@ -53,7 +53,7 @@ export function chatBucket(seconds) {
 export const TIER = {
   GREEN: { label: "直接执行", tone: "green", past: "绿色 · 只读" },
   YELLOW: { label: "需你确认", tone: "amber", past: "黄色 · 本人确认" },
-  RED: { label: "需验证码", tone: "red", past: "红色 · 验证码" },
+  RED: { label: "需强验证", tone: "red", past: "红色 · 强验证" },
 };
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);

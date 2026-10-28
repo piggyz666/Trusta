@@ -53,6 +53,8 @@ class BankingControls:
         self.enabled = config.safety_profile == "competition"
         self.key = hmac.new(config.signing_key, b"banking-safety-v1", hashlib.sha256).digest()
         self.cipher = Fernet(base64.urlsafe_b64encode(self.key))
+        from backend.security.webauthn import WebAuthn
+        self.webauthn = WebAuthn(db, audit, config.signing_key)  # face / fingerprint / security key
         with db.transaction() as conn:
             conn.executescript(SCHEMA)
         with db.transaction() as conn:
@@ -143,6 +145,7 @@ class BankingControls:
             row = conn.execute("SELECT body FROM banking_totp WHERE owner=?", (owner,)).fetchone()
             enrolled = bool(row and self._load(row["body"])["active"])
         return {**state, "profile":self.config.safety_profile, "totp_enrolled":enrolled,
+                "webauthn_credentials":self.webauthn.credentials(owner),
                 "daily_transfer_limit_minor":self.config.daily_transfer_limit, "daily_limit_currency":"CNY",
                 "daily_timezone":"Asia/Shanghai", "foreign_currency_policy":"STRONG_AUTH",
                 "quota_scope":"TRUSTA initiated transfers; not all activity at external banks"}
@@ -285,6 +288,16 @@ class BankingControls:
         if isinstance(code, str) and code.startswith("sms:"):
             reference, error = self._verify_sms(conn, auth, action, code[4:])
             method, counter = "sms", None
+        elif isinstance(code, str) and code.startswith("webauthn:"):
+            self.assert_unlocked(auth["user_id"], conn)
+            reference, error = self.webauthn.verify_assertion(conn, auth["user_id"], auth, digest(action), code[9:])
+            method, counter = "webauthn", None
+            if error:
+                self._failure(conn, auth["user_id"], "authentication", error)
+            else:
+                state = self._user(conn, auth["user_id"])
+                state["authentication_failures"] = 0
+                self._save_user(conn, state)
         else:
             counter, error = self._verify_code(conn, auth["user_id"], code)
             method, reference = "totp", None
@@ -293,7 +306,7 @@ class BankingControls:
         proof = {"authorization_id":auth["authorization_id"],"owner":auth["user_id"],"action_hash":digest(action),
                  "verified_at":time.time(),"expires_at":auth["expires_at"],"counter":counter,"method":method}
         if reference:
-            proof["otp_id"] = reference
+            proof["credential" if method == "webauthn" else "otp_id"] = reference
         self.audit.append_in(conn,action["task_id"],action["action_id"],"STRONG_AUTH_VERIFIED","security",proof)
         return self._pack(proof),None
 
@@ -305,7 +318,7 @@ class BankingControls:
         proof = self._load(auth["strong_auth_proof"])
         return (proof["authorization_id"]==auth["authorization_id"] and proof["owner"]==auth["user_id"]
                 and proof["action_hash"]==auth["action_hash"] and proof["expires_at"]==auth["expires_at"]
-                and auth["created_at"] <= proof["verified_at"] < auth["expires_at"] and proof["method"] in {"totp","sms"})
+                and auth["created_at"] <= proof["verified_at"] < auth["expires_at"] and proof["method"] in {"totp","sms","webauthn"})
 
     def _day(self):
         now = datetime.fromtimestamp(time.time(),timezone(timedelta(hours=8)))

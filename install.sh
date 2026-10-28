@@ -57,4 +57,4 @@ if [ "${TRUSTA_NO_SETUP:-}" != "1" ] && [ ! -f .env ]; then
   if [ -r /dev/tty ]; then .venv/bin/python -m scripts.setup </dev/tty; else .venv/bin/python -m scripts.setup; fi
 fi
 
-printf '\n\033[1m安装完成。\033[0m 启动：\n\n  cd %s && ./start.sh\n\n然后用窗口里打印的 http://127.0.0.1:8000/#token=… 链接打开。\n' "$DIR"
+printf '\n\033[1m安装完成。\033[0m 启动：\n\n  cd %s && ./start.sh\n\n然后用窗口里打印的 http://localhost:8000/#token=… 链接打开。\n' "$DIR"

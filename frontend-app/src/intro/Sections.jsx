@@ -474,7 +474,7 @@ export function Install({ c }) {
           )}
         </div>
       </Reveal>
-      <Reveal as="p" className="after">{t.after[0]} <code>http://127.0.0.1:8000/#token=…</code> {t.after[1]}</Reveal>
+      <Reveal as="p" className="after">{t.after[0]} <code>http://localhost:8000/#token=…</code> {t.after[1]}</Reveal>
     </section>
   );
 }

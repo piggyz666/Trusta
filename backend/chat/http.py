@@ -73,7 +73,14 @@ def handle_get(handler, chat, path, user_id):
         from backend.chat.activity import ActivityFeed
         return handler.reply(200, ActivityFeed(chat).overview(user_id))
     if parts == ["api", "chat", "bills"]:
+        from urllib.parse import parse_qs, urlparse
         from backend.chat.pages import BillsPage
+        from backend.chat.query_consent import card as query_card
+        # 订阅 / 代扣查询是黄色操作：未确认时只返回确认说明，确认后（confirm=1）才读取并显示
+        if not chat.query_consent.active(user_id, "subscriptions"):
+            if (parse_qs(urlparse(handler.path).query).get("confirm") or ["0"])[0] != "1":
+                return handler.reply(200, {"requires_confirmation": True, "confirm": query_card("q-page", "subscriptions")})
+            chat.query_consent.grant(user_id, "subscriptions", {"page": "bills"})
         return handler.reply(200, BillsPage(chat).view(user_id))
     if parts == ["api", "chat", "wealth"]:
         from backend.chat.pages import WealthPage
@@ -118,7 +125,7 @@ def handle_post(handler, chat, path, body, user_id):
     if parts[:3]==["api","chat","finance"]:
         from backend.banking.finance import Finance
         f=Finance(chat)
-        methods={'create':f.create,'proposal':f.propose,'decide':f.decide,'sms':f.sms,'archive':f.archive}
+        methods={'create':f.create,'proposal':f.propose,'decide':f.decide,'sms':f.sms,'webauthn':f.webauthn,'archive':f.archive}
         if len(parts)!=4 or parts[-1] not in methods:raise Rejected('INVALID_INPUT')
         return handler.reply(200,methods[parts[-1]](user_id,body))
     if parts in [["api","chat","profile"],["api","chat","plans"],["api","chat","plans","update"]]:
@@ -216,6 +223,10 @@ def handle_post(handler, chat, path, body, user_id):
             raise Rejected("INVALID_INPUT")
         return handler.reply(200, chat.decide(session_id, user_id, parts[5], body.get("action_hash"), body["approve"],
                                               body.get("verification")))
+    if len(parts) == 7 and operation == "actions" and parts[6] == "webauthn":
+        if body:
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.webauthn_options(session_id, user_id, parts[5]))
     if len(parts) == 7 and operation == "actions" and parts[6] == "sms":
         if body:
             raise Rejected("INVALID_INPUT")
@@ -236,6 +247,10 @@ def handle_post(handler, chat, path, body, user_id):
         if set(body) != {"bundle_hash", "approve"} or type(body["approve"]) is not bool:
             raise Rejected("INVALID_INPUT")
         return handler.reply(200, chat.decide_rule(session_id, user_id, parts[5], body["bundle_hash"], body["approve"]))
+    if len(parts) == 7 and operation == "queries" and parts[6] == "decision":
+        if set(body) != {"approve"} or type(body["approve"]) is not bool:
+            raise Rejected("INVALID_INPUT")
+        return handler.reply(200, chat.decide_query(session_id, user_id, parts[5], body["approve"]))
     if len(parts) == 5 and operation == "protection":
         if set(body) - {"hours"} or type(body.get("hours", 24)) is not int:
             raise Rejected("INVALID_INPUT")

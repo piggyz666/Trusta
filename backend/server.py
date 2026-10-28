@@ -360,6 +360,13 @@ def create_server(service, token, port=8000, identities=None, *, max_workers=64,
                     return self.reply(201,service.safety.begin_enrollment(user_id))
                 if parts == ['api','security','totp','confirm'] and set(body)=={'code'}:
                     return self.reply(200,service.safety.confirm_enrollment(user_id,body['code']))
+                if parts == ['api','security','webauthn','register'] and not body:
+                    if not service.safety.enabled: raise Rejected('COMPETITION_SAFETY_DISABLED')
+                    return self.reply(200,service.safety.webauthn.begin_registration(user_id,self.headers.get('Origin','')))
+                if parts == ['api','security','webauthn','finish']:
+                    return self.reply(200,service.safety.webauthn.finish_registration(user_id,body))
+                if parts == ['api','security','webauthn','remove'] and set(body)=={'id'}:
+                    return self.reply(200,service.safety.webauthn.remove(user_id,body['id']))
                 if parts == ['api','security','unlock'] and set(body)=={'reason'}:
                     return self.reply(200,service.safety.unlock(user_id,self.headers.get('X-TRUSTA-Operator',''),body['reason']))
                 if parts==['api','graphs'] and hasattr(service,'graphs'):
@@ -518,7 +525,7 @@ def main():
     if chat is not None:
         mode = "DeepSeek（" + chat.llm.model + "）" if getattr(chat.llm, "available", False) else "规则兜底（未配置 DEEPSEEK_API_KEY）"
         print("对话理解：" + mode)
-    print(f"打开 http://127.0.0.1:8000/#token={token}")
+    print(f"打开 http://localhost:8000/#token={token}")
     access = service.access
     if access.warning:
         print("注意：" + access.warning)

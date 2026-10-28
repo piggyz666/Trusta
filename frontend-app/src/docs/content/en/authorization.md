@@ -4,9 +4,9 @@ TRUSTA puts every operation into one of three tiers. The backend policy engine d
 
 | Tier | How it's authorised | Typical operations |
 |---|---|---|
-| Green | Runs directly | Balances, spending, subscriptions, comparing investments, the risk questionnaire |
-| Yellow | You tap Confirm on the card | Transfers, freezing a card, cancelling a subscription or direct debit, locking wish-fund money, updating your risk level |
-| Red | Confirm + SMS or authenticator code | Large transfers, new payees, reporting a card lost and cancelling it, unfreezing, PIN reset, raising a limit, enabling a card control, buying or redeeming investments |
+| Green | Runs directly | Balances, spending, comparing investments, the risk questionnaire |
+| Yellow | You tap Confirm on the card | Small transfers, viewing subscriptions and direct debits (not asked again for 10 minutes), cancelling a subscription or direct debit, applying for a virtual card, freezing a card, locking wish-fund money, updating your risk level |
+| Red | Confirm + face / fingerprint / security key, or an SMS or authenticator code | Large transfers, new payees, reporting a card lost and cancelling it, unfreezing, PIN reset, raising a limit, enabling a card control, buying or redeeming investments |
 
 ## When a transfer turns red
 
@@ -20,9 +20,10 @@ Any one of these requires a code:
 
 Cards and other operations: unfreezing, reporting lost, cancelling a lost report, resetting a PIN, adding a payee, raising a spending limit, enabling a card control, and any amount of ¥5,000 or more are red. Under the `competition` safety profile, buying and redeeming investments are red too.
 
-## Codes
+## Verification
 
-- Use an authenticator code (TOTP) or an SMS code. In demo mode SMS is simulated and the code appears on the page's “simulated phone”.
+- **Face / fingerprint / security key (recommended)**: register this device under Settings → Security (phone or laptop face or fingerprint unlock, Windows Hello, or a USB / NFC security key). For a red operation, follow the device prompt. The signature is bound to that one operation; it has to be a real user verification (face, fingerprint or PIN), not just a touch. Browsers allow it only over https or `http://localhost`; when opened through a LAN IP, use a code instead.
+- Or use an authenticator code (TOTP) or an SMS code. In demo mode SMS is simulated and the code appears on the page's “simulated phone”.
 - SMS codes are valid for **5 minutes**, allow **3** attempts and only work for that one operation.
 - **5** failed verifications in a row lock the account for safety (`TRUSTA_AUTH_FAILURE_LIMIT`).
 - Enter codes only on the confirmation card, never in chat.

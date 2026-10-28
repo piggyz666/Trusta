@@ -41,7 +41,7 @@ Run `python -m scripts.setup` any time to change it. See [First-run setup](#/set
 .\start.ps1         # Windows, or double-click TRUSTA.cmd
 ```
 
-The window prints a `http://127.0.0.1:8000/#token=…` link; open it in your browser. The token is this computer's access credential — don't share it.
+The window prints a `http://localhost:8000/#token=…` link; open it in your browser. The token is this computer's access credential — don't share it.
 
 ## 4. Try a few sentences
 

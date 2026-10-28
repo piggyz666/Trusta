@@ -41,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/piggyz666/Trusta/main/install.sh | 
 .\start.ps1         # Windows，或者双击 TRUSTA.cmd
 ```
 
-窗口里会打印一条 `http://127.0.0.1:8000/#token=…` 链接，用浏览器打开。链接里的 token 是本机访问凭证，不要发给别人。
+窗口里会打印一条 `http://localhost:8000/#token=…` 链接，用浏览器打开。链接里的 token 是本机访问凭证，不要发给别人。
 
 ## 4. 试几句话
 

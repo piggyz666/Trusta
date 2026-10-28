@@ -239,9 +239,16 @@ class Finance:
         if set(b)-{'task_id','action_id','action_hash','approve','verification'} or not {'task_id','action_id','action_hash','approve'}<=set(b) or type(b['approve']) is not bool:raise Rejected('INVALID_INPUT')
         self.owned_task(owner,b['task_id']);secret='';v=b.get('verification')
         if v is not None:
-            if not isinstance(v,dict) or set(v)!={'method','code'} or v['method'] not in {'TOTP','SMS','DEMO_SECRET'} or not isinstance(v['code'],str) or not 1<=len(v['code'])<=64:raise Rejected('INVALID_VERIFICATION')
-            secret=('sms:' if v['method']=='SMS' else '')+v['code']
+            if not isinstance(v,dict) or set(v)!={'method','code'} or v['method'] not in {'TOTP','SMS','DEMO_SECRET','WEBAUTHN'} or not isinstance(v['code'],str) or not 1<=len(v['code'])<=(8192 if v['method']=='WEBAUTHN' else 64):raise Rejected('INVALID_VERIFICATION')
+            secret={'SMS':'sms:','WEBAUTHN':'webauthn:'}.get(v['method'],'')+v['code']
         return self.result(owner,self.s.banking.authorize(b['task_id'],owner,b['action_hash'],b['approve'],secret,b['action_id']))
+
+    def webauthn(self,owner,b):
+        if set(b)!={'task_id','action_id'}:raise Rejected('INVALID_INPUT')
+        task=self.owned_task(owner,b['task_id'])
+        record=next((r for r in task['action_records'] if r['action']['action_id']==b['action_id']),None)
+        if not record or not record.get('authorization') or record['status']!='WAITING_USER':raise Rejected('ACTION_NOT_PENDING')
+        return self.s.safety.webauthn.request_options(owner,record['authorization'])
 
     def sms(self,owner,b):
         if set(b)!={'task_id','action_id'}:raise Rejected('INVALID_INPUT')

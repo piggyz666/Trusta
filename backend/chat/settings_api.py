@@ -44,6 +44,7 @@ class SettingsAPI:
             "feishu": {"configured": feishu.enabled, "mode": feishu.mode if feishu.enabled else None, "app_id": feishu.app_id or None,
                        "available": facts["have"].get("channel.feishu", False), "bound": bool(bound and bound["n"])},
             "security": {"profile": security.get("profile"), "totp_enrolled": security.get("totp_enrolled"),
+                         "webauthn_credentials": security.get("webauthn_credentials", []),
                          "locked": bool(security.get("locked")), "daily_limit_minor": security.get("daily_transfer_limit_minor"),
                          "protection": protection and {"until": protection["until"], "reason": protection["reason"]},
                          "sms_demo": os.environ.get("TRUSTA_DEMO_MODE", "false").lower() == "true"},

@@ -46,6 +46,8 @@ class ChatService(AutomationMixin):
         from backend.capabilities import CapabilityRegistry
         self.capabilities = service.deployment_capabilities = CapabilityRegistry(service, self)
         self._llm_gate = threading.BoundedSemaphore(max(1, int(os.environ.get("TRUSTA_CHAT_LLM_CONCURRENCY", "4"))))
+        from backend.chat.query_consent import QueryConsent
+        self.query_consent = QueryConsent(service)
         # The bundled sandbox bank quotes gold / FX from the same public market feed TRUSTA displays (one cache per server).
         # A real bank prices with its own feed; nothing here is used for it.
         try:
@@ -126,7 +128,8 @@ class ChatService(AutomationMixin):
                 "channel": body["channel"], "default_account_id": body["default_account_id"],
                 "accounts": body["accounts"], "llm_mode": "deepseek" if getattr(self.llm, "available", False) else "rules",
                 "messages": [{k: m[k] for k in ("role", "text", "at", "message_id", "cards", "fallback_reason") if k in m} for m in body["messages"]],
-                "pending": [p["card"] for p in body["pending"]] + [p["card"] for p in body.get("pending_rules", [])]}
+                "pending": [p["card"] for p in body["pending"]] + [p["card"] for p in body.get("pending_rules", [])]
+                           + [p["card"] for p in body.get("pending_queries", [])]}
 
     def get(self, session_id, owner):
         body = self.store.get(session_id, owner)
@@ -480,6 +483,21 @@ class ChatService(AutomationMixin):
                 texts.append(f"已为你找到“{knowledge.PAGES[args['page']]}”入口，点击下方按钮打开。没有发起任何交易")
             elif name == "out_of_scope":
                 texts.append("我只处理 TRUSTA 站内银行业务和生活服务导航，不处理其他领域的任务。" + SMALLTALK["CAPABILITIES"])
+        # 4b. YELLOW queries (subscriptions / direct debits): shown only after the customer confirms on a card
+        from backend.chat.query_consent import scope_of, card as query_card
+        gated = {}
+        for step in steps:
+            scope = scope_of(step.get("tool"))
+            if scope and not self.query_consent.active(owner, scope):
+                gated.setdefault(scope, []).append(step)
+        for scope, held in gated.items():
+            steps = [s for s in steps if s not in held]
+            query_id = "q-" + uid()
+            confirm = query_card(query_id, scope)
+            body.setdefault("pending_queries", []).append({"query_id": query_id, "scope": scope, "steps": held, "goal": text,
+                                                           "account": account, "card": confirm})
+            cards.append(confirm)
+            texts.append(f"查询{confirm['fields'][0]['value']}属于需要确认的操作，请在卡片上点“确认查询”")
         # 5. execute reads, register proposals
         renderer = CardRenderer(self.s, owner, catalog)
         goal = text
@@ -691,6 +709,8 @@ class ChatService(AutomationMixin):
         body["pending"] = []
         count += self._drop_queue(body, None, everything=True)
         count += self._cancel_rule_drafts(body, owner)
+        count += len(body.get("pending_queries", []))
+        body["pending_queries"] = []
         return count
 
     BALANCE_OPERATIONS = {"LOAN_DRAW","INSTALLMENT_START","CREDIT_REPAY","CREDIT_SETTLE","GOLD_BUY","GOLD_SELL","TRANSFER", "INVESTMENT_PURCHASE", "INVESTMENT_REDEEM", "FUND_LOCK", "FUND_RELEASE"}
@@ -875,16 +895,45 @@ class ChatService(AutomationMixin):
         return [{"kind": "read" if read else "propose", "tool": "rules:" + kind.lower(), "normalized": intent}], []
 
     # ---- decisions ---------------------------------------------------------------------------
+    def decide_query(self, session_id, owner, query_id, approve):
+        """Confirm or decline a YELLOW query card; on confirm the held reads run now."""
+        if type(approve) is not bool:
+            raise Rejected("INVALID_INPUT")
+        body = self.store.get(session_id, owner)
+        entry = next((p for p in body.get("pending_queries", []) if p["query_id"] == query_id), None)
+        if not entry:
+            raise Rejected("ACTION_NOT_PENDING")
+        body["pending_queries"] = [p for p in body["pending_queries"] if p["query_id"] != query_id]
+        cards, texts = [], []
+        if approve:
+            self.query_consent.grant(owner, entry["scope"], {"session_id": session_id, "query_id": query_id})
+            renderer = CardRenderer(self.s, owner, self.catalog(owner))
+            for step in entry["steps"]:
+                try:
+                    task = self._run(entry["goal"], owner, entry["account"], step["normalized"])
+                    new_cards, new_texts = renderer.task_cards(task, step)
+                    cards.extend(new_cards), texts.extend(new_texts)
+                except Rejected as exc:
+                    texts.append("查询没有完成：" + self._error(exc.code))
+        else:
+            texts.append("好的，没有查询。")
+        text = "".join(t if t.endswith(("。", "？", "！")) else t + "。" for t in texts) or "已完成查询。"
+        message_id = "query-" + query_id[-10:]
+        body["messages"].append({"role": "assistant", "message_id": message_id, "text": text, "cards": cards, "at": time.time()})
+        body = self.store.save(body)
+        return {"session_id": session_id, "message_id": message_id, "revision": body["revision"], "state": self._state(body),
+                "reply": {"text": text, "cards": cards}, "plan": body.get("plan")}
+
     def decide(self, session_id, owner, action_id, action_hash, approve, verification=None):
         if type(approve) is not bool or not isinstance(action_hash, str):
             raise Rejected("INVALID_INPUT")
         secret = ""
         if verification is not None:
             if (not isinstance(verification, dict) or set(verification) != {"method", "code"}
-                    or verification["method"] not in {"TOTP", "SMS", "DEMO_SECRET"} or not isinstance(verification["code"], str)
-                    or not 0 < len(verification["code"]) <= 64):
+                    or verification["method"] not in {"TOTP", "SMS", "DEMO_SECRET", "WEBAUTHN"} or not isinstance(verification["code"], str)
+                    or not 0 < len(verification["code"]) <= (8192 if verification["method"] == "WEBAUTHN" else 64)):
                 raise Rejected("INVALID_VERIFICATION")
-            secret = ("sms:" if verification["method"] == "SMS" else "") + verification["code"]
+            secret = {"SMS": "sms:", "WEBAUTHN": "webauthn:"}.get(verification["method"], "") + verification["code"]
         body = self.store.get(session_id, owner)
         entry = next((p for p in body["pending"] if p["action_id"] == action_id), None)
         if not entry:
@@ -898,11 +947,12 @@ class ChatService(AutomationMixin):
             else:
                 task = self.s.authorize(entry["task_id"], owner, action_hash, approve, secret)
         except Rejected as exc:
-            retry = exc.code.startswith(("TOTP_", "STRONG_AUTH", "SMS_")) and exc.code != "TOTP_NOT_ENROLLED"
+            retry = exc.code.startswith(("TOTP_", "STRONG_AUTH", "SMS_", "WEBAUTHN_")) and exc.code != "TOTP_NOT_ENROLLED"
             texts = {"TOTP_NOT_ENROLLED": "你还没有绑定认证器，可以改用短信验证码完成验证。",
                      "SMS_NOT_SENT_OR_EXPIRED": "短信验证码未发送或已过期，请重新获取。",
                      "BANKING_SECURITY_LOCKED": "验证失败次数过多，账户已安全锁定，请联系客服解锁。"}
-            text = texts.get(exc.code, "验证码不正确或已过期，请重新输入。" if retry else "这项操作已失效，请重新发起。")
+            text = texts.get(exc.code, ("刷脸 / 指纹 / 安全密钥验证未通过，请重试，或改用验证码。" if exc.code.startswith("WEBAUTHN_")
+                                        else "验证码不正确或已过期，请重新输入。") if retry else "这项操作已失效，请重新发起。")
             if not retry and exc.code not in {"TOTP_NOT_ENROLLED"}:
                 body["pending"] = [p for p in body["pending"] if p["action_id"] != action_id]
             self.s.audit.append(entry["task_id"], action_id, "CHAT_DECISION_REJECTED", "chat",
@@ -1178,6 +1228,27 @@ class ChatService(AutomationMixin):
             raise Rejected("TRACE_NOT_FOUND")
         return {"bundle": self.s.handoffs.export(task_id, owner), "public_registry": self.s.crypto_registry.snapshot(),
                 "verify_with": "python -m scripts.verify_handoff_evidence bundle.json --trusted-registry registry.json"}
+
+    def _pending_authorization(self, session_id, owner, action_id):
+        body = self.store.get(session_id, owner)
+        entry = next((p for p in body["pending"] if p["action_id"] == action_id), None)
+        if not entry:
+            raise Rejected("ACTION_NOT_PENDING")
+        task = self.s.get_task(entry["task_id"], owner)
+        if "action_records" in task:
+            record = next((e for e in task["action_records"] if e["action"]["action_id"] == action_id), None)
+            auth = record and record.get("authorization")
+        else:
+            auth = task.get("authorization")
+        if not auth or auth.get("status") != "PENDING_STRONG_AUTH":
+            raise Rejected("ACTION_NOT_PENDING")
+        return auth
+
+    def webauthn_options(self, session_id, owner, action_id):
+        """Face / fingerprint / security-key challenge for a RED card, bound to that card's authorization only."""
+        if not self.s.safety.enabled:
+            raise Rejected("COMPETITION_SAFETY_DISABLED")
+        return self.s.safety.webauthn.request_options(owner, self._pending_authorization(session_id, owner, action_id))
 
     def send_sms(self, session_id, owner, action_id):
         """Simulated SMS second factor for a RED card. The code is bound to that card's authorization only."""

@@ -1,3 +1,4 @@
+import { createCredential, webauthnStatus } from '../webauthn.js';
 import {PersonalProfile} from "../components/PersonalLife.jsx";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
@@ -209,17 +210,32 @@ function Security({ data, reload, toast }) {
   async function confirm() {
     try { await api.confirmTotp(otp); setEnroll(null); setOtp(""); toast("验证器已绑定，红色操作可以用它验证"); reload(); } catch (e) { toast(explain(e), "error"); }
   }
+  const support = webauthnStatus();
+  async function registerBiometric() {
+    try {
+      const options = await api.webauthnRegister();
+      await api.webauthnFinish({ ...(await createCredential(options)), label: navigator.platform || "本机" });
+      toast("已登记刷脸 / 指纹 / 安全密钥，红色操作可以直接用它验证"); reload();
+    } catch (e) { toast(e?.name === "NotAllowedError" ? "已取消" : explain(e), "error"); }
+  }
+  async function removeBiometric(id) { try { await api.webauthnRemove(id); reload(); } catch (e) { toast(explain(e), "error"); } }
   async function protect() {
     try { const r = await api.protectAccount(hours); toast(`转账保护已开启，到 ${dateTime(r.until)}`); reload(); } catch (e) { toast(explain(e), "error"); }
   }
   return (
     <>
-      <Row label="权限分级" hint="绿色：只读，直接执行；黄色：涉及资金或卡片，需要你在卡片上确认；红色：大额、新收款人、挂失等，需要验证码">
+      <Row label="权限分级" hint="绿色：只读，直接执行；黄色：小额转账、订阅查询与取消、虚拟卡申请等，需要你在卡片上确认；红色：大额、新收款人、挂失、改密码、理财申购等，需要刷脸 / 指纹或验证码">
         <span style={{ display: "flex", gap: 6 }}><Tag tone="green">绿</Tag><Tag tone="amber">黄</Tag><Tag tone="red">红</Tag></span></Row>
       <Row label="安全档位" hint={sec.profile === "competition" ? "强验证已开启" : "基础档：建议开启强验证"}><Tag tone={sec.profile === "competition" ? "green" : "amber"}>{sec.profile}</Tag></Row>
       <Row label="每日转账限额" hint="按北京时间自然日累计，只统计经 TRUSTA 发起的转账"><span className="num">{yuan(sec.daily_limit_minor)}</span></Row>
       <Row label="验证器（TOTP）" hint={sec.sms_demo ? "演示模式下也可用短信验证码（验证码直接显示在卡片上）" : "用手机验证器 App 生成 6 位动态码"}>
         {sec.totp_enrolled ? <Tag tone="green">已绑定</Tag> : <button className="btn small" disabled={sec.profile !== "competition"} onClick={start}>绑定验证器</button>}
+      </Row>
+      <Row label="刷脸 / 指纹 / 安全密钥" hint={support.ok ? "用设备的人脸、指纹解锁，或 U 盾类安全密钥完成红色操作的验证；每次签名只对一笔操作有效" : support.reason}>
+        <span style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+          {(sec.webauthn_credentials || []).map((c) => <Tag key={c.id} tone="green">{c.label} <button className="icon-btn" aria-label="移除" onClick={() => removeBiometric(c.id)}>×</button></Tag>)}
+          <button className="btn small" disabled={sec.profile !== "competition" || !support.ok} onClick={registerBiometric}>{(sec.webauthn_credentials || []).length ? "再登记一个" : "登记本机"}</button>
+        </span>
       </Row>
       {enroll && (
         <div style={{ display: "flex", gap: 20, padding: "6px 0 16px", flexWrap: "wrap", alignItems: "center" }}>

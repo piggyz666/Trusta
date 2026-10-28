@@ -61,6 +61,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
   useEffect(() => { const el = threadRef.current; if (el) el.scrollTop = el.scrollHeight; }, [view, optimistic, stages]);
 
   const pendingIds = useMemo(() => new Set((view?.pending || []).filter((c) => c.type === "confirm").map((c) => c.action_id)), [view]);
+  const pendingQueryIds = useMemo(() => new Set((view?.pending || []).filter((c) => c.type === "query_confirm").map((c) => c.query_id)), [view]);
   const pendingRuleIds = useMemo(() => new Set((view?.pending || []).filter((c) => c.type === "automation_confirm").map((c) => c.bundle_id)), [view]);
 
   async function send(text) {
@@ -102,7 +103,7 @@ export default function Chat({ sessionId, onSessionCreated, onChanged, navigate,
     try { await api.interrupt(view.session_id, view.revision); await load(); } catch (error) { toast(explain(error), "error"); }
   }
 
-  const ctx = { sessionId: view?.session_id, pendingIds, pendingRuleIds, send, reload: () => { load(currentId.current); onChanged?.(); },
+  const ctx = { sessionId: view?.session_id, pendingIds, pendingRuleIds, pendingQueryIds, send, reload: () => { load(currentId.current); onChanged?.(); },
     navigate, openEvidence: (taskId) => openEvidence(view?.session_id, taskId), openProof };
 
   const messages = view?.messages || [];

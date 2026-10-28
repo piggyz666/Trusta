@@ -104,7 +104,10 @@ class CardRenderer:
     def _verification(self, decision):
         if decision != "STRONG_AUTH":
             return []
-        return ["TOTP", "SMS"] if self.s.safety.enabled else ["DEMO_SECRET"]
+        if not self.s.safety.enabled:
+            return ["DEMO_SECRET"]
+        # Face / fingerprint / security key first when the customer has registered one (browser support is checked on the device).
+        return (["WEBAUTHN"] if self.s.safety.webauthn.credentials(self.owner) else []) + ["TOTP", "SMS"]
 
     # ---- confirmation ------------------------------------------------------------------------
     def action_fields(self, action, account_snapshot=None):

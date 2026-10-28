@@ -67,7 +67,7 @@ def build(embed_zip: Path, out_dir: Path, py_version: str, name: str) -> Path:
     (stage / "README-先读我.txt").write_text(
         "TRUSTA 便携版（Windows x64）\r\n\r\n"
         "1. 双击 TRUSTA.cmd。首次运行会打开配置向导（大模型、银行、访问方式、安全），全部可以直接回车用默认值。\r\n"
-        "2. 窗口里会打印 http://127.0.0.1:8000/#token=… ，用浏览器打开即可。\r\n"
+        "2. 窗口里会打印 http://localhost:8000/#token=… ，用浏览器打开即可。\r\n"
         "3. 关闭窗口即停止 TRUSTA。数据保存在本文件夹的 data\\ 里。\r\n\r\n"
         "已自带 Python，不需要另外安装任何东西。\r\n", encoding="utf-8")
 

@@ -174,6 +174,14 @@ class ChatServiceTests(unittest.TestCase):
     def cards(self, turn, kind):
         return [c for c in turn["reply"]["cards"] if c["type"] == kind]
 
+    def confirm_query(self, turn, approve=True):
+        """Subscription / direct-debit queries are YELLOW (赛题权限表): confirm the query card, get the held results."""
+        card = self.cards(turn, "query_confirm")[0]
+        self.assertEqual(card["risk_level"], "YELLOW")
+        result = self.chat.decide_query(self.session["session_id"], "demo", card["query_id"], approve)
+        self.rev = result["revision"]
+        return result
+
     def balance(self):
         return self.s.transaction.balance("demo", "acct-demo")["balance"]
 
@@ -227,10 +235,20 @@ class ChatServiceTests(unittest.TestCase):
         report = self.cards(turn, "report")[0]
         self.assertEqual(report["summary"]["total_minor"], 542500)
         self.assertIn("¥5,425.00", turn["reply"]["text"])
-        subs = self.say("我有哪些订阅", [call("list_subscriptions", detect=True)])
+        asked = self.say("我有哪些订阅", [call("list_subscriptions", detect=True)])
+        self.assertFalse(self.cards(asked, "report"))  # nothing shown before the query is confirmed
+        subs = self.confirm_query(asked)
         self.assertEqual(len(self.cards(subs, "report")[0]["items"]), 2)
+        again = self.say("我的订阅", [call("list_subscriptions", detect=True)])
+        self.assertTrue(self.cards(again, "report"))  # confirmed a moment ago: not asked twice
         cancel = self.say("取消视频会员", [call("propose_subscription_cancel", subscriptions=[{"id": "sub-stream", "span": "视频会员"}])])
         self.assertEqual(self.cards(cancel, "confirm")[0]["action_type"], "SUBSCRIPTION_CANCEL")
+
+    def test_declined_subscription_query_shows_nothing(self):
+        turn = self.confirm_query(self.say("我有哪些订阅", [call("list_subscriptions", detect=True)]), approve=False)
+        self.assertFalse(self.cards(turn, "report"))
+        self.assertIn("没有查询", turn["reply"]["text"])
+        self.assertTrue(self.cards(self.say("我有哪些订阅", [call("list_subscriptions", detect=True)]), "query_confirm"))
 
     def test_card_lost_is_red(self):
         card = self.cards(self.say("我的卡丢了", [call("propose_card_operation", op="REPORT_LOST")]), "confirm")[0]
@@ -238,7 +256,7 @@ class ChatServiceTests(unittest.TestCase):
         self.assertTrue(card["required_verification"])
 
     def test_subscription_review_has_report_and_cards(self):
-        turn = self.say("上个月哪些订阅可以取消", [call("review_subscriptions", month="2026-09")])
+        turn = self.confirm_query(self.say("上个月哪些订阅可以取消", [call("review_subscriptions", month="2026-09")]))
         self.assertEqual(self.cards(turn, "report")[0]["report_type"], "SUBSCRIPTIONS")
         self.assertEqual(len(self.cards(turn, "confirm")), 2)
         self.assertIn("逐项决定", turn["reply"]["text"])

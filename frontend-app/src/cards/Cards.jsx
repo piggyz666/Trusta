@@ -3,6 +3,7 @@ import { api, explain } from "../api.js";
 import { Bars, Columns, Donut } from "../components/Charts.jsx";
 import { Icon, Tag, useToast } from "../components/ui.jsx";
 import { TIER, dateOnly, dateTime, yuan } from "../format.js";
+import { getAssertion, webauthnStatus } from "../webauthn.js";
 import { safeLink } from "../life.js";
 
 // Every card is interactive, but anything that changes money or account state is turned into a *message* (so it goes
@@ -23,6 +24,7 @@ export function Card({ card, ctx }) {
     case "life": return <LifeCard card={card} />;
     case "questionnaire": return <QuestionnaireCard card={card} ctx={ctx} />;
     case "automation_confirm": return <RuleCard card={card} ctx={ctx} />;
+    case "query_confirm": return <QueryCard card={card} ctx={ctx} />;
     case "handoff": return <HandoffCard card={card} />;
     default: return null;
   }
@@ -55,7 +57,8 @@ function ConfirmCard({ card, ctx }) {
   const red = card.risk_level === "RED";
   const toast = useToast();
   const [busy, setBusy] = useState(false);
-  const [method, setMethod] = useState("SMS");
+  const biometric = card.required_verification?.includes("WEBAUTHN") && webauthnStatus().ok;
+  const [method, setMethod] = useState(biometric ? "WEBAUTHN" : "SMS");
   const [code, setCode] = useState("");
   const [sms, setSms] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -66,7 +69,10 @@ function ConfirmCard({ card, ctx }) {
   async function decide(approve) {
     setBusy(true);
     try {
-      const verification = approve && red ? { method, code: code.trim() } : undefined;
+      let verification = approve && red ? { method, code: code.trim() } : undefined;
+      if (verification && method === "WEBAUTHN") {
+        verification = { method, code: await getAssertion(await api.webauthnOptions(ctx.sessionId, card.action_id)) };
+      }
       const result = await api.decide(ctx.sessionId, card, approve, verification);
       if (result.error) toast(result.reply.text, "error");
       ctx.reload();
@@ -118,15 +124,16 @@ function ConfirmCard({ card, ctx }) {
             <div className="row">
               <span className="muted" style={{ fontSize: 13 }}>验证方式</span>
               <div className="segmented" role="group">
+                {biometric && <button aria-pressed={method === "WEBAUTHN"} onClick={() => setMethod("WEBAUTHN")}>刷脸 / 指纹</button>}
                 <button aria-pressed={method === "SMS"} onClick={() => setMethod("SMS")}>短信验证码</button>
                 <button aria-pressed={method === "TOTP"} onClick={() => setMethod("TOTP")}>认证器动态码</button>
               </div>
             </div>
-            <div className="row">
+            {method === "WEBAUTHN" ? <div className="row muted" style={{ fontSize: 13 }}>点“验证并确认”后，按设备提示刷脸、按指纹或插入安全密钥；签名只对这一笔有效。</div> : <div className="row">
               <input className="input otp num" inputMode="numeric" maxLength={6} value={code} placeholder="••••••" aria-label="6 位验证码"
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} />
               {method === "SMS" && <button className="btn small" onClick={sendSms}>{sms ? "重新发送" : "发送验证码"}</button>}
-            </div>
+            </div>}
             {sms?.dev_code && <div className="phone-toast">模拟手机 · 短信：【TRUSTA】验证码 <b className="num">{sms.dev_code}</b>，仅用于本笔操作。</div>}
           </div>
         )}
@@ -134,7 +141,7 @@ function ConfirmCard({ card, ctx }) {
       <div className="card-foot">
         {pending ? (
           <>
-            <button className="btn primary" disabled={busy || (red && code.length !== 6)} onClick={() => decide(true)}>{red ? "验证并确认" : "确认"}</button>
+            <button className="btn primary" disabled={busy || (red && method !== "WEBAUTHN" && code.length !== 6)} onClick={() => decide(true)}>{red ? "验证并确认" : "确认"}</button>
             <button className="btn ghost" disabled={busy} onClick={() => decide(false)}>拒绝</button>
             <span className="spacer" />
             <Countdown until={card.expires_at} />
@@ -518,6 +525,30 @@ function RuleCard({ card, ctx }) {
         {pending ? <>
           <button className="btn primary" disabled={busy} onClick={() => decide(true)}>启用规则</button>
           <button className="btn ghost" disabled={busy} onClick={() => decide(false)}>不用了</button>
+        </> : <span className="muted" style={{ fontSize: 13 }}>已处理</span>}
+      </div>
+    </article>
+  );
+}
+
+function QueryCard({ card, ctx }) {
+  const pending = ctx.pendingQueryIds?.has(card.query_id);
+  const [busy, setBusy] = useState(false);
+  const toast = useToast();
+  async function decide(approve) {
+    setBusy(true);
+    try { await api.decideQuery(ctx.sessionId, card, approve); ctx.reload(); } catch (e) { toast(explain(e), "error"); ctx.reload(); } finally { setBusy(false); }
+  }
+  return (
+    <article className="card tier-yellow">
+      <div className="card-head"><h3>{card.title}</h3><Tag tone="amber">需你确认</Tag></div>
+      <div className="card-body">
+        <dl className="fields">{card.fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl>
+      </div>
+      <div className="card-foot">
+        {pending ? <>
+          <button className="btn primary" disabled={busy} onClick={() => decide(true)}>确认查询</button>
+          <button className="btn ghost" disabled={busy} onClick={() => decide(false)}>不查了</button>
         </> : <span className="muted" style={{ fontSize: 13 }}>已处理</span>}
       </div>
     </article>

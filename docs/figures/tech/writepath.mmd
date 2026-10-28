@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  participant U as 客户
+  participant C as 对话层
+  participant A as 智能体（Transaction）
+  participant P as 策略 / 授权
+  participant G as 网关 + 执行合约
+  participant B as 银行
+  participant V as 核验 / 回执
+  U->>C: “给张三转2000”
+  C->>C: 防护 → 理解 → 校验（金额出自原话）
+  C->>A: 签名请求（含能力快照哈希）
+  A->>B: 读：收款人、账户、余额（只读）
+  A->>P: 提议 BankActionIR（前置条件 = 当前余额与版本）
+  P-->>U: 红色确认卡（日累计 > ¥1,000）
+  U->>P: 确认 + 刷脸（签名绑定本笔 action_hash）
+  P->>G: 授权（单次、限时）
+  G->>G: 再核对前置条件 · 幂等键
+  G->>B: 执行
+  B-->>G: 流水号（CREATED / SETTLED）
+  G->>V: 回查银行状态，比对已签名动作
+  V-->>U: VERIFIED 才出回执；否则人工核对、不重发

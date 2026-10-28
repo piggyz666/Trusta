@@ -90,4 +90,4 @@ Write-Host ''
 Write-Host "  双击 $Dir\TRUSTA.cmd"
 Write-Host "  或：cd $Dir; .\start.ps1"
 Write-Host ''
-Write-Host '然后用窗口里打印的 http://127.0.0.1:8000/#token=… 链接打开。'
+Write-Host '然后用窗口里打印的 http://localhost:8000/#token=… 链接打开。'

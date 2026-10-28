@@ -107,13 +107,17 @@ python -m scripts.setup                              # 配置向导：大模型�
 .\start.ps1                                          # macOS / Linux：./start.sh；Windows 也可双击 TRUSTA.cmd
 ```
 
-用窗口里打印的 `http://127.0.0.1:8000/#token=…` 链接打开网页。不配置大模型也能用，此时使用规则引擎，只认标准说法。
+用窗口里打印的 `http://localhost:8000/#token=…` 链接打开网页。不配置大模型也能用，此时使用规则引擎，只认标准说法。
 
 **手机 H5**：在配置向导里把访问方式设为“局域网”，重启后在网页“设置 → 访问与设备”生成配对码，手机连同一 Wi-Fi 扫码即可；可“添加到主屏幕”全屏使用。
 
 **飞书**：向导里填飞书应用凭据（长连接，不需要公网地址），然后 `python -m scripts.pair --feishu` 生成绑定码，在飞书里发给机器人。黄色操作可在飞书内确认，红色操作会引导回 APP 验证。
 
 完整文档（安装、配置、授权等级、可信机制、API）在网站的 `/docs.html`，源文件在 `frontend-app/src/docs/content/`。
+
+## 技术文档
+
+系统架构图、核心算法与安全设计见 [docs/technical-design.md](docs/technical-design.md)。
 
 ## 项目结构
 
@@ -140,6 +144,8 @@ npm run build
 python -m unittest discover -s tests   # 或 python -m pytest -q
 python -m benchmarks.scenario_audit     # 六大场景 49 项闭环检查
 ```
+
+少数测试需要未随仓库发布的原始材料（Groth16 证明资产、冻结的模型评测记录），缺少时会显示为“跳过”并写明原因，材料放入后自动运行。权限分级与赛题对照见 `tests/test_permission_matrix.py`，真实银行接入见 `tests/test_real_bank_readiness.py` 与 `tests/test_bank_check.py`。
 
 ## 说明
 

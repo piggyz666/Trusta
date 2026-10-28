@@ -1,3 +1,5 @@
+> 本文是 V1 阶段的历史设计记录。当前系统的架构、核心算法与安全设计见 [TRUSTA 技术文档](technical-design.md)。
+
 # TRUSTA V1 架构
 
 当前状态以 [后端最终能力矩阵](final-backend/TRUSTA_Final_Capability_Matrix.md) 为准。ECDSA V3、did:key 验证、真实 Groth16 本地证明与验证、签名 Merkle 检查点已实现；真实外部区块链部署与独立验收仍受签名批准及第二 RPC 阻塞。原 Hash Chain 和金融执行链保留，锚定在独立 worker 内。下文为历史 V1 设计，后续阶段扩展了密码能力，未改变金融执行边界。

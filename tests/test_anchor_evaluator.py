@@ -22,6 +22,18 @@ def manifest(provider):
             'gold':{'path':gold.as_posix(),'sha256':hashlib.sha256(gold.read_bytes()).hexdigest()}}
 
 
+def frozen_records_available():
+    """The replay needs the original recorded model responses and their signatures (raw experiment records kept outside
+    this repository). Without them the tests are skipped with this reason instead of failing."""
+    try:
+        records=json.loads(Path('data/llm-semantic-convergence/independent-verification.json').read_text(encoding='utf-8'))
+        return all(Path(row[key]).exists() for row in records['rows'] for key in ('source_path','response_path','proof_path')) \
+            and Path('evaluation_dataset/normal_cases.json').exists()
+    except (OSError,ValueError,KeyError):
+        return False
+
+
+@unittest.skipUnless(frozen_records_available(), '需要原始模型评测记录（冻结的真实响应与签名，未随仓库发布）；记录齐全时自动运行')
 class TrustedCapabilityEvaluatorTests(unittest.TestCase):
     def test_frozen_real_mimo_twenty_goals_recomputed(self):
         counts,rows=evaluate_frozen_model(Path.cwd(),manifest('mimo'))

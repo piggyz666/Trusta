@@ -138,8 +138,8 @@ export const COPY = {
       apps: {
         title: "桌面安装包", lead: "自带运行环境，下载解压即可使用，不需要另外安装 Python。",
         windows: ["Windows", "Windows 10 / 11 · x64", "下载 .zip", "解压后双击 TRUSTA.cmd；首次运行会打开配置向导。"],
-        mac: ["macOS", "Apple Silicon / Intel", "用一行命令安装", "在终端粘贴一行命令，自动下载并完成配置。"],
-        linux: ["Linux", "x64", "用一行命令安装", "在终端粘贴一行命令，自动下载并完成配置。"],
+        mac: ["macOS", "Apple Silicon / Intel", "", "安装包即将推出；现在可以用上方“一行命令”或“源码”方式安装。"],
+        linux: ["Linux", "x64", "", "安装包即将推出；现在可以用上方“一行命令”或“源码”方式安装。"],
         useOneLiner: "改用一行命令",
       },
       oneliner: {
@@ -153,7 +153,7 @@ export const COPY = {
         front: "修改前端后重新构建：",
       },
       after: ["启动后，用窗口里打印的", "链接打开网页。不配置大模型也能用，此时使用规则引擎，只认标准说法。"],
-      copy: "复制", copied: "已复制", soon: "即将开放", notice: "代码仓库即将公开。届时下面的下载按钮和安装命令可以直接使用。",
+      copy: "复制", copied: "已复制", soon: "即将开放", comingSoon: "即将推出", notice: "代码仓库即将公开。届时下面的下载按钮和安装命令可以直接使用。",
     },
     footer: {
       tagline: "可信的多智能体银行 AI 助手",
@@ -305,8 +305,8 @@ export const COPY = {
       apps: {
         title: "Desktop packages", lead: "Bundles its own runtime. Download, unzip and go — no separate Python install.",
         windows: ["Windows", "Windows 10 / 11 · x64", "Download .zip", "Unzip and double-click TRUSTA.cmd; the first run opens the setup wizard."],
-        mac: ["macOS", "Apple Silicon / Intel", "Install with one line", "Paste one command into Terminal; it downloads and sets everything up."],
-        linux: ["Linux", "x64", "Install with one line", "Paste one command into a terminal; it downloads and sets everything up."],
+        mac: ["macOS", "Apple Silicon / Intel", "", "A package is coming soon; for now use the One-liner or Hackable tab above."],
+        linux: ["Linux", "x64", "", "A package is coming soon; for now use the One-liner or Hackable tab above."],
         useOneLiner: "Use the one-liner",
       },
       oneliner: {
@@ -320,7 +320,7 @@ export const COPY = {
         front: "After changing the web app, rebuild it:",
       },
       after: ["Once it's running, open the", "link printed in the window. It works without a language model too, using the rule engine, which only understands standard phrasings."],
-      copy: "Copy", copied: "Copied", soon: "Opening soon", notice: "The code repository opens soon. The downloads and install commands below will work from then on.",
+      copy: "Copy", copied: "Copied", soon: "Opening soon", comingSoon: "Coming soon", notice: "The code repository opens soon. The downloads and install commands below will work from then on.",
     },
     footer: {
       tagline: "A trustworthy multi-agent banking assistant",

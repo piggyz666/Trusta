@@ -417,7 +417,7 @@ export function Install({ c }) {
         {primary && SHOW_REPO && RELEASE_READY
           ? <a className="btn solid" href={DOWNLOAD_WINDOWS}>↓ {action}</a>
           : primary ? <span className="btn soon" aria-disabled="true">{t.soon}</span>
-          : <button type="button" className="btn" onClick={() => { setTab("oneliner"); setOs("unix"); }}>{action} →</button>}
+          : <span className="btn soon" aria-disabled="true">{t.comingSoon}</span>}
         <p className="note">{note}</p>
       </div>
     );

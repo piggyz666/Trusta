@@ -161,6 +161,16 @@ Runs **49** end-to-end checks across transfers, spending, investments, cards, su
 - Passing every test doesn't prove there are no unknown vulnerabilities.
 `,Ze=`# Changelog
 
+## 2026-10-28
+
+- Viewing subscriptions and direct debits is Yellow, as the brief requires: the query is shown and confirmed first, then not asked again for 10 minutes; tests check every tier against the brief.
+- Red operations can be approved with face / fingerprint / security key (WebAuthn), bound to that one operation; the start URL is now \`http://localhost:8000\`.
+- Real-bank readiness: pages and chat read only through the bank interface; deposits, FX, gold, funds, loans and the credit account run as bank quote → confirmation → signed execution; incoming payments can come from any bank's transaction list.
+- Bank integration kit: data contract with JSON Schemas, adapter template, conformance checker \`python -m scripts.bank_check\`, security brief for bank review.
+- Technical document (architecture, core algorithms, security design); tests that need unpublished material are skipped with the reason.
+- Wealth page with gold and FX reference quotes, a converter and a spending-based plan; Bills & subscriptions page; everyday-service links filled from your words.
+- Membership points removed; the first conversation no longer opens with a message.
+
 ## 2026-10-25
 
 - Landing page: ink-fluid hero, product demo, trust layers, measured results and quick start; Chinese and English.
@@ -938,6 +948,16 @@ python -m benchmarks.scenario_audit
 - 使用合成的沙箱银行和审计记录；耗时受主机文件系统和 SQLite 影响。
 - 测试全部通过不代表不存在未知漏洞。
 `,gn=`# 更新日志
+
+## 2026-10-28
+
+- 订阅与代扣查询按赛题列为黄色：先显示查询内容并确认，确认后 10 分钟内不重复确认；权限分级与赛题逐级对照的测试。
+- 红色操作新增刷脸 / 指纹 / 安全密钥验证（WebAuthn），签名只对这一笔有效；启动地址改为 \`http://localhost:8000\`。
+- 接入真实银行：所有页面与对话只通过银行接口取数；存款、外汇、黄金、基金、贷款、信用账户改为“银行报价 → 确认 → 签名执行”；入账明细可来自任意银行的交易流水。
+- 银行接入工具包：数据格式规范与 JSON Schema、适配器模板、接入自检工具 \`python -m scripts.bank_check\`、银行安全审查说明。
+- 技术文档（架构图、核心算法、安全设计）；缺少原始材料的测试改为写明原因的跳过。
+- 理财页：黄金与外汇参考行情、汇率换算、按消费给出的配置建议；账单与订阅页；生活服务带条件跳转。
+- 移除会员与积分；首个对话不再主动推送消息。
 
 ## 2026-10-25
 

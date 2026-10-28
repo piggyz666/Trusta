@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-28
+
+- Viewing subscriptions and direct debits is Yellow, as the brief requires: the query is shown and confirmed first, then not asked again for 10 minutes; tests check every tier against the brief.
+- Red operations can be approved with face / fingerprint / security key (WebAuthn), bound to that one operation; the start URL is now `http://localhost:8000`.
+- Real-bank readiness: pages and chat read only through the bank interface; deposits, FX, gold, funds, loans and the credit account run as bank quote → confirmation → signed execution; incoming payments can come from any bank's transaction list.
+- Bank integration kit: data contract with JSON Schemas, adapter template, conformance checker `python -m scripts.bank_check`, security brief for bank review.
+- Technical document (architecture, core algorithms, security design); tests that need unpublished material are skipped with the reason.
+- Wealth page with gold and FX reference quotes, a converter and a spending-based plan; Bills & subscriptions page; everyday-service links filled from your words.
+- Membership points removed; the first conversation no longer opens with a message.
+
 ## 2026-10-25
 
 - Landing page: ink-fluid hero, product demo, trust layers, measured results and quick start; Chinese and English.

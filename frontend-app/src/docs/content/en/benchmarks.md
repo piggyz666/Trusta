@@ -63,7 +63,7 @@ The attack benchmark above tests the communication and execution chain itself. T
 
 ![Figure 3 One model, three ways to build the agent](/figs/fig3-en.webp)
 
-**Figure 3 | Same DeepSeek model, same bank, same 218 test cases — only the way the agent is built changes.** A lets the model call the bank directly; B adds safety prompts and relies on the model to follow them; in TRUSTA the model can only propose, and the system does the confirming and verifying. Only TRUSTA never went wrong and still got things done on the spot.
+**Figure 3 | Same DeepSeek model, same bank, same 218 test cases — only the way the agent is built changes.** A lets the model call the bank directly; B adds safety prompts and relies on the model to follow them; in TRUSTA the model can only propose, and the system does the confirming and verifying. Only TRUSTA is both safe and gets things done on the spot.
 
 The full method, test set and all 1,962 records are in the repository under `docs/compare/`. Reproduce with:
 

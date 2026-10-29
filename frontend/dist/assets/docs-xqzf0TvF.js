@@ -166,7 +166,7 @@ The attack benchmark above tests the communication and execution chain itself. T
 
 ![Figure 3 One model, three ways to build the agent](/figs/fig3-en.webp)
 
-**Figure 3 | Same DeepSeek model, same bank, same 218 test cases — only the way the agent is built changes.** A lets the model call the bank directly; B adds safety prompts and relies on the model to follow them; in TRUSTA the model can only propose, and the system does the confirming and verifying. Only TRUSTA never went wrong and still got things done on the spot.
+**Figure 3 | Same DeepSeek model, same bank, same 218 test cases — only the way the agent is built changes.** A lets the model call the bank directly; B adds safety prompts and relies on the model to follow them; in TRUSTA the model can only propose, and the system does the confirming and verifying. Only TRUSTA is both safe and gets things done on the spot.
 
 The full method, test set and all 1,962 records are in the repository under \`docs/compare/\`. Reproduce with:
 
@@ -991,7 +991,7 @@ python -m benchmarks.scenario_audit
 
 ![图 3 同一个大模型，三种搭法](/figs/fig3.webp)
 
-**图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。** A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 一次没出事，又能当场办成。
+**图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。** A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 既不出事，又能当场办成。
 
 完整方法、题库和 1,962 条逐条记录在仓库的 \`docs/compare/\`；复现：
 

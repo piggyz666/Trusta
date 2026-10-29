@@ -18,7 +18,7 @@
 
 ![图 3 同一个大模型，三种搭法](figure-card.png)
 
-<sub>**图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。** A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 一次没出事，又能当场办成。</sub>
+<sub>**图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。** A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 既不出事，又能当场办成。</sub>
 
 英文版：[figure-card-en.png](figure-card-en.png)。更多图：[四联图](figure.png)、[逐次对话点阵](figure-units.png)；`python -m benchmarks.compare.figure_card` 等脚本可从 report.json 重画。
 

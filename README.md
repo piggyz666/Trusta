@@ -115,7 +115,7 @@ python -m scripts.bank_check --config config/bank.<你的银行>.local.toml   # 
 
 <p align="center"><img src="docs/compare/figure-card.png" alt="图 3 同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成" width="100%"></p>
 
-<sub>**图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。** A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 一次没出事，又能当场办成。 方法、题库、局限与逐条记录见 [docs/compare](docs/compare/README.md)；复现：`python -m benchmarks.compare --live --runs 3`。English version: [docs/compare/figure-card-en.png](docs/compare/figure-card-en.png)。</sub>
+<sub>**图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。** A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 既不出事，又能当场办成。 方法、题库、局限与逐条记录见 [docs/compare](docs/compare/README.md)；复现：`python -m benchmarks.compare --live --runs 3`。English version: [docs/compare/figure-card-en.png](docs/compare/figure-card-en.png)。</sub>
 
 ## 快速开始
 

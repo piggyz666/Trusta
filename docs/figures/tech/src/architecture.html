@@ -57,7 +57,7 @@
           <div class="card" id="c-plan"><span class="ic" data-icon="cards" data-bg="#d9e8f3"></span><div><div class="t"><span class="num">4</span>计划与卡片</div><div class="d">任务图 DAG · 确认卡 · 查询确认卡</div></div></div>
         </div>
         <div style="display:flex;justify-content:center;margin-top:14px">
-          <div class="card" id="c-reg" style="width:430px;border-style:dashed"><span class="ic" data-icon="grid" data-bg="#d9e8f3"></span><div><div class="t">功能注册表</div><div class="d">按接入银行实际提供的能力点亮工具；没有的能力，模型看不到也调不了</div></div></div>
+          <div class="card" id="c-reg" style="width:560px;border-style:dashed"><span class="ic" data-icon="grid" data-bg="#d9e8f3"></span><div><div class="t">功能注册表</div><div class="d">按接入银行实际提供的能力点亮工具；没有的能力，模型看不到也调不了</div></div></div>
         </div>
       </section>
 
@@ -127,8 +127,11 @@
   wire("c-guard", "c-und", { color: G, straight: true });
   wire("c-und", "c-val", { color: G, straight: true });
   wire("c-val", "c-plan", { color: G, straight: true });
-  wire("c-reg", "c-und", { from: "t", to: "b", color: D, dash: "4 4", ff: 0.3 });
-  wire("c-reg", "c-val", { from: "t", to: "b", color: D, dash: "4 4", ff: 0.7 });
+  // registry feeds understanding and validation: straight up into the centre of each card
+  for (const target of ["c-und", "c-val"]) {
+    const reg = box("c-reg"), t = box(target);
+    wire("c-reg", target, { from: "t", to: "b", straight: true, color: D, dash: "4 4", width: 1.6, ff: (t.left + t.width / 2 - reg.left) / reg.width });
+  }
   // chat -> agents (signed messages)
   wire("c-plan", "c-sup", { from: "b", to: "t", color: G, elbow: "v", at: gap("b-chat", "b-ag"), label: "签名消息 · ECDSA P-256", lpos: 0.5 });
   wire("c-sup", "c-pl", { color: G, straight: true });

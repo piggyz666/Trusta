@@ -67,14 +67,28 @@ function pt(el, side, frac = 0.5) {
   const x = r.left - f.left, y = r.top - f.top;
   return { r: [x + r.width, y + r.height * frac], l: [x, y + r.height * frac], t: [x + r.width * frac, y], b: [x + r.width * frac, y + r.height] }[side];
 }
+// polyline with rounded corners (radius shrinks on short segments; collinear points are skipped)
+function rounded(pts, r) {
+  pts = pts.filter((p, i) => i === 0 || p[0] !== pts[i - 1][0] || p[1] !== pts[i - 1][1]);
+  let d = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
+    const l1 = Math.hypot(x - px, y - py), l2 = Math.hypot(nx - x, ny - y);
+    if (!l1 || !l2 || (px === x && x === nx) || (py === y && y === ny)) { d += `L${x} ${y}`; continue; }
+    const k = Math.min(r, l1 / 2, l2 / 2);
+    d += `L${x - (x - px) / l1 * k} ${y - (y - py) / l1 * k}Q${x} ${y} ${x + (nx - x) / l2 * k} ${y + (ny - y) / l2 * k}`;
+  }
+  const last = pts[pts.length - 1];
+  return d + `L${last[0]} ${last[1]}`;
+}
 function wire(a, b, o = {}) {
   const A = document.getElementById(a), B = document.getElementById(b);
   const [x1, y1] = pt(A, o.from || "r", o.ff ?? 0.5), [x2, y2] = pt(B, o.to || "l", o.tf ?? 0.5);
   const color = o.color || "#5b6573";
   let d;
   if (o.straight) d = `M${x1} ${y1}L${x2} ${y2}`;
-  else if (o.elbow === "v") { const my = o.at ?? (y1 + y2) / 2; d = `M${x1} ${y1}V${my}H${x2}V${y2}`; }
-  else if (o.elbow === "h") { const mx = o.at ?? (x1 + x2) / 2; d = `M${x1} ${y1}H${mx}V${y2}H${x2}`; }
+  else if (o.elbow === "v") { const my = o.at ?? (y1 + y2) / 2; d = rounded([[x1, y1], [x1, my], [x2, my], [x2, y2]], o.r ?? 12); }
+  else if (o.elbow === "h") { const mx = o.at ?? (x1 + x2) / 2; d = rounded([[x1, y1], [mx, y1], [mx, y2], [x2, y2]], o.r ?? 12); }
   else {
     const k = o.bend ?? 0.5, vert = (o.from === "b" || o.from === "t");
     d = vert ? `M${x1} ${y1}C${x1} ${y1 + (y2 - y1) * k},${x2} ${y2 - (y2 - y1) * k},${x2} ${y2}`

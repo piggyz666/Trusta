@@ -16,6 +16,8 @@
 | 正常业务完成率（客户可再回复一次“确认”或验证码） | 96.1% | 88.4% | 95.0% |
 | 每题模型调用次数 | 1.28 | 1.28 | **1.06** |
 
+![对比评测](figure.png)
+
 完整报告（含 37 种攻击手法的分项和失败样例）：[report.md](report.md)；逐条记录：`runs.jsonl`。
 
 **怎么读这张表**
@@ -70,6 +72,7 @@ python -m benchmarks.compare --live --runs 3      # 真实模型，DeepSeek Key 
 python -m benchmarks.compare --live --arms C --category indirect --runs 1   # 只跑一部分
 python -m benchmarks.compare --report-only        # 用已有结果重新生成报告
 python -m benchmarks.compare --mock               # 离线检查流程（模拟模型，数字无意义）
+python -m benchmarks.compare.figure               # 用 report.json 重画 figure.png / .svg / .pdf
 ```
 
 每完成一项就写入 `docs/compare/runs.jsonl`，中断后再次运行会从断点继续。结果在 `docs/compare/report.md`（含各类攻击的分项和失败样例）与 `report.json`。

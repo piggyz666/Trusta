@@ -1,0 +1,50 @@
+/* Shared style for the technical-design figures (rendered to PNG by render.mjs). */
+:root {
+  --ink: #1a2230; --ink2: #4b5563; --muted: #8a9099; --line: #c9ced6;
+  --navy: #0b1a2c; --teal: #0f7c78; --teal-d: #0a5f5c; --gold: #c9ae7c; --gold-d: #9c7f45;
+  --red: #c8372d; --amber: #d98a1e; --green: #2e8b57;
+  --t-channel: #f7f2e8; --b-channel: #e2d6bd;
+  --t-chat: #eaf2f8;    --b-chat: #c4d9ea;
+  --t-agents: #f1eef8;  --b-agents: #d6cdea;
+  --t-sec: #e8f3f2;     --b-sec: #b9dcd8;
+  --t-bank: #fbefea;    --b-bank: #ecc9bd;
+  --t-audit: #fbf7ee;   --b-audit: #e6d7b5;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #fff; }
+body { font-family: "Noto Sans CJK SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--ink);
+       -webkit-font-smoothing: antialiased; }
+#fig { position: relative; padding: 36px 40px 30px; }
+.letter { position: absolute; font-size: 30px; font-weight: 800; color: var(--ink); }
+.ptitle { font-size: 21px; font-weight: 800; margin: 0 0 4px; }
+.psub { font-size: 14px; color: var(--muted); margin: 0; }
+
+/* layer band */
+.band { position: relative; border-radius: 18px; border: 1.5px solid; padding: 18px 22px 20px; }
+.band-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.band-name { font-size: 17px; font-weight: 800; }
+.band-path { font: 600 12.5px "DejaVu Sans Mono", monospace; color: var(--ink2); background: rgba(255,255,255,.7); padding: 2px 8px; border-radius: 6px; }
+.band-note { font-size: 13px; color: var(--ink2); margin-left: auto; }
+
+/* component card */
+.card { position: relative; background: #fff; border: 1.4px solid var(--line); border-radius: 12px; padding: 11px 13px;
+        display: flex; gap: 11px; align-items: flex-start; box-shadow: 0 1px 0 rgba(16,24,40,.04); }
+.card .ic { flex: none; width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; }
+.card .ic svg { width: 20px; height: 20px; }
+.card .t { font-size: 14.5px; font-weight: 750; line-height: 1.25; }
+.card .d { font-size: 12.3px; color: var(--ink2); line-height: 1.45; margin-top: 3px; }
+.num { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--navy); color: var(--gold);
+       font-size: 11.5px; font-weight: 800; margin-right: 6px; vertical-align: 1px; }
+.chip { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; line-height: 1.5; white-space: nowrap; }
+.chip.teal { background: #dff0ee; color: var(--teal-d); }
+.chip.gold { background: #f6ecd7; color: var(--gold-d); }
+.chip.red { background: #fbe3e0; color: var(--red); }
+.chip.amber { background: #fbecd4; color: #a8650d; }
+.chip.green { background: #dcefe3; color: #23704a; }
+.chip.navy { background: var(--navy); color: #fff; }
+
+/* arrows overlay */
+svg.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.wlabel { position: absolute; transform: translate(-50%, -50%); font-size: 12px; font-weight: 700; color: var(--ink2); background: #fff;
+          padding: 2px 9px; border-radius: 999px; border: 1.2px solid var(--line); white-space: nowrap; z-index: 3; }
+.caption-strip { font-size: 12.5px; color: var(--muted); margin-top: 16px; }

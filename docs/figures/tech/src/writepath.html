@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>一笔红色转账的写路径</title>
+<link rel="stylesheet" href="fig.css">
+<style>
+  #fig { width: 1600px; height: 950px; }
+  .lane-head { position: absolute; top: 58px; width: 128px; text-align: center; background: #fff; border: 1.4px solid var(--line); border-radius: 12px;
+               padding: 9px 6px 8px; z-index: 2; }
+  .lane-head .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; margin: 0 auto 5px; }
+  .lane-head .ic svg { width: 19px; height: 19px; }
+  .lane-head .t { font-size: 13.5px; font-weight: 800; line-height: 1.25; }
+  .lane-head .d { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .phase { position: absolute; left: 40px; border-radius: 12px; z-index: 0; }
+  svg.wires { z-index: 2; }
+  .phase-label { position: absolute; left: 52px; font-size: 13px; font-weight: 800; color: var(--ink2); writing-mode: vertical-rl; letter-spacing: 3px; }
+  .msg { position: absolute; font-size: 12.6px; color: var(--ink); white-space: nowrap; transform: translate(-50%, -100%); padding-bottom: 3px; z-index: 3;
+         background: transparent; }
+  .msg small { color: var(--ink2); font-size: 11.8px; }
+  .badge { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: var(--gold); font-size: 11.5px; font-weight: 800;
+           display: grid; place-items: center; transform: translate(-50%, -50%); z-index: 4; border: 2px solid #fff; }
+  .badge.gold { background: var(--gold); color: var(--navy); }
+  .side { position: absolute; top: 58px; right: 40px; width: 330px; }
+  .side h3 { font-size: 16px; margin: 0 0 12px; }
+  .point { background: #fff; border: 1.4px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: flex; gap: 11px; }
+  .point .badge { position: static; transform: none; flex: none; }
+  .point .t { font-size: 13.6px; font-weight: 800; }
+  .point .d { font-size: 12.3px; color: var(--ink2); line-height: 1.55; margin-top: 3px; }
+  .side .foot { font-size: 12.3px; color: var(--ink2); line-height: 1.6; background: var(--t-sec); border: 1.4px solid var(--b-sec); border-radius: 12px; padding: 12px 14px; }
+</style></head>
+<body><div id="fig">
+  <span class="letter" style="left:40px;top:14px">a</span>
+  <span class="letter" style="left:1215px;top:14px">b</span>
+  <div class="side">
+    <h3>关键点</h3>
+    <div class="point"><span class="badge">5</span><div><div class="t">前置条件写进动作</div><div class="d">提议时就锁定当时的余额和账户版本；之后账户有任何变化，这笔都不能执行。</div></div></div>
+    <div class="point"><span class="badge gold">7</span><div><div class="t">签名只对这一笔有效</div><div class="d">刷脸 / 指纹签的是本笔的 action_hash；换金额、换收款人，签名立即失效。</div></div></div>
+    <div class="point"><span class="badge">9</span><div><div class="t">执行前再核对一次</div><div class="d">执行合约重新核对前置条件；同一个幂等键只会执行一次，不会重复扣款。</div></div></div>
+    <div class="point"><span class="badge">12</span><div><div class="t">核验通过才有回执</div><div class="d">回查银行，状态与已签名的动作逐项一致才出回执；否则转人工核对，绝不自动重发。</div></div></div>
+    <div class="foot">模型在第 2 步之后就不再参与：它能做的只是把“给张三转2000”变成一个候选工具调用。</div>
+  </div>
+</div>
+<script src="fig.js"></script>
+<script>(() => {
+  const F2 = document.getElementById("fig");
+  const lanes = [
+    ["客户", "", "user", "#f6ecd7", "#9c7f45"],
+    ["对话层", "backend/chat", "brain", "#d9e8f3", "#0b1a2c"],
+    ["智能体", "Transaction", "transfer", "#e6dff3", "#0b1a2c"],
+    ["策略 / 授权", "绿 · 黄 · 红", "light", "#d5ebe8", "#0b1a2c"],
+    ["网关 + 执行合约", "前置条件 · 幂等", "contract", "#d5ebe8", "#0b1a2c"],
+    ["银行", "规范接口", "bank", "#f6ddd3", "#0b1a2c"],
+    ["核验 / 回执", "独立回查", "search", "#d5ebe8", "#0b1a2c"],
+  ];
+  const x0 = 165, step = 163, TOP = 150, rowH = 58;
+  const X = lanes.map((_, i) => x0 + i * step);
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = F2.querySelector("svg.wires");
+  const rows = 13, y = (n) => TOP + 40 + (n - 1) * rowH;   // step n -> y
+  const bottom = y(rows) + 36;
+  // phases (shaded rows)
+  const phases = [[1, 3, "理解", "#f3f7fb"], [4, 5, "读与提议", "#f6f4fb"], [6, 7, "客户授权", "#fbf3e2"], [8, 11, "执行", "#eef7f5"], [12, 13, "核验", "#eef7f5"]];
+  for (const [a, b, name, color] of phases) {
+    const d = document.createElement("div"); d.className = "phase";
+    d.style.top = y(a) - rowH / 2 - 2 + "px"; d.style.height = (b - a + 1) * rowH - 4 + "px"; d.style.width = X[6] + 72 - 40 + "px";
+    d.style.background = color; if (name === "客户授权") d.style.border = "1.6px solid #e6d3a8"; F2.appendChild(d);
+    const l = document.createElement("div"); l.className = "phase-label"; l.textContent = name;
+    l.style.top = y(a) - rowH / 2 + 8 + "px"; if (name === "客户授权") l.style.color = "#9c7f45"; F2.appendChild(l);
+  }
+  // lane heads + lifelines
+  lanes.forEach(([t, d, ic, bg, col], i) => {
+    const h = document.createElement("div"); h.className = "lane-head"; h.style.left = X[i] - 64 + "px";
+    h.innerHTML = `<span class="ic" style="background:${bg}">${icon(ic, col)}</span><div class="t">${t}</div>` + (d ? `<div class="d">${d}</div>` : "");
+    F2.appendChild(h);
+    const l = document.createElementNS(NS, "line");
+    l.setAttribute("x1", X[i]); l.setAttribute("x2", X[i]); l.setAttribute("y1", 150); l.setAttribute("y2", bottom);
+    l.setAttribute("stroke", "#c9ced6"); l.setAttribute("stroke-width", 1.6); l.setAttribute("stroke-dasharray", "2 5"); l.setAttribute("stroke-linecap", "round");
+    svg.appendChild(l);
+  });
+  function arrowHead(color) { return `url(#${(window._hd ||= {})[color] || mk(color)})`; }
+  function mk(color) {
+    const id = "wp" + Object.keys(window._hd).length;
+    const m = document.createElementNS(NS, "marker");
+    m.setAttribute("id", id); m.setAttribute("viewBox", "0 0 10 10"); m.setAttribute("refX", "9"); m.setAttribute("refY", "5");
+    m.setAttribute("markerWidth", "7"); m.setAttribute("markerHeight", "7"); m.setAttribute("orient", "auto");
+    m.innerHTML = `<path d="M0 0L10 5L0 10z" fill="${color}"/>`; svg.querySelector("defs").appendChild(m); window._hd[color] = id; return id;
+  }
+  function msg(n, a, b, text, o = {}) {
+    const color = o.color || "#4b5563", yy = y(n);
+    const p = document.createElementNS(NS, "path");
+    if (a === b) {  // self loop
+      const x = X[a];
+      p.setAttribute("d", `M${x} ${yy - 9}h42v18h-38`);
+    } else {
+      const dir = Math.sign(X[b] - X[a]);
+      p.setAttribute("d", `M${X[a] + dir * 6} ${yy}H${X[b] - dir * 8}`);
+    }
+    p.setAttribute("fill", "none"); p.setAttribute("stroke", color); p.setAttribute("stroke-width", o.w || 2);
+    if (o.dash) p.setAttribute("stroke-dasharray", "6 5");
+    p.setAttribute("marker-end", arrowHead(color)); svg.appendChild(p);
+    const badge = document.createElement("div"); badge.className = "badge" + (o.gold ? " gold" : ""); badge.textContent = n;
+    badge.style.left = X[a] + "px"; badge.style.top = yy + "px"; F2.appendChild(badge);
+    const m = document.createElement("div"); m.className = "msg"; m.innerHTML = text;
+    if (a === b) { m.style.left = X[a] + 52 + "px"; m.style.top = yy + 9 + "px"; m.style.transform = "translate(0, -50%)"; m.style.paddingBottom = "0"; }
+    else { m.style.left = (X[a] + X[b]) / 2 + "px"; m.style.top = yy - 3 + "px"; }
+    if (o.gold) m.style.color = "#7a5f2a";
+    F2.appendChild(m);
+  }
+  const T = "#0f7c78", R = "#9c7f45";
+  msg(1, 0, 1, "“给张三转2000”");
+  msg(2, 1, 1, "防护 → 理解 → 校验 <small>（金额出自原话）</small>");
+  msg(3, 1, 2, "签名请求 <small>含能力快照哈希</small>");
+  msg(4, 2, 5, "读：收款人、账户、余额 <span class='chip teal' style='font-size:11px'>只读</span>", { dash: true });
+  msg(5, 2, 3, "提议 BankActionIR <small>前置条件 = 当前余额与版本</small>", { color: T });
+  msg(6, 3, 0, "红色确认卡 <small>日累计 > ¥1,000</small>", { dash: true, color: "#c8372d" });
+  msg(7, 0, 3, "<b>确认 + 刷脸</b> <small>签名绑定本笔 action_hash</small>", { color: R, gold: true, w: 2.6 });
+  msg(8, 3, 4, "授权 <small>单次 · 限时</small>", { color: T });
+  msg(9, 4, 4, "再核对前置条件 · 幂等键", { color: T });
+  msg(10, 4, 5, "执行", { color: T, w: 2.6 });
+  msg(11, 5, 4, "流水号 <small>CREATED / SETTLED</small>", { dash: true });
+  msg(12, 4, 6, "回查银行状态，比对已签名动作", { color: T });
+  msg(13, 6, 0, "<b>VERIFIED 才出回执</b> <small>否则人工核对、不重发</small>", { dash: true, color: "#2e8b57" });
+})();
+</script>
+</body></html>

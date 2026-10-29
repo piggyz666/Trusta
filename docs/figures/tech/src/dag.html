@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>跨场景任务图</title>
+<link rel="stylesheet" href="fig.css">
+<style>
+  #fig { width: 1600px; }
+  .pa { position: relative; display: grid; grid-template-columns: 230px 1fr 1fr 1fr; column-gap: 118px; align-items: start; padding: 54px 0 0 0; }
+  .bubble { background: var(--navy); color: #fff; border-radius: 16px 16px 16px 4px; padding: 16px 18px; font-size: 15px; line-height: 1.6; position: relative; margin-top: 8px; }
+  .bubble .who { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gold); margin-bottom: 6px; font-weight: 700; }
+  .bubble .who svg { width: 16px; height: 16px; }
+  .node { background: #fff; border: 1.6px solid var(--b-sec); border-radius: 14px; padding: 14px 16px; position: relative; }
+  .node .top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .node .ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: #d5ebe8; flex: none; }
+  .node .ic svg { width: 21px; height: 21px; }
+  .node .id { font: 800 12px "DejaVu Sans Mono", monospace; color: var(--teal-d); }
+  .node .t { font-size: 15.5px; font-weight: 800; }
+  .node .d { font-size: 12.6px; color: var(--ink2); line-height: 1.55; }
+  .node .chips { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .exc { background: #fff; border: 1.6px dashed #e3a39c; border-radius: 14px; padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
+  .exc .ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: #fbe3e0; flex: none; }
+  .exc .ic svg { width: 18px; height: 18px; }
+  .exc .t { font-size: 14px; font-weight: 800; }
+  .exc .d { font-size: 12.3px; color: var(--ink2); line-height: 1.5; margin-top: 2px; }
+  .exrow { display: grid; grid-template-columns: 230px 1fr 1fr 1fr; column-gap: 118px; margin-top: 64px; }
+  .axis { position: relative; display: grid; grid-template-columns: 230px 1fr 1fr 1fr; column-gap: 118px; margin-top: 34px; height: 46px; }
+  .axis .tick { position: relative; text-align: center; font-size: 12.6px; font-weight: 700; color: var(--ink2); padding-top: 18px; }
+  .axis .tick::before { content: ""; position: absolute; left: 50%; top: 3px; width: 11px; height: 11px; margin-left: -5.5px; border-radius: 50%;
+                        background: #fff; border: 2.4px solid var(--teal); z-index: 2; }
+  .axis .line { position: absolute; left: 348px; right: 0; top: 8px; border-top: 2px solid #b9dcd8; }
+  .pb { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 66px; position: relative; }
+  .ctl { background: var(--t-agents); border: 1.5px solid var(--b-agents); border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
+  .ctl .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: #fff; flex: none; }
+  .ctl .ic svg { width: 22px; height: 22px; }
+  .ctl .t { font-size: 16px; font-weight: 800; }
+  .ctl .say { display: inline-block; margin: 6px 0 4px; font-size: 13px; background: #fff; border: 1.3px solid var(--b-agents); border-radius: 10px 10px 10px 3px; padding: 3px 10px; }
+  .ctl .d { font-size: 12.6px; color: var(--ink2); line-height: 1.55; }
+  .rule { margin-top: 20px; font-size: 13px; color: var(--ink2); background: var(--t-sec); border: 1.4px solid var(--b-sec); border-radius: 12px; padding: 11px 16px; }
+</style></head>
+<body><div id="fig">
+  <span class="letter" style="left:40px;top:14px">a</span>
+  <div class="pa">
+    <div class="bubble" id="say"><div class="who"><span data-icon="user" data-color="#c9ae7c"></span>客户的一句话</div>“爱人生日锁定 1000 元，生日前 2 天订花和蛋糕”</div>
+    <div class="node" id="n1"><div class="top"><span class="ic" data-icon="lock" data-color="#0a5f5c"></span><div><div class="id">n1</div><div class="t">锁定心愿金 ¥1,000</div></div></div>
+      <div class="d">从活期划入心愿金，专款专用</div><div class="chips"><span class="chip amber">黄色 · 待确认</span></div></div>
+    <div class="node" id="n2"><div class="top"><span class="ic" data-icon="gift" data-color="#0a5f5c"></span><div><div class="id">n2</div><div class="t">生日前 2 天下单</div></div></div>
+      <div class="d">鲜花 + 蛋糕；价格取自商户目录，不由模型生成</div><div class="chips"><span class="chip amber">到期再确认</span><span class="chip teal">依赖 n1</span></div></div>
+    <div class="node" id="n3"><div class="top"><span class="ic" data-icon="wallet" data-color="#0a5f5c"></span><div><div class="id">n3</div><div class="t">余额释放回活期</div></div></div>
+      <div class="d">下单后剩余的心愿金自动退回</div><div class="chips"><span class="chip teal">依赖 n2</span></div></div>
+  </div>
+  <div class="exrow">
+    <div></div>
+    <div class="exc" id="x1"><span class="ic" data-icon="x" data-color="#c8372d"></span><div><div class="t">拒绝 / 执行失败</div><div class="d">后续节点自动取消，不会出现“钱锁了花没订”</div></div></div>
+    <div class="exc" id="x2"><span class="ic" data-icon="undo" data-color="#c8372d"></span><div><div class="t">中断 / 撤销 / 转人工</div><div class="d">生成反向操作并再次确认；或交给人工接管</div></div></div>
+    <div></div>
+  </div>
+  <div class="axis"><div class="line"></div><div></div><div class="tick">今天</div><div class="tick">生日前 2 天</div><div class="tick">下单之后</div></div>
+
+  <div class="pb" id="pb">
+    <span class="letter" style="left:0;top:-44px">b</span>
+    <div class="ctl"><span class="ic" data-icon="x" data-color="#0b1a2c"></span><div><div class="t">中断</div><div class="say">“算了不转了”</div><div class="d">取消所有待确认的操作，已执行的不受影响</div></div></div>
+    <div class="ctl"><span class="ic" data-icon="undo" data-color="#0b1a2c"></span><div><div class="t">撤销回退</div><div class="say">“撤销刚才的”</div><div class="d">生成反向操作，仍要客户逐笔确认</div></div></div>
+    <div class="ctl"><span class="ic" data-icon="headset" data-color="#0b1a2c"></span><div><div class="t">人工接管</div><div class="say">“转人工”</div><div class="d">打开服务工单，由运营人员回复</div></div></div>
+  </div>
+  <div class="rule">多笔动钱的操作<b>串行</b>执行：后一张确认卡要等前一笔执行后，按最新的账户状态生成；前一笔被拒，后续节点自动取消。</div>
+</div>
+<script src="fig.js"></script>
+<script>
+  const T = "#0f7c78", R = "#c8372d";
+  wire("say", "n1", { color: "#5b6573", straight: true, label: "拆成 3 个节点", lpos: 0.5, dy: -22 });
+  wire("n1", "n2", { color: T, width: 2.4, straight: true, label: "确认成功", lcolor: T, dy: -22 });
+  wire("n2", "n3", { color: T, width: 2.4, straight: true, label: "到期提醒 · 再确认", lcolor: T, dy: -22 });
+  wire("n1", "x1", { from: "b", to: "t", color: R, dash: "5 5" });
+  wire("n2", "x2", { from: "b", to: "t", color: R, dash: "5 5" });
+</script>
+</body></html>

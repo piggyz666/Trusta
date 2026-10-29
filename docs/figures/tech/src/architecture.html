@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>TRUSTA 总体架构</title>
+<link rel="stylesheet" href="fig.css">
+<style>
+  #fig { width: 1560px; }
+  .layout { display: grid; grid-template-columns: 1fr 210px; gap: 26px; }
+  .stack { display: grid; gap: 54px; }
+  .row { display: flex; gap: 16px; align-items: stretch; }
+  .row > .card { flex: 1; }
+  .ch { background: var(--t-channel); border-color: var(--b-channel); }
+  .chat { background: var(--t-chat); border-color: var(--b-chat); }
+  .ag { background: var(--t-agents); border-color: var(--b-agents); }
+  .sec { background: var(--t-sec); border-color: var(--b-sec); }
+  .bk { background: var(--t-bank); border-color: var(--b-bank); }
+  .band:not(.ch) .band-head { justify-content: flex-end; }
+  .band:not(.ch) .band-head .band-name { order: 3; }
+  .band:not(.ch) .band-head .band-path { order: 2; }
+  .band:not(.ch) .band-head .chip { order: 1; margin-right: 6px; }
+  .sec { padding-bottom: 40px; }
+  .bus { position: absolute; left: 0; right: 0; height: 0; }
+  .agents { display: grid; grid-template-columns: 190px 190px 1fr; gap: 16px; align-items: center; }
+  .workers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .workers .card { padding: 10px 11px; }
+  .audit { background: var(--t-audit); border: 1.5px solid var(--b-audit); border-radius: 18px; padding: 20px 16px; display: flex;
+           flex-direction: column; align-items: center; text-align: center; margin-top: 196px; height: calc(100% - 196px); }
+  .audit .big { width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center; background: var(--navy); margin-bottom: 12px; }
+  .audit .big svg { width: 30px; height: 30px; }
+  .audit h3 { margin: 0; font-size: 17px; }
+  .audit p { font-size: 12.5px; color: var(--ink2); line-height: 1.6; margin: 8px 0 0; }
+  .blocks { margin-top: 18px; display: grid; gap: 8px; width: 100%; }
+  .blocks div { background: #fff; border: 1.3px solid var(--b-audit); border-radius: 9px; padding: 7px 8px; font: 600 11.5px "DejaVu Sans Mono", monospace; color: var(--ink2); }
+  .blocks div b { color: var(--gold-d); }
+  .tap { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); border: 2px solid #fff; }
+  .legend { display: flex; gap: 22px; align-items: center; font-size: 12.5px; color: var(--ink2); margin-top: 18px; }
+  .legend i { display: inline-block; width: 26px; border-top: 2px solid #5b6573; vertical-align: middle; margin-right: 6px; }
+  .legend i.d { border-top: 2px dashed var(--gold-d); }
+  .legend i.t { border-top: 2.4px solid var(--teal); }
+</style></head>
+<body><div id="fig">
+  <div class="layout">
+    <div class="stack">
+      <section class="band ch" id="b-ch">
+        <div class="band-head"><span class="band-name">渠道</span><span class="band-note">三个入口进同一个会话服务，用同一套授权规则</span></div>
+        <div class="row">
+          <div class="card" id="c-web"><span class="ic" data-icon="web" data-bg="#efe5d2"></span><div><div class="t">网页 / 手机 H5</div><div class="d">对话首页、确认卡、刷脸 / 指纹</div></div></div>
+          <div class="card" id="c-fs"><span class="ic" data-icon="bot" data-bg="#efe5d2"></span><div><div class="t">飞书机器人</div><div class="d">长连接免公网；红色操作回到 APP 验证</div></div></div>
+          <div class="card" id="c-api"><span class="ic" data-icon="term" data-bg="#efe5d2"></span><div><div class="t">终端 / HTTP API</div><div class="d">脚本与第三方系统接入</div></div></div>
+        </div>
+      </section>
+
+      <section class="band chat" id="b-chat">
+        <div class="band-head"><span class="chip navy">模型看不到余额、流水、卡号</span><span class="band-path">backend/chat</span><span class="band-name">对话层</span></div>
+        <div class="row">
+          <div class="card" id="c-guard"><span class="ic" data-icon="shield" data-bg="#d9e8f3"></span><div><div class="t"><span class="num">1</span>输入防护</div><div class="d">提示注入 · 诈骗话术 · 信息套取；转发文字隔离</div></div></div>
+          <div class="card" id="c-und"><span class="ic" data-icon="brain" data-bg="#d9e8f3"></span><div><div class="t"><span class="num">2</span>意图理解</div><div class="d">大模型工具调用；60 秒内失败 3 次熔断，切规则引擎</div></div></div>
+          <div class="card" id="c-val"><span class="ic" data-icon="check" data-bg="#d9e8f3"></span><div><div class="t"><span class="num">3</span>校验器</div><div class="d">金额、收款人须出自客户原话；越权字段整轮作废</div></div></div>
+          <div class="card" id="c-plan"><span class="ic" data-icon="cards" data-bg="#d9e8f3"></span><div><div class="t"><span class="num">4</span>计划与卡片</div><div class="d">任务图 DAG · 确认卡 · 查询确认卡</div></div></div>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:14px">
+          <div class="card" id="c-reg" style="width:430px;border-style:dashed"><span class="ic" data-icon="grid" data-bg="#d9e8f3"></span><div><div class="t">功能注册表</div><div class="d">按接入银行实际提供的能力点亮工具；没有的能力，模型看不到也调不了</div></div></div>
+        </div>
+      </section>
+
+      <section class="band ag" id="b-ag">
+        <div class="band-head"><span class="chip gold">只能提议，不能执行</span><span class="band-path">backend/runtime · backend/agents</span><span class="band-name">六智能体运行时</span></div>
+        <div class="agents">
+          <div class="card" id="c-sup"><span class="ic" data-icon="user" data-bg="#e6dff3"></span><div><div class="t">Supervisor</div><div class="d">接收与监督</div></div></div>
+          <div class="card" id="c-pl"><span class="ic" data-icon="flow" data-bg="#e6dff3"></span><div><div class="t">Planner</div><div class="d">拆解任务</div></div></div>
+          <div class="workers" id="c-workers">
+            <div class="card" id="c-tr"><span class="ic" data-icon="transfer" data-bg="#e6dff3"></span><div><div class="t">Transaction</div><div class="d">转账</div></div></div>
+            <div class="card" id="c-fi"><span class="ic" data-icon="chart" data-bg="#e6dff3"></span><div><div class="t">Finance</div><div class="d">账单分析</div></div></div>
+            <div class="card" id="c-we"><span class="ic" data-icon="coins" data-bg="#e6dff3"></span><div><div class="t">Wealth</div><div class="d">理财</div></div></div>
+            <div class="card" id="c-sv"><span class="ic" data-icon="headset" data-bg="#e6dff3"></span><div><div class="t">Service</div><div class="d">卡片 · 订阅</div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="band sec" id="b-sec">
+        <div class="band-head"><span class="chip teal">唯一能动钱的路径</span><span class="band-name">安全执行链</span></div>
+        <div class="row">
+          <div class="card" id="s1"><span class="ic" data-icon="light" data-bg="#d5ebe8"></span><div><div class="t">策略引擎</div><div class="d">绿 · 黄 · 红 分级</div></div></div>
+          <div class="card" id="s2"><span class="ic" data-icon="finger" data-bg="#d5ebe8"></span><div><div class="t">授权</div><div class="d">确认卡 + 刷脸 / 指纹 / 动态码</div></div></div>
+          <div class="card" id="s3"><span class="ic" data-icon="contract" data-bg="#d5ebe8"></span><div><div class="t">执行合约</div><div class="d">前置条件 · 幂等键</div></div></div>
+          <div class="card" id="s4"><span class="ic" data-icon="gate" data-bg="#d5ebe8"></span><div><div class="t">工具网关</div><div class="d">能力白名单</div></div></div>
+          <div class="card" id="s5"><span class="ic" data-icon="search" data-bg="#d5ebe8"></span><div><div class="t">独立核验</div><div class="d">回查银行，比对签名动作</div></div></div>
+          <div class="card" id="s6"><span class="ic" data-icon="receipt" data-bg="#d5ebe8"></span><div><div class="t">签名回执</div><div class="d">可离线验证</div></div></div>
+        </div>
+      </section>
+
+      <section class="band bk" id="b-bk">
+        <div class="band-head"><span class="band-name">银行接入层</span><span class="band-path">backend/bank_sdk</span></div>
+        <div class="row">
+          <div class="card" id="k0" style="flex:1.25"><span class="ic" data-icon="plug" data-bg="#f6ddd3"></span><div><div class="t">规范接口</div><div class="d">BankRequest → BankResponse；20 个数据格式 + 接入自检工具</div></div></div>
+          <div class="card" id="k1"><span class="ic" data-icon="cube" data-bg="#f6ddd3"></span><div><div class="t">内置沙箱银行</div><div class="d">六大场景全量可用</div></div></div>
+          <div class="card" id="k2"><span class="ic" data-icon="bank" data-bg="#f6ddd3"></span><div><div class="t">Revolut 沙箱 <span class="chip green">已实测</span></div><div class="d">官方开放银行接口</div></div></div>
+          <div class="card" id="k3"><span class="ic" data-icon="bank" data-bg="#f6ddd3"></span><div><div class="t">任意银行适配器</div><div class="d">provider = module</div></div></div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="audit" id="audit">
+      <span class="big" data-icon="chain" data-color="#c9ae7c"></span>
+      <h3>审计哈希链</h3>
+      <p>每个关键事件只追加、不可改；独立进程定期生成签名 Merkle 检查点</p>
+      <div class="blocks">
+        <div><b>#1041</b> 策略判定</div>
+        <div><b>#1042</b> 客户授权</div>
+        <div><b>#1043</b> 执行合约</div>
+        <div><b>#1044</b> 核验结果</div>
+        <div><b>#1045</b> 签名回执</div>
+        <div style="background:var(--navy);color:var(--gold);border-color:var(--navy)">Merkle 根 · 已签名</div>
+      </div>
+    </aside>
+  </div>
+  <div class="legend"><span><i></i>请求与数据流</span><span><i class="t"></i>唯一的写路径</span><span><i class="d"></i>写入审计链</span></div>
+</div>
+<script src="fig.js"></script>
+<script>
+  const G = "#5b6573", T = "#0f7c78", D = "#9c7f45";
+  const F = document.getElementById("fig").getBoundingClientRect();
+  const box = (id) => document.getElementById(id).getBoundingClientRect();
+  const gap = (a, b) => (box(a).bottom + box(b).top) / 2 - F.top;  // midline of the gap between two bands
+  // channels -> one bus in the gap -> guard
+  for (const c of ["c-web", "c-fs", "c-api"]) wire(c, "c-guard", { from: "b", to: "t", color: G, elbow: "v", at: gap("b-ch", "b-chat"), tf: 0.3,
+    head: c === "c-web" });
+  // chat flow
+  wire("c-guard", "c-und", { color: G, straight: true });
+  wire("c-und", "c-val", { color: G, straight: true });
+  wire("c-val", "c-plan", { color: G, straight: true });
+  wire("c-reg", "c-und", { from: "t", to: "b", color: D, dash: "4 4", ff: 0.3 });
+  wire("c-reg", "c-val", { from: "t", to: "b", color: D, dash: "4 4", ff: 0.7 });
+  // chat -> agents (signed messages)
+  wire("c-plan", "c-sup", { from: "b", to: "t", color: G, elbow: "v", at: gap("b-chat", "b-ag"), label: "签名消息 · ECDSA P-256", lpos: 0.5 });
+  wire("c-sup", "c-pl", { color: G, straight: true });
+  wire("c-pl", "c-workers", { color: G, straight: true });
+  // agents -> security chain (proposal only)
+  wire("c-workers", "s1", { from: "b", to: "t", ff: 0.1, color: T, width: 2.4, elbow: "v", at: gap("b-ag", "b-sec"),
+    label: "提议 BankActionIR（只读事实 + 前置条件）", lcolor: T, lpos: 0.45 });
+  for (const [a, b] of [["s1", "s2"], ["s2", "s3"], ["s3", "s4"], ["s4", "s5"], ["s5", "s6"]]) wire(a, b, { color: T, width: 2.4, straight: true });
+  // gateway -> bank sdk
+  wire("s4", "k0", { from: "b", to: "t", color: T, width: 2.4, elbow: "v", at: gap("b-sec", "b-bk"), label: "BankRequest", lcolor: T });
+  wire("k0", "k1", { color: G, straight: true });
+  // audit taps: under the cards, along one bus, into the audit chain
+  const busY = box("s1").bottom - F.top + 17;
+  for (const s of ["s1", "s2", "s3", "s5", "s6"]) wire(s, "audit", { from: "b", to: "l", ff: 0.5, color: D, dash: "3 4", width: 1.4, elbow: "v", at: busY,
+    tf: (busY - (box("audit").top - F.top)) / box("audit").height, head: s === "s6" });
+</script>
+</body></html>

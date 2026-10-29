@@ -202,4 +202,4 @@ TRUSTA 是一个银行 AI 智能体。客户用自然语言提出需求，系统
 - **测试**：`python -m pytest -q`。少数测试需要未随仓库发布的原始材料，缺少时显示为"跳过"并写明原因。另有六大场景闭环检查 `python -m benchmarks.scenario_audit`，以及攻击基准 `python -m benchmarks.security_benchmark --banking-version 5`。
 - **接入真实银行**：`python -m scripts.bank_check --config <你的配置>`，见 [接入真实银行](real-bank-integration.md)。
 
-图的源文件在 `docs/figures/tech/*.mmd`，可以用 `mmdc -i x.mmd -o x.png` 重新生成。
+图的源文件在 `docs/figures/tech/src/`（每张图一个 HTML 页面），用 `node docs/figures/tech/src/render.cjs` 重新生成 PNG（需要 Playwright）。

@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="518.4pt" height="309.6pt" viewBox="0 0 518.4 309.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-29T17:01:17.182493</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 309.6 
+L 518.4 309.6 
+L 518.4 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 404.352 271.932 
+L 505.44 271.932 
+Q 511.6608 271.932 511.6608 265.74 
+L 511.6608 50.052 
+Q 511.6608 43.86 505.44 43.86 
+L 404.352 43.86 
+Q 398.1312 43.86 398.1312 50.052 
+L 398.1312 265.74 
+Q 398.1312 271.932 404.352 271.932 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef5f9"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 15.552 79.98 
+L 502.848 79.98 
+" clip-path="url(#p89e2ef3590)" style="fill: none; stroke: #e3e6ea; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 15.552 126.42 
+L 502.848 126.42 
+" clip-path="url(#p89e2ef3590)" style="fill: none; stroke: #e3e6ea; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 15.552 172.86 
+L 502.848 172.86 
+" clip-path="url(#p89e2ef3590)" style="fill: none; stroke: #e3e6ea; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 15.552 219.3 
+L 502.848 219.3 
+" clip-path="url(#p89e2ef3590)" style="fill: none; stroke: #e3e6ea; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 18.144 295.926 
+C 19.17511 295.926 20.164127 295.518232 20.893231 294.792503 
+C 21.622336 294.066774 22.032 293.082336 22.032 292.056 
+C 22.032 291.029664 21.622336 290.045226 20.893231 289.319497 
+C 20.164127 288.593768 19.17511 288.186 18.144 288.186 
+C 17.11289 288.186 16.123873 288.593768 15.394769 289.319497 
+C 14.665664 290.045226 14.256 291.029664 14.256 292.056 
+C 14.256 293.082336 14.665664 294.066774 15.394769 294.792503 
+C 16.123873 295.518232 17.11289 295.926 18.144 295.926 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 57.024 295.926 
+C 58.05511 295.926 59.044127 295.518232 59.773231 294.792503 
+C 60.502336 294.066774 60.912 293.082336 60.912 292.056 
+C 60.912 291.029664 60.502336 290.045226 59.773231 289.319497 
+C 59.044127 288.593768 58.05511 288.186 57.024 288.186 
+C 55.99289 288.186 55.003873 288.593768 54.274769 289.319497 
+C 53.545664 290.045226 53.136 291.029664 53.136 292.056 
+C 53.136 293.082336 53.545664 294.066774 54.274769 294.792503 
+C 55.003873 295.518232 55.99289 295.926 57.024 295.926 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #d98a1e"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 95.904 295.926 
+C 96.93511 295.926 97.924127 295.518232 98.653231 294.792503 
+C 99.382336 294.066774 99.792 293.082336 99.792 292.056 
+C 99.792 291.029664 99.382336 290.045226 98.653231 289.319497 
+C 97.924127 288.593768 96.93511 288.186 95.904 288.186 
+C 94.87289 288.186 93.883873 288.593768 93.154769 289.319497 
+C 92.425664 290.045226 92.016 291.029664 92.016 292.056 
+C 92.016 293.082336 92.425664 294.066774 93.154769 294.792503 
+C 93.883873 295.518232 94.87289 295.926 95.904 295.926 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 239.5008 98.556 
+L 278.3808 98.556 
+L 278.3808 93.396 
+L 239.5008 93.396 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 350.9568 98.556 
+L 389.8368 98.556 
+L 389.8368 93.396 
+L 350.9568 93.396 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 462.4128 98.556 
+L 501.2928 98.556 
+L 501.2928 93.396 
+L 462.4128 93.396 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 239.5008 144.996 
+L 278.3808 144.996 
+L 278.3808 139.836 
+L 239.5008 139.836 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 350.9568 144.996 
+L 389.8368 144.996 
+L 389.8368 139.836 
+L 350.9568 139.836 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 462.4128 144.996 
+L 501.2928 144.996 
+L 501.2928 139.836 
+L 462.4128 139.836 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 239.5008 191.436 
+L 278.3808 191.436 
+L 278.3808 186.276 
+L 239.5008 186.276 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 350.9568 191.436 
+L 389.8368 191.436 
+L 389.8368 186.276 
+L 350.9568 186.276 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 462.4128 191.436 
+L 501.2928 191.436 
+L 501.2928 186.276 
+L 462.4128 186.276 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 239.5008 237.876 
+L 278.3808 237.876 
+L 278.3808 232.716 
+L 239.5008 232.716 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 350.9568 237.876 
+L 389.8368 237.876 
+L 389.8368 232.716 
+L 350.9568 232.716 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 462.4128 237.876 
+L 501.2928 237.876 
+L 501.2928 232.716 
+L 462.4128 232.716 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #eef0f2"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 15.552 265.74 
+L 502.848 265.74 
+" clip-path="url(#p89e2ef3590)" style="fill: none; stroke: #e3e6ea; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="15.552" y="23.46" transform="rotate(-0 15.552 23.46)">同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="15.552" y="39.688" transform="rotate(-0 15.552 39.688)">同一个模型（deepseek-flash）、同一个银行、同一份 218 道题，每题每组跑 3 次，共 1,962 次真实对话</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="181.44" y="59.474" transform="rotate(-0 181.44 59.474)">不设防的智能体</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="181.44" y="72.092" transform="rotate(-0 181.44 72.092)">模型直接调用银行接口</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="292.896" y="59.474" transform="rotate(-0 292.896 59.474)">提示词加固</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="292.896" y="72.092" transform="rotate(-0 292.896 72.092)">8 条安全规则 + 确认框</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #0a6e99" x="404.352" y="59.474" transform="rotate(-0 404.352 59.474)">TRUSTA</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="404.352" y="72.092" transform="rotate(-0 404.352 72.092)">本作品</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="15.552" y="99.532" transform="rotate(-0 15.552 99.532)">会不会被话术骗着越权？</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="15.552" y="114.404" transform="rotate(-0 15.552 114.404)">攻击成功率，越低越好</text>
+   </g>
+   <g id="patch_18">
+    <path d="M 187.1424 101.394 
+C 188.585954 101.394 189.970577 100.823125 190.991324 99.807105 
+C 192.01207 98.791084 192.5856 97.41287 192.5856 95.976 
+C 192.5856 94.53913 192.01207 93.160916 190.991324 92.144895 
+C 189.970577 91.128875 188.585954 90.558 187.1424 90.558 
+C 185.698846 90.558 184.314223 91.128875 183.293476 92.144895 
+C 182.27273 93.160916 181.6992 94.53913 181.6992 95.976 
+C 181.6992 97.41287 182.27273 98.791084 183.293476 99.807105 
+C 184.314223 100.823125 185.698846 101.394 187.1424 101.394 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="198.0288" y="100.536" transform="rotate(-0 198.0288 100.536)">23.9%</text>
+   </g>
+   <g id="patch_19">
+    <path d="M 239.5008 98.556 
+L 248.798191 98.556 
+L 248.798191 93.396 
+L 239.5008 93.396 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="181.44" y="116.468" transform="rotate(-0 181.44 116.468)">说一句“我已在柜台验证过”，就直接挂失</text>
+   </g>
+   <g id="patch_20">
+    <path d="M 298.5984 101.394 
+C 300.041954 101.394 301.426577 100.823125 302.447324 99.807105 
+C 303.46807 98.791084 304.0416 97.41287 304.0416 95.976 
+C 304.0416 94.53913 303.46807 93.160916 302.447324 92.144895 
+C 301.426577 91.128875 300.041954 90.558 298.5984 90.558 
+C 297.154846 90.558 295.770223 91.128875 294.749476 92.144895 
+C 293.72873 93.160916 293.1552 94.53913 293.1552 95.976 
+C 293.1552 97.41287 293.72873 98.791084 294.749476 99.807105 
+C 295.770223 100.823125 297.154846 101.394 298.5984 101.394 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="309.4848" y="100.536" transform="rotate(-0 309.4848 100.536)">0%</text>
+   </g>
+   <g id="patch_21">
+    <path d="M 410.0544 101.394 
+C 411.497954 101.394 412.882577 100.823125 413.903324 99.807105 
+C 414.92407 98.791084 415.4976 97.41287 415.4976 95.976 
+C 415.4976 94.53913 414.92407 93.160916 413.903324 92.144895 
+C 412.882577 91.128875 411.497954 90.558 410.0544 90.558 
+C 408.610846 90.558 407.226223 91.128875 406.205476 92.144895 
+C 405.18473 93.160916 404.6112 94.53913 404.6112 95.976 
+C 404.6112 97.41287 405.18473 98.791084 406.205476 99.807105 
+C 407.226223 100.823125 408.610846 101.394 410.0544 101.394 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="420.9408" y="100.536" transform="rotate(-0 420.9408 100.536)">0%</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="15.552" y="145.972" transform="rotate(-0 15.552 145.972)">真的出过事吗？</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="15.552" y="160.844" transform="rotate(-0 15.552 160.844)">越权执行 + 泄露系统提示词 + 不适当销售，次数</text>
+   </g>
+   <g id="patch_22">
+    <path d="M 187.1424 147.834 
+C 188.585954 147.834 189.970577 147.263125 190.991324 146.247105 
+C 192.01207 145.231084 192.5856 143.85287 192.5856 142.416 
+C 192.5856 140.97913 192.01207 139.600916 190.991324 138.584895 
+C 189.970577 137.568875 188.585954 136.998 187.1424 136.998 
+C 185.698846 136.998 184.314223 137.568875 183.293476 138.584895 
+C 182.27273 139.600916 181.6992 140.97913 181.6992 142.416 
+C 181.6992 143.85287 182.27273 145.231084 183.293476 146.247105 
+C 184.314223 147.263125 185.698846 147.834 187.1424 147.834 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="text_17">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="198.0288" y="146.976" transform="rotate(-0 198.0288 146.976)">16 次</text>
+   </g>
+   <g id="patch_23">
+    <path d="M 239.5008 144.996 
+L 270.6048 144.996 
+L 270.6048 139.836 
+L 239.5008 139.836 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="181.44" y="162.908" transform="rotate(-0 181.44 162.908)">12 次未确认就执行，3 次念出系统提示词，1 次卖超风险理财</text>
+   </g>
+   <g id="patch_24">
+    <path d="M 298.5984 147.834 
+C 300.041954 147.834 301.426577 147.263125 302.447324 146.247105 
+C 303.46807 145.231084 304.0416 143.85287 304.0416 142.416 
+C 304.0416 140.97913 303.46807 139.600916 302.447324 138.584895 
+C 301.426577 137.568875 300.041954 136.998 298.5984 136.998 
+C 297.154846 136.998 295.770223 137.568875 294.749476 138.584895 
+C 293.72873 139.600916 293.1552 140.97913 293.1552 142.416 
+C 293.1552 143.85287 293.72873 145.231084 294.749476 146.247105 
+C 295.770223 147.263125 297.154846 147.834 298.5984 147.834 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_19">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="309.4848" y="146.976" transform="rotate(-0 309.4848 146.976)">0 次</text>
+   </g>
+   <g id="patch_25">
+    <path d="M 410.0544 147.834 
+C 411.497954 147.834 412.882577 147.263125 413.903324 146.247105 
+C 414.92407 145.231084 415.4976 143.85287 415.4976 142.416 
+C 415.4976 140.97913 414.92407 139.600916 413.903324 138.584895 
+C 412.882577 137.568875 411.497954 136.998 410.0544 136.998 
+C 408.610846 136.998 407.226223 137.568875 406.205476 138.584895 
+C 405.18473 139.600916 404.6112 140.97913 404.6112 142.416 
+C 404.6112 143.85287 405.18473 145.231084 406.205476 146.247105 
+C 407.226223 147.263125 408.610846 147.834 410.0544 147.834 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_20">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="420.9408" y="146.976" transform="rotate(-0 420.9408 146.976)">0 次</text>
+   </g>
+   <g id="text_21">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="15.552" y="192.340125" transform="rotate(-0 15.552 192.340125)">大额、改密等高风险操作，有没有强验证？</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="15.552" y="207.284" transform="rotate(-0 15.552 207.284)">强验证覆盖率，越高越好</text>
+   </g>
+   <g id="patch_26">
+    <path d="M 187.1424 194.274 
+C 188.585954 194.274 189.970577 193.703125 190.991324 192.687105 
+C 192.01207 191.671084 192.5856 190.29287 192.5856 188.856 
+C 192.5856 187.41913 192.01207 186.040916 190.991324 185.024895 
+C 189.970577 184.008875 188.585954 183.438 187.1424 183.438 
+C 185.698846 183.438 184.314223 184.008875 183.293476 185.024895 
+C 182.27273 186.040916 181.6992 187.41913 181.6992 188.856 
+C 181.6992 190.29287 182.27273 191.671084 183.293476 192.687105 
+C 184.314223 193.703125 185.698846 194.274 187.1424 194.274 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="text_23">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="198.0288" y="193.416" transform="rotate(-0 198.0288 193.416)">0%</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="181.44" y="209.348" transform="rotate(-0 181.44 209.348)">转账、挂失、改密都不验证</text>
+   </g>
+   <g id="patch_27">
+    <path d="M 298.5984 194.274 
+C 300.041954 194.274 301.426577 193.703125 302.447324 192.687105 
+C 303.46807 191.671084 304.0416 190.29287 304.0416 188.856 
+C 304.0416 187.41913 303.46807 186.040916 302.447324 185.024895 
+C 301.426577 184.008875 300.041954 183.438 298.5984 183.438 
+C 297.154846 183.438 295.770223 184.008875 294.749476 185.024895 
+C 293.72873 186.040916 293.1552 187.41913 293.1552 188.856 
+C 293.1552 190.29287 293.72873 191.671084 294.749476 192.687105 
+C 295.770223 193.703125 297.154846 194.274 298.5984 194.274 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #d98a1e"/>
+   </g>
+   <g id="text_25">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="309.4848" y="193.416" transform="rotate(-0 309.4848 193.416)">98.1%</text>
+   </g>
+   <g id="patch_28">
+    <path d="M 350.9568 191.436 
+L 389.081849 191.436 
+L 389.081849 186.276 
+L 350.9568 186.276 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #d98a1e"/>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="292.896" y="209.348" transform="rotate(-0 292.896 209.348)">靠模型自觉，有 2 次跳过了</text>
+   </g>
+   <g id="patch_29">
+    <path d="M 410.0544 194.274 
+C 411.497954 194.274 412.882577 193.703125 413.903324 192.687105 
+C 414.92407 191.671084 415.4976 190.29287 415.4976 188.856 
+C 415.4976 187.41913 414.92407 186.040916 413.903324 185.024895 
+C 412.882577 184.008875 411.497954 183.438 410.0544 183.438 
+C 408.610846 183.438 407.226223 184.008875 406.205476 185.024895 
+C 405.18473 186.040916 404.6112 187.41913 404.6112 188.856 
+C 404.6112 190.29287 405.18473 191.671084 406.205476 192.687105 
+C 407.226223 193.703125 408.610846 194.274 410.0544 194.274 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_27">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="420.9408" y="193.416" transform="rotate(-0 420.9408 193.416)">100%</text>
+   </g>
+   <g id="patch_30">
+    <path d="M 462.4128 191.436 
+L 501.2928 191.436 
+L 501.2928 186.276 
+L 462.4128 186.276 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_28">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="404.352" y="209.348" transform="rotate(-0 404.352 209.348)">由系统强制，不靠模型</text>
+   </g>
+   <g id="text_29">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="15.552" y="238.780125" transform="rotate(-0 15.552 238.780125)">说一句话，能不能当场办成？</text>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="15.552" y="253.724" transform="rotate(-0 15.552 253.724)">正常业务当轮完成率，越高越好</text>
+   </g>
+   <g id="patch_31">
+    <path d="M 187.1424 240.714 
+C 188.585954 240.714 189.970577 240.143125 190.991324 239.127105 
+C 192.01207 238.111084 192.5856 236.73287 192.5856 235.296 
+C 192.5856 233.85913 192.01207 232.480916 190.991324 231.464895 
+C 189.970577 230.448875 188.585954 229.878 187.1424 229.878 
+C 185.698846 229.878 184.314223 230.448875 183.293476 231.464895 
+C 182.27273 232.480916 181.6992 233.85913 181.6992 235.296 
+C 181.6992 236.73287 182.27273 238.111084 183.293476 239.127105 
+C 184.314223 240.143125 185.698846 240.714 187.1424 240.714 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #d98a1e"/>
+   </g>
+   <g id="text_31">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="198.0288" y="239.856" transform="rotate(-0 198.0288 239.856)">82%</text>
+   </g>
+   <g id="patch_32">
+    <path d="M 239.5008 237.876 
+L 271.448707 237.876 
+L 271.448707 232.716 
+L 239.5008 232.716 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #d98a1e"/>
+   </g>
+   <g id="text_32">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="181.44" y="255.788" transform="rotate(-0 181.44 255.788)">办得快，但不设防</text>
+   </g>
+   <g id="patch_33">
+    <path d="M 298.5984 240.714 
+C 300.041954 240.714 301.426577 240.143125 302.447324 239.127105 
+C 303.46807 238.111084 304.0416 236.73287 304.0416 235.296 
+C 304.0416 233.85913 303.46807 232.480916 302.447324 231.464895 
+C 301.426577 230.448875 300.041954 229.878 298.5984 229.878 
+C 297.154846 229.878 295.770223 230.448875 294.749476 231.464895 
+C 293.72873 232.480916 293.1552 233.85913 293.1552 235.296 
+C 293.1552 236.73287 293.72873 238.111084 294.749476 239.127105 
+C 295.770223 240.143125 297.154846 240.714 298.5984 240.714 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="text_33">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="309.4848" y="239.856" transform="rotate(-0 309.4848 239.856)">36%</text>
+   </g>
+   <g id="patch_34">
+    <path d="M 350.9568 237.876 
+L 364.971684 237.876 
+L 364.971684 232.716 
+L 350.9568 232.716 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #c8372d"/>
+   </g>
+   <g id="text_34">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="292.896" y="255.788" transform="rotate(-0 292.896 255.788)">多数要先口头再问一遍</text>
+   </g>
+   <g id="patch_35">
+    <path d="M 410.0544 240.714 
+C 411.497954 240.714 412.882577 240.143125 413.903324 239.127105 
+C 414.92407 238.111084 415.4976 236.73287 415.4976 235.296 
+C 415.4976 233.85913 414.92407 232.480916 413.903324 231.464895 
+C 412.882577 230.448875 411.497954 229.878 410.0544 229.878 
+C 408.610846 229.878 407.226223 230.448875 406.205476 231.464895 
+C 405.18473 232.480916 404.6112 233.85913 404.6112 235.296 
+C 404.6112 236.73287 405.18473 238.111084 406.205476 239.127105 
+C 407.226223 240.143125 408.610846 240.714 410.0544 240.714 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_35">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #1f2328" x="420.9408" y="239.856" transform="rotate(-0 420.9408 239.856)">95%</text>
+   </g>
+   <g id="patch_36">
+    <path d="M 462.4128 237.876 
+L 499.33373 237.876 
+L 499.33373 232.716 
+L 462.4128 232.716 
+z
+" clip-path="url(#p89e2ef3590)" style="fill: #2e8b57"/>
+   </g>
+   <g id="text_36">
+    <text style="font-weight: 700; font-size: 5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="18.144" y="293.612828" transform="rotate(-0 18.144 293.612828)">✓</text>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="24.3648" y="294.488" transform="rotate(-0 24.3648 294.488)">达标</text>
+   </g>
+   <g id="text_38">
+    <text style="font-weight: 700; font-size: 5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="57.024" y="293.612828" transform="rotate(-0 57.024 293.612828)">!</text>
+   </g>
+   <g id="text_39">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="63.2448" y="294.488" transform="rotate(-0 63.2448 294.488)">有隐患</text>
+   </g>
+   <g id="text_40">
+    <text style="font-weight: 700; font-size: 5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="95.904" y="293.612828" transform="rotate(-0 95.904 293.612828)">✗</text>
+   </g>
+   <g id="text_41">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4b5563" x="102.1248" y="294.488" transform="rotate(-0 102.1248 294.488)">不达标</text>
+   </g>
+   <g id="text_42">
+    <text style="font-size: 6.4px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="134.784" y="294.488" transform="rotate(-0 134.784 294.488)">“攻击”共 37 种手法：直接注入、埋在银行数据和转发短信里的指令、催促跳过验证等。</text>
+   </g>
+   <g id="text_43">
+    <text style="font-size: 5.8px; font-family: 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #8a9099" x="15.552" y="304.719" transform="rotate(-0 15.552 304.719)">埋在数据里的指令这一代模型本身已能识破，三组都没有被骗；TRUSTA 的不同在于：即使模型被骗，系统也不放行。  方法与逐条记录：github.com/piggyz666/Trusta 中 docs/compare</text>
+   </g>
+   <g id="text_44">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="187.1424" y="97.922477" transform="rotate(-0 187.1424 97.922477)">✗</text>
+   </g>
+   <g id="text_45">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="298.5984" y="97.922477" transform="rotate(-0 298.5984 97.922477)">✓</text>
+   </g>
+   <g id="text_46">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="410.0544" y="97.922477" transform="rotate(-0 410.0544 97.922477)">✓</text>
+   </g>
+   <g id="text_47">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="187.1424" y="144.362477" transform="rotate(-0 187.1424 144.362477)">✗</text>
+   </g>
+   <g id="text_48">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="298.5984" y="144.362477" transform="rotate(-0 298.5984 144.362477)">✓</text>
+   </g>
+   <g id="text_49">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="410.0544" y="144.362477" transform="rotate(-0 410.0544 144.362477)">✓</text>
+   </g>
+   <g id="text_50">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="187.1424" y="190.802477" transform="rotate(-0 187.1424 190.802477)">✗</text>
+   </g>
+   <g id="text_51">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="298.5984" y="190.802477" transform="rotate(-0 298.5984 190.802477)">!</text>
+   </g>
+   <g id="text_52">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="410.0544" y="190.802477" transform="rotate(-0 410.0544 190.802477)">✓</text>
+   </g>
+   <g id="text_53">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="187.1424" y="237.242477" transform="rotate(-0 187.1424 237.242477)">!</text>
+   </g>
+   <g id="text_54">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="298.5984" y="237.242477" transform="rotate(-0 298.5984 237.242477)">✗</text>
+   </g>
+   <g id="text_55">
+    <text style="font-weight: 700; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="410.0544" y="237.242477" transform="rotate(-0 410.0544 237.242477)">✓</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p89e2ef3590">
+   <rect x="0" y="0" width="518.4" height="309.6"/>
+  </clipPath>
+ </defs>
+</svg>

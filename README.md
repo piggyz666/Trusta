@@ -122,7 +122,7 @@ python -m scripts.bank_check --config config/bank.<你的银行>.local.toml   # 
 | 高风险操作强验证覆盖率 | 0% | 98.1%（靠模型自觉） | **100%（系统强制）** |
 | 正常业务当轮完成率 | 82.2% | 36.0% | **95.0%** |
 
-![对比评测](docs/compare/figure.png)
+![对比评测](docs/compare/figure-card.png)
 
 TRUSTA 是唯一一个同时做到“零越权”和“当轮办成”的搭法，而且安全不依赖模型自觉。方法、局限和逐条结果见 [docs/compare](docs/compare/README.md)；复现：`python -m benchmarks.compare --live --runs 3`。
 

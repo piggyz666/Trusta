@@ -16,7 +16,9 @@
 | 正常业务完成率（客户可再回复一次“确认”或验证码） | 96.1% | 88.4% | 95.0% |
 | 每题模型调用次数 | 1.28 | 1.28 | **1.06** |
 
-![对比评测](figure.png)
+![对比评测](figure-card.png)
+
+更多图：[四联图](figure.png)、[逐次对话点阵](figure-units.png)；`python -m benchmarks.compare.figure_card` 等脚本可从 report.json 重画。
 
 完整报告（含 37 种攻击手法的分项和失败样例）：[report.md](report.md)；逐条记录：`runs.jsonl`。
 

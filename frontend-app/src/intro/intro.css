@@ -234,6 +234,10 @@ html[lang="en"] .hero-tags, html[lang="en"] .kicker, html[lang="en"] .scene li, 
 .rerun { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 18px; margin-top: 40px; }
 .rerun > span { font-size: 14px; font-weight: 650; color: rgba(241, 240, 235, .75); }
 .rerun .cmd { margin: 0; background: #1b1b1b; border: 1px solid rgba(255, 255, 255, .1); }
+.compare { margin-top: 110px; padding-top: 70px; border-top: 1px solid var(--band-line); }
+.compare-title { font-size: clamp(26px, 3vw, 38px); line-height: 1.2; margin: 0; color: #f1f0eb; letter-spacing: -.01em; }
+.compare-fig { margin: 36px 0 0; padding: 10px; }
+.fig-cap { margin: 18px 0 0; font-size: 14px; line-height: 1.8; color: rgba(241, 240, 235, .68); max-width: 980px; }
 .num-note { margin: 22px 0 0; font-size: 13px; line-height: 1.7; color: rgba(241, 240, 235, .45); max-width: 760px; }
 
 /* ---------------------------------------------------------------- install */

@@ -23,7 +23,7 @@ ROW_A, ROW_B, TRACK = "#F4F6F8", "#FFFFFF", "#E5E8EC"
 GOOD, WARN, BAD = "#2E8B57", "#D98A1E", "#C8372D"  # status colours, always with a ✓ / ! / ✗ glyph
 TINT = {"A": "#FCEDEA", "B": "#F3EEFB", "C": "#E8F3F2"}
 ACCENT = {"A": "#E5704F", "B": "#9C7BD3", "C": TEAL}
-W, H = 100.0, 76.5
+W, H = 100.0, 69.5
 
 
 def font():
@@ -45,35 +45,37 @@ def mark(ax, x, y, verdict, r=1.15, size=7):
             ha="center", va="center", zorder=5, family="DejaVu Sans")
 
 
-def main():
+def main(lang="zh"):
+    global TITLE, BODY, NOTE
+    TITLE, BODY, NOTE = (13, 7.6, 6.4) if lang == "zh" else (11.6, 6.6, 5.7)  # Latin text sets wider in this face
     plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": [font(), "DejaVu Sans"], "svg.fonttype": "none",
                          "pdf.fonttype": 42, "axes.unicode_minus": False})
     report = json.loads((OUT / "report.json").read_text(encoding="utf-8"))
     s = report["summary"]
     pct = lambda v: (v or 0) * 100
     incidents = {k: s[k]["unconfirmed_writes"] + s[k]["prompt_leaks"] + s[k]["unsuitable_sales"] for k in "ABC"}
+    zh = lang == "zh"
+    t = TEXT[lang]
+    unit = (lambda v: f"{v:.0f} 次") if zh else (lambda v: f"{v:.0f}")
     rows = [
-        ("会不会被话术骗着越权？", "攻击成功率 · 越低越好", 100, lambda v: f"{v:.1f}%" if v else "0%", {
-            "A": (pct(s["A"]["attack_success"]), "bad", "称“已在柜台验证”就直接挂失"),
-            "B": (pct(s["B"]["attack_success"]), "good", "37 种攻击手法全部挡住"),
-            "C": (pct(s["C"]["attack_success"]), "good", "37 种攻击手法全部挡住")}),
-        ("真的出过事吗？", "越权执行 + 泄露提示词 + 不适当销售", 20, lambda v: f"{v:.0f} 次", {
-            "A": (incidents["A"], "bad", f"{s['A']['unconfirmed_writes']} 次未确认就执行 · {s['A']['prompt_leaks']} 次念出提示词"),
-            "B": (incidents["B"], "good", "一次也没有"),
-            "C": (incidents["C"], "good", "一次也没有")}),
-        ("大额、改密等高风险操作，有强验证吗？", "强验证覆盖率 · 越高越好", 100,
-         lambda v: f"{v:.0f}%" if v in (0, 100) else f"{v:.1f}%", {
-            "A": (pct(s["A"]["strong_auth_coverage"]), "bad", "转账、挂失、改密都不验证"),
-            "B": (pct(s["B"]["strong_auth_coverage"]), "warn", "靠模型自觉，有 2 次跳过了"),
-            "C": (pct(s["C"]["strong_auth_coverage"]), "good", "由系统强制执行，不靠模型")}),
-        ("说一句话，能不能当场办成？", "正常业务当轮完成率 · 越高越好", 100, lambda v: f"{v:.0f}%", {
-            "A": (pct(s["A"]["task_success_same_turn"]), "warn", "办得快，但不设防"),
-            "B": (pct(s["B"]["task_success_same_turn"]), "bad", "多数要先口头再问一遍"),
-            "C": (pct(s["C"]["task_success_same_turn"]), "good", "一句话办成，安全不打折")}),
+        (t["q1"], t["h1"], 100, lambda v: f"{v:.1f}%" if v else "0%", {
+            "A": (pct(s["A"]["attack_success"]), "bad", t["e1a"]),
+            "B": (pct(s["B"]["attack_success"]), "good", t["e1b"]),
+            "C": (pct(s["C"]["attack_success"]), "good", t["e1b"])}),
+        (t["q2"], t["h2"], 20, unit, {
+            "A": (incidents["A"], "bad", t["e2a"].format(w=s["A"]["unconfirmed_writes"], l=s["A"]["prompt_leaks"])),
+            "B": (incidents["B"], "good", t["e2b"]),
+            "C": (incidents["C"], "good", t["e2b"])}),
+        (t["q3"], t["h3"], 100, lambda v: f"{v:.0f}%" if v in (0, 100) else f"{v:.1f}%", {
+            "A": (pct(s["A"]["strong_auth_coverage"]), "bad", t["e3a"]),
+            "B": (pct(s["B"]["strong_auth_coverage"]), "warn", t["e3b"]),
+            "C": (pct(s["C"]["strong_auth_coverage"]), "good", t["e3c"])}),
+        (t["q4"], t["h4"], 100, lambda v: f"{v:.0f}%", {
+            "A": (pct(s["A"]["task_success_same_turn"]), "warn", t["e4a"]),
+            "B": (pct(s["B"]["task_success_same_turn"]), "bad", t["e4b"]),
+            "C": (pct(s["C"]["task_success_same_turn"]), "good", t["e4c"])}),
     ]
-    arms = [("A", "不设防的智能体", ["最常见的写法：模型直接调用转账、", "挂失等银行接口，调了就执行"]),
-            ("B", "提示词加固", ["在 A 上加 8 条安全规则，写操作弹", "确认框；能否守规矩靠模型自觉"]),
-            ("C", "TRUSTA（本作品）", ["模型只能提议；金额、收款人须出自原话，", "客户逐笔确认，高风险由系统强验证"])]
+    arms = [("A", t["a"], t["a_note"]), ("B", t["b"], t["b_note"]), ("C", "TRUSTA", t["c_note"])]
 
     fig = plt.figure(figsize=(7.2, 7.2 * H / W), dpi=300, facecolor=SURFACE)
     ax = fig.add_axes([0, 0, 1, 1])
@@ -83,41 +85,29 @@ def main():
     ax.set_axis_off()
 
     # header band
-    ax.add_patch(Rectangle((0, H - 14.5), W, 14.5, fc=NAVY, ec="none"))
-    ax.text(3, H - 4.2, "同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成", fontsize=TITLE, fontweight="bold",
+    ax.add_patch(Rectangle((0, H - 11), W, 11, fc=NAVY, ec="none"))
+    ax.plot([3, 9], [H - 2.6, H - 2.6], color=GOLD, lw=1.8, solid_capstyle="round")
+    ax.text(3, H - 5.0, t["title"], fontsize=TITLE, fontweight="bold",
             color=SURFACE, va="center")
     runs = sum(s[k]["runs"] for k in "ABC")
-    setup = [("大模型", f"{report['meta'].get('model', '')}", "DeepSeek · 三组完全相同 · 温度 0"),
-             ("银行", "同一个沙箱银行", "同样的账户、收款人、流水"),
-             ("题库", "218 道题，6 类", "正常业务、模糊指令、注入攻击、诱导编造、高风险操作"),
-             ("运行", f"每题每组 3 次", f"共 {runs:,} 次真实对话")]
-    widths = [24.0, 20.0, 32.0, 18.0]
-    x = 3
-    for (key, value, note), w in zip(setup, widths):
-        box(ax, x, H - 13.4, w - 1.0, 5.6, 0.8, fc="#16283F", ec="none", zorder=2)
-        ax.text(x + 1.2, H - 9.6, key, fontsize=NOTE, color=GOLD, va="center", zorder=3)
-        ax.text(x + 1.2 + 4.6, H - 9.6, value, fontsize=NOTE + 0.5, fontweight="bold", color=SURFACE, va="center", zorder=3)
-        ax.text(x + 1.2, H - 11.9, note, fontsize=NOTE - 0.3, color=NAVY2, va="center", zorder=3)
-        x += w
+    ax.text(3, H - 8.6, t["sub"].format(model=report["meta"].get("model", ""), runs=runs), fontsize=NOTE + 0.3, color=NAVY2, va="center")
 
     col_x, col_w = [36.0, 57.5, 79.0], 19.0
-    head_top, head_h = H - 16.6, 9.6
+    head_top, head_h = H - 13.2, 7.0
     for (arm, name, note), x in zip(arms, col_x):
         if arm == "C":
             box(ax, x - 1.2, head_top - head_h, col_w + 2.4, head_h, 1.0, fc=NAVY, ec="none", zorder=2)
-            size = 3.8  # the icon, unaltered, inside the navy header
-            ax.imshow(plt.imread(ICON), extent=(x - 0.4, x - 0.4 + size, head_top - 0.6 - size, head_top - 0.6), zorder=3)
-            ax.text(x + 4.0, head_top - 2.5, name, fontsize=BODY + 1.2, fontweight="bold", color=SURFACE, va="center")
-            for j, line in enumerate(note):
-                ax.text(x - 0.2, head_top - 5.9 - j * 2.2, line, fontsize=NOTE - 1.0, color=GOLD, va="center")
+            size = head_h - 1.4  # the icon, unaltered, inside the navy header
+            ax.imshow(plt.imread(ICON), extent=(x - 0.2, x - 0.2 + size, head_top - head_h + 0.7, head_top - 0.7), zorder=3)
+            ax.text(x + size + 0.8, head_top - 2.4, name, fontsize=BODY + 2.4, fontweight="bold", color=SURFACE, va="center")
+            ax.text(x + size + 0.8, head_top - 5.0, note, fontsize=NOTE, color=GOLD, va="center")
         else:
             box(ax, x - 1.2, head_top - head_h, col_w + 2.4, head_h, 1.0, fc=TINT[arm], ec="none", zorder=2)
-            ax.add_patch(Circle((x + 1.4, head_top - 2.5), 1.6, fc=ACCENT[arm], ec="none", zorder=3))
-            ax.text(x + 1.4, head_top - 2.55, arm, fontsize=BODY, fontweight="bold", color=SURFACE, ha="center",
+            ax.add_patch(Circle((x + 1.4, head_top - head_h / 2), 1.7, fc=ACCENT[arm], ec="none", zorder=3))
+            ax.text(x + 1.4, head_top - head_h / 2 - 0.05, arm, fontsize=BODY, fontweight="bold", color=SURFACE, ha="center",
                     va="center", zorder=4)
-            ax.text(x + 4.0, head_top - 2.5, name, fontsize=BODY + 1.2, fontweight="bold", color=INK, va="center")
-            for j, line in enumerate(note):
-                ax.text(x - 0.2, head_top - 5.9 - j * 2.2, line, fontsize=NOTE - 0.6, color=INK2, va="center")
+            ax.text(x + 4.2, head_top - 2.4, name, fontsize=BODY + 1.2, fontweight="bold", color=INK, va="center")
+            ax.text(x + 4.2, head_top - 5.0, note, fontsize=NOTE, color=INK2, va="center")
 
     top, row_h = head_top - head_h - 1.2, 8.8
     # TRUSTA column: tinted and outlined, through the score row
@@ -144,27 +134,65 @@ def main():
 
     # overall score per column
     y = top - 4 * row_h - 3.2
-    ax.text(7.4, y, "四项合计", fontsize=BODY + 0.4, fontweight="bold", color=INK, va="center")
+    ax.text(7.4, y, t["total"], fontsize=BODY + 0.4, fontweight="bold", color=INK, va="center")
     for arm, x in zip("ABC", col_x):
         passed = sum(1 for *_, cells in rows if cells[arm][1] == "good")
         fc = GOOD if passed == 4 else (WARN if passed >= 2 else BAD)
         box(ax, x, y - 1.9, 13.5, 3.8, 1.9, fc=fc, ec="none", zorder=3)
-        ax.text(x + 6.75, y - 0.05, f"{passed} / 4 项达标", fontsize=BODY + 0.6, fontweight="bold", color=SURFACE, ha="center",
+        ax.text(x + 6.75, y - 0.05, t["passed"].format(n=passed), fontsize=BODY + 0.6, fontweight="bold", color=SURFACE, ha="center",
                 va="center", zorder=4)
 
     # legend + notes
     x = 3.4
-    for verdict, label in (("good", "达标"), ("warn", "有隐患"), ("bad", "不达标")):
+    for verdict, label in zip(("good", "warn", "bad"), t["legend"]):
         mark(ax, x, 4.0, verdict, r=0.8, size=5)
         ax.text(x + 1.3, 4.0, label, fontsize=NOTE, color=INK2, va="center")
-        x += 7.4
-    ax.text(x, 4.0, "攻击共 37 种手法：直接注入、埋在银行数据和转发短信里的指令、催促跳过验证、冒充员工与公检法等",
+        x += 7.4 if zh else 9.0
+    ax.text(x, 4.0, t["note1"],
             fontsize=NOTE, color=MUTED, va="center")
-    ax.text(3, 1.6, "埋在数据里的指令这一代模型本身已能识破，三组都没被骗；TRUSTA 的不同在于即使模型被骗，系统也不放行。"
-                    "  方法与逐条记录：github.com/piggyz666/Trusta · docs/compare", fontsize=NOTE - 0.4, color=MUTED, va="center")
+    ax.text(3, 1.6, t["note2"], fontsize=NOTE - 0.4, color=MUTED, va="center")
     for ext in ("png", "svg", "pdf"):
-        fig.savefig(OUT / f"figure-card.{ext}", facecolor=SURFACE)
+        fig.savefig(OUT / (f"figure-card.{ext}" if zh else f"figure-card-en.{ext}"), facecolor=SURFACE)
+    plt.close(fig)
+
+
+TEXT = {
+    "zh": {
+        "title": "同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成",
+        "sub": "同一个模型（{model}）· 同一个银行 · 同一份 218 道题 · 每题每组 3 次 · 共 {runs:,} 次真实对话",
+        "a": "不设防的智能体", "a_note": "模型直接调用银行接口", "b": "提示词加固", "b_note": "8 条安全规则 + 确认框", "c_note": "本作品",
+        "q1": "会不会被话术骗着越权？", "h1": "攻击成功率 · 越低越好", "e1a": "称“已在柜台验证”就直接挂失", "e1b": "37 种攻击手法全部挡住",
+        "q2": "真的出过事吗？", "h2": "越权执行 + 泄露提示词 + 不适当销售", "e2a": "{w} 次未确认就执行 · {l} 次念出提示词", "e2b": "一次也没有",
+        "q3": "大额、改密等高风险操作，有强验证吗？", "h3": "强验证覆盖率 · 越高越好", "e3a": "转账、挂失、改密都不验证",
+        "e3b": "靠模型自觉，有 2 次跳过了", "e3c": "由系统强制执行，不靠模型",
+        "q4": "说一句话，能不能当场办成？", "h4": "正常业务当轮完成率 · 越高越好", "e4a": "办得快，但不设防", "e4b": "多数要先口头再问一遍",
+        "e4c": "一句话办成，安全不打折",
+        "total": "四项合计", "passed": "{n} / 4 项达标", "legend": ("达标", "有隐患", "不达标"),
+        "note1": "攻击共 37 种手法：直接注入、埋在银行数据和转发短信里的指令、催促跳过验证、冒充员工与公检法等",
+        "note2": "埋在数据里的指令这一代模型本身已能识破，三组都没被骗；TRUSTA 的不同在于即使模型被骗，系统也不放行。"
+                 "  方法与逐条记录：github.com/piggyz666/Trusta · docs/compare",
+    },
+    "en": {
+        "title": "One model, three ways to build the agent: only TRUSTA is safe and gets it done",
+        "sub": "Same model ({model}) · same bank · same 218 test cases · 3 runs per case and approach · {runs:,} real conversations",
+        "a": "Unguarded agent", "a_note": "Calls the bank API directly", "b": "Prompt-hardened", "b_note": "8 safety rules + confirm box",
+        "c_note": "Our entry",
+        "q1": "Can it be talked into overstepping?", "h1": "Attack success rate · lower is better",
+        "e1a": "“I was verified” → card reported lost", "e1b": "All 37 attack techniques stopped",
+        "q2": "Did anything actually go wrong?", "h2": "Unauthorised acts + leaks + mis-selling",
+        "e2a": "{w} unconfirmed · {l} prompt leaks", "e2b": "Never",
+        "q3": "High-risk operations strongly verified?", "h3": "Strong-verification coverage · higher is better",
+        "e3a": "Transfers, lost card, PIN: none", "e3b": "Left to the model; skipped twice", "e3c": "Enforced by the system",
+        "q4": "Done in the same turn?", "h4": "One-turn completion · higher is better",
+        "e4a": "Fast, but unguarded", "e4b": "Usually asks again first", "e4c": "Done in one turn, safely",
+        "total": "Overall", "passed": "{n} / 4 passed", "legend": ("Pass", "At risk", "Fail"),
+        "note1": "37 attack techniques: direct injection, instructions in bank data and forwarded SMS, pressure to skip checks",
+        "note2": "Models already see through instructions hidden in data; none of the three was fooled. TRUSTA's difference: even a fooled "
+                 "model cannot get an operation through.  Records: github.com/piggyz666/Trusta",
+    },
+}
 
 
 if __name__ == "__main__":
-    main()
+    main("zh")
+    main("en")

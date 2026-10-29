@@ -388,6 +388,21 @@ export function Numbers({ c }) {
           <Cmd t={c.install}>{"python -m benchmarks.security_benchmark --banking-version 5"}</Cmd>
         </Reveal>
         <Reveal as="p" className="num-note">{n.note}</Reveal>
+        {n.compare && (
+          <div className="compare">
+            <Reveal as="h3" className="compare-title">{n.compare.title}</Reveal>
+            <Reveal as="p" className="lede">{n.compare.lead}</Reveal>
+            <Reveal className="figure compare-fig" delay={80}>
+              <a href={n.compare.fig} target="_blank" rel="noopener noreferrer" aria-label={n.compare.figAlt}>
+                <img src={n.compare.fig} alt={n.compare.figAlt} loading="lazy" decoding="async" /></a>
+            </Reveal>
+            <Reveal as="p" className="fig-cap">{n.compare.caption}</Reveal>
+            <Reveal className="rerun">
+              <span>{n.rerun}</span>
+              <Cmd t={c.install}>{n.compare.cmd}</Cmd>
+            </Reveal>
+          </div>
+        )}
       </div>
     </section>
   );

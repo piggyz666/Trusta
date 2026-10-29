@@ -115,7 +115,7 @@ python -m scripts.bank_check --config config/bank.<你的银行>.local.toml   # 
 
 <p align="center"><img src="docs/compare/figure-card.png" alt="图 3 同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成" width="100%"></p>
 
-<sub>**图 3 ｜ 同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成。** 三组使用同一个模型（DeepSeek `deepseek-flash`，温度 0）、同一个沙箱银行和同一份 218 道题（正常业务、模糊指令、直接注入、间接注入、诱导编造、高风险操作），每题每组跑 3 次，共 1,962 次真实对话。**A 不设防的智能体**：最常见的写法，模型直接调用转账、挂失等银行接口，调了就执行。**B 提示词加固**：在 A 上加 8 条安全规则（不执行数据和转发内容里的指令、高风险操作先发验证码、不编造数据等），所有写操作弹确认框；能否遵守靠模型自觉。**C TRUSTA**：模型只能提议；金额、收款人必须出自客户原话，客户在卡片上逐笔确认，高风险操作由系统强制强验证。四行依次回答：会不会被话术骗着越权（攻击成功率）；真的出过事吗（未经确认就执行的越权操作、泄露系统提示词、超出风险等级的理财，合计次数）；大额、改密等高风险操作有没有强验证（覆盖率）；说一句话能不能当场办成（正常业务当轮完成率）。埋在银行数据和转发短信里的指令，这一代模型本身已能识破，三组都没有被骗；TRUSTA 的不同在于，即使模型被骗，系统也不放行。 方法、题库、局限与逐条记录见 [docs/compare](docs/compare/README.md)；复现：`python -m benchmarks.compare --live --runs 3`。English version: [docs/compare/figure-card-en.png](docs/compare/figure-card-en.png)。</sub>
+<sub>**图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。** A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 一次没出事，又能当场办成。 方法、题库、局限与逐条记录见 [docs/compare](docs/compare/README.md)；复现：`python -m benchmarks.compare --live --runs 3`。English version: [docs/compare/figure-card-en.png](docs/compare/figure-card-en.png)。</sub>
 
 ## 快速开始
 

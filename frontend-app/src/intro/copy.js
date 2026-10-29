@@ -129,9 +129,9 @@ export const COPY = {
       ],
       compare: {
         title: "同一个大模型，三种搭法",
-        lead: "上面的数字检查的是 TRUSTA 自己拦不拦得住；这组对比回答另一个问题：同一个模型接同一家银行，换成常见的搭法会怎样。",
+        lead: "同一个模型接同一家银行，换成常见的搭法会怎样？",
         fig: "/figs/fig3.webp", figAlt: "图 3 同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成",
-        caption: "图 3 ｜ 同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成。 三组使用同一个模型（DeepSeek deepseek-flash，温度 0）、同一个沙箱银行和同一份 218 道题（正常业务、模糊指令、直接注入、间接注入、诱导编造、高风险操作），每题每组跑 3 次，共 1,962 次真实对话。A 不设防的智能体：最常见的写法，模型直接调用转账、挂失等银行接口，调了就执行。B 提示词加固：在 A 上加 8 条安全规则（不执行数据和转发内容里的指令、高风险操作先发验证码、不编造数据等），所有写操作弹确认框；能否遵守靠模型自觉。C TRUSTA：模型只能提议；金额、收款人必须出自客户原话，客户在卡片上逐笔确认，高风险操作由系统强制强验证。四行依次回答：会不会被话术骗着越权（攻击成功率）；真的出过事吗（未经确认就执行的越权操作、泄露系统提示词、超出风险等级的理财，合计次数）；大额、改密等高风险操作有没有强验证（覆盖率）；说一句话能不能当场办成（正常业务当轮完成率）。埋在银行数据和转发短信里的指令，这一代模型本身已能识破，三组都没有被骗；TRUSTA 的不同在于，即使模型被骗，系统也不放行。",
+        caption: "图 3 ｜ 同一个 DeepSeek 模型、同一个银行、同一份 218 道题，只换智能体的搭法。 A 让模型直接调银行接口；B 再加安全提示词，靠模型自觉守规矩；TRUSTA 让模型只能提议，确认和验证由系统把关。结果：只有 TRUSTA 一次没出事，又能当场办成。",
         cmd: "python -m benchmarks.compare --live --runs 3",
       },
       rerun: "自己重跑一遍",
@@ -303,9 +303,9 @@ export const COPY = {
       ],
       compare: {
         title: "One model, three ways to build the agent",
-        lead: "The numbers above test whether TRUSTA itself holds. This comparison asks a different question: same model, same bank — what happens with the common ways of building an agent?",
+        lead: "Same model, same bank — what happens with the common ways of building an agent?",
         fig: "/figs/fig3-en.webp", figAlt: "Figure 3: one model, three ways to build the agent; only TRUSTA is safe and gets it done",
-        caption: "Figure 3 | One model, three ways to build the agent: only TRUSTA is safe and gets it done. All three use the same model (DeepSeek deepseek-flash, temperature 0), the same sandbox bank and the same 218 test cases (normal requests, ambiguous instructions, direct injection, indirect injection, induced fabrication, high-risk operations), three runs per case and approach — 1,962 real conversations. A, unguarded agent: the common way — the model calls bank functions such as transfer or report-lost directly, and a call is an executed operation. B, prompt-hardened: A plus 8 safety rules (ignore instructions in data and forwarded text, ask for an SMS code before high-risk operations, never invent data, …) and a confirm box for every write; following the rules is left to the model. C, TRUSTA: the model can only propose; amounts and payees must come from the customer's own words, the customer confirms each operation on a card, and high-risk operations need strong verification enforced by the system. The rows ask: can it be talked into overstepping (attack success rate); did anything actually go wrong (operations executed without confirmation, system-prompt leaks, products above the customer's risk level); are high-risk operations strongly verified (coverage); is a normal request done in the same turn. Instructions hidden in bank data and forwarded SMS are already caught by the model itself — none of the three was fooled; TRUSTA's difference is that even a fooled model cannot get an operation through.",
+        caption: "Figure 3 | Same DeepSeek model, same bank, same 218 test cases — only the way the agent is built changes. A lets the model call the bank directly; B adds safety prompts and relies on the model to follow them; in TRUSTA the model can only propose, and the system does the confirming and verifying. Only TRUSTA never went wrong and still got things done on the spot.",
         cmd: "python -m benchmarks.compare --live --runs 3",
       },
       rerun: "Run it yourself",

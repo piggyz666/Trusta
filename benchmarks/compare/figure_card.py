@@ -23,7 +23,7 @@ ROW_A, ROW_B, TRACK = "#F4F6F8", "#FFFFFF", "#E5E8EC"
 GOOD, WARN, BAD = "#2E8B57", "#D98A1E", "#C8372D"  # status colours, always with a ✓ / ! / ✗ glyph
 TINT = {"A": "#FCEDEA", "B": "#F3EEFB", "C": "#E8F3F2"}
 ACCENT = {"A": "#E5704F", "B": "#9C7BD3", "C": TEAL}
-W, H = 100.0, 69.5
+W, H = 100.0, 76.5
 
 
 def font():
@@ -71,7 +71,9 @@ def main():
             "B": (pct(s["B"]["task_success_same_turn"]), "bad", "多数要先口头再问一遍"),
             "C": (pct(s["C"]["task_success_same_turn"]), "good", "一句话办成，安全不打折")}),
     ]
-    arms = [("A", "不设防的智能体", "模型直接调用银行接口"), ("B", "提示词加固", "8 条安全规则 + 确认框"), ("C", "TRUSTA", "本作品")]
+    arms = [("A", "不设防的智能体", ["最常见的写法：模型直接调用转账、", "挂失等银行接口，调了就执行"]),
+            ("B", "提示词加固", ["在 A 上加 8 条安全规则，写操作弹", "确认框；能否守规矩靠模型自觉"]),
+            ("C", "TRUSTA（本作品）", ["模型只能提议；金额、收款人须出自原话，", "客户逐笔确认，高风险由系统强验证"])]
 
     fig = plt.figure(figsize=(7.2, 7.2 * H / W), dpi=300, facecolor=SURFACE)
     ax = fig.add_axes([0, 0, 1, 1])
@@ -81,30 +83,41 @@ def main():
     ax.set_axis_off()
 
     # header band
-    ax.add_patch(Rectangle((0, H - 11), W, 11, fc=NAVY, ec="none"))
-    ax.plot([3, 9], [H - 2.6, H - 2.6], color=GOLD, lw=1.8, solid_capstyle="round")
-    ax.text(3, H - 5.0, "同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成", fontsize=TITLE, fontweight="bold",
+    ax.add_patch(Rectangle((0, H - 14.5), W, 14.5, fc=NAVY, ec="none"))
+    ax.text(3, H - 4.2, "同一个大模型，三种搭法：只有 TRUSTA 既不出事，又能当场办成", fontsize=TITLE, fontweight="bold",
             color=SURFACE, va="center")
     runs = sum(s[k]["runs"] for k in "ABC")
-    ax.text(3, H - 8.6, f"同一个模型（{report['meta'].get('model', '')}）· 同一个银行 · 同一份 218 道题 · 每题每组 3 次 · "
-                        f"共 {runs:,} 次真实对话", fontsize=NOTE + 0.3, color=NAVY2, va="center")
+    setup = [("大模型", f"{report['meta'].get('model', '')}", "DeepSeek · 三组完全相同 · 温度 0"),
+             ("银行", "同一个沙箱银行", "同样的账户、收款人、流水"),
+             ("题库", "218 道题，6 类", "正常业务、模糊指令、注入攻击、诱导编造、高风险操作"),
+             ("运行", f"每题每组 3 次", f"共 {runs:,} 次真实对话")]
+    widths = [24.0, 20.0, 32.0, 18.0]
+    x = 3
+    for (key, value, note), w in zip(setup, widths):
+        box(ax, x, H - 13.4, w - 1.0, 5.6, 0.8, fc="#16283F", ec="none", zorder=2)
+        ax.text(x + 1.2, H - 9.6, key, fontsize=NOTE, color=GOLD, va="center", zorder=3)
+        ax.text(x + 1.2 + 4.6, H - 9.6, value, fontsize=NOTE + 0.5, fontweight="bold", color=SURFACE, va="center", zorder=3)
+        ax.text(x + 1.2, H - 11.9, note, fontsize=NOTE - 0.3, color=NAVY2, va="center", zorder=3)
+        x += w
 
     col_x, col_w = [36.0, 57.5, 79.0], 19.0
-    head_top, head_h = H - 13.2, 7.0
+    head_top, head_h = H - 16.6, 9.6
     for (arm, name, note), x in zip(arms, col_x):
         if arm == "C":
             box(ax, x - 1.2, head_top - head_h, col_w + 2.4, head_h, 1.0, fc=NAVY, ec="none", zorder=2)
-            size = head_h - 1.4  # the icon, unaltered, inside the navy header
-            ax.imshow(plt.imread(ICON), extent=(x - 0.2, x - 0.2 + size, head_top - head_h + 0.7, head_top - 0.7), zorder=3)
-            ax.text(x + size + 0.8, head_top - 2.4, name, fontsize=BODY + 2.4, fontweight="bold", color=SURFACE, va="center")
-            ax.text(x + size + 0.8, head_top - 5.0, note, fontsize=NOTE, color=GOLD, va="center")
+            size = 3.8  # the icon, unaltered, inside the navy header
+            ax.imshow(plt.imread(ICON), extent=(x - 0.4, x - 0.4 + size, head_top - 0.6 - size, head_top - 0.6), zorder=3)
+            ax.text(x + 4.0, head_top - 2.5, name, fontsize=BODY + 1.2, fontweight="bold", color=SURFACE, va="center")
+            for j, line in enumerate(note):
+                ax.text(x - 0.2, head_top - 5.9 - j * 2.2, line, fontsize=NOTE - 1.0, color=GOLD, va="center")
         else:
             box(ax, x - 1.2, head_top - head_h, col_w + 2.4, head_h, 1.0, fc=TINT[arm], ec="none", zorder=2)
-            ax.add_patch(Circle((x + 1.4, head_top - head_h / 2), 1.7, fc=ACCENT[arm], ec="none", zorder=3))
-            ax.text(x + 1.4, head_top - head_h / 2 - 0.05, arm, fontsize=BODY, fontweight="bold", color=SURFACE, ha="center",
+            ax.add_patch(Circle((x + 1.4, head_top - 2.5), 1.6, fc=ACCENT[arm], ec="none", zorder=3))
+            ax.text(x + 1.4, head_top - 2.55, arm, fontsize=BODY, fontweight="bold", color=SURFACE, ha="center",
                     va="center", zorder=4)
-            ax.text(x + 4.2, head_top - 2.4, name, fontsize=BODY + 1.2, fontweight="bold", color=INK, va="center")
-            ax.text(x + 4.2, head_top - 5.0, note, fontsize=NOTE, color=INK2, va="center")
+            ax.text(x + 4.0, head_top - 2.5, name, fontsize=BODY + 1.2, fontweight="bold", color=INK, va="center")
+            for j, line in enumerate(note):
+                ax.text(x - 0.2, head_top - 5.9 - j * 2.2, line, fontsize=NOTE - 0.6, color=INK2, va="center")
 
     top, row_h = head_top - head_h - 1.2, 8.8
     # TRUSTA column: tinted and outlined, through the score row

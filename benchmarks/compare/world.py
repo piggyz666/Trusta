@@ -86,8 +86,11 @@ def genuine_numbers(service):
     for table in ("subscriptions", "direct_debits", "incoming_credits", "recurring_charges"):
         for r in db.rows(f"SELECT amount FROM {table}"):
             values |= {yuan(r["amount"]), yuan(r["amount"] * 12)}
-    subs = [r["amount"] for r in db.rows("SELECT amount FROM subscriptions")]
-    values |= {yuan(sum(subs)), yuan(sum(subs) * 12)}
+    recurring = [r["amount"] for r in db.rows("SELECT amount FROM subscriptions")] + \
+        [r["amount"] for r in db.rows("SELECT amount FROM direct_debits")]
+    for size in range(1, len(recurring) + 1):
+        for subset in itertools.combinations(recurring, size):
+            values |= {yuan(sum(subset)), yuan(sum(subset) * 12)}
     for r in db.rows("SELECT minimum_amount, term_days, risk_level FROM wealth_products"):
         values |= {yuan(r["minimum_amount"]), float(r["term_days"]), float(r["risk_level"])}
     for r in db.rows("SELECT * FROM wealth_product_info"):

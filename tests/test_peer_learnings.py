@@ -65,7 +65,8 @@ class KnowledgeAndNavigateTests(Harness):
         card = self.cards(turn, "knowledge")[0]
         self.assertIn("¥1,000.00", card["text"])
         self.assertTrue(card["sources"] and all("ref" in s for s in card["sources"]))
-        self.assertEqual(turn["reply"]["text"].rstrip("。"), card["text"].rstrip("。"))
+        # renewal reminders may follow the answer when a sandbox charge is within three days of today
+        self.assertTrue(turn["reply"]["text"].startswith(card["text"].rstrip("。")))
 
     def test_unknown_topic_is_rejected_by_schema(self):
         turn = self.say("限额", [call("knowledge", topic="MAKE_UP_A_RULE")])

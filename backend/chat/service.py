@@ -36,6 +36,9 @@ UNDO_WORDS = re.compile(r"撤销|撤回|回退|恢复刚才|改回去|弄错了.
 STATE_LABELS = {"HANDED_OFF": "已转人工", "IDLE": "空闲", "CLARIFYING": "等待用户补充信息", "AWAITING_CONFIRMATION": "等待用户在确认卡上决定", "LOCKED": "已锁定"}
 
 
+MARKET_WORDS = r"金价|黄金|汇率|美元|欧元|日元|港币|美金|英镑|外币|外汇|行情"
+
+
 class ChatService(AutomationMixin):
     def __init__(self, service, llm_client=None):
         if not service.banking:
@@ -450,6 +453,10 @@ class ChatService(AutomationMixin):
                 texts.append(f"已开启转账保护，到 {time.strftime('%m-%d %H:%M', time.localtime(state['until']))} 前对外转账、新增收款人都会暂停"
                              + (f"，并取消了 {cancelled} 项待确认的操作" if cancelled else "")
                              + "。保护期内只能由银行安全人员核实后提前解除")
+            elif name == "knowledge" and args["topic"] == "MARKET_QUOTES" and not re.search(MARKET_WORDS, text):
+                # 利率 / 收益率 are not market quotes: answering with gold and FX prices would look like an answer but isn't
+                texts.append("这个数据我这里查不到：我只能提供银行接口返回的数据，以及黄金价格和外币汇率参考行情。"
+                             "存款利率、产品收益等请以银行公布的产品资料为准，可以在理财页查看产品说明。")
             elif name == "knowledge":
                 from backend.chat import knowledge
                 from backend.chat.http import market as _market

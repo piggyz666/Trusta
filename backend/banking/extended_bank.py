@@ -10,6 +10,22 @@ RESOURCE_TABLES = {"card": "cards", "card_application":"card_applications", "sub
 WISH_POOL = "wish-pool"  # internal ledger account holding earmarked (locked) customer funds
 
 
+def _next_month_start():
+    # Demo subscriptions renew on the 1st of next month, so the seeded data never goes stale.
+    now = datetime.now(CHINA)
+    return datetime(now.year + (now.month == 12), now.month % 12 + 1, 1, tzinfo=CHINA).timestamp()
+
+
+def _previous_months(n):
+    # The n full months before the current one, oldest first: the seeded charge history always covers
+    # the window the subscription review reads, whatever today's date is.
+    now = datetime.now(CHINA); y, m = now.year, now.month; out = []
+    for _ in range(n):
+        y, m = (y - 1, 12) if m == 1 else (y, m - 1)
+        out.append((y, m))
+    return out[::-1]
+
+
 def seed_extended(conn):
     conn.execute("INSERT OR IGNORE INTO accounts VALUES('investment-clearing',NULL,'CNY',0,0,0)")
     conn.execute("INSERT OR IGNORE INTO accounts VALUES('acct-savings','demo','CNY',500000,0,0)")
@@ -20,13 +36,13 @@ def seed_extended(conn):
                         ("direct_debits", [("dd-electric", "演示电力", 12000)])):
         for resource_id, merchant, amount in rows:
             conn.execute(f"INSERT OR IGNORE INTO {table} VALUES(?,?,'demo','acct-demo',?,'CNY','MONTHLY',?,'ACTIVE',1,'BANK_SANDBOX',0)",
-                         (resource_id, merchant, amount, datetime(2026, 11, 1, tzinfo=CHINA).timestamp()))
+                         (resource_id, merchant, amount, _next_month_start()))
     # Independent historic bank charge feed, not new deductions from today's balance.
     # The third one is a monthly charge the bank has no subscription record for (row ids kept from earlier versions).
     for merchant, amount, row in (("演示视频", 1999, "演示视频"), ("演示云盘", 990, "演示云盘"), ("QQ音乐", 1500, "未登记商户")):
-        for month in (7, 8, 9):
+        for i, (year, month) in enumerate(_previous_months(3)):
             conn.execute("INSERT OR IGNORE INTO recurring_charges VALUES(?,'demo','acct-demo',?,?,'CNY',?,'SETTLED')",
-                         (f"rec-{row}-{month}", merchant, amount, datetime(2026, month, 1, tzinfo=CHINA).timestamp()))
+                         (f"rec-{row}-{7 + i}", merchant, amount, datetime(year, month, 1, tzinfo=CHINA).timestamp()))
     conn.execute("UPDATE recurring_charges SET merchant='QQ音乐' WHERE id LIKE 'rec-未登记商户-%'")
     conn.execute("INSERT OR IGNORE INTO product_restrictions SELECT id,1,1 FROM wealth_products")
     conn.execute(f"INSERT OR IGNORE INTO accounts VALUES('{WISH_POOL}',NULL,'CNY',0,0,0)")

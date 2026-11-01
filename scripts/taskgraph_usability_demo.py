@@ -43,7 +43,7 @@ def demo(directory):
 
 def main():
     with tempfile.TemporaryDirectory() as directory:result=demo(directory)
-    (ROOT/'docs/phase6-taskgraph-usability-demo.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    (ROOT/'docs/archive/phase6-taskgraph-usability-demo.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({key:result[key] for key in ('passed','real_model_called','readonly_status','financial_proposal_status','bank_writes')}))
 
 

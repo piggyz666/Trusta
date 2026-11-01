@@ -4,7 +4,7 @@
 
 ## 1. Architecture Review
 
-编码前完成 [架构评估与分阶段方案](phase4-architecture-review.md)，先运行原有 **151 tests / 187.285s / OK**。没有发现需要改变冻结金融架构的重大冲突。
+编码前完成 [架构评估与分阶段方案](archive/phase4-architecture-review.md)，先运行原有 **151 tests / 187.285s / OK**。没有发现需要改变冻结金融架构的重大冲突。
 
 基线实际采用 HMAC-SHA256 消息 V2，根密钥派生各 Agent / epoch 密钥，已有轮换、撤销、宽限和持久化 nonce；它不能供仅持有公钥的第三方验签。已有 Audit 为追加式哈希链，能检测链内改写，缺少签名检查点和单记录包含证明。模型、Memory、Scheduler 仍受确定性安全边界约束。
 
@@ -58,7 +58,7 @@ Agent 消息在验签、身份与权限状态、载荷引用、任务上下文�
 | 本地异步 anchor 先交付 | 可展示真实持久化、幂等、失败恢复；不引入链节点、钱包、合约与转账耦合 |
 | 显式兼容配置 + 持久化 V3 下限 | 原测试与历史脚本保持兼容，V3 不接受降级消息或退回 V2 启动 |
 
-算法参考和推导见 [架构评估中的一手来源](phase4-architecture-review.md)。本实现不是完整 DID / Certificate Transparency / JCS 标准实现或密码模块认证。
+算法参考和推导见 [架构评估中的一手来源](archive/phase4-architecture-review.md)。本实现不是完整 DID / Certificate Transparency / JCS 标准实现或密码模块认证。
 
 ## 4. 新目录与完整修改清单
 
@@ -171,7 +171,7 @@ CapabilityRegistry 仍是唯一授予银行 / inference / Memory 权限的确定
 
 认证接口：`GET /api/audit/proof?audit_event_id=...`，或 receipt_id / transaction_id，必须恰好一个非空查询参数，不能重复、增加未知参数。先检查当前客户任务归属，拒绝其他客户和全局运维事件。尚未生成批次返回 AUDIT_CHECKPOINT_PENDING；不即时伪造 root 或 CONFIRMED。
 
-实际 Demo 的 [完整 proof bundle](phase4-record-proof.json) 核心字段：
+实际 Demo 的 [完整 proof bundle](archive/phase4-record-proof.json) 核心字段：
 
 ```json
 {
@@ -279,7 +279,7 @@ Windows 11 / Python 3.13.1 / cryptography 47.0.0 / OpenSSL 4.0.0。单位 ms。
 
 最终 `python -m unittest discover -s tests -v`：**285 tests / 207.554s / OK**。原 151 项测试未删除、未修改断言；新增 134 项，其中 81 项把原执行 / 场景 / Memory / Conversation 断言在 V3 再运行。另有真实 ECDSA、身份生命周期、能力承诺、原子 nonce、Merkle、锚定故障、查询隔离与完整 HTTP Demo 覆盖。
 
-[完整测试输出](phase4-tests.txt) 与 [机器验证摘要](phase4-validation.json)。`compileall`、前端语法检查、启动脚本 PowerShell 解析通过。实际浏览器显示只读理财报告和单记录证明核验通过，无 warn/error 日志；[页面截图](phase4-ui.png)。证明 JSON 的脚本导出与独立 CLI 验证通过；浏览器导出按钮已触发，in-app browser 的下载事件未返回，因此不声称已验证浏览器下载文件。
+[完整测试输出](archive/phase4-tests.txt) 与 [机器验证摘要](archive/phase4-validation.json)。`compileall`、前端语法检查、启动脚本 PowerShell 解析通过。实际浏览器显示只读理财报告和单记录证明核验通过，无 warn/error 日志；[页面截图](archive/phase4-ui.png)。证明 JSON 的脚本导出与独立 CLI 验证通过；浏览器导出按钮已触发，in-app browser 的下载事件未返回，因此不声称已验证浏览器下载文件。
 
 ```powershell
 python -m pip install -r requirements.txt
@@ -298,7 +298,7 @@ python -m scripts.audit_worker --watch
 
 ## 15. 三个原业务场景与 Demo
 
-运行 `python -m scripts.phase4_demo`，生成独立沙箱实际 HTTP 报告、proof JSON 和演示公钥，日常银行数据不变。[本次结果](phase4-demo.json)：
+运行 `python -m scripts.phase4_demo`，生成独立沙箱实际 HTTP 报告、proof JSON 和演示公钥，日常银行数据不变。[本次结果](archive/phase4-demo.json)：
 
 | 请求 | 结果 |
 |---|---|
@@ -310,7 +310,7 @@ Demo 流程：V3 创建任务 → 额外合法消息验证 → Transaction key �
 
 重启检查：Agent registry、key 轮换版本、撤销状态、nonce 防重放、检查点证明和旧格式 Receipt **全部保持正确**。Audit hash chain 有效。证明的 CONFIRMED 仅为本地开发 anchor。
 
-![单条审计记录核验](phase4-ui.png)
+![单条审计记录核验](archive/phase4-ui.png)
 
 ## 16. 能力状态清单
 

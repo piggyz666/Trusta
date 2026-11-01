@@ -119,7 +119,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--llm-config')
     parser.add_argument('--provider')
-    parser.add_argument('--output',default='docs/phase5-provider-evaluation.json')
+    parser.add_argument('--output',default='docs/archive/phase5-provider-evaluation.json')
     args=parser.parse_args()
     report=run_evaluation(LLMSettings.load(args.llm_config) if args.llm_config else None,args.provider)
     write_reports(report,args.output)

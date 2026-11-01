@@ -5,15 +5,16 @@ import json
 from pathlib import Path
 import re
 import sys
+from scripts.docpaths import doc
 ROOT=Path(__file__).resolve().parents[1]
 def read(name):return json.loads((ROOT/name).read_text(encoding='utf-8'))
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
-def save(name,value):(ROOT/'docs'/name).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+def save(name,value):doc(ROOT,name).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 def main():
     baseline=read('data/hardening-baseline-result.json');final=read('data/hardening-final-result.json')
     if not final['passed'] or final['tests']!=640:raise SystemExit('Final passing full regression is required')
-    old=ROOT/'docs/backend-hardening-final-tests.txt'
-    if old.exists():(ROOT/'docs/backend-hardening-full-tests.txt').write_bytes(old.read_bytes())
+    old=ROOT/'docs/archive/backend-hardening-final-tests.txt'
+    if old.exists():(ROOT/'docs/archive/backend-hardening-full-tests.txt').write_bytes(old.read_bytes())
     skipped=sum(sum(int(n) for n in re.findall(r'skipped=(\d+)',Path(r['log']).read_text(encoding='utf-8'))) for r in final['results'])
     before=read('data/hardening-before.json');oldfiles=before['files'];after={}
     for directory in ('backend','scripts','benchmarks','tests','config'):
@@ -29,8 +30,8 @@ def main():
           'backend/execution/gateway.py','backend/verification.py','backend/receipts.py','backend/runtime/taskgraph.py')
     unchanged={p:p in oldfiles and sha(ROOT/p)==oldfiles[p] for p in core}
     if not all(unchanged.values()):raise SystemExit('Frozen financial boundary changed')
-    llm=read('docs/llm-holdout-summary.json');reliability=read('docs/backend-reliability-benchmark.json')
-    security=read('docs/agent-communication-security-benchmark.json');bank=read('docs/external-bank-evidence-review.json')
+    llm=read('docs/archive/llm-holdout-summary.json');reliability=read('docs/archive/backend-reliability-benchmark.json')
+    security=read('docs/archive/agent-communication-security-benchmark.json');bank=read('docs/archive/external-bank-evidence-review.json')
     assert security['passed'] and security['tests']==31 and not skipped
     gap='''
 ## 实际完成状态
@@ -47,7 +48,7 @@ def main():
 | DID/ZKP | 原真实 did:key 与开发 Groth16 通过回归 | 本地信任根/单机setup，不是生产资质 |
 | 运行可靠性 | 31专项、640全量、HTTP/锁竞争/1000审计 | 本机有限样本，非生产容量证明 |
 '''
-    matrix=ROOT/'docs/backend-hardening-gap-matrix.md';text=matrix.read_text(encoding='utf-8')
+    matrix=ROOT/'docs/archive/backend-hardening-gap-matrix.md';text=matrix.read_text(encoding='utf-8')
     if '## 实际完成状态' in text:text=text.split('## 实际完成状态')[0]
     matrix.write_text(text+gap,encoding='utf-8')
     report=f'''# TRUSTA V1 后端深化交付（2026-10-08）
@@ -117,7 +118,7 @@ config/llm.compact.example.toml
 
 交付下一顺序：扩大独立LLM标注和多轮澄清、为剩余Agent扩展同样窄的进程边界、受控运维恢复与容量验证、具备可信配置后Sepolia独立read-back/真实外部授权证据；保持本轮后端边界，再进入UI/产品形态设计。
 '''
-    (ROOT/'docs/TRUSTA-V1-backend-hardening-final.md').write_text(report,encoding='utf-8')
+    (ROOT/'docs/archive/TRUSTA-V1-backend-hardening-final.md').write_text(report,encoding='utf-8')
     docs=['backend-hardening-architecture-audit.md','backend-hardening-gap-matrix.md','backend-trust-boundaries.md',
           'agent-transport-and-key-isolation.md','agent-handoff-evidence-spec.md','llm-holdout-evaluation.md',
           'agent-communication-security-benchmark.json','agent-communication-recovery-report.json',
@@ -132,7 +133,7 @@ config/llm.compact.example.toml
         'baseline':{k:v for k,v in baseline.items() if k!='results'},'final':{k:v for k,v in final.items() if k!='results'},
         'skipped':skipped,'original_test_files':len(original_tests),'original_test_files_byte_identical':intact,'original_test_hashes':original_tests,
         'frozen_boundary_byte_identical':unchanged,'changed_files':changed,'added_or_additionally_inventoried_files':added,
-        'before_hashes':oldfiles,'after_source_hashes':after,'artifact_hashes':{'docs/'+p:sha(ROOT/'docs'/p) for p in docs},
+        'before_hashes':oldfiles,'after_source_hashes':after,'artifact_hashes':{doc(ROOT,p).relative_to(ROOT).as_posix():sha(doc(ROOT,p)) for p in docs},
         'classifications':{'llm':'REAL_EXTERNAL_VERIFIED_QUALITY_LIMITED','process':'FINANCE_SCOPE_PROCESS_ISOLATION_VERIFIED',
             'bank':'HISTORICAL_OFFICIAL_SANDBOX_EVIDENCE_REVERIFIED','anchor':'BLOCKED_BY_EXTERNAL_CREDENTIAL','production_ready':False},
         'external_bank_http_calls_this_round':0,'production_funds_operations_this_round':0,'new_python_dependencies':[],

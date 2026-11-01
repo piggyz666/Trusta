@@ -47,7 +47,7 @@ def scan_exported_secrets():
                         values.append(('BANK_' + key.upper(), value))
     files = [p for p in OUT.rglob('*') if p.is_file() and 'audit-venv' not in p.parts
              and p.suffix in {'.json', '.txt', '.csv', '.pem'}]
-    report = ROOT / 'TRUSTA_BACKEND_ZERO_KNOWN_FIXABLE_DEFECTS.md'
+    report = ROOT / 'docs' / 'archive' / 'TRUSTA_BACKEND_ZERO_KNOWN_FIXABLE_DEFECTS.md'
     if report.exists():
         files.append(report)
     hits = []

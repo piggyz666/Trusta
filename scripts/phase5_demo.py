@@ -186,7 +186,7 @@ def demo(directory):
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument('--output',default='docs/phase5-demo.json')
+    parser.add_argument('--output',default='docs/archive/phase5-demo.json')
     args=parser.parse_args()
     with tempfile.TemporaryDirectory(prefix='trusta-phase5-demo-') as directory:
         report=demo(directory)

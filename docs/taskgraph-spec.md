@@ -14,7 +14,7 @@ LLM 接入：POST /api/graphs/propose(goal,inputs) → Supervisor 建立草稿 �
 
 Planner 的语义提案权限是固定 Graph endpoint 的有限角色规则，受现有活跃身份保护；不改原 signed CapabilityRegistry bank/inference commitments，也不给新增金融 grant。普通旧 template inference 路径不变。raw Prompt/response 只保存在合成评测文件；Gateway telemetry 仅保留 hash/usage/安全错误。
 
-2026-10-06提案接入增强：Gateway提供闭合响应Schema及按原注册表生成的功能目录；响应可为有效图或有限的缺参澄清。澄清问题由系统生成，不安装图、不产生审批，补齐输入后另建提案任务。旧纯图响应保留兼容。完整安全校验仍为上述原Validator/Compiler；详见[TaskGraph可用性改进](phase6-taskgraph-usability.md)，不将小规模图评测等同于原100例自然语言意图评测。
+2026-10-06提案接入增强：Gateway提供闭合响应Schema及按原注册表生成的功能目录；响应可为有效图或有限的缺参澄清。澄清问题由系统生成，不安装图、不产生审批，补齐输入后另建提案任务。旧纯图响应保留兼容。完整安全校验仍为上述原Validator/Compiler；详见[TaskGraph可用性改进](archive/phase6-taskgraph-usability.md)，不将小规模图评测等同于原100例自然语言意图评测。
 
 接口：POST /api/graphs 手动闭合图；/propose 模型提案；/{id}/signal 语义选择；/{id}/authorize 独立金融审批；/{id}/resume 恢复。选择不是授权。`python -m scripts.taskgraph_worker` 可轮询 WAIT_TIME，无用户审批权限。
 

@@ -1,6 +1,6 @@
 # TRUSTA Phase 3.3：类型化 Memory 与可信通信增强
 
-本文保留 Phase 3.3 历史交付，HMAC V2 与接口占位说明适用于该阶段。当前版本见 [Phase 4](phase4-cryptographic-trust.md)：正常入口默认 ECDSA V3，Merkle / 本地锚定已实现，原 Memory 与金融边界保持。
+本文保留 Phase 3.3 历史交付，HMAC V2 与接口占位说明适用于该阶段。当前版本见 [Phase 4](../phase4-cryptographic-trust.md)：正常入口默认 ECDSA V3，Merkle / 本地锚定已实现，原 Memory 与金融边界保持。
 
 交付日期：2026-10-06。基于 Phase 3.1 / 3.2 增加明确同意的类型化 Memory、统一身份与权限查询、版本化消息、可轮换的消息密钥版本，以及默认关闭的未来扩展接口。保留 Supervisor、Planner、Transaction、Finance、Wealth 五个 Agent，没有新增 Agent 或金融业务。
 

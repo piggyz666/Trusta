@@ -2,7 +2,7 @@
 
 # TRUSTA V1 架构
 
-当前状态以 [后端最终能力矩阵](final-backend/TRUSTA_Final_Capability_Matrix.md) 为准。ECDSA V3、did:key 验证、真实 Groth16 本地证明与验证、签名 Merkle 检查点已实现；真实外部区块链部署与独立验收仍受签名批准及第二 RPC 阻塞。原 Hash Chain 和金融执行链保留，锚定在独立 worker 内。下文为历史 V1 设计，后续阶段扩展了密码能力，未改变金融执行边界。
+当前状态以 [后端最终能力矩阵](archive/final-backend/TRUSTA_Final_Capability_Matrix.md) 为准。ECDSA V3、did:key 验证、真实 Groth16 本地证明与验证、签名 Merkle 检查点已实现；真实外部区块链部署与独立验收仍受签名批准及第二 RPC 阻塞。原 Hash Chain 和金融执行链保留，锚定在独立 worker 内。下文为历史 V1 设计，后续阶段扩展了密码能力，未改变金融执行边界。
 
 本文记录V1冻结架构。Phase 2只读场景在相同Runtime/Blackboard/Gateway中扩展，见 `phase2-scenarios.md`；金融写执行边界不变。
 

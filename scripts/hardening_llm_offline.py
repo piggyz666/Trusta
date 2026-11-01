@@ -7,10 +7,10 @@ from backend.llm.compact_graph import normalize
 from backend.llm.grounded_request import normalize_request,matches_request
 from backend.domain import Rejected
 from tests.phase6_helpers import service
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/backend-final-hardening'
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/archive/backend-final-hardening'
 
 def main():
-    original=ROOT/'docs/final-backend/LLM_Live_Benchmark.json'
+    original=ROOT/'docs/archive/final-backend/LLM_Live_Benchmark.json'
     with tempfile.TemporaryDirectory(prefix='trusta-historical-replay-') as directory:
         replay.OUT=Path(directory);shutil.copy2(original,replay.OUT/'LLM_Live_Benchmark.json');replay.main()
         doc=json.loads((replay.OUT/'LLM_Score_Amendment.json').read_text(encoding='utf-8'))
@@ -47,7 +47,7 @@ def main():
                          'finish_reason':raw['raw_response']['choices'][0]['finish_reason'] if raw.get('raw_response') else None,
                          'returned_model':raw['returned_model'],'usage':raw['usage']})
     report={'status':'LOCAL_VERIFIED','method':'Classification from actual saved raw content and current deterministic decoder. No retry/repair/model call.',
-        'source_path':'docs/final-backend/LLM_Live_Benchmark.json','source_sha256':hashlib.sha256(original.read_bytes()).hexdigest(),
+        'source_path':'docs/archive/final-backend/LLM_Live_Benchmark.json','source_sha256':hashlib.sha256(original.read_bytes()).hexdigest(),
         'cases':rows,'remote_requests':0,'new_cost_usd':0,
         'limits':['Historical failures are not a fresh blind evaluation','Earlier GLM 4.7 API 429/truncation probes are separate historical evidence',
                   'Working glm-4-flash quality cannot characterize all GLM models','No financial rules or missing fields auto-repaired']}

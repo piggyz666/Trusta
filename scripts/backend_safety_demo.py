@@ -61,7 +61,7 @@ def run():
 
 if __name__=='__main__':
     report=run()
-    destination=Path(__file__).resolve().parents[1]/'docs'/'backend-safety-six-scenario-demo.json'
+    destination=Path(__file__).resolve().parents[1]/'docs'/'archive'/'backend-safety-six-scenario-demo.json'
     destination.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'six_scenario_smoke_passed':report['six_scenario_smoke_passed'],
                       'audit_chain_verified':report['audit_chain_verified'],'external_bank_calls':0},ensure_ascii=False))

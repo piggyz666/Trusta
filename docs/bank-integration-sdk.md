@@ -35,7 +35,7 @@ Feed 在 Adapter 内投影为 id/customer_id/account_id/整数 amount/currency/o
 
 新增固定Sandbox Adapter和RS256 OAuth自动刷新，仅声明accounts.read、balance.read、transactions.read。真实账户/余额、交易读取、GBP Finance BILL_ANALYSIS及TaskGraph已通过原Gateway/Capability/V3消息/Audit验证；资金写能力拒绝，默认Virtual保留。Decimal金额映射、账户内legs、充值排除、分页完整性以及权限/签名/刷新异常通过本地测试。原安全链、Graph Validator/Compiler和能力授予没有修改。
 
-本轮全量522项测试通过，24项为新增SDK/认证/原生币种测试；原三个Virtual HTTP场景再运行通过。银行未返回token scope字段，不把请求READ视作银行返回的权限证明。详细文件、实接证据及业务限制见[Revolut说明](revolut-readonly-integration.md)。
+本轮全量522项测试通过，24项为新增SDK/认证/原生币种测试；原三个Virtual HTTP场景再运行通过。银行未返回token scope字段，不把请求READ视作银行返回的权限证明。详细文件、实接证据及业务限制见[Revolut说明](archive/revolut-readonly-integration.md)。
 
 官方依据：[Starling Public API](https://developer-sandbox.starlingbank.com/docs)、[官方 SDK](https://github.com/starlingbank/starling-developer-sdk)、[签名示例](https://github.com/starlingbank/api-samples)。Live 状态见 reference-bank-validation.json。
 
@@ -43,4 +43,4 @@ Feed 在 Adapter 内投影为 id/customer_id/account_id/整数 amount/currency/o
 
 后续增加独立 transfer_profile，固定 Sandbox、GBP/GB 与 EUR/DE 同币种白名单、每笔最多100最小单位。原 readonly profile 保持只读；新 profile 的银行 PAY 同意不能代替 Core 逐笔 Authorization。POST claim 先落盘，不确定结果不重发；只读 reconcile 依照原合约/授权核查并保存补充回执，保留原 MANUAL_REVIEW 历史。金融写不经过新增公开捷径，原 Gateway/Registry/Validator/Compiler 不变。
 
-545项全量测试通过；23项为新增业务测试，最终协议端点版本另通过35项专项测试。前端与单个资源 GET 已官方实测，合成付款/恢复与官方资金执行分开统计。实接付款状态见 [最新运行记录](revolut-banking-validation.json)，配置、目录及 Demo 见 [说明](revolut-banking-integration.md)。
+545项全量测试通过；23项为新增业务测试，最终协议端点版本另通过35项专项测试。前端与单个资源 GET 已官方实测，合成付款/恢复与官方资金执行分开统计。实接付款状态见 [最新运行记录](archive/revolut-banking-validation.json)，配置、目录及 Demo 见 [说明](archive/revolut-banking-integration.md)。

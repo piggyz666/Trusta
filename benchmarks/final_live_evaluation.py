@@ -16,7 +16,7 @@ from backend.conversation.store import empty_slots
 from backend.conversation.service import ConversationService
 from backend.llm.validation import strict_json
 
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/final-backend'
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/archive/final-backend'
 LEDGER=ROOT/'data/final-llm-budget.json'
 
 def dataset():

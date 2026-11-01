@@ -17,14 +17,14 @@ from benchmarks.taskgraph_live_evaluation import score
 
 def main():
     def load(path):return json.loads((ROOT/path).read_text(encoding='utf-8'))
-    tests=(ROOT/'docs/phase6-taskgraph-tests.txt').read_text(encoding='utf-8')
+    tests=(ROOT/'docs/archive/phase6-taskgraph-tests.txt').read_text(encoding='utf-8')
     match=re.search(r'Ran (\d+) tests in ([\d.]+)s\s+OK\s*$',tests)
     if not match:raise SystemExit('Final full regression must pass before publishing')
     hashes=load('data/phase6-original-test-hashes.json')
     assert all(hashlib.sha256((ROOT/path).read_bytes()).hexdigest()==value for path,value in hashes.items())
     baseline=load('data/phase6-taskgraph-usability-before/manifest.json')['files']
     assert hashlib.sha256((ROOT/'backend/runtime/taskgraph.py').read_bytes()).hexdigest()==baseline['backend/runtime/taskgraph.py']
-    v1=load('docs/phase6-taskgraph-heldout.json');v2=load('docs/phase6-taskgraph-heldout-v2.json')
+    v1=load('docs/archive/phase6-taskgraph-heldout.json');v2=load('docs/archive/phase6-taskgraph-heldout-v2.json')
     for version,report in ((1,v1),(2,v2)):
         dataset=ROOT/f'benchmarks/taskgraph_holdout_v{version}.json'
         assert report['dataset_hash']==hashlib.sha256(dataset.read_bytes()).hexdigest()
@@ -58,7 +58,7 @@ def main():
             'One target_id clarification was returned as resource_id; canonical parameter score remains failed',
             'No second live provider, official bank sandbox, external chain, DID or ZKP verification added',
             'Financial proposals await independent user authorization; zero bank writes in evaluation']}
-    (ROOT/'docs/phase6-taskgraph-usability-validation.json').write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    (ROOT/'docs/archive/phase6-taskgraph-usability-validation.json').write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'passed':True,'full_tests':int(match[1]),'captured_replays':len(replays),'new_model_calls':0}))
 
 

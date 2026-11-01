@@ -101,9 +101,9 @@ def demo(directory):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="docs/phase4-demo.json")
-    parser.add_argument("--proof-output", default="docs/phase4-record-proof.json")
-    parser.add_argument("--public-key-output", default="docs/phase4-audit-public.pem")
+    parser.add_argument("--output", default="docs/archive/phase4-demo.json")
+    parser.add_argument("--proof-output", default="docs/archive/phase4-record-proof.json")
+    parser.add_argument("--public-key-output", default="docs/archive/phase4-audit-public.pem")
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="trusta-phase4-demo-") as directory:
         report = demo(directory)

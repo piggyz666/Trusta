@@ -134,7 +134,7 @@ def main():
     from pathlib import Path
     parser = argparse.ArgumentParser(description="Check or repair derived metrics without model calls or bank execution.")
     parser.add_argument("--repair", action="store_true")
-    parser.add_argument("--path", type=Path, default=Path(__file__).resolve().parents[1] / "docs/real-llm-evaluation.json")
+    parser.add_argument("--path", type=Path, default=Path(__file__).resolve().parents[1] / "docs/archive/real-llm-evaluation.json")
     args = parser.parse_args()
     report = json.loads(args.path.read_text(encoding="utf-8"))
     if args.repair:

@@ -74,7 +74,7 @@ def main():
       'classification':'REAL_EXTERNAL_VERIFIED' if success else 'BLOCKED_BY_EXTERNAL_CREDENTIAL','real_llm_verified':bool(success),'cross_provider_verified':bool(success and cross.get('raw_result')),
       'cross_provider_attempt':cross,'completion_rate':None,'resource_grounding_rate':None,'graph_acceptance_rate':None,'cost_usd':None,'cost_reason':'No pinned verified price; tokens reported without inventing billing','results':rows}
     report=summarize(report)
-    write_artifacts(report,ROOT/'docs/real-llm-evaluation.json')
+    write_artifacts(report,ROOT/'docs/archive/real-llm-evaluation.json')
     request=InferenceRequest('route-live',InferenceContext(None,'synthetic','planner','GENERAL_GRAPH',0),'plan_proposal',{},sensitivity='public')
     p=ProviderRequest(({'role':'user','content':'synthetic'},),{},512,20)
     router=ModelRouter(LLMSettings(mode='assisted',providers=(cfg,second)))
@@ -85,5 +85,5 @@ def main():
         'live_latency_ms':{'median':statistics.median(r['latency_ms'] for r in rows) if rows else None,'max':max((r['latency_ms'] for r in rows),default=None)},
         'public_eligible':[r.name for r in public.providers],'restricted_eligible':[r.name for r in restricted.providers],'restricted_rejected':restricted.rejected,
         'fault_injection_scope':'LOCAL_FIXTURE; tests exercise timeout/429/protocol/fallback, never described as observed provider incidents','cross_provider_live_verified':report['cross_provider_verified']}
-    (ROOT/'docs/model-router-live-evaluation.json').write_text(json.dumps(router_report,ensure_ascii=False,indent=2),encoding='utf-8')
+    (ROOT/'docs/archive/model-router-live-evaluation.json').write_text(json.dumps(router_report,ensure_ascii=False,indent=2),encoding='utf-8')
 if __name__=='__main__':main()

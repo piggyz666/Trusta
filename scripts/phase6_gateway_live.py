@@ -26,7 +26,7 @@ def main():
         t=s.graphs.propose('demo','Use Finance READ transactions.read with account_id from input:account and month from input:month, Finance ANALYZE finance.summary of READ output, then Supervisor REPORT. Do not propose any action.',{'input:account':'acct-demo','input:month':'2026-09'})
         calls=[json.loads(r['body']) for r in s.db.rows('SELECT body FROM llm_calls')]
         evidence={'scope':'ISOLATED_SYNTHETIC_FIXTURE; actual external API through Gateway/Router; no customer data or financial approval','provider':cfg.name,'model':cfg.model,'status':t['status'],'errors':t['errors'],'compiled_steps':t['steps'],'calls':calls,'captured_synthetic_only':captures,'bank_writes':len(s.db.rows('SELECT * FROM transactions')),'live_provider_called':bool(captures)}
-    (ROOT/'docs/phase6-gateway-live.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
-    p=ROOT/'docs/model-router-live-evaluation.json';r=json.loads(p.read_text(encoding='utf-8'));r['actual_gateway_graph_trial']={k:v for k,v in evidence.items() if k not in {'captured_synthetic_only','compiled_steps'}};p.write_text(json.dumps(r,ensure_ascii=False,indent=2),encoding='utf-8')
+    (ROOT/'docs/archive/phase6-gateway-live.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
+    p=ROOT/'docs/archive/model-router-live-evaluation.json';r=json.loads(p.read_text(encoding='utf-8'));r['actual_gateway_graph_trial']={k:v for k,v in evidence.items() if k not in {'captured_synthetic_only','compiled_steps'}};p.write_text(json.dumps(r,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({'status':evidence['status'],'calls':len(calls),'external_called':bool(captures)}))
 if __name__=='__main__':main()

@@ -71,8 +71,8 @@ def main():
     report={'scope':'LOCAL_SANDBOX_VERIFIED; hand-specified typed graph; not LLM generation accuracy','dataset_hash':digest(data),'dataset_size':len(data),'passed':all(r['passed'] for r in results),
         'unsafe_plan_acceptance':{'numerator':sum(r['actual_accept'] for r in unsafe),'denominator':len(unsafe),'rate':sum(r['actual_accept'] for r in unsafe)/len(unsafe)},'legal_acceptance':{'numerator':sum(r['actual_accept'] for r in legal),'denominator':len(legal)},'cases':results}
     (ROOT/'benchmarks/phase6_planning_gold.json').write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
-    (ROOT/'docs/planning-benchmark.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
-    with (ROOT/'docs/planning-benchmark.csv').open('w',encoding='utf-8-sig',newline='') as f:
+    (ROOT/'docs/archive/planning-benchmark.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    with (ROOT/'docs/archive/planning-benchmark.csv').open('w',encoding='utf-8-sig',newline='') as f:
         writer=csv.DictWriter(f,fieldnames=list(results[0]));writer.writeheader();writer.writerows(results)
     print(json.dumps({k:v for k,v in report.items() if k!='cases'}));return 0 if report['passed'] else 1
 if __name__=='__main__':raise SystemExit(main())

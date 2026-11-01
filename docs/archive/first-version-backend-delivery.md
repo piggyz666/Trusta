@@ -105,7 +105,7 @@ python -m scripts.build_privacy_proof --local-phase1 --output data/zkp-dev-v1
 
 既有 Solidity 合约、独立 RPC 读回、确认数/重组检查和持久化发送记录保留，并在全量测试里执行本地 EVM 验证。**本轮未向外部 Sepolia 广播，也没有新的外部 tx hash。** 仍需用户控制的测试钱包、测试 ETH、RPC 与部署后的合约地址；只接收本机配置路径，不发送私钥。
 
-已有步骤见 [external-blockchain-anchor.md](external-blockchain-anchor.md)。生产银行/真实企业开户不作为本版比赛后端的前置条件。
+已有步骤见 [external-blockchain-anchor.md](../external-blockchain-anchor.md)。生产银行/真实企业开户不作为本版比赛后端的前置条件。
 
 ## 新增目录与主要文件
 

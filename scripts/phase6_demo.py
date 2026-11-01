@@ -17,7 +17,7 @@ def provision(s):
             conn.execute('INSERT INTO payees VALUES(?,?,?,0)',('payee-'+u,u,'Organizer'))
             conn.execute("INSERT INTO split_payee_routes VALUES(?,'acct-demo')",('payee-'+u,))
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',type=Path,default=ROOT/'docs');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',type=Path,default=ROOT/'docs'/'archive');args=parser.parse_args()
     args.output_dir.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory() as root:
         s=configured(root);provision(s);server=create_server(s,'unused',0,{u+'-local-demo':u for u in ('demo','alice','bob','carol')});threading.Thread(target=server.serve_forever,daemon=True).start()

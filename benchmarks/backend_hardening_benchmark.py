@@ -19,10 +19,11 @@ from backend.runtime.taskgraph import node
 from backend.server import create_server
 from tests.phase6_helpers import service
 from tests.test_phase6_graph import read_graph
+from scripts.docpaths import doc
 
 ROOT=Path(__file__).resolve().parents[1]
 def write(name,value):
-    (ROOT/'docs'/name).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    doc(ROOT,name).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 def latency(values):
     ordered=sorted(values)
     return {'samples':len(values),'p50_ms':statistics.median(values),'p95_ms':ordered[max(0,int(.95*len(values))-1)],

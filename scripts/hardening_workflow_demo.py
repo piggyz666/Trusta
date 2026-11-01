@@ -9,7 +9,7 @@ from backend.runtime.handoff_evidence import verify_bundle
 from backend.audit_trust.records import verify_record
 
 def main():
-    output=ROOT/'docs/backend-final-hardening'
+    output=ROOT/'docs/archive/backend-final-hardening'
     with tempfile.TemporaryDirectory(prefix='trusta-hardening-demo-') as directory:
         s=service(directory);d=SubscriptionBudgetDialogue(s)
         goal='分析最近三个月的支出，找出不需要的订阅，列出可以取消的项目，等我确认后取消，再根据节省的预算制定下个月的理财计划。'

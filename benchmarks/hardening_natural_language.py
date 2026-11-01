@@ -8,7 +8,7 @@ from backend.llm.grounded_request import normalize_request
 from backend.llm.subscription_workflow import SubscriptionBudgetDialogue
 from backend.conversation.service import ConversationService
 from tests.phase6_helpers import service
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/backend-final-hardening'
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/archive/backend-final-hardening'
 
 def dataset():
     future=(datetime.now(CHINA)+timedelta(days=1)).strftime('%Y-%m-%d %H:%M')

@@ -101,6 +101,6 @@ def run():
 
 if __name__=='__main__':
     report=run()
-    (ROOT/'docs'/'backend-complete-demo.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    (ROOT/'docs'/'archive'/'backend-complete-demo.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'six_scenarios':len(report['scenarios']),'real_zkp_verified':report['crypto']['zkp']['verified'],
                       'audit_chain_verified':report['audit_chain_verified'],'external_bank_calls':0}))

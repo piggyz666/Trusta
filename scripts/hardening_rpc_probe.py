@@ -92,7 +92,7 @@ def main():
             'configuration_changed':configured,'read_protocol_checks':checks,
             'provider_independence_basis':'Pocket Network Foundation public portal vs Infura; independently named operator. This does not prove all underlying nodes have no shared infrastructure.',
             'anchor_readback_status':'BLOCKED_EXTERNAL_CONTRACT_NOT_DEPLOYED'}
-    output=ROOT/'docs/backend-final-hardening/sepolia-independent-verification.json'
+    output=ROOT/'docs/archive/backend-final-hardening/sepolia-independent-verification.json'
     if output.exists():
         prior=json.loads(output.read_text(encoding='utf-8'))
         report['prior_attempts']=prior.get('prior_attempts',[])+[{k:v for k,v in prior.items() if k!='prior_attempts'}]

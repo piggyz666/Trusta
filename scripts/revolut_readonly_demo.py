@@ -124,7 +124,7 @@ if __name__=='__main__':
     parser.add_argument('--config',default=str(ROOT/'config/bank.revolut.local.toml'))
     parser.add_argument('--month',default=datetime.now().strftime('%Y-%m'))
     parser.add_argument('--currency',choices=['GBP','EUR','USD','AUD'],default='GBP')
-    parser.add_argument('--output',default=str(ROOT/'docs/revolut-readonly-validation.json'))
+    parser.add_argument('--output',default=str(ROOT/'docs/archive/revolut-readonly-validation.json'))
     args=parser.parse_args()
     try: run(args.config,args.month,args.currency,args.output)
     except Rejected as exc:

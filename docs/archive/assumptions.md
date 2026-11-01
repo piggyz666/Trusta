@@ -1,6 +1,6 @@
 # 实现假设与限制
 
-当前已完成 [Phase 4](phase4-cryptographic-trust.md)。默认消息 V3 使用随机 ECDSA 密钥、加密本地私钥库、能力承诺及持久化防降级；新增签名 Merkle 与单记录证明、本地异步锚定。真实 DID / Blockchain / ZKP 未实现。生产隔离、可信公钥分发、根密钥失陷恢复、外部时间与大规模历史核验仍有限制，详见 Phase 4 第 16–17 节。模型默认关闭，Memory 不缓存金融字段。下文是 V1 / 早期阶段历史选择，关于三个 Agent、标准库、HMAC 和未实现 Merkle 的描述不代表当前 V3 配置。
+当前已完成 [Phase 4](../phase4-cryptographic-trust.md)。默认消息 V3 使用随机 ECDSA 密钥、加密本地私钥库、能力承诺及持久化防降级；新增签名 Merkle 与单记录证明、本地异步锚定。真实 DID / Blockchain / ZKP 未实现。生产隔离、可信公钥分发、根密钥失陷恢复、外部时间与大规模历史核验仍有限制，详见 Phase 4 第 16–17 节。模型默认关闭，Memory 不缓存金融字段。下文是 V1 / 早期阶段历史选择，关于三个 Agent、标准库、HMAC 和未实现 Merkle 的描述不代表当前 V3 配置。
 
 Phase 2新增Finance、Wealth只读实现，详见 `phase2-scenarios.md`。以下关于“只激活三个Agent”及仅转账句式的描述为V1阶段记录；Phase 2目前五个活跃Agent，支持消费月份与理财推荐句式，仍未接入外部LLM。
 

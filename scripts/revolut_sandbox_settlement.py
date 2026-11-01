@@ -20,6 +20,7 @@ from backend.bank_sdk.revolut import identifier
 from backend.bank_sdk.revolut_auth import SANDBOX,credential_lock
 from backend.bank_sdk.contracts import BankError
 from scripts.revolut_server import build
+from scripts.docpaths import doc
 
 
 def prior_rejection(service,action,bank_id,target,report):
@@ -182,7 +183,7 @@ def main():
     try:
         prior=None
         if args.operator_retry:
-            prior=json.loads((ROOT/'docs/revolut-sandbox-settlement-validation.json').read_text(encoding='utf-8'))
+            prior=json.loads((ROOT/'docs/archive/revolut-sandbox-settlement-validation.json').read_text(encoding='utf-8'))
         report=advance(s,identifier(args.complete_task),claim_directory,
                        operator_retry=args.operator_retry,rejection_report=prior,check_only=args.check_only)
         # Reconciliation runs in the original UI service's lock; no duplicate
@@ -200,7 +201,7 @@ def main():
     report_name=('revolut-sandbox-settlement-preflight.json' if args.check_only else
                  'revolut-sandbox-operator-settlement-validation.json' if args.operator_retry else
                  'revolut-sandbox-settlement-validation.json')
-    save_report(ROOT/'docs'/report_name,report)
+    save_report(doc(ROOT,report_name),report)
     print(json.dumps(report,ensure_ascii=False))
 
 

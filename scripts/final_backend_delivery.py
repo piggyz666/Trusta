@@ -2,7 +2,7 @@
 from pathlib import Path
 import json,hashlib,os,platform
 from datetime import datetime,timezone
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/final-backend'
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/archive/final-backend'
 def read(name):return json.loads((OUT/name).read_text(encoding='utf-8'))
 def write(name,text):(OUT/name).write_text(text.strip()+'\n',encoding='utf-8')
 def main():
@@ -60,7 +60,7 @@ def main():
 
 GLM 使用原 OpenAI-compatible Adapter；可选 thinking_mode 不影响默认请求，不把 reasoning_content 当可执行候选。生产模型仍由配置与 Router 决定，测试脚本的固定模型只是本轮对照对象。外部真实客户数据未被授权出站，public shadow 模板会被 restricted 请求拒绝；评测专用配置只处理合成数据。
 
-新增目录/文件：backend/llm/grounded_request.py；config/llm.glm.public-example.toml；benchmarks/final_live_evaluation.py；scripts/anchor_operator.py、final_local_acceptance.py、amend_final_llm_scores.py、final_backend_delivery.py；tests/test_final_convergence.py；docs/final-backend/ 全部交付及原始证据。
+新增目录/文件：backend/llm/grounded_request.py；config/llm.glm.public-example.toml；benchmarks/final_live_evaluation.py；scripts/anchor_operator.py、final_local_acceptance.py、amend_final_llm_scores.py、final_backend_delivery.py；tests/test_final_convergence.py；docs/archive/final-backend/ 全部交付及原始证据。
 
 修改原文件：{', '.join(changed)}。逐文件 SHA-256 与新增清单见 source-changes.json / source-after.json。docs/architecture.md 仅更正状态入口。原 {baseline['tests']} 项断言保留；新增 21 项，最终 {final['tests']} 项全通过。金融核心和合约哈希未变化。
 

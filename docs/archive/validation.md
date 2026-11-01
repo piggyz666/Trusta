@@ -1,6 +1,6 @@
 # 本地验证记录
 
-当前最新：Phase 4 全量 **285 项 / 207.554 秒 / OK**，原 151 项保留，新增 134 项；独立安全基准 **18 类 / 90 次**全部检测或阻止，合法消息 / proof 误拒绝 **0 / 135**，未授权银行写入 **0 / 15**。详见 [完整 Phase 4 交付](phase4-cryptographic-trust.md)、[测试输出](phase4-tests.txt)、[机器验证摘要](phase4-validation.json) 和 [基准实测](phase4-security-benchmark.json)。本文后面的 Phase 1–3 数字为历史记录。
+当前最新：Phase 4 全量 **285 项 / 207.554 秒 / OK**，原 151 项保留，新增 134 项；独立安全基准 **18 类 / 90 次**全部检测或阻止，合法消息 / proof 误拒绝 **0 / 135**，未授权银行写入 **0 / 15**。详见 [完整 Phase 4 交付](../phase4-cryptographic-trust.md)、[测试输出](phase4-tests.txt)、[机器验证摘要](phase4-validation.json) 和 [基准实测](../phase4-security-benchmark.json)。本文后面的 Phase 1–3 数字为历史记录。
 
 Phase 2 全量回归：59项测试通过，三个实际HTTP场景和浏览器交互通过；详见 [场景扩展验证](phase2-scenarios.md)。下文保留V1阶段验证记录。
 

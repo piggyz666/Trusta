@@ -76,7 +76,7 @@ Phase 2 沿用 `POST /api/tasks`：`{"text":"分析2026-09消费"}` 创建 BILL_
 
 保存返回 201 与记录；查询、忘记和清空返回 200。缺少明确同意、无效枚举 / TTL 或未知额外字段返回 400；跨所有者删除 / 引用访问为 403。忘记不改变银行数据，不删除历史任务、Conversation 原文或审计。
 
-安全状态接口不返回根密钥、派生密钥、根绑定值或配置秘密；没有客户可调用的密钥轮换、权限更新或扩展启用端点。V2 历史运维见 [Phase 3.3](phase3.3-memory-communication.md)，当前 V3 运维见 [Phase 4](phase4-cryptographic-trust.md)。
+安全状态接口不返回根密钥、派生密钥、根绑定值或配置秘密；没有客户可调用的密钥轮换、权限更新或扩展启用端点。V2 历史运维见 [Phase 3.3](archive/phase3.3-memory-communication.md)，当前 V3 运维见 [Phase 4](phase4-cryptographic-trust.md)。
 
 ## Phase 4 单记录审计证明
 
@@ -113,4 +113,4 @@ Phase 2 沿用 `POST /api/tasks`：`{"text":"分析2026-09消费"}` 创建 BILL_
 
 WAITING_USER包括澄清和逐项审批；WAITING_TIME表示已批准但未到期。到期授权失效、风险提高或前置状态变化，暂停并产生需重新确认的新动作；Job为REAUTH_REQUIRED。长期调度不延长授权300秒TTL。不确定写结果为MANUAL_REVIEW，禁止resume或重发。任务COMPLETED可能包含用户拒绝的DENIED分支，客户端应展示各动作状态与真实成功回执。
 
-新领域回执仍采用原结构，`/api/audit/proof`继续按receipt_id或bank_transaction_id提供证明。TIME触发是本地worker，**没有**客户可调用的tick、Card/投资直写、权限管理或自动批准端点。完整状态机、运行约束和事实边界见 [Phase5交付](phase5-full-banking.md)。
+新领域回执仍采用原结构，`/api/audit/proof`继续按receipt_id或bank_transaction_id提供证明。TIME触发是本地worker，**没有**客户可调用的tick、Card/投资直写、权限管理或自动批准端点。完整状态机、运行约束和事实边界见 [Phase5交付](archive/phase5-full-banking.md)。

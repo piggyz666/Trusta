@@ -9,7 +9,7 @@ from backend.llm.gateway import LLMGateway
 from backend.llm.contracts import ProviderResponse,InferenceError
 from benchmarks.final_live_evaluation import service
 from backend.llm.configuration import LLMSettings,ProviderConfig
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/final-backend'
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/archive/final-backend'
 def main():
     original=OUT/'LLM_Live_Benchmark.json';d=json.loads(original.read_text(encoding='utf-8'));results=deepcopy(d['results'])
     for r in results:

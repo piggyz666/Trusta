@@ -23,7 +23,7 @@ def load(path):return json.loads((ROOT/path).read_text(encoding='utf-8'))
 
 
 def main():
-    log=(ROOT/'docs/phase6-second-provider-tests.txt').read_text(encoding='utf-8')
+    log=(ROOT/'docs/archive/phase6-second-provider-tests.txt').read_text(encoding='utf-8')
     match=re.search(r'Ran (\d+) tests in ([\d.]+)s\s+OK\s*$',log)
     if not match:raise SystemExit('Full regression must pass first')
     test_hashes=load('data/phase6-original-test-hashes.json')
@@ -31,8 +31,8 @@ def main():
     baseline=load('data/phase6-taskgraph-usability-before/manifest.json')['files']
     assert hashlib.sha256((ROOT/'backend/runtime/taskgraph.py').read_bytes()).hexdigest()==baseline['backend/runtime/taskgraph.py']
     dataset=ROOT/'benchmarks/taskgraph_holdout_v2.json'
-    live=load('docs/phase6-second-provider-regression.json')
-    routes=load('docs/phase6-second-provider-routes.json')
+    live=load('docs/archive/phase6-second-provider-regression.json')
+    routes=load('docs/archive/phase6-second-provider-routes.json')
     smoke=load('data/deepseek-smoke.json')
     assert live['dataset_hash']==hashlib.sha256(dataset.read_bytes()).hexdigest()
     assert live['metrics']==summarize(live['results'])
@@ -44,7 +44,7 @@ def main():
         'deepseek_regression':live['metrics']['all']['real_model_responses'],
         'route_scenarios':routes['metrics']['all']['real_model_responses']}
     live_counts['total']=sum(live_counts.values())
-    prior=load('docs/phase6-taskgraph-usability-validation.json')['source_hashes']
+    prior=load('docs/archive/phase6-taskgraph-usability-validation.json')['source_hashes']
     assert all(hashlib.sha256((ROOT/path).read_bytes()).hexdigest()==value for path,value in prior.items())
     # No keys in any persisted live evidence; contents are strictly synthetic.
     for env in ('DEEPSEEK_API_KEY','GEMINI_API_KEY'):
@@ -100,7 +100,7 @@ def main():
             'Customer goals stay restricted; public example remains shadow and cannot route these goals',
             'Default runtime remains disabled; synthetic review does not authorize customer data egress',
             'No financial approval or bank write in model evaluations; cost is unknown']}
-    (ROOT/'docs/phase6-second-provider-validation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    (ROOT/'docs/archive/phase6-second-provider-validation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'passed':True,'full_tests':int(match[1]),'replays':len(replays),'new_live_calls':0}))
 
 

@@ -106,7 +106,7 @@ def evaluate_case(case, baseline):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--smoke',action='store_true')
     parser.add_argument('--dataset',type=Path,default=DATASET)
-    parser.add_argument('--output',type=Path,default=ROOT/'docs/phase6-taskgraph-heldout.json')
+    parser.add_argument('--output',type=Path,default=ROOT/'docs/archive/phase6-taskgraph-heldout.json')
     args=parser.parse_args();dataset_path=args.dataset.resolve()
     if getproxies().get('https'):os.environ['TASKGRAPH_SYNTHETIC_PROXY']=getproxies()['https']
     if not os.getenv('GEMINI_API_KEY'):raise SystemExit('GEMINI_API_KEY missing; no live verification claim')

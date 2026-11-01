@@ -40,7 +40,7 @@ def check(probe=False):
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--read-only-probe',action='store_true')
-    parser.add_argument('--output',default='docs/external-anchor-validation.json');args=parser.parse_args()
+    parser.add_argument('--output',default='docs/archive/external-anchor-validation.json');args=parser.parse_args()
     report=check(args.read_only_probe);Path(args.output).write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'status':report['status'],'external_blockchain_verified':False,'blockers':report['blockers']}))
 

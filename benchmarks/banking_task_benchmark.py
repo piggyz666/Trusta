@@ -204,7 +204,7 @@ def write_reports(report,output):
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--dataset')
-    parser.add_argument('--output',default='docs/phase5-banking-benchmark.json')
+    parser.add_argument('--output',default='docs/archive/phase5-banking-benchmark.json')
     args=parser.parse_args()
     report=run_benchmark(args.dataset)
     write_reports(report,args.output)

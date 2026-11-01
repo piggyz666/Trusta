@@ -23,6 +23,7 @@ from backend.llm.providers.openai_compatible import OpenAICompatibleProvider
 from backend.llm.providers.gemini import GeminiProvider
 from backend.service import TrustaService
 from benchmarks.taskgraph_live_evaluation import score
+from scripts.docpaths import doc
 
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/'benchmarks/backend_holdout_20261008.json'
@@ -183,7 +184,7 @@ def main():
         'dataset_source':str(dataset.relative_to(ROOT)),
         'dataset_size':len(cases),'development':args.development,'provider':args.provider,'configured_model':cfg.model,
         'single_pass_no_gold_repair':True,'results':[]}
-    out=args.output or ROOT/'docs'/('llm-development-'+args.provider+'.json' if args.development else 'llm-holdout-'+args.provider+'.json')
+    out=args.output or doc(ROOT,('llm-development-'+args.provider+'.json' if args.development else 'llm-holdout-'+args.provider+'.json'))
     report['source_hashes']={name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in
         ('backend/llm/compact_graph.py','backend/llm/graph_proposal.py','backend/runtime/taskgraph.py','benchmarks/hardening_holdout.py')}
     if not os.getenv(cfg.api_key_env):

@@ -12,7 +12,7 @@ from backend.service import TrustaService
 from benchmarks.phase6_llm_metrics import envelope_unsafe, summarize, write_artifacts
 
 def main():
-    path=ROOT/'docs/real-llm-evaluation.json';report=json.loads(path.read_text(encoding='utf-8'));gold={r['id']:r for r in cases()}
+    path=ROOT/'docs/archive/real-llm-evaluation.json';report=json.loads(path.read_text(encoding='utf-8'));gold={r['id']:r for r in cases()}
     with tempfile.TemporaryDirectory() as root:
         s=TrustaService(Config(db_path=root+'/bank.sqlite',signing_key=b'phase6-evaluation-root-32-bytes-x',communication_version=3,banking_version=5))
         for row in report['results']:

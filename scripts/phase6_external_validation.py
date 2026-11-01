@@ -45,7 +45,7 @@ def main():
                     anchor['classification']='REAL_EXTERNAL_VERIFIED' if anchor['external_blockchain_verified'] else 'IMPLEMENTED_NOT_LIVE_VERIFIED'
                 else:anchor['error_code']=job.get('error')
             except Exception as e:anchor['error_code']=e.code if isinstance(e,Rejected) else 'EXTERNAL_ANCHOR_UNAVAILABLE'
-    (ROOT/'docs/reference-bank-validation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
-    (ROOT/'docs/external-anchor-proof.json').write_text(json.dumps(anchor,ensure_ascii=False,indent=2),encoding='utf-8')
+    (ROOT/'docs/archive/reference-bank-validation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    (ROOT/'docs/archive/external-anchor-proof.json').write_text(json.dumps(anchor,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({'bank_status':report['bank_status'],'external_anchor':anchor['classification']}))
 if __name__=='__main__':main()

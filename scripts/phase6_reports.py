@@ -4,11 +4,12 @@ from pathlib import Path
 from datetime import datetime,timezone
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from benchmarks.phase6_llm_metrics import validate_summary
+from scripts.docpaths import doc
 def read(path):return json.loads((ROOT/path).read_text(encoding='utf-8'))
 def write(path,value):
     (ROOT/path).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 def main():
-    log=(ROOT/'docs/phase6-tests.txt').read_text(encoding='utf-8')
+    log=(ROOT/'docs/archive/phase6-tests.txt').read_text(encoding='utf-8')
     match=re.search(r'Ran (\d+) tests in ([\d.]+)s\s+OK\s*$',log)
     if not match:raise SystemExit('Complete passing full regression is required')
     repair_path=ROOT/'data/phase6-metrics-repair-tests.txt'
@@ -16,7 +17,7 @@ def main():
     if repair_path.exists() and not repair_match:raise SystemExit('Metric repair checks have not passed')
     original=read('data/phase6-original-test-hashes.json');unchanged=all(hashlib.sha256((ROOT/k).read_bytes()).hexdigest()==v for k,v in original.items())
     if not unchanged:raise SystemExit('An original test file changed')
-    llm=read('docs/real-llm-evaluation.json')
+    llm=read('docs/archive/real-llm-evaluation.json')
     validate_summary(llm)  # Fail before writing deliverables if case evidence and summaries disagree.
     originals=read('data/phase6-source-review-inventory.json');before={r['file']:r['sha256'] for r in originals};changed=[];added=[]
     for directory in ['backend','scripts','benchmarks','tests']:
@@ -25,12 +26,12 @@ def main():
             if relative not in before:added.append(relative)
             elif before[relative]!=h:changed.append(relative)
     manifest={'changed_python_files':changed,'added_python_files':added,'original_test_files':len(original),'original_test_files_byte_identical':unchanged,'original_test_hashes':original}
-    write('docs/phase6-change-manifest.json',manifest)
-    p4=read('docs/phase6-security-profile4.json');p5=read('docs/phase6-security-profile5.json');bs=read('docs/phase6-banking-security.json');bt=read('docs/phase6-banking-task.json')
+    write('docs/archive/phase6-change-manifest.json',manifest)
+    p4=read('docs/archive/phase6-security-profile4.json');p5=read('docs/archive/phase6-security-profile5.json');bs=read('docs/archive/phase6-banking-security.json');bt=read('docs/archive/phase6-banking-task.json')
     security={'passed':p4['passed'] and p5['passed'] and bs['passed'],'profile4':p4,'profile5':p5,'banking_security':bs,'external_scope':'All attacks local fixtures; no production penetration-test claim'}
     banking={'passed':bt['passed'],'banking_task':bt,'banking_security':bs,'scope':'Virtual bank; original benchmark datasets and assertions unchanged'}
-    write('docs/security-regression.json',security);write('docs/banking-regression.json',banking)
-    router=read('docs/model-router-live-evaluation.json');planning=read('docs/planning-benchmark.json');bank=read('docs/reference-bank-validation.json');anchor=read('docs/external-anchor-proof.json');aa=read('docs/aa-demo.json');graph=read('docs/phase6-taskgraph-demo.json');live=read('docs/phase6-gateway-live.json')
+    write('docs/archive/security-regression.json',security);write('docs/archive/banking-regression.json',banking)
+    router=read('docs/archive/model-router-live-evaluation.json');planning=read('docs/archive/planning-benchmark.json');bank=read('docs/archive/reference-bank-validation.json');anchor=read('docs/archive/external-anchor-proof.json');aa=read('docs/archive/aa-demo.json');graph=read('docs/archive/phase6-taskgraph-demo.json');live=read('docs/archive/phase6-gateway-live.json')
     matrix=[
         {'capability':'Canonical Bank SDK / Virtual compatibility','classification':'LOCAL_SANDBOX_VERIFIED','evidence':'phase6-tests.txt; bank-integration-sdk.md'},
         {'capability':'Starling reference protocol adapter','classification':'IMPLEMENTED_NOT_LIVE_VERIFIED','evidence':'test_phase6_sdk.py; reference-bank-validation.json'},
@@ -59,7 +60,7 @@ def main():
       'llm_metrics':llm['metrics'],'detailed_llm_metrics':llm['detailed_metrics'],'llm_metric_contract':llm['metric_contract'],'llm_outcomes':llm['outcomes'],'live_gateway_graph_status':live['status'],
       'demos':{'aa':'aa-demo.json','dynamic_cross_budget':'phase6-taskgraph-demo.json','real_model_graph':'phase6-gateway-live.json'},
       'limits':['Synthetic local bank funds only; bank reference HTTP fixtures are not official sandbox','OpenAI credential probe failed; only Gemini live provider verified','Bank PAT signing/status assumptions await official sandbox validation','CNY Finance scenarios preserved; Reference exposes GBP canonical records with UNKNOWN consumption classification, no GBP Finance analysis claim','External chain unconfigured; local EVM tests are not blockchain live proof','Strict source grammar replay rejects many model candidates; no production-ready arbitrary-language accuracy claim','No automatic financial authorization/retry; cost null without verified price','DID/ZKP retained as interfaces; no added Agent']}
-    write('docs/phase6-validation.json',validation)
+    write('docs/archive/phase6-validation.json',validation)
     files=['phase6-architecture-review.md','phase6-gap-matrix.md','bank-integration-sdk.md','reference-bank-selection.md','reference-bank-validation.json','real-llm-evaluation.json','real-llm-evaluation.csv','model-router-live-evaluation.json','external-blockchain-anchor.md','external-anchor-proof.json','aa-workflow.md','aa-demo.json','taskgraph-spec.md','planning-benchmark.json','planning-benchmark.csv','security-regression.json','banking-regression.json','phase6-validation.json','phase6-tests.txt','phase6-final-report.md']
     rows='\n'.join('| '+r['capability']+' | '+r['classification']+' | '+r['evidence']+' |' for r in matrix)
     changes='\n'.join('- `'+p+'`' for p in changed);new='\n'.join('- `'+p+'`' for p in added)
@@ -154,10 +155,10 @@ real_bank_connected={str(bank['real_bank_connected']).lower()}；official_bank_s
 ## 指定交付索引
 
 '''+ '\n'.join(f'{i}. [{name}]({name})' for i,name in enumerate(files,1))+'\n'
-    (ROOT/'docs/phase6-final-report.md').write_text(final,encoding='utf-8')
-    missing=[name for name in files if not (ROOT/'docs'/name).is_file()]
+    (ROOT/'docs/archive/phase6-final-report.md').write_text(final,encoding='utf-8')
+    missing=[name for name in files if not doc(ROOT,name).is_file()]
     if missing:raise SystemExit('Missing deliverables: '+str(missing))
     validation['specified_delivery_count']=len(files);validation['all_specified_deliverables_present']=not missing
-    write('docs/phase6-validation.json',validation)
+    write('docs/archive/phase6-validation.json',validation)
     print(json.dumps({'tests':int(match[1]),'passed':validation['local_implementation_and_regression_passed'],'deliverables':len(files),'original_unchanged':unchanged,'changed_python':len(changed),'new_python':len(added)}))
 if __name__=='__main__':main()

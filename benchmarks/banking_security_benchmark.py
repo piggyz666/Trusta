@@ -123,7 +123,7 @@ def run_benchmark(trials=3):
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--trials',type=int,default=3)
-    parser.add_argument('--output',default='docs/phase5-banking-security.json')
+    parser.add_argument('--output',default='docs/archive/phase5-banking-security.json')
     args=parser.parse_args()
     report=run_benchmark(args.trials)
     write_reports(report,args.output)

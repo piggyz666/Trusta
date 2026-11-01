@@ -86,7 +86,7 @@ fig.innerHTML = `
     </div>
     <div class="q c2">
       <div class="ask">${T("“你够格吗？”", "“Are you qualified?”")}<small>${T("能力不能自己报", "ability can't be self-declared")}</small></div>
-      <div class="mech"><span class="tag" style="background:var(--purple)">M1 · Groth16</span>${T("零知识能力准入", "Zero-knowledge capability admission")}</div>
+      <div class="mech"><span class="tag" style="background:var(--purple)">Groth16</span>${T("零知识能力准入", "Zero-knowledge capability admission")}</div>
       <div class="zk">
         <div class="priv"><b>${T("保密（不公开）", "Kept private")}</b>${T("评测明细 TP / FP / FN<br>每条预测结果", "evaluation details TP / FP / FN<br>every prediction")}</div>
         <div class="arrow">→</div>
@@ -99,7 +99,7 @@ fig.innerHTML = `
     </div>
     <div class="q c3">
       <div class="ask">${T("“结论被改过吗？”", "“Was the conclusion altered?”")}<small>${T("事后能不能否认", "can it be denied later")}</small></div>
-      <div class="mech"><span class="tag" style="background:var(--teal)">M3</span>${T("链上决策承诺", "On-chain decision commitment")}</div>
+      <div class="mech"><span class="tag" style="background:var(--teal)">Merkle</span>${T("链上决策承诺", "On-chain decision commitment")}</div>
       <ul>
         <li>${T("结论的 Merkle 根 + 成员快照写入 CollaborationAnchor 合约", "The conclusion's Merkle root + member snapshot go into the CollaborationAnchor contract")}</li>
         <li>${T("两个节点的 RPC 分别读回，逐项核对", "Read back over two nodes' RPC endpoints and compared field by field")}</li>
@@ -108,7 +108,7 @@ fig.innerHTML = `
       <div class="data">root&nbsp;&nbsp;0x9429ba25…99bcc7<br>${T("区块", "block")}&nbsp;&nbsp;27 · gas 156,826</div>
     </div>
   </div>
-  <div class="m2"><span class="tag">M2</span>${T("把三者连起来：每条协作消息 =", "Tying them together: every collaboration message =")}
+  <div class="m2"><span class="tag">${T("绑定", "Binding")}</span>${T("把三者连起来：每条协作消息 =", "Tying them together: every collaboration message =")}
     <i>${T("V3 签名", "V3 signature")}</i>+<i>${T("链上身份", "on-chain identity")}</i>+<i>${T("准入凭证", "admission credential")}</i>+<i>${T("轮次 / 任务", "round / task")}</i>+<i>Epoch</i>
     <em>${T("任何一项对不上即拒收", "any mismatch → rejected")}</em></div>
 </section>
@@ -155,8 +155,8 @@ fig.innerHTML = `
       "single-host 8-node test chain, not independent institutions; Groth16 uses a development trusted setup, not a production MPC; the circuit proves a restricted statistical relation and doesn't run the model.")}</div>
   </section>
 </div>
-<div class="foot">${T("数据来源：docs/ANCHOR_Integration_Final_Acceptance.md（WeID、M1、M2、OTC、M3 实测与负例）。第三方复验：python -m scripts.verify_anchor_collaboration。",
-  "Source: docs/ANCHOR_Integration_Final_Acceptance.md (WeID, M1, M2, OTC, M3 runs and negative tests). Third-party re-verification: python -m scripts.verify_anchor_collaboration.")}</div>
+<div class="foot">${T("数据来源：docs/ANCHOR_Integration_Final_Acceptance.md（链上身份、零知识准入、消息绑定、链上承诺的实测与负例）。第三方复验：python -m scripts.verify_anchor_collaboration。",
+  "Source: docs/ANCHOR_Integration_Final_Acceptance.md (runs and negative tests for on-chain identity, ZK admission, message binding and on-chain commitment). Third-party re-verification: python -m scripts.verify_anchor_collaboration.")}</div>
 `;
 
 document.fonts.ready.then(() => {

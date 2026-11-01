@@ -258,6 +258,16 @@ class RealBankReadiness(unittest.TestCase):
 
 
     # ---- TRUSTA-side features that must not depend on the bank's internal tables -------------------------------
+    def test_income_window_always_includes_the_current_month(self):
+        # Early in a month the 100-day window spans five calendar months; the newest one must not be dropped.
+        from datetime import datetime
+        from backend.business import CHINA
+        from backend.banking.transaction_feed import _months
+        now = datetime(2026, 11, 2, 0, 30, tzinfo=CHINA).timestamp()
+        self.assertEqual(_months(0, now), ["2026-08", "2026-09", "2026-10", "2026-11"])
+        mid = datetime(2026, 11, 20, tzinfo=CHINA).timestamp()
+        self.assertEqual(_months(mid - 3 * 86400, mid), ["2026-11"])
+
     def test_income_from_the_transaction_list(self):
         for profile in ("full", "readonly"):
             service, chat = build(profile)

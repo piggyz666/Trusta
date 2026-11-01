@@ -20,11 +20,12 @@ CACHE_SECONDS = 60
 def _months(since, now):
     start = datetime.fromtimestamp(max(since, now - 100 * 86400), CHINA)
     end = datetime.fromtimestamp(now, CHINA)
-    y, m, out = start.year, start.month, []
-    while (y, m) <= (end.year, end.month) and len(out) < WINDOW_MONTHS + 1:
+    # Walk back from the current month so the newest credits are never cut off by the window cap.
+    y, m, out = end.year, end.month, []
+    while (y, m) >= (start.year, start.month) and len(out) < WINDOW_MONTHS + 1:
         out.append(f"{y}-{m:02d}")
-        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
-    return out
+        y, m = (y - 1, 12) if m == 1 else (y, m - 1)
+    return out[::-1]
 
 
 def is_credit(row):
